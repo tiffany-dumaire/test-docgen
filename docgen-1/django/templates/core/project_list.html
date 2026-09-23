@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Projets{% endblock %}
+{% block heading %}Projets{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{% url 'project_new' %}">Nouveau projet</a>{% endblock %}
+{% block content %}
+{% if projects %}
+<table class="tbl">
+  <thead><tr><th>Projet</th><th>Client</th><th>Contact interne</th><th>Documents</th></tr></thead>
+  <tbody>
+  {% for p in projects %}
+    <tr>
+      <td><a href="{% url 'project_detail' p.pk %}">{{ p.name }}</a></td>
+      <td>{{ p.client_name }}</td>
+      <td>{{ p.internal_contact|default:"—" }}</td>
+      <td class="num">{{ p.documents.count }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="empty">Aucun projet. Créez-en un pour commencer.</div>{% endif %}
+{% endblock %}

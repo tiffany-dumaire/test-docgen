@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Entreprise{% endblock %}
+
+{% block body %}
+<div id="app" v-cloak>
+  <v-app>
+    {% include "partials/nav.html" with appbar_title="Profil entreprise" %}
+    <v-main class="bg-grey-lighten-3">
+      <v-container class="pa-6" style="max-width: 900px;">
+        <h1 class="text-h4 mb-6">Profil de l'entreprise</h1>
+
+        <v-card class="mb-4">
+          <v-card-title>Identité</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12" md="4" class="text-center">
+                <v-avatar size="120" color="grey-lighten-2" class="mb-2">
+                  <v-img v-if="c.logo_url" :src="c.logo_url"></v-img>
+                  <v-icon v-else size="60">mdi-domain</v-icon>
+                </v-avatar>
+                <div>
+                  <v-file-input v-model="logoFile" label="Logo" accept="image/*" density="compact"
+                    prepend-icon="mdi-camera" hide-details @update:modelValue="uploadLogo"></v-file-input>
+                </div>
+              </v-col>
+              <v-col cols="12" md="8">
+                <v-text-field v-model="c.name" label="Nom de l'entreprise *"></v-text-field>
+                <v-textarea v-model="c.description" label="Description" rows="3"></v-textarea>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+
+        <v-card class="mb-4">
+          <v-card-title>Coordonnées</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-textarea v-model="c.address" label="Adresse" rows="2"></v-textarea>
+            <v-row>
+              <v-col cols="12" md="6"><v-text-field v-model="c.phone" label="Téléphone" prepend-inner-icon="mdi-phone"></v-text-field></v-col>
+              <v-col cols="12" md="6"><v-text-field v-model="c.email" label="E-mail" prepend-inner-icon="mdi-email"></v-text-field></v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+
+        <v-card class="mb-4">
+          <v-card-title>Liens</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-text-field v-model="c.website" label="Site web" prepend-inner-icon="mdi-web"></v-text-field>
+            <v-text-field v-model="c.terms_url" label="Conditions générales (URL)" prepend-inner-icon="mdi-file-document"></v-text-field>
+            <v-divider class="my-3"></v-divider>
+            <div class="text-subtitle-2 mb-2">Autres liens utiles</div>
+            <v-row v-for="(link, i) in c.useful_links" :key="i" dense>
+              <v-col cols="5"><v-text-field v-model="link.label" label="Libellé" density="compact"></v-text-field></v-col>
+              <v-col cols="6"><v-text-field v-model="link.url" label="URL" density="compact"></v-text-field></v-col>
+              <v-col cols="1"><v-btn icon="mdi-delete" variant="text" color="error" @click="c.useful_links.splice(i,1)"></v-btn></v-col>
+            </v-row>
+            <v-btn variant="tonal" prepend-icon="mdi-plus" @click="c.useful_links.push({label:'',url:''})">Ajouter un lien</v-btn>
+          </v-card-text>
+        </v-card>
+
+        <v-btn color="primary" size="large" prepend-icon="mdi-content-save" :loading="saving" @click="save">Enregistrer</v-btn>
+      </v-container>
+      <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">[[ snackbar.text ]]</v-snackbar>
+    </v-main>
+  </v-app>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const { createApp } = Vue;
+  const { createVuetify } = Vuetify;
+  const vuetify = createVuetify();
+  createApp({
+    delimiters: ['[[', ']]'],
+    data() {
+      return Object.assign(window.commonData(), {
+        c: { name:'', description:'', website:'', terms_url:'', address:'', phone:'', email:'', logo_url:null, useful_links:[] },
+        logoFile: null, saving: false,
+      });
+    },
+    methods: Object.assign({}, window.commonMethods, {
+      async load() { this.c = await window.api('/api/company/'); if (!this.c.useful_links) this.c.useful_links = []; },
+      async save() {
+        this.saving = true;
+        const res = await window.api('/api/company/', { method:'POST', body: JSON.stringify(this.c) });
+        this.saving = false;
+        if (res._ok) { this.c = res; this.notify('Profil enregistré ✓'); }
+        else this.notify('Erreur lors de l\'enregistrement', 'error');
+      },
+      async uploadLogo(file) {
+        const f = Array.isArray(file) ? file[0] : file;
+        if (!f) return;
+        const fd = new FormData(); fd.append('logo', f);
+        const res = await window.apiUpload('/api/company/logo/', fd);
+        this.c.logo_url = res.logo_url; this.notify('Logo mis à jour ✓');
+      },
+    }),
+    mounted() { this.load(); },
+  }).use(vuetify).mount('#app');
+</script>
+{% endblock %}

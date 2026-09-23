@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Documents{% endblock %}
+{% block heading %}Documents{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{% url 'document_new' %}">Générer un document</a>{% endblock %}
+{% block content %}
+{% if documents %}
+<table class="tbl">
+  <thead><tr><th>Titre</th><th>Type</th><th>Projet</th><th>Confidentialité</th><th>Version</th></tr></thead>
+  <tbody>
+  {% for d in documents %}
+    <tr>
+      <td><a href="{% url 'document_detail' d.pk %}">{{ d.title }}</a></td>
+      <td><span class="tag tag-kind">{{ d.template.get_kind_display }}</span></td>
+      <td>{{ d.project.name|default:"—" }}</td>
+      <td><span class="tag tag-{{ d.confidentiality }}">{{ d.get_confidentiality_display }}</span></td>
+      <td class="num">v{{ d.current_version }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="empty">Aucun document. Générez-en un à partir d'un modèle.</div>{% endif %}
+{% endblock %}

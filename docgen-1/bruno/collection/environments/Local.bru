@@ -1,0 +1,10 @@
+vars {
+  baseUrl: {{process.env.API_BASE_URL}}
+  apiKey: {{process.env.API_KEY}}
+}
+
+// baseUrl et apiKey sont injectés depuis l'environnement du container Bruno
+// (voir docker-compose.yml : API_BASE_URL=http://web:8000, API_KEY=...).
+// En dehors de Docker, remplacez par des valeurs en dur, par ex. :
+//   baseUrl: http://localhost:8000
+//   apiKey: dev-api-key

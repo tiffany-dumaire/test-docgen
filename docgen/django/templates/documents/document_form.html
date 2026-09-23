@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Document{% endblock %}
+{% block heading %}{% if document %}Modifier le document{% else %}Générer un document{% endif %}{% endblock %}
+{% block content %}
+<form method="post" class="form-narrow">
+  {% csrf_token %}
+  {% for field in form %}
+    <div class="field">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+      {{ field.errors }}
+    </div>
+  {% endfor %}
+  <button class="btn btn-primary" type="submit">Enregistrer</button>
+</form>
+<p class="help" style="margin-top:14px">Après enregistrement, ouvrez le document pour le générer et créer une version.</p>
+{% endblock %}

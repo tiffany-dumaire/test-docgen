@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Formulaire{% endblock %}
+{% block heading %}{% if form_obj %}Modifier le formulaire{% else %}Nouveau formulaire{% endif %}{% endblock %}
+{% block content %}
+<form method="post" class="form-narrow">
+  {% csrf_token %}
+  <div class="field"><label>Titre</label><input type="text" name="title" value="{{ form_obj.title|default:'' }}" required></div>
+  <div class="field"><label>Description</label><textarea name="description" rows="2">{{ form_obj.description|default:'' }}</textarea></div>
+  <div class="field"><label><input type="checkbox" name="is_open" {% if form_obj.is_open or not form_obj %}checked{% endif %}> Ouvert aux réponses</label></div>
+  <div class="field">
+    <label>Champs (JSON)</label>
+    <textarea name="schema" class="mono" rows="14">{{ schema_json }}</textarea>
+    <div class="help">Types : text, email, number, textarea. Ex. {"name":"email","label":"E-mail","type":"email","required":true}</div>
+  </div>
+  <button class="btn btn-primary" type="submit">Enregistrer</button>
+</form>
+{% endblock %}

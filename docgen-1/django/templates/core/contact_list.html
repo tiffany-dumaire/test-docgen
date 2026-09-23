@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Contacts{% endblock %}
+{% block heading %}Contacts{% endblock %}
+{% block content %}
+<div class="row-2">
+  <div>
+    <div class="section-title">Contacts client</div>
+    {% for c in clients %}
+      <div class="card" style="margin-bottom:10px"><h3>{{ c }} <span class="coord">{{ c.initials }}</span></h3><p>{{ c.role }} — {{ c.email }}</p></div>
+    {% empty %}<div class="empty">Aucun contact client.</div>{% endfor %}
+
+    <div class="section-title">Contacts internes</div>
+    {% for c in internals %}
+      <div class="card" style="margin-bottom:10px"><h3>{{ c }} <span class="coord">{{ c.initials }}</span></h3><p>{{ c.role }} — {{ c.email }}</p></div>
+    {% empty %}<div class="empty">Aucun contact interne.</div>{% endfor %}
+  </div>
+  <div>
+    <div class="section-title">Ajouter un contact</div>
+    <form method="post" class="card">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="field"><label>{{ field.label }}</label>{{ field }}{{ field.errors }}</div>
+      {% endfor %}
+      <button class="btn btn-primary" type="submit">Ajouter</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

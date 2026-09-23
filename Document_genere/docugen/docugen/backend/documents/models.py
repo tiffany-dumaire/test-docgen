@@ -1,0 +1,137 @@
+from django.db import models
+
+from projects.models import Project
+
+
+class ConfidentialityLevel(models.TextChoices):
+    PUBLIC = "public", "Public"
+    INTERNAL = "internal", "Interne"
+    CONFIDENTIAL = "confidential", "Confidentiel"
+    RESTRICTED = "restricted", "Strictement confidentiel"
+
+
+class DocumentType(models.TextChoices):
+    PDF = "pdf", "PDF"
+    XLSX = "xlsx", "Excel"
+    DOCX = "docx", "Word"
+
+
+class DocumentTemplate(models.Model):
+    """
+    Modèle de document. Définit :
+      - le type de fichier produit (pdf / xlsx / docx),
+      - le générateur à utiliser (builder_key),
+      - le schéma des variables attendues (schema, JSON),
+        chaque variable : {"key", "label", "type", "required", "help"}.
+    """
+
+    name = models.CharField("Nom du modèle", max_length=255)
+    slug = models.SlugField("Identifiant", unique=True)
+    description = models.TextField("Description", blank=True)
+    doc_type = models.CharField(
+        "Type de fichier", max_length=10, choices=DocumentType.choices
+    )
+    builder_key = models.CharField(
+        "Générateur", max_length=100,
+        help_text="Clé du générateur (ex: project_tracking, generic_table, "
+        "analysis_report). Utilise le générateur générique si inconnu.",
+    )
+    schema = models.JSONField(
+        "Schéma des variables", default=list, blank=True,
+        help_text="Liste de définitions de variables au format JSON.",
+    )
+    is_active = models.BooleanField("Actif", default=True)
+    is_system = models.BooleanField(
+        "Modèle système", default=False,
+        help_text="Modèle générique fourni par défaut (non supprimable côté UI).",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Modèle de document"
+        verbose_name_plural = "Modèles de documents"
+
+    def __str__(self):
+        return f"{self.name} [{self.get_doc_type_display()}]"
+
+
+class Document(models.Model):
+    """
+    Instance de document rattachée à un projet et basée sur un modèle.
+    Les valeurs des variables sont stockées dans `data`.
+    L'historique complet est conservé dans les DocumentVersion.
+    """
+
+    project = models.ForeignKey(
+        Project, related_name="documents", on_delete=models.CASCADE
+    )
+    template = models.ForeignKey(
+        DocumentTemplate, related_name="documents", on_delete=models.PROTECT
+    )
+    title = models.CharField("Titre", max_length=255)
+    confidentiality = models.CharField(
+        "Confidentialité",
+        max_length=20,
+        choices=ConfidentialityLevel.choices,
+        default=ConfidentialityLevel.INTERNAL,
+    )
+    data = models.JSONField("Valeurs des variables", default=dict, blank=True)
+
+    current_version = models.PositiveIntegerField("Version courante", default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        verbose_name = "Document"
+        verbose_name_plural = "Documents"
+
+    def __str__(self):
+        return f"{self.title} (v{self.current_version})"
+
+    @property
+    def doc_type(self):
+        return self.template.doc_type
+
+    @property
+    def latest_version(self):
+        return self.versions.order_by("-version_number").first()
+
+
+class DocumentVersion(models.Model):
+    """
+    Version figée d'un document, produite lors d'une (re)génération.
+    Conserve le fichier généré, un instantané des données, le commentaire
+    et les initiales de l'auteur de la modification.
+    """
+
+    document = models.ForeignKey(
+        Document, related_name="versions", on_delete=models.CASCADE
+    )
+    version_number = models.PositiveIntegerField("Numéro de version")
+    comment = models.TextField("Commentaire de modification", blank=True)
+    author_initials = models.CharField("Initiales de l'auteur", max_length=10)
+    author_name = models.CharField("Nom de l'auteur", max_length=150, blank=True)
+
+    confidentiality = models.CharField(
+        "Confidentialité", max_length=20,
+        choices=ConfidentialityLevel.choices,
+        default=ConfidentialityLevel.INTERNAL,
+    )
+    data_snapshot = models.JSONField("Données figées", default=dict, blank=True)
+    file = models.FileField("Fichier généré", upload_to="documents/%Y/%m/")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-version_number"]
+        unique_together = ("document", "version_number")
+        verbose_name = "Version de document"
+        verbose_name_plural = "Versions de document"
+
+    def __str__(self):
+        return f"{self.document.title} v{self.version_number}"

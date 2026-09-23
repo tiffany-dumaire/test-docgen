@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Modèles{% endblock %}
+{% block heading %}Modèles de documents{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{% url 'template_new' %}">Nouveau modèle</a>{% endblock %}
+{% block content %}
+{% if templates %}
+<table class="tbl">
+  <thead><tr><th>Nom</th><th>Type</th><th>Générique</th><th>Confid. défaut</th><th></th></tr></thead>
+  <tbody>
+  {% for t in templates %}
+    <tr>
+      <td>{{ t.name }}</td>
+      <td><span class="tag tag-kind">{{ t.get_kind_display }}</span></td>
+      <td>{{ t.is_generic|yesno:"Oui,Non" }}</td>
+      <td><span class="tag tag-{{ t.default_confidentiality }}">{{ t.get_default_confidentiality_display }}</span></td>
+      <td style="text-align:right">
+        {% if t.kind == 'pdf' %}<a class="btn btn-sm" href="{% url 'pdf_editor' t.pk %}">Éditeur</a>{% else %}<a class="btn btn-sm" href="{% url 'template_config' t.pk %}">Définition</a>{% endif %}
+        <a class="btn btn-sm" href="{% url 'template_edit' t.pk %}">Modifier</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="empty">Aucun modèle. Créez un modèle PDF, Excel ou Word.</div>{% endif %}
+{% endblock %}

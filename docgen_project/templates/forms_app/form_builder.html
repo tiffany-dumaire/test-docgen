@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Formulaires{% endblock %}
+
+{% block body %}
+<div id="app" v-cloak>
+  <v-app>
+    {% include "partials/nav.html" with appbar_title="Formulaires en ligne" %}
+    <v-main class="bg-grey-lighten-3">
+      <v-container fluid class="pa-6">
+        <v-row>
+          <v-col cols="12" md="7">
+            <v-card>
+              <v-card-title class="d-flex align-center"><v-icon class="mr-2">mdi-form-select</v-icon> Créer un formulaire</v-card-title>
+              <v-divider></v-divider>
+              <v-card-text>
+                <v-select v-model="form.project" :items="projects" item-title="name" item-value="id" label="Projet (optionnel)" clearable></v-select>
+                <v-text-field v-model="form.title" label="Titre du formulaire *"></v-text-field>
+                <v-textarea v-model="form.description" label="Description" rows="2"></v-textarea>
+                <v-select v-model="form.confidentiality" :items="confChoices" item-title="label" item-value="value" label="Confidentialité"></v-select>
+
+                <div class="d-flex align-center mb-2 mt-2">
+                  <div class="text-subtitle-1 font-weight-medium">Champs du formulaire</div>
+                  <v-spacer></v-spacer>
+                  <v-btn size="small" variant="tonal" prepend-icon="mdi-plus" @click="addField">Ajouter un champ</v-btn>
+                </div>
+
+                <v-card v-for="(f, i) in form.fields_schema" :key="i" variant="outlined" class="mb-2">
+                  <v-card-text class="pb-1">
+                    <v-row dense>
+                      <v-col cols="5"><v-text-field v-model="f.label" label="Libellé" density="compact"></v-text-field></v-col>
+                      <v-col cols="4">
+                        <v-select v-model="f.type" :items="fieldTypes" density="compact" label="Type"></v-select>
+                      </v-col>
+                      <v-col cols="2" class="d-flex align-center"><v-switch v-model="f.required" label="Requis" density="compact" hide-details color="primary"></v-switch></v-col>
+                      <v-col cols="1"><v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="form.fields_schema.splice(i,1)"></v-btn></v-col>
+                    </v-row>
+                    <v-text-field v-if="f.type==='select'" v-model="f.optionsRaw" label="Options (séparées par des virgules)" density="compact"
+                      @update:modelValue="f.options = f.optionsRaw.split(',').map(s=>s.trim()).filter(Boolean)"></v-text-field>
+                  </v-card-text>
+                </v-card>
+                <v-alert v-if="!form.fields_schema.length" type="info" variant="tonal" density="compact">Ajoutez au moins un champ.</v-alert>
+              </v-card-text>
+              <v-card-actions class="pa-4">
+                <v-spacer></v-spacer>
+                <v-btn color="teal" size="large" prepend-icon="mdi-content-save" :loading="saving" @click="create">Créer le formulaire</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" md="5">
+            <v-card>
+              <v-card-title class="d-flex align-center"><v-icon class="mr-2">mdi-format-list-bulleted</v-icon> Formulaires existants</v-card-title>
+              <v-divider></v-divider>
+              <v-list v-if="forms.length" lines="two">
+                <v-list-item v-for="f in forms" :key="f.id" :title="f.title" :subtitle="f.submissions_count + ' réponse(s)'">
+                  <template v-slot:prepend><v-icon color="teal">mdi-form-select</v-icon></template>
+                  <template v-slot:append>
+                    <v-btn size="small" variant="text" icon="mdi-eye" :href="f.short_url" target="_blank" title="Ouvrir"></v-btn>
+                    <v-btn size="small" variant="text" icon="mdi-chart-box" :href="'/forms/' + f.id + '/submissions/'" title="Réponses"></v-btn>
+                    <v-btn size="small" variant="text" icon="mdi-share-variant" @click="showLink(f)" title="Lien &amp; QR"></v-btn>
+                  </template>
+                </v-list-item>
+              </v-list>
+              <v-card-text v-else class="text-medium-emphasis">Aucun formulaire.</v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+
+      <v-dialog v-model="linkDialog" max-width="420">
+        <v-card v-if="current">
+          <v-card-title>Partager « [[ current.title ]] »</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text class="text-center">
+            <p class="text-caption mb-1">Lien réduit</p>
+            <v-text-field :model-value="current.short_url" readonly density="compact" append-inner-icon="mdi-content-copy"
+              @click:append-inner="copy(current.short_url)"></v-text-field>
+            <v-img :src="current.qr_url" width="200" class="mx-auto mt-2"></v-img>
+            <p class="text-caption mt-1">Scannez le QR code pour ouvrir le formulaire</p>
+          </v-card-text>
+          <v-card-actions><v-spacer></v-spacer><v-btn @click="linkDialog=false">Fermer</v-btn></v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">[[ snackbar.text ]]</v-snackbar>
+    </v-main>
+  </v-app>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const { createApp } = Vue;
+  const { createVuetify } = Vuetify;
+  const vuetify = createVuetify();
+  const params = new URLSearchParams(window.location.search);
+  createApp({
+    delimiters: ['[[', ']]'],
+    data() {
+      return Object.assign(window.commonData(), {
+        forms: [], projects: [], saving: false, linkDialog: false, current: null,
+        fieldTypes: ['text','textarea','email','number','date','select','checkbox'],
+        confChoices: [
+          {value:'public',label:'Public'},{value:'internal',label:'Interne'},
+          {value:'confidential',label:'Confidentiel'},{value:'secret',label:'Secret'},
+        ],
+        form: { project:null, title:'', description:'', confidentiality:'internal', fields_schema:[] },
+      });
+    },
+    methods: Object.assign({}, window.commonMethods, {
+      async load() {
+        this.forms = (await window.api('/forms/api/list/')).results || [];
+        this.projects = (await window.api('/documents/api/meta/')).projects || [];
+        const pid = params.get('project'); if (pid) this.form.project = parseInt(pid);
+      },
+      addField() { this.form.fields_schema.push({ key:'field_' + (this.form.fields_schema.length+1), label:'', type:'text', required:false, options:[], optionsRaw:'' }); },
+      async create() {
+        if (!this.form.title) { this.notify('Titre requis', 'error'); return; }
+        if (!this.form.fields_schema.length) { this.notify('Ajoutez au moins un champ', 'error'); return; }
+        this.form.fields_schema.forEach((f,i) => { if(!f.key) f.key = 'field_'+(i+1); });
+        this.saving = true;
+        const res = await window.api('/forms/api/list/', { method:'POST', body: JSON.stringify(this.form) });
+        this.saving = false;
+        if (res.id) {
+          this.forms.unshift(res);
+          this.form = { project:null, title:'', description:'', confidentiality:'internal', fields_schema:[] };
+          this.showLink(res); this.notify('Formulaire créé ✓');
+        } else this.notify('Erreur', 'error');
+      },
+      showLink(f) { this.current = f; this.linkDialog = true; },
+      copy(text) { navigator.clipboard.writeText(text); this.notify('Lien copié ✓'); },
+    }),
+    mounted() { this.load(); },
+  }).use(vuetify).mount('#app');
+</script>
+{% endblock %}

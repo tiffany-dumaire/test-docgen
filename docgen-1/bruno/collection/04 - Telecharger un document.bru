@@ -1,0 +1,21 @@
+meta {
+  name: 04 - Telecharger un document
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/documents/api/documents/{{lastDocumentId}}/download/
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-Key: {{apiKey}}
+}
+
+docs {
+  Télécharge le fichier courant du document.
+  Utilise `lastDocumentId`, renseigné automatiquement par la requête 03.
+  Vous pouvez aussi remplacer {{lastDocumentId}} par un id connu.
+}
