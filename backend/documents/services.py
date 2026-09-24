@@ -15,12 +15,29 @@ def _slugify(value):
     return re.sub(r"[-\s]+", "-", value) or "document"
 
 
+def a3_export_format(document) -> str:
+    """Format d'export d'un template A3 : 'pdf' (défaut) ou 'png'."""
+    return ((document.template.settings or {}).get("a3_export") or "pdf")
+
+
+def output_meta(document):
+    """(ext, mime) du fichier produit, en tenant compte de l'export A3 PNG/PDF."""
+    if document.doc_type == "a3" and a3_export_format(document) == "png":
+        return file_meta("a3_png")
+    return file_meta(document.doc_type)
+
+
 @transaction.atomic
 def render_content(document: Document, ctx) -> bytes:
     """Sélectionne le bon générateur et renvoie les octets du document produit."""
     excel_cfg = (document.template.settings or {}).get("excel", {})
     content = None
     generator = None
+    if document.doc_type == "a3":
+        from .generators import a3_gen
+        if a3_export_format(document) == "png":
+            return a3_gen.render_png(ctx)
+        return a3_gen.render(ctx)
     if document.doc_type == "xlsx" and excel_cfg.get("sheets"):
         from .generators import excel_workbook
         generator = excel_workbook.render
@@ -61,7 +78,7 @@ def preview_document(document: Document):
         confidentiality=document.confidentiality,
     )
     content = render_content(document, ctx)
-    ext, mime = file_meta(document.doc_type)
+    ext, mime = output_meta(document)
     return content, ext, mime
 
 
@@ -69,8 +86,8 @@ def to_pdf_for_preview(content: bytes, ext: str):
     """Convertit un document en PDF pour l'aperçu navigateur. (content_pdf | None)."""
     if ext == ".pdf":
         return content
-    if ext == ".md":
-        # Aperçu Markdown : HTML autonome rendu dans le navigateur (pas un PDF).
+    if ext in (".md", ".png"):
+        # Markdown -> HTML ; PNG -> affiché nativement. Pas de conversion PDF.
         return None
     from .generators import pdf_convert
     if ext == ".docx" and pdf_convert.available():
@@ -137,7 +154,7 @@ def generate_version(document: Document, *, author_initials, author_name="",
     excel_cfg = (document.template.settings or {}).get("excel", {})
     content = render_content(document, ctx)
 
-    ext, _mime = file_meta(document.doc_type)
+    ext, _mime = output_meta(document)
     filename = f"{_slugify(document.title)}-v{next_version}{ext}"
 
     version = DocumentVersion(

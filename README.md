@@ -330,9 +330,45 @@ docugen/
 | GET | `/api/documents/versions/{id}/download/` | Télécharger un fichier |
 | GET | `/api/documents/choices/` | Listes (confidentialité, types) |
 | CRUD | `/api/forms/forms/` | Formulaires en ligne |
+| GET | `/api/forms/forms/{id}/diagrams_data/` | Données calculées des diagrammes |
+| GET | `/api/forms/forms/{id}/diagram/?id=&fmt=png\|svg` | Export d'un diagramme (PNG / SVG) |
+| CRUD | `/api/forms/form-templates/` | Modèles de formulaire (questions + diagrammes) |
+| POST | `/api/forms/form-templates/{id}/instantiate/` | Générer un formulaire depuis un modèle |
 | GET | `/api/forms/public/{code}/` | Définition publique d'un formulaire |
 | POST | `/api/forms/public/{code}/submit/` | Soumission d'une réponse |
 | GET | `/s/{code}` | Résolution / redirection d'un lien réduit |
+
+---
+
+## Configuration des modèles par type · Modèles de formulaire · Diagrammes
+
+**Configuration séparée par onglet selon le type.** La page *Modèles* regroupe désormais
+les modèles par type dans des onglets distincts : **Word, PDF, Excel, Template A3
+(PNG / PDF), Markdown, PowerPoint** et **Formulaires**. À la création / modification, la
+configuration proposée s'adapte au type choisi :
+
+- **Word** : contenu par blocs + structure (garde/suivi, mise en page libre, styles).
+- **PDF** : identique à Word (le PDF est le Word exporté) ; option *PDF depuis Word*.
+- **Excel** : constructeur de classeur (onglets, colonnes typées, croisés, règles).
+- **Template A3 (PNG / PDF)** : pages A3/A4 à positionnement libre, multi-pages, avec
+  choix du format d'export **PNG** (1ʳᵉ page) ou **PDF** (toutes les pages).
+- **Markdown** : contenu par blocs, export `.md`.
+- **PowerPoint** : contenu par blocs (un titre = une diapo) + thème (couleur, logo).
+
+**Modèles de formulaire.** Un *modèle de formulaire* (`FormTemplate`) regroupe des
+questions réutilisables et des diagrammes. On génère un formulaire en ligne à partir d'un
+modèle depuis la page *Modèles → Formulaires* **ou directement depuis un projet** (onglet
+*Documents & formulaires → Formulaires liés → Générer depuis un modèle*).
+
+**Diagrammes de formulaire (PNG / SVG).** Chaque modèle/formulaire peut définir des
+diagrammes **calculés à partir des réponses** et exportables en **PNG** ou **SVG** :
+
+- *Répartition* : comptage des réponses à une question (barres, camembert, anneau…).
+- *Croisement* : regroupement par une question + agrégation (`count` / `sum` / `avg`)
+  d'une question numérique.
+
+Types de graphiques : barres verticales/horizontales, camembert, anneau, courbe. Le rendu
+est portable (Pillow pour le PNG, SVG généré à la main), sans dépendance système.
 
 ---
 

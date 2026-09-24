@@ -115,6 +115,31 @@ import {
             </div>
           }
 
+          @if (isEdit() && (m.diagrams?.length || 0) > 0) {
+            <div class="card">
+              <div class="row between">
+                <h3>Diagrammes ({{ m.diagrams!.length }})</h3>
+                <button class="btn btn-sm btn-ghost" (click)="loadDiagrams()">↻ Actualiser</button>
+              </div>
+              <p class="muted" style="margin:.2rem 0 .6rem">
+                Calculés à partir des {{ subCount() }} réponse(s). Exportez en PNG ou SVG.
+              </p>
+              @for (dg of m.diagrams!; track dg.id) {
+                <div class="diag-card">
+                  @if (imgUrl(dg.id)) {
+                    <img [src]="imgUrl(dg.id)" [alt]="dg.title" />
+                  } @else {
+                    <div class="diag-empty">Aucune donnée pour « {{ dg.title }} » (aucune réponse exploitable).</div>
+                  }
+                  <div class="row" style="gap:.4rem; margin-top:.3rem">
+                    <button class="btn btn-sm btn-ghost" (click)="download(dg.id, 'png', dg.title)">⬇ PNG</button>
+                    <button class="btn btn-sm btn-ghost" (click)="download(dg.id, 'svg', dg.title)">⬇ SVG</button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
           @if (isEdit()) {
             <div class="card">
               <h3>Réponses ({{ submissions().length }})</h3>
@@ -154,6 +179,9 @@ import {
       .linkbox input { font-family: ui-monospace, monospace; font-size: 0.8rem; }
       .sub { border-bottom: 1px solid var(--border); padding: 0.6rem 0; font-size: 0.85rem; }
       .sub:last-child { border-bottom: none; }
+      .diag-card { border: 1px solid var(--border); border-radius: 10px; padding: .5rem; margin-bottom: .7rem; background: #fff; }
+      .diag-card img { width: 100%; border-radius: 6px; }
+      .diag-empty { padding: 1.2rem .6rem; color: var(--muted); font-size: .82rem; text-align: center; }
     `,
   ],
 })
@@ -171,6 +199,10 @@ export class FormBuilder {
   confidentialityLevels = signal<Choice[]>([]);
   submissions = signal<FormSubmission[]>([]);
   saving = signal(false);
+  subCount = signal(0);
+  private diagramUrls = signal<Record<string, string>>({});
+
+  imgUrl(id: string): string | null { return this.diagramUrls()[id] ?? null; }
 
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
@@ -178,7 +210,7 @@ export class FormBuilder {
 
     setTimeout(() => {
       if (this.id) {
-        this.service.get(+this.id).subscribe((f) => this.model.set(f));
+        this.service.get(+this.id).subscribe((f) => { this.model.set(f); this.loadDiagrams(); });
         this.service.submissions(+this.id).subscribe((s) => this.submissions.set(s));
       } else {
         this.model.set({
@@ -220,6 +252,39 @@ export class FormBuilder {
 
   entries(s: FormSubmission): [string, string][] {
     return Object.entries(s.data).map(([k, v]) => [k, String(v)]);
+  }
+
+  loadDiagrams() {
+    const m = this.model();
+    if (!this.id || !m?.diagrams?.length) return;
+    this.service.diagramsData(+this.id).subscribe((res) => {
+      this.subCount.set(res.count);
+      // Révoque les anciennes URLs objet
+      Object.values(this.diagramUrls()).forEach((u) => URL.revokeObjectURL(u));
+      this.diagramUrls.set({});
+      for (const item of res.diagrams) {
+        const cfg = item.config;
+        const hasData = (item.series?.values?.length ?? 0) > 0 &&
+          item.series.values.some((v) => v !== 0);
+        if (!hasData) continue;
+        this.service.diagramBlob(+this.id!, cfg.id, 'png').subscribe((blob) => {
+          const url = URL.createObjectURL(blob);
+          this.diagramUrls.update((cur) => ({ ...cur, [cfg.id]: url }));
+        });
+      }
+    });
+  }
+
+  download(diagramId: string, format: 'png' | 'svg', title: string) {
+    if (!this.id) return;
+    this.service.diagramBlob(+this.id, diagramId, format).subscribe((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safe = (title || 'diagramme').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      a.href = url; a.download = `${safe}.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   }
 
   copy(url: string) {

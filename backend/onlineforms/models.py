@@ -40,11 +40,66 @@ class ShortLink(models.Model):
         return f"/s/{self.code}"
 
 
+class FormTemplate(models.Model):
+    """
+    Modèle de formulaire réutilisable. Un formulaire en ligne peut être
+    *généré* à partir d'un modèle, notamment depuis un projet.
+
+    `schema`   : liste de champs {"key","label","type","required","options"}.
+    `diagrams` : liste de configurations de diagrammes calculés à partir des
+                 réponses, exportables en PNG / SVG. Chaque entrée :
+        {
+          "id", "title",
+          "variant": "bar|hbar|pie|donut|line",
+          "mode": "distribution" | "crosstab",
+          "question": "<clé de la question analysée>",   # distribution
+          "group_by": "<clé>", "value": "<clé>",         # crosstab
+          "agg": "count|sum|avg",
+          "color": "#1F497D"
+        }
+    """
+
+    name = models.CharField("Nom du modèle", max_length=255)
+    description = models.TextField("Description", blank=True)
+    schema = models.JSONField("Champs", default=list, blank=True)
+    diagrams = models.JSONField("Diagrammes", default=list, blank=True)
+    confidentiality = models.CharField(
+        "Confidentialité par défaut", max_length=20,
+        choices=ConfidentialityLevel.choices,
+        default=ConfidentialityLevel.INTERNAL)
+    success_message = models.CharField(
+        "Message de confirmation", max_length=255,
+        default="Merci, votre réponse a bien été enregistrée.")
+    is_active = models.BooleanField("Actif", default=True)
+
+    SCOPE_GLOBAL = "global"
+    SCOPE_PROJECTS = "projects"
+    SCOPE_CHOICES = [(SCOPE_GLOBAL, "Ouvert à tous"),
+                     (SCOPE_PROJECTS, "Projets spécifiques")]
+    scope = models.CharField("Portée", max_length=20, choices=SCOPE_CHOICES,
+                             default=SCOPE_GLOBAL)
+    projects = models.ManyToManyField(
+        Project, blank=True, related_name="form_templates_scoped")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Modèle de formulaire"
+        verbose_name_plural = "Modèles de formulaire"
+
+    def __str__(self):
+        return self.name
+
+
 class OnlineForm(models.Model):
     """
     Formulaire en ligne partageable via un lien réduit.
     `schema` : liste de champs {"key","label","type","required","options"}.
     Types de champs : text, textarea, email, number, date, select, checkbox.
+    `diagrams` : configurations de diagrammes (héritées d'un modèle) calculés
+                 à partir des réponses et exportables en PNG / SVG.
     """
 
     title = models.CharField("Titre", max_length=255)
@@ -52,7 +107,11 @@ class OnlineForm(models.Model):
     project = models.ForeignKey(
         Project, related_name="forms", on_delete=models.SET_NULL,
         null=True, blank=True)
+    template = models.ForeignKey(
+        FormTemplate, related_name="forms", on_delete=models.SET_NULL,
+        null=True, blank=True)
     schema = models.JSONField("Champs", default=list, blank=True)
+    diagrams = models.JSONField("Diagrammes", default=list, blank=True)
     confidentiality = models.CharField(
         "Confidentialité", max_length=20,
         choices=ConfidentialityLevel.choices,

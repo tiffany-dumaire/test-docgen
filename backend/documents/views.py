@@ -59,6 +59,8 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
             if ext == ".md":
                 from .services import markdown_to_html_page
                 content, ext, kind = markdown_to_html_page(content.decode("utf-8")), ".html", "html"
+            elif ext == ".png":
+                kind = "image"
             else:
                 pdf = to_pdf_for_preview(content, ext)
                 if pdf is not None:
@@ -141,6 +143,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if ext == ".md":
             from .services import markdown_to_html_page
             content, ext, kind = markdown_to_html_page(content.decode("utf-8")), ".html", "html"
+        elif ext == ".png":
+            kind = "image"
         else:
             pdf = to_pdf_for_preview(content, ext)
             if pdf is not None:
@@ -211,7 +215,10 @@ class DocumentVersionViewSet(viewsets.ReadOnlyModelViewSet):
         version = self.get_object()
         if not version.file:
             raise Http404("Fichier introuvable")
-        _ext, mime = file_meta(version.document.doc_type)
+        # Type MIME déduit de l'extension réelle du fichier (gère A3 PNG/PDF).
+        import mimetypes
+        mime = (mimetypes.guess_type(version.file.name)[0]
+                or file_meta(version.document.doc_type)[1])
         response = FileResponse(version.file.open("rb"), content_type=mime)
         response["Content-Disposition"] = (
             f'attachment; filename="{version.file.name.split("/")[-1]}"')

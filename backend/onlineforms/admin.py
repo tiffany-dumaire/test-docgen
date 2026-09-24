@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import FormSubmission, OnlineForm, ShortLink
+from .models import FormSubmission, FormTemplate, OnlineForm, ShortLink
+
+
+@admin.register(FormTemplate)
+class FormTemplateAdmin(admin.ModelAdmin):
+    list_display = ("name", "scope", "is_active", "updated_at")
+    list_filter = ("scope", "is_active")
+    search_fields = ("name", "description")
 
 
 @admin.register(ShortLink)

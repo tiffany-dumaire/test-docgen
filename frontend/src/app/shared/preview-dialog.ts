@@ -20,6 +20,8 @@ export interface PreviewData { url: string; kind: string; ext: string; title: st
     <div class="pv-body">
       @if (data.kind === 'pdf' || data.kind === 'html') {
         <iframe [src]="safe" title="Aperçu"></iframe>
+      } @else if (data.kind === 'image') {
+        <div class="pv-image"><img [src]="data.url" alt="Aperçu" /></div>
       } @else {
         <div class="pv-native">
           <mat-icon>description</mat-icon>
@@ -37,6 +39,8 @@ export interface PreviewData { url: string; kind: string; ext: string; title: st
     iframe { width:100%; height:100%; border:0; }
     .pv-native { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.8rem; color:#fff; }
     .pv-native mat-icon { font-size:48px; width:48px; height:48px; }
+    .pv-image { height:100%; overflow:auto; display:flex; align-items:flex-start; justify-content:center; padding:1rem; }
+    .pv-image img { max-width:100%; height:auto; box-shadow:0 4px 24px rgba(0,0,0,.4); background:#fff; }
   `],
 })
 export class PreviewDialog {

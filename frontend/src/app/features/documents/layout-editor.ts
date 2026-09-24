@@ -21,12 +21,14 @@ const DISP_W = 460;
   imports: [FormsModule],
   template: `
     <div class="le">
+      @if (!single) {
       <div class="tabs">
         <button class="tab" [class.active]="page() === 'cover'" (click)="setPage('cover')">📄 Page de garde</button>
         <button class="tab" [class.active]="page() === 'suivi'" (click)="setPage('suivi')">📋 Page de suivi</button>
         <button class="tab" [class.active]="page() === 'page'" (click)="setPage('page')">🖼️ Page libre (A3/A4)</button>
         <label class="chk"><input type="checkbox" [ngModel]="enabled()" (ngModelChange)="toggle($event)" /> Activer la mise en page libre</label>
       </div>
+      }
 
       @if (enabled()) {
         <div class="fmt">
@@ -183,7 +185,10 @@ const DISP_W = 460;
   `],
 })
 export class LayoutEditor {
-  @Input({ required: true }) settings!: TemplateSettings;
+  @Input() settings!: TemplateSettings;
+  /** Mode « page unique » : édite directement cet objet de mise en page
+   *  (utilisé par les templates A3 multi-pages). */
+  @Input() single?: LLayout;
 
   page = signal<'cover' | 'suivi' | 'page'>('cover');
   rev = signal(0);
@@ -204,10 +209,16 @@ export class LayoutEditor {
     return this.settings.layouts as unknown as Record<string, LLayout>;
   }
   enabled = computed(() => {
+    if (this.single) return true;
+    this.rev();
     const l = this.ensure()[this.page()];
     return !!l;
   });
   layout(): LLayout {
+    if (this.single) {
+      if (!this.single.elements) this.single.elements = [];
+      return this.single;
+    }
     const store = this.ensure();
     if (!store[this.page()]) store[this.page()] = { background: '#ffffff', elements: [] };
     return store[this.page()];

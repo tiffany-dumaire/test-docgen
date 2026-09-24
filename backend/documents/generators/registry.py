@@ -16,6 +16,8 @@ FILE_META = {
     "pptx": (".pptx",
              "application/vnd.openxmlformats-officedocument.presentationml.presentation"),
     "md": (".md", "text/markdown"),
+    "a3": (".pdf", "application/pdf"),
+    "a3_png": (".png", "image/png"),
 }
 
 # builder_key -> (module, doc_type attendu)

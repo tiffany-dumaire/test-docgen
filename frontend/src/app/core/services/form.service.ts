@@ -2,7 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiConfig, toHttpParams } from './api.service';
-import { FormSubmission, OnlineForm, Paginated } from '../models';
+import {
+  DiagramSeries,
+  FormDiagram,
+  FormSubmission,
+  FormTemplate,
+  OnlineForm,
+  Paginated,
+} from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class FormService {
@@ -29,6 +36,41 @@ export class FormService {
   }
   submissions(id: number): Observable<FormSubmission[]> {
     return this.http.get<FormSubmission[]>(`${this.base}/forms/${id}/submissions/`);
+  }
+
+  // ---- Diagrammes d'un formulaire (calculés à partir des réponses) ----
+  diagramsData(id: number): Observable<{ count: number; diagrams: { config: FormDiagram; series: DiagramSeries }[] }> {
+    return this.http.get<{ count: number; diagrams: { config: FormDiagram; series: DiagramSeries }[] }>(
+      `${this.base}/forms/${id}/diagrams_data/`);
+  }
+  diagramUrl(id: number, diagramId: string, format: 'png' | 'svg', download = false): string {
+    const dl = download ? '&download=1' : '';
+    return `${this.base}/forms/${id}/diagram/?id=${encodeURIComponent(diagramId)}&fmt=${format}${dl}`;
+  }
+  diagramBlob(id: number, diagramId: string, format: 'png' | 'svg'): Observable<Blob> {
+    return this.http.get(this.diagramUrl(id, diagramId, format), { responseType: 'blob' });
+  }
+
+  // ---- Modèles de formulaire ----
+  templates(filters: Record<string, unknown> = {}): Observable<Paginated<FormTemplate>> {
+    return this.http.get<Paginated<FormTemplate>>(`${this.base}/form-templates/`, {
+      params: toHttpParams(filters),
+    });
+  }
+  template(id: number): Observable<FormTemplate> {
+    return this.http.get<FormTemplate>(`${this.base}/form-templates/${id}/`);
+  }
+  createTemplate(data: Partial<FormTemplate>): Observable<FormTemplate> {
+    return this.http.post<FormTemplate>(`${this.base}/form-templates/`, data);
+  }
+  updateTemplate(id: number, data: Partial<FormTemplate>): Observable<FormTemplate> {
+    return this.http.put<FormTemplate>(`${this.base}/form-templates/${id}/`, data);
+  }
+  removeTemplate(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/form-templates/${id}/`);
+  }
+  instantiate(id: number, body: { project?: number | null; title?: string }): Observable<OnlineForm> {
+    return this.http.post<OnlineForm>(`${this.base}/form-templates/${id}/instantiate/`, body);
   }
 
   // Endpoints publics (par code de lien réduit)

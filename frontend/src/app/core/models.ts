@@ -106,7 +106,7 @@ export interface Project {
   updated_at?: string;
 }
 
-export type DocType = 'pdf' | 'xlsx' | 'docx' | 'pptx' | 'md';
+export type DocType = 'pdf' | 'xlsx' | 'docx' | 'pptx' | 'md' | 'a3';
 
 export type BlockType =
   | 'heading'
@@ -179,6 +179,17 @@ export interface ElementStyle {
 }
 export type StyleMap = { [element: string]: ElementStyle };
 
+export interface A3Page {
+  id: string;
+  name: string;
+  layout: PageLayout & { page_size?: string; orientation?: string };
+}
+
+export interface PptxSettings {
+  main_color?: string;
+  include_logo?: boolean;
+}
+
 export interface TemplateSettings {
   cover_title?: string;
   cover_subtitle?: string;
@@ -189,6 +200,11 @@ export interface TemplateSettings {
   excel?: ExcelWorkbook;
   layouts?: { [page: string]: PageLayout };
   styles?: StyleMap;
+  pdf_from_docx?: boolean;
+  pptx?: PptxSettings;
+  // Template A3 (PNG / PDF)
+  a3_export?: 'pdf' | 'png';
+  a3_pages?: A3Page[];
 }
 
 // ---- Classeurs Excel personnalisables ----
@@ -376,12 +392,57 @@ export interface FormField {
   options?: string[];
 }
 
+export type DiagramVariant = 'bar' | 'hbar' | 'pie' | 'donut' | 'line';
+export type DiagramMode = 'distribution' | 'crosstab';
+
+export interface FormDiagram {
+  id: string;
+  title: string;
+  variant: DiagramVariant;
+  mode: DiagramMode;
+  // distribution : répartition des réponses à une question
+  question?: string;
+  // crosstab : regroupe par une question, agrège une autre
+  group_by?: string;
+  value?: string;
+  agg?: 'count' | 'sum' | 'avg';
+  color?: string;
+}
+
+export interface DiagramSeries {
+  title: string;
+  labels: string[];
+  values: number[];
+  unit?: string;
+  error?: string;
+}
+
+export interface FormTemplate {
+  id?: number;
+  name: string;
+  description: string;
+  schema: FormField[];
+  diagrams: FormDiagram[];
+  confidentiality: Confidentiality;
+  confidentiality_display?: string;
+  success_message: string;
+  is_active: boolean;
+  scope: 'global' | 'projects';
+  projects: number[];
+  form_count?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface OnlineForm {
   id?: number;
   title: string;
   description: string;
   project?: number | null;
+  template?: number | null;
+  template_name?: string | null;
   schema: FormField[];
+  diagrams?: FormDiagram[];
   confidentiality: Confidentiality;
   confidentiality_display?: string;
   is_open: boolean;

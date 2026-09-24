@@ -10,7 +10,9 @@ import { RouterLink } from '@angular/router';
 import { ProjectService } from '../../core/services/project.service';
 import { DocumentService } from '../../core/services/document.service';
 import { FormService } from '../../core/services/form.service';
-import { OnlineForm, Project, ProjectDocument } from '../../core/models';
+import { FormTemplate, OnlineForm, Project, ProjectDocument } from '../../core/models';
+import { ToastService } from '../../core/services/api.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-project-detail',
@@ -105,11 +107,23 @@ import { OnlineForm, Project, ProjectDocument } from '../../core/models';
                   }</tbody></table>
               } @else { <div class="muted">Aucun document.</div> }
             </div>
-            <div class="card"><h3>📝 Formulaires liés</h3>
+            <div class="card"><div class="row between"><h3>📝 Formulaires liés</h3>
+              <a class="btn btn-sm btn-ghost" [routerLink]="['/forms/new']" [queryParams]="{ project: p.id }">+ Vierge</a></div>
+              @if (formTemplates().length) {
+                <div class="row" style="gap:.4rem; align-items:center; margin-bottom:.6rem; flex-wrap:wrap">
+                  <span class="tag">Générer depuis un modèle :</span>
+                  <select [(ngModel)]="selTemplate" style="max-width:260px">
+                    <option [ngValue]="null" disabled>— choisir un modèle —</option>
+                    @for (ft of formTemplates(); track ft.id) { <option [ngValue]="ft.id">{{ ft.name }}</option> }
+                  </select>
+                  <button class="btn btn-sm btn-primary" (click)="genForm(p)" [disabled]="!selTemplate">Générer</button>
+                </div>
+              }
               @if (forms().length) {
-                <table><thead><tr><th>Titre</th><th>Lien réduit</th><th>Réponses</th></tr></thead>
+                <table><thead><tr><th>Titre</th><th>Modèle</th><th>Lien réduit</th><th>Réponses</th></tr></thead>
                   <tbody>@for (f of forms(); track f.id) {
                     <tr><td><a [routerLink]="['/forms', f.id]">{{ f.title }}</a></td>
+                      <td>{{ f.template_name || '—' }}</td>
                       <td><a [href]="f.short_url" target="_blank">{{ f.short_url }}</a></td><td>{{ f.submission_count }}</td></tr>
                   }</tbody></table>
               } @else { <div class="muted">Aucun formulaire lié.</div> }
@@ -204,11 +218,15 @@ export class ProjectDetail {
   private formsSvc = inject(FormService);
   private membershipSvc = inject(MembershipService);
   private extras = inject(ProjectExtrasService);
+  private toast = inject(ToastService);
+  private router = inject(Router);
 
   @Input() id!: string;
   project = signal<Project | null>(null);
   documents = signal<ProjectDocument[]>([]);
   forms = signal<OnlineForm[]>([]);
+  formTemplates = signal<FormTemplate[]>([]);
+  selTemplate: number | null = null;
   members = signal<Membership[]>([]);
   users = signal<{ id?: number; full_name?: string; email: string }[]>([]);
   newUser: number | null = null;
@@ -226,10 +244,21 @@ export class ProjectDetail {
       this.projects.get(pid).subscribe((p) => this.project.set(p));
       this.documentsSvc.list({ project: pid }).subscribe((r) => this.documents.set(r.results));
       this.formsSvc.list({ project: pid }).subscribe((r) => this.forms.set(r.results));
+      this.formsSvc.templates({ project: pid }).subscribe((r) => this.formTemplates.set(r.results));
       this.loadMembers(pid);
       this.membershipSvc.users().subscribe((r) => this.users.set(r.results));
       this.reloadExtras(pid);
     });
+  }
+
+  genForm(p: Project) {
+    if (!this.selTemplate) return;
+    const ft = this.formTemplates().find((t) => t.id === this.selTemplate);
+    this.formsSvc.instantiate(this.selTemplate, { project: p.id, title: ft?.name })
+      .subscribe({
+        next: (form) => { this.toast.success('Formulaire généré depuis le modèle.'); this.router.navigate(['/forms', form.id]); },
+        error: () => this.toast.error('Génération impossible.'),
+      });
   }
 
   reloadExtras(pid: number) {

@@ -1,7 +1,26 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from .models import FormSubmission, OnlineForm, ShortLink
+from .models import FormSubmission, FormTemplate, OnlineForm, ShortLink
+
+
+class FormTemplateSerializer(serializers.ModelSerializer):
+    confidentiality_display = serializers.CharField(
+        source="get_confidentiality_display", read_only=True)
+    form_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FormTemplate
+        fields = [
+            "id", "name", "description", "schema", "diagrams",
+            "confidentiality", "confidentiality_display", "success_message",
+            "is_active", "scope", "projects", "form_count",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def get_form_count(self, obj):
+        return obj.forms.count()
 
 
 class ShortLinkSerializer(serializers.ModelSerializer):
@@ -24,15 +43,20 @@ class OnlineFormSerializer(serializers.ModelSerializer):
     confidentiality_display = serializers.CharField(
         source="get_confidentiality_display", read_only=True)
 
+    template_name = serializers.CharField(source="template.name",
+                                           read_only=True, default=None)
+
     class Meta:
         model = OnlineForm
         fields = [
-            "id", "title", "description", "project", "schema",
+            "id", "title", "description", "project", "template", "template_name",
+            "schema", "diagrams",
             "confidentiality", "confidentiality_display", "is_open",
             "success_message", "deadline", "short_link", "short_url", "submission_count",
             "created_at", "updated_at",
         ]
-        read_only_fields = ["id", "short_link", "created_at", "updated_at"]
+        read_only_fields = ["id", "short_link", "template_name",
+                            "created_at", "updated_at"]
 
     def get_short_url(self, obj):
         if obj.short_link:

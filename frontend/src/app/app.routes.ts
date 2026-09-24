@@ -28,6 +28,8 @@ export const routes: Routes = [
       { path: 'forms', loadComponent: () => import('./features/forms/form-list').then((m) => m.FormList) },
       { path: 'forms/new', loadComponent: () => import('./features/forms/form-builder').then((m) => m.FormBuilder) },
       { path: 'forms/:id', loadComponent: () => import('./features/forms/form-builder').then((m) => m.FormBuilder) },
+      { path: 'form-templates/new', loadComponent: () => import('./features/forms/form-template-builder').then((m) => m.FormTemplateBuilder) },
+      { path: 'form-templates/:id', loadComponent: () => import('./features/forms/form-template-builder').then((m) => m.FormTemplateBuilder) },
       { path: 'clients', loadComponent: () => import('./features/clients/client-list').then((m) => m.ClientList) },
       { path: 'clients/:id', loadComponent: () => import('./features/clients/client-detail').then((m) => m.ClientDetail) },
       { path: 'teams', loadComponent: () => import('./features/teams/team-list').then((m) => m.TeamList) },

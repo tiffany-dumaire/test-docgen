@@ -1,11 +1,13 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .views import (FormSubmissionViewSet, OnlineFormViewSet, ShortLinkViewSet,
+from .views import (FormSubmissionViewSet, FormTemplateViewSet,
+                    OnlineFormViewSet, ShortLinkViewSet,
                     public_form, public_submit)
 
 router = DefaultRouter()
 router.register("forms", OnlineFormViewSet, basename="form")
+router.register("form-templates", FormTemplateViewSet, basename="form-template")
 router.register("shortlinks", ShortLinkViewSet, basename="shortlink")
 router.register("submissions", FormSubmissionViewSet, basename="submission")
 

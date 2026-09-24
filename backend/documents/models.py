@@ -16,6 +16,7 @@ class DocumentType(models.TextChoices):
     DOCX = "docx", "Word"
     PPTX = "pptx", "PowerPoint"
     MD = "md", "Markdown"
+    A3 = "a3", "Template A3 (PNG / PDF)"
 
 
 class DocumentTemplate(models.Model):

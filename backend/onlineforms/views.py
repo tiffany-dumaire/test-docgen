@@ -1,13 +1,17 @@
+import copy
+
 from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .models import FormSubmission, OnlineForm, ShortLink
-from .serializers import (FormSubmissionSerializer, OnlineFormSerializer,
-                          PublicFormSerializer, ShortLinkSerializer)
+from .models import FormSubmission, FormTemplate, OnlineForm, ShortLink
+from .serializers import (FormSubmissionSerializer, FormTemplateSerializer,
+                          OnlineFormSerializer, PublicFormSerializer,
+                          ShortLinkSerializer)
 
 
 def _client_ip(request):
@@ -17,10 +21,56 @@ def _client_ip(request):
     return request.META.get("REMOTE_ADDR")
 
 
+class FormTemplateViewSet(viewsets.ModelViewSet):
+    """Modèles de formulaire réutilisables (avec diagrammes)."""
+    queryset = FormTemplate.objects.all().prefetch_related("projects")
+    serializer_class = FormTemplateSerializer
+    filterset_fields = ["is_active", "scope"]
+    search_fields = ["name", "description"]
+
+    def get_queryset(self):
+        qs = FormTemplate.objects.all().prefetch_related("projects")
+        project = self.request.query_params.get("project")
+        if project:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(scope=FormTemplate.SCOPE_GLOBAL) | Q(projects__id=project)
+            ).distinct()
+        return qs
+
+    @action(detail=True, methods=["post"])
+    def instantiate(self, request, pk=None):
+        """Génère un formulaire en ligne à partir de ce modèle.
+
+        Corps : { "project": <id|null>, "title": "..." (facultatif) }.
+        """
+        template = self.get_object()
+        project_id = request.data.get("project")
+        project = None
+        if project_id:
+            from projects.models import Project
+            project = Project.objects.filter(pk=project_id).first()
+        title = request.data.get("title") or template.name
+        form = OnlineForm.objects.create(
+            title=title,
+            description=template.description,
+            project=project,
+            template=template,
+            schema=copy.deepcopy(template.schema),
+            diagrams=copy.deepcopy(template.diagrams),
+            confidentiality=template.confidentiality,
+            success_message=template.success_message,
+        )
+        form.ensure_short_link()
+        return Response(OnlineFormSerializer(form, context={"request": request}).data,
+                        status=status.HTTP_201_CREATED)
+
+
 class OnlineFormViewSet(viewsets.ModelViewSet):
-    queryset = OnlineForm.objects.select_related("short_link", "project").all()
+    queryset = OnlineForm.objects.select_related(
+        "short_link", "project", "template").all()
     serializer_class = OnlineFormSerializer
-    filterset_fields = ["project", "is_open", "confidentiality"]
+    filterset_fields = ["project", "is_open", "confidentiality", "template"]
     search_fields = ["title", "description"]
 
     @action(detail=True, methods=["get"])
@@ -29,6 +79,47 @@ class OnlineFormViewSet(viewsets.ModelViewSet):
         data = FormSubmissionSerializer(
             form.submissions.all(), many=True).data
         return Response(data)
+
+    @action(detail=True, methods=["get"])
+    def diagrams_data(self, request, pk=None):
+        """Jeux de données calculés pour chaque diagramme (aperçu côté UI)."""
+        from .diagrams import compute_series
+        form = self.get_object()
+        subs = list(form.submissions.values_list("data", flat=True))
+        out = []
+        for cfg in (form.diagrams or []):
+            try:
+                series = compute_series(cfg, form.schema, subs)
+            except Exception as exc:  # config incomplète
+                series = {"title": cfg.get("title", ""), "labels": [],
+                          "values": [], "error": str(exc)}
+            out.append({"config": cfg, "series": series})
+        return Response({"count": len(subs), "diagrams": out})
+
+    @action(detail=True, methods=["get"])
+    def diagram(self, request, pk=None):
+        """Exporte un diagramme en PNG ou SVG.
+
+        Query : ?id=<id du diagramme>&format=png|svg
+        """
+        from .diagrams import render as render_diagram
+        form = self.get_object()
+        did = request.query_params.get("id")
+        # NB : on évite le paramètre « format » (négociation de contenu DRF).
+        fmt = (request.query_params.get("fmt")
+               or request.query_params.get("format") or "png").lower()
+        cfg = next((c for c in (form.diagrams or []) if str(c.get("id")) == str(did)),
+                   None)
+        if cfg is None:
+            return Response({"detail": "Diagramme introuvable."},
+                            status=status.HTTP_404_NOT_FOUND)
+        subs = list(form.submissions.values_list("data", flat=True))
+        data, mime, ext = render_diagram(cfg, form.schema, subs, fmt=fmt)
+        resp = HttpResponse(data, content_type=mime)
+        fname = f"diagramme-{did}{ext}"
+        disp = "attachment" if request.query_params.get("download") else "inline"
+        resp["Content-Disposition"] = f'{disp}; filename="{fname}"'
+        return resp
 
 
 class ShortLinkViewSet(viewsets.ModelViewSet):

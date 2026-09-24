@@ -372,4 +372,54 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"Formulaire démo créé : lien /s/{form.short_link.code}")
 
+        # Modèle de formulaire démo (avec diagrammes)
+        from onlineforms.models import FormTemplate
+        ft_schema = [
+            {"key": "satisfaction", "label": "Satisfaction globale",
+             "type": "select", "required": True,
+             "options": ["Faible", "Moyenne", "Élevée"]},
+            {"key": "service", "label": "Service concerné", "type": "select",
+             "options": ["Support", "Ventes", "Technique"]},
+            {"key": "note", "label": "Note /10", "type": "number"},
+        ]
+        ft_diagrams = [
+            {"id": "d1", "title": "Répartition de la satisfaction",
+             "variant": "pie", "mode": "distribution", "question": "satisfaction"},
+            {"id": "d2", "title": "Note moyenne par service", "variant": "bar",
+             "mode": "crosstab", "group_by": "service", "value": "note",
+             "agg": "avg", "color": "#4F81BD"},
+        ]
+        FormTemplate.objects.get_or_create(
+            name="Enquête de satisfaction",
+            defaults={
+                "description": "Modèle réutilisable avec diagrammes exportables "
+                               "(PNG / SVG) calculés à partir des réponses.",
+                "schema": ft_schema, "diagrams": ft_diagrams,
+            })
+        self.stdout.write("Modèle de formulaire démo créé.")
+
+        # Modèle « Template A3 » démo (affiche à positionnement libre)
+        DocumentTemplate.objects.get_or_create(
+            slug="affiche-a3-demo",
+            defaults={
+                "name": "Affiche projet A3", "doc_type": "a3",
+                "builder_key": "a3", "is_block_based": False, "schema": [],
+                "description": "Affiche A3 à positionnement libre, exportable "
+                               "en PNG ou PDF.",
+                "settings": {"a3_export": "png", "a3_pages": [
+                    {"id": "p1", "name": "Affiche", "layout": {
+                        "page_size": "a3", "orientation": "portrait",
+                        "background": "#0F172A", "elements": [
+                            {"id": "t1", "type": "text", "x": 60, "y": 160,
+                             "w": 720, "h": 130, "text": "{{project_name}}",
+                             "font": "title", "size": 60, "color": "#FFFFFF",
+                             "align": "center", "bold": True},
+                            {"id": "t2", "type": "text", "x": 60, "y": 300,
+                             "w": 720, "h": 60, "text": "{{client_name}}",
+                             "font": "subtitle", "size": 28, "color": "#93C5FD",
+                             "align": "center"},
+                        ]}}]},
+            })
+        self.stdout.write("Modèle Template A3 démo créé.")
+
         self.stdout.write(self.style.SUCCESS("Seed (démo) terminé."))
