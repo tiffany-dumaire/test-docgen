@@ -1,6 +1,7 @@
 import { Component, inject, signal, Input, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DocumentService } from '../../core/services/document.service';
 import { ProjectService } from '../../core/services/project.service';
@@ -22,7 +23,7 @@ import {
 
 @Component({
   selector: 'app-document-editor',
-  imports: [FormsModule, RouterLink, DatePipe, DataGrid],
+  imports: [FormsModule, RouterLink, DatePipe, DataGrid, MatTabsModule],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? doc()?.title : 'Nouveau document' }}</h1>
@@ -30,9 +31,9 @@ import {
     </div>
 
     @if (doc(); as d) {
-      <div class="grid-2">
-        <!-- Colonne édition -->
-        <div class="stack">
+      <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+        <mat-tab label="Contenu à remplir">
+        <div class="stack tabpad">
           <div class="card stack">
             <h3>Paramètres</h3>
             <div class="field">
@@ -198,9 +199,10 @@ import {
             </button>
           </div>
         </div>
+        </mat-tab>
 
-        <!-- Colonne génération + historique -->
-        <div class="stack">
+        <mat-tab label="Génération & versions">
+        <div class="stack tabpad">
           <div class="card stack">
             <h3>Générer une version</h3>
             @if (!isEdit()) {
@@ -256,11 +258,14 @@ import {
             }
           </div>
         </div>
-      </div>
+        </mat-tab>
+      </mat-tab-group>
     }
   `,
   styles: [
     `
+      .detail-tabs { margin-top: 1rem; }
+      .tabpad { padding-top: 1.2rem; }
       .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
       @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
       .mono { font-family: ui-monospace, monospace; font-size: 0.8rem; }

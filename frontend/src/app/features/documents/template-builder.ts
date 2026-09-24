@@ -7,6 +7,7 @@ import { ToastService } from '../../core/services/api.service';
 import { RichTextEditor } from '../../shared/rich-text-editor';
 import { ExcelBuilder } from './excel-builder';
 import { LayoutEditor } from './layout-editor';
+import { MatTabsModule } from '@angular/material/tabs';
 import { StyleEditor } from './style-editor';
 import { ProjectService } from '../../core/services/project.service';
 import {
@@ -28,7 +29,7 @@ interface PaletteItem {
 
 @Component({
   selector: 'app-template-builder',
-  imports: [FormsModule, RouterLink, RichTextEditor, NgTemplateOutlet, ExcelBuilder, LayoutEditor, StyleEditor],
+  imports: [FormsModule, RouterLink, RichTextEditor, NgTemplateOutlet, ExcelBuilder, LayoutEditor, StyleEditor, MatTabsModule],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? 'Modifier le modèle' : 'Nouveau modèle' }}</h1>
@@ -40,27 +41,10 @@ interface PaletteItem {
     </p>
 
     @if (model(); as m) {
-      <div class="builder" [class.solo]="isExcel()">
-        <!-- Palette -->
-        @if (!isExcel()) {
-        <div class="palette card">
-          <h3>Éléments</h3>
-          @for (item of palette; track item.type) {
-            <div
-              class="palette-item"
-              draggable="true"
-              (dragstart)="onPaletteDrag(item.type)"
-              (click)="add(item.type)"
-            >
-              <span class="pi-icon">{{ item.icon }}</span> {{ item.label }}
-            </div>
-          }
-        </div>
-        }
-
-        <!-- Canvas -->
-        <div class="stack">
-          <div class="card stack">
+      <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+        <mat-tab label="Général">
+          <div class="tabpad">
+            <div class="card stack">
             <div class="form-grid">
               <div class="field">
                 <label>Nom du modèle *</label>
@@ -105,52 +89,27 @@ interface PaletteItem {
               </div>
             }
           </div>
-
-          <!-- Réglages page de garde / suivi / sommaire -->
-          @if (!isExcel()) {
-          <div class="card stack">
-            <h3>Structure du document</h3>
-            <div class="form-grid">
-              <label class="chk"><input type="checkbox" [(ngModel)]="settings().include_cover" /> Page de garde</label>
-              <label class="chk"><input type="checkbox" [(ngModel)]="settings().include_suivi" /> Page de suivi (identification + révisions)</label>
-              <label class="chk"><input type="checkbox" [(ngModel)]="settings().include_toc" /> Table des matières auto</label>
-            </div>
-            @if (settings().include_cover) {
-              <div class="form-grid">
-                <div class="field">
-                  <label>Titre de couverture</label>
-                  <input [(ngModel)]="settings().cover_title" placeholder="{{ '{{' }}document_title{{ '}}' }}" />
-                </div>
-                <div class="field">
-                  <label>Sous-titre</label>
-                  <input [(ngModel)]="settings().cover_subtitle" />
-                </div>
-              </div>
-            }
           </div>
-          <div class="card stack">
-            <h3>Mise en page libre des pages de garde / suivi</h3>
-            <p class="muted" style="margin:0 0 .4rem">Positionnez librement titres, images (redimensionnables), logo, formes et variables. Le PDF sera identique au Word.</p>
-            <app-layout-editor [settings]="settings()" />
-          </div>
-          <div class="card stack">
-            <h3>Styles du modèle</h3>
-            <p class="muted" style="margin:0 0 .2rem">Héritage : <b>Entreprise → Projet → Modèle</b>. Ce modèle peut ré-utiliser les styles hérités, les surcharger par élément, ou définir des styles 100 % personnalisés.</p>
-            <app-style-editor [styles]="templateStyles()" />
-          </div>
-          }
-
-          <!-- Concepteur Excel -->
-          @if (isExcel()) {
-            <div class="card stack">
-              <h3>Onglets du classeur Excel</h3>
-              <p class="muted" style="margin:0 0 .4rem">Ajoutez des onglets : tableaux à colonnes typées et regroupées, tableaux croisés, informations fixes.</p>
-              <app-excel-builder [sheets]="excelSheets()" />
+        </mat-tab>
+        @if (!isExcel()) {
+          <mat-tab label="Contenu">
+            <div class="tabpad content-grid">
+              @if (!isExcel()) {
+        <div class="palette card">
+          <h3>Éléments</h3>
+          @for (item of palette; track item.type) {
+            <div
+              class="palette-item"
+              draggable="true"
+              (dragstart)="onPaletteDrag(item.type)"
+              (click)="add(item.type)"
+            >
+              <span class="pi-icon">{{ item.icon }}</span> {{ item.label }}
             </div>
           }
-
-          <!-- Zone document -->
-          @if (!isExcel()) {
+        </div>
+        }
+              @if (!isExcel()) {
           <div
             class="canvas card"
             (dragover)="$event.preventDefault()"
@@ -290,14 +249,7 @@ interface PaletteItem {
             }
           </div>
           }
-
-          <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
-            {{ isEdit() ? 'Enregistrer le modèle' : 'Créer le modèle' }}
-          </button>
-        </div>
-
-        <!-- Variables -->
-        @if (!isExcel()) {
+              @if (!isExcel()) {
         <div class="side card">
           <h3>Variables</h3>
           <p class="muted" style="font-size:.78rem">Cliquez pour copier.</p>
@@ -306,6 +258,64 @@ interface PaletteItem {
           }
         </div>
         }
+            </div>
+          </mat-tab>
+          <mat-tab label="Structure & styles">
+            <div class="tabpad">
+              @if (!isExcel()) {
+          <div class="card stack">
+            <h3>Structure du document</h3>
+            <div class="form-grid">
+              <label class="chk"><input type="checkbox" [(ngModel)]="settings().include_cover" /> Page de garde</label>
+              <label class="chk"><input type="checkbox" [(ngModel)]="settings().include_suivi" /> Page de suivi (identification + révisions)</label>
+              <label class="chk"><input type="checkbox" [(ngModel)]="settings().include_toc" /> Table des matières auto</label>
+            </div>
+            @if (settings().include_cover) {
+              <div class="form-grid">
+                <div class="field">
+                  <label>Titre de couverture</label>
+                  <input [(ngModel)]="settings().cover_title" placeholder="{{ '{{' }}document_title{{ '}}' }}" />
+                </div>
+                <div class="field">
+                  <label>Sous-titre</label>
+                  <input [(ngModel)]="settings().cover_subtitle" />
+                </div>
+              </div>
+            }
+          </div>
+          <div class="card stack">
+            <h3>Mise en page libre des pages de garde / suivi</h3>
+            <p class="muted" style="margin:0 0 .4rem">Positionnez librement titres, images (redimensionnables), logo, formes et variables. Le PDF sera identique au Word.</p>
+            <app-layout-editor [settings]="settings()" />
+          </div>
+          <div class="card stack">
+            <h3>Styles du modèle</h3>
+            <p class="muted" style="margin:0 0 .2rem">Héritage : <b>Entreprise → Projet → Modèle</b>. Ce modèle peut ré-utiliser les styles hérités, les surcharger par élément, ou définir des styles 100 % personnalisés.</p>
+            <app-style-editor [styles]="templateStyles()" />
+          </div>
+          }
+            </div>
+          </mat-tab>
+        }
+        @if (isExcel()) {
+          <mat-tab label="Classeur Excel">
+            <div class="tabpad">
+              @if (isExcel()) {
+            <div class="card stack">
+              <h3>Onglets du classeur Excel</h3>
+              <p class="muted" style="margin:0 0 .4rem">Ajoutez des onglets : tableaux à colonnes typées et regroupées, tableaux croisés, informations fixes.</p>
+              <app-excel-builder [sheets]="excelSheets()" />
+            </div>
+          }
+            </div>
+          </mat-tab>
+        }
+      </mat-tab-group>
+
+      <div class="row" style="margin-top:1rem">
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+          {{ isEdit() ? 'Enregistrer le modèle' : 'Créer le modèle' }}
+        </button>
       </div>
     }
 
@@ -335,6 +345,10 @@ interface PaletteItem {
   `,
   styles: [
     `
+      .detail-tabs { margin-top: .5rem; }
+      .tabpad { padding-top: 1.2rem; display: flex; flex-direction: column; gap: 1rem; }
+      .content-grid { display: grid; grid-template-columns: 190px 1fr 230px; gap: 1rem; align-items: start; }
+      @media (max-width: 1100px) { .content-grid { grid-template-columns: 1fr; } }
       .builder { display: grid; grid-template-columns: 190px 1fr 240px; gap: 1rem; align-items: start; }
       .builder.solo { grid-template-columns: 1fr; }
       .proj-pick { display:flex; flex-wrap:wrap; gap:.5rem; }

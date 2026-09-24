@@ -68,6 +68,11 @@ projets et de variables paramétrables.
   - **Mises en forme conditionnelles** : coloration selon la valeur
     (condition, échelle de couleurs, barres de données).
   - **Validations** : listes déroulantes et plages (entier / décimal / date).
+- **Refonte Angular Material 21** : thème M3 entièrement personnalisé
+  (mode sombre / clair, couleur d'entreprise appliquée au thème), menu latéral
+  repliable, barre d'outils, police d'icônes auto-hébergée (hors-ligne).
+- **Vues détail en onglets** : fiche projet, éditeur de document, éditeur de
+  modèle et écran entreprise.
 - **Interface Angular Material 21** : thème **100 % personnalisé** avec **mode
   sombre / clair**, **menu latéral repliable**, barre d'outils, et
   **couleur d'entreprise / utilisateur** appliquée dynamiquement au thème.

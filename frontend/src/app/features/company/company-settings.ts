@@ -1,13 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StyleEditor } from '../documents/style-editor';
+import { MatTabsModule } from '@angular/material/tabs';
 import { CompanyService } from '../../core/services/company.service';
 import { ToastService } from '../../core/services/api.service';
 import { CompanyProfile, UsefulLink } from '../../core/models';
 
 @Component({
   selector: 'app-company-settings',
-  imports: [FormsModule, StyleEditor],
+  imports: [FormsModule, StyleEditor, MatTabsModule],
   template: `
     <div class="row between">
       <h1>Mon entreprise</h1>
@@ -21,7 +22,10 @@ import { CompanyProfile, UsefulLink } from '../../core/models';
     </p>
 
     @if (model(); as m) {
-      <div class="card stack">
+      <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+        <mat-tab label="Informations">
+          <div class="tabpad">
+          <div class="card stack">
         <div class="form-grid">
           <div class="field">
             <label>Nom *</label>
@@ -88,14 +92,22 @@ import { CompanyProfile, UsefulLink } from '../../core/models';
           }
         </div>
 
-        <div class="card" style="margin-top:1rem">
+          </div>
+          </div>
+        </mat-tab>
+        <mat-tab label="Styles globaux">
+          <div class="tabpad">
+          <div class="card">
           <h3>Styles globaux de l'entreprise</h3>
           <p class="muted" style="margin:0 0 .4rem">Charte typographique appliquée par défaut à tous les documents. Les projets et les modèles peuvent en hériter ou la surcharger.</p>
           <app-style-editor [styles]="companyStyles(m)" />
-        </div>
-      </div>
+          </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
     }
   `,
+  styles: [`.detail-tabs{margin-top:1rem}.tabpad{padding-top:1.2rem}`],
 })
 export class CompanySettings {
   private service = inject(CompanyService);
