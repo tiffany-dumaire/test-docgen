@@ -5,8 +5,13 @@ export interface UsefulLink {
   order?: number;
 }
 
+export interface CompanyStyles {
+  global?: StyleMap;
+  types?: { [docType: string]: StyleMap };
+}
+
 export interface CompanyProfile {
-  styles?: StyleMap;
+  styles?: CompanyStyles | StyleMap;
   id?: number;
   name: string;
   logo?: string | null;
@@ -51,21 +56,40 @@ export interface Client {
 
 export interface TeamMember {
   id?: number;
-  team?: number;
   first_name: string;
   last_name: string;
   full_name?: string;
+  initials?: string;
   role?: string;
   email?: string;
   phone?: string;
+  team_ids?: number[];
+  team_names?: string[];
+}
+
+export interface TeamProjectRef {
+  id: number;
+  name: string;
+  status: string;
+  client_name: string;
 }
 
 export interface Team {
   id?: number;
   name: string;
   description?: string;
-  members: TeamMember[];
+  color?: string;
+  parent?: number | null;
+  parent_name?: string | null;
+  subteam_ids?: number[];
+  related_teams?: number[];
+  related_team_ids?: number[];
+  members?: TeamMember[];
+  member_ids?: number[];
+  projects_detail?: TeamProjectRef[];
+  project_ids?: number[];
   member_count?: number;
+  project_count?: number;
   created_at?: string;
 }
 
@@ -439,6 +463,7 @@ export interface OnlineForm {
   title: string;
   description: string;
   project?: number | null;
+  project_name?: string | null;
   template?: number | null;
   template_name?: string | null;
   schema: FormField[];

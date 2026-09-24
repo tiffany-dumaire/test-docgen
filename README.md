@@ -340,6 +340,39 @@ docugen/
 
 ---
 
+## Thème hivernal · Organisation (entreprise, équipes, collaborateurs) · Suivi général
+
+**Thème hivernal.** L'interface adopte une charte « hiver » colorée et originale :
+dégradés aurore (turquoise → bleu → violet → rose), fonds givrés, navigation
+minuit et accents glacier. Le mode sombre et la couleur d'entreprise restent
+personnalisables.
+
+**Styles par défaut, par type de modèle.** Dans *Mon entreprise → Styles par type*,
+chaque type de document (Word, PDF, Excel, Template A3, Markdown, PowerPoint)
+possède ses propres styles par défaut, en plus d'une « base commune ». L'héritage
+devient : **Base commune → Type → Projet → Modèle**.
+
+**Mon entreprise réorganisée en onglets :**
+- *Informations* : description de l'entreprise **+ organigramme** reconstruit
+  automatiquement à partir des équipes et de leurs liens hiérarchiques.
+- *Collaborateurs* : l'ensemble des collaborateurs de l'entreprise.
+- *Équipes* : créez autant d'équipes que voulu, avec couleur et **équipe parente**
+  (sous-équipes). La page « Équipes » est désormais un onglet de *Mon entreprise*.
+
+**Collaborateurs ↔ équipes (plusieurs équipes).** Un collaborateur appartient à
+l'entreprise et peut être associé à **une ou plusieurs équipes**. La sélection se
+fait depuis le détail d'une équipe (*Mon entreprise → Équipes → Gérer*).
+
+**Détail d'une équipe** (`/teams/:id`) : onglets *Vue d'ensemble*, *Collaborateurs*,
+**Projets** (projets gérés par l'équipe) et *Hiérarchie & liens* (sous-équipes et
+liens transverses entre équipes).
+
+**Suivi général** (`/suivi`) : tous les documents générés et formulaires de
+**l'ensemble des projets** regroupés dans un même écran (deux onglets), avec
+recherche et colonnes projet — pour un suivi transversal.
+
+---
+
 ## Configuration des modèles par type · Modèles de formulaire · Diagrammes
 
 **Configuration séparée par onglet selon le type.** La page *Modèles* regroupe désormais

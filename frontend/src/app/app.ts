@@ -90,22 +90,25 @@ interface NavItem { path: string; icon: string; label: string; }
   styles: [`
     .shell { height: 100vh; background: var(--mat-sys-surface-container-low, #f4f5fb); }
     .nav { width: 244px; border: none !important;
-      background: linear-gradient(185deg, #14162b, #0c0e1c) !important; color: #cdd3e6;
-      transition: width .18s ease; overflow-x: hidden; }
+      background:
+        radial-gradient(420px 220px at 20% 0%, rgba(45,212,191,.16), transparent 60%),
+        radial-gradient(420px 260px at 90% 12%, rgba(139,92,246,.20), transparent 60%),
+        linear-gradient(190deg, #0c1730, #070d1c 70%) !important;
+      color: #cfe0f5; transition: width .18s ease; overflow-x: hidden; }
     .nav.rail { width: 72px; }
     .brand { display: flex; align-items: center; gap: .6rem; padding: 1rem 1.1rem; }
     .brand.center { justify-content: center; padding: 1rem .5rem; }
     .brand .logo { font-size: 1.4rem; width: 40px; height: 40px; border-radius: 12px; flex: none;
-      display: grid; place-items: center; background: linear-gradient(135deg, var(--brand, #7c6cf0), #22d3ee);
-      box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+      display: grid; place-items: center; background: linear-gradient(135deg, #2dd4bf, var(--brand, #3b82f6) 55%, #8b5cf6);
+      box-shadow: 0 8px 20px rgba(59,130,246,.45); }
     .brand strong { color: #fff; letter-spacing: -.02em; font-size: 1.1rem; }
-    .brand .tag { color: #8b93ad; font-size: .7rem; }
-    mat-nav-list { --mat-list-list-item-label-text-color: #cdd3e6; padding: 0 .5rem; }
-    mat-nav-list a.active { background: linear-gradient(90deg, color-mix(in srgb, var(--brand,#7c6cf0) 90%, transparent), color-mix(in srgb, var(--brand,#7c6cf0) 60%, transparent));
-      color: #fff; border-radius: 12px; }
+    .brand .tag { color: #8ea6cc; font-size: .7rem; }
+    mat-nav-list { --mat-list-list-item-label-text-color: #cfe0f5; padding: 0 .5rem; }
+    mat-nav-list a.active { background: linear-gradient(100deg, color-mix(in srgb, var(--brand,#3b82f6) 92%, transparent), #8b5cf6 130%);
+      color: #fff; border-radius: 12px; box-shadow: 0 8px 20px rgba(59,130,246,.28); }
     mat-nav-list a.active mat-icon { color: #fff; }
-    mat-nav-list mat-icon { color: #9aa3bd; }
-    .sep { height: 1px; background: rgba(255,255,255,.08); margin: .5rem .8rem; }
+    mat-nav-list mat-icon { color: #93b0d6; }
+    .sep { height: 1px; background: rgba(255,255,255,.10); margin: .5rem .8rem; }
     .main { background: var(--mat-sys-surface-container-low, #f4f5fb); }
     .topbar { position: sticky; top: 0; z-index: 5;
       background: color-mix(in srgb, var(--mat-sys-surface) 88%, transparent);
@@ -114,7 +117,7 @@ interface NavItem { path: string; icon: string; label: string; }
     .userbtn { display: inline-flex; align-items: center; gap: .5rem; }
     .avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center;
       color: #fff; font-weight: 700; font-size: .75rem; text-transform: uppercase;
-      background: linear-gradient(135deg, var(--brand,#7c6cf0), #22d3ee); }
+      background: linear-gradient(135deg, var(--brand,#3b82f6), #22d3ee); }
     .uname { font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     @media (max-width: 640px) { .uname { display: none; } }
     .menuhead { padding: .6rem 1rem; border-bottom: 1px solid var(--mat-sys-outline-variant); }
@@ -135,13 +138,11 @@ export class App {
   nav: NavItem[] = [
     { path: '/dashboard', icon: 'dashboard', label: 'Tableau de bord' },
     { path: '/projects', icon: 'folder', label: 'Projets' },
-    { path: '/documents', icon: 'description', label: 'Documents' },
+    { path: '/suivi', icon: 'fact_check', label: 'Suivi général' },
     { path: '/templates', icon: 'grid_view', label: 'Modèles' },
-    { path: '/forms', icon: 'assignment', label: 'Formulaires' },
   ];
   navBottom: NavItem[] = [
     { path: '/clients', icon: 'handshake', label: 'Clients' },
-    { path: '/teams', icon: 'groups', label: 'Équipes' },
     { path: '/company', icon: 'business', label: 'Mon entreprise' },
   ];
 

@@ -45,17 +45,20 @@ class OnlineFormSerializer(serializers.ModelSerializer):
 
     template_name = serializers.CharField(source="template.name",
                                            read_only=True, default=None)
+    project_name = serializers.CharField(source="project.name",
+                                         read_only=True, default=None)
 
     class Meta:
         model = OnlineForm
         fields = [
-            "id", "title", "description", "project", "template", "template_name",
+            "id", "title", "description", "project", "project_name",
+            "template", "template_name",
             "schema", "diagrams",
             "confidentiality", "confidentiality_display", "is_open",
             "success_message", "deadline", "short_link", "short_url", "submission_count",
             "created_at", "updated_at",
         ]
-        read_only_fields = ["id", "short_link", "template_name",
+        read_only_fields = ["id", "short_link", "template_name", "project_name",
                             "created_at", "updated_at"]
 
     def get_short_url(self, obj):

@@ -41,12 +41,31 @@ def _merge(base, override):
     return out
 
 
+def _company_layers(raw, doc_type):
+    """
+    Sépare les styles entreprise en (base commune, base propre au type).
+
+    Nouveau format :
+        {"global": {<StyleMap>}, "types": {"docx": {...}, "pdf": {...}, ...}}
+    Ancien format (rétro-compatible) : un StyleMap plat = base commune.
+    """
+    raw = raw or {}
+    if "types" in raw or "global" in raw:
+        base = raw.get("global") or {}
+        by_type = (raw.get("types") or {}).get(doc_type) or {}
+        return base, by_type
+    return raw, {}
+
+
 def resolve(ctx):
-    """Fusionne les styles entreprise → projet → modèle pour ce document."""
-    company = getattr(ctx.company, "styles", None) or {}
+    """Fusionne les styles entreprise (base + type) → projet → modèle."""
+    doc_type = ctx.document.template.doc_type
+    company_base, company_type = _company_layers(
+        getattr(ctx.company, "styles", None), doc_type)
     project = getattr(ctx.project, "styles", None) or {}
     template = (ctx.document.template.settings or {}).get("styles") or {}
-    resolved = _merge({}, company)
+    resolved = _merge({}, company_base)
+    resolved = _merge(resolved, company_type)
     resolved = _merge(resolved, project)
     resolved = _merge(resolved, template)
     return resolved

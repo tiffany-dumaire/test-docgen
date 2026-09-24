@@ -42,12 +42,21 @@ from .serializers import TeamSerializer, TeamMemberSerializer
 
 
 class TeamViewSet(viewsets.ModelViewSet):
-    queryset = Team.objects.prefetch_related("members").all()
+    queryset = Team.objects.prefetch_related(
+        "members", "projects", "subteams", "related_teams").all()
     serializer_class = TeamSerializer
     search_fields = ["name"]
 
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
-    queryset = TeamMember.objects.select_related("team").all()
+    """Collaborateurs de l'entreprise."""
+    queryset = TeamMember.objects.prefetch_related("teams").all()
     serializer_class = TeamMemberSerializer
-    filterset_fields = ["team"]
+    search_fields = ["first_name", "last_name", "role", "email"]
+
+    def get_queryset(self):
+        qs = TeamMember.objects.prefetch_related("teams").all()
+        team = self.request.query_params.get("team")
+        if team:
+            qs = qs.filter(teams__id=team)
+        return qs.distinct()

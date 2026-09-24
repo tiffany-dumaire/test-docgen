@@ -30,12 +30,16 @@ class ClientSerializer(serializers.ModelSerializer):
 class ProjectAssignmentSerializer(serializers.ModelSerializer):
     member_name = serializers.CharField(source="member.full_name", read_only=True)
     member_email = serializers.CharField(source="member.email", read_only=True)
-    team_name = serializers.CharField(source="member.team.name", read_only=True)
+    team_name = serializers.SerializerMethodField()
 
     class Meta:
         model = ProjectAssignment
         fields = ["id", "member", "member_name", "member_email", "team_name", "role"]
         read_only_fields = ["id", "member_name", "member_email", "team_name"]
+
+    def get_team_name(self, obj):
+        # Un collaborateur peut appartenir à plusieurs équipes.
+        return ", ".join(t.name for t in obj.member.teams.all())
 
 
 class MeetingSerializer(serializers.ModelSerializer):

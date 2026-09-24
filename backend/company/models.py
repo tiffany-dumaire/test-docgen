@@ -72,30 +72,16 @@ class UsefulLink(models.Model):
 # (styles ajoutés à CompanyProfile ci-dessus)
 
 
-class Team(models.Model):
-    """Équipe interne de l'entreprise (ex. Développement, Design, Commerce)."""
+class TeamMember(models.Model):
+    """
+    Collaborateur de l'entreprise. Rattaché à l'entreprise (et non plus à une
+    seule équipe) : un collaborateur peut appartenir à zéro, une ou plusieurs
+    équipes (relation many-to-many `Team.members`).
+    """
 
     company = models.ForeignKey(
-        CompanyProfile, related_name="teams", on_delete=models.CASCADE
-    )
-    name = models.CharField("Nom de l'équipe", max_length=150)
-    description = models.TextField("Description", blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = "Équipe"
-        verbose_name_plural = "Équipes"
-
-    def __str__(self):
-        return self.name
-
-
-class TeamMember(models.Model):
-    """Membre d'une équipe de l'entreprise."""
-
-    team = models.ForeignKey(
-        Team, related_name="members", on_delete=models.CASCADE
+        CompanyProfile, related_name="collaborators", on_delete=models.CASCADE,
+        null=True, blank=True,
     )
     first_name = models.CharField("Prénom", max_length=100)
     last_name = models.CharField("Nom", max_length=100)
@@ -106,8 +92,8 @@ class TeamMember(models.Model):
 
     class Meta:
         ordering = ["last_name", "first_name"]
-        verbose_name = "Membre d'équipe"
-        verbose_name_plural = "Membres d'équipe"
+        verbose_name = "Collaborateur"
+        verbose_name_plural = "Collaborateurs"
 
     def __str__(self):
         return self.full_name
@@ -115,3 +101,54 @@ class TeamMember(models.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
+
+    @property
+    def initials(self):
+        fi = self.first_name[:1].upper() if self.first_name else ""
+        li = self.last_name[:1].upper() if self.last_name else ""
+        return f"{fi}{li}"
+
+
+class Team(models.Model):
+    """
+    Équipe interne de l'entreprise (ex. Développement, Design, Commerce).
+
+    Une équipe peut :
+      - regrouper des collaborateurs (M2M `members`) ;
+      - avoir une équipe parente (`parent`) → sous-équipes ;
+      - être liée hiérarchiquement à d'autres équipes (`related_teams`) ;
+      - gérer un ou plusieurs projets (`projects`).
+    L'organigramme est reconstruit automatiquement à partir de ces liens.
+    """
+
+    company = models.ForeignKey(
+        CompanyProfile, related_name="teams", on_delete=models.CASCADE
+    )
+    name = models.CharField("Nom de l'équipe", max_length=150)
+    description = models.TextField("Description", blank=True)
+    color = models.CharField("Couleur", max_length=20, default="#38BDF8")
+    parent = models.ForeignKey(
+        "self", related_name="subteams", null=True, blank=True,
+        on_delete=models.SET_NULL, verbose_name="Équipe parente",
+    )
+    related_teams = models.ManyToManyField(
+        "self", symmetrical=False, related_name="related_from", blank=True,
+        verbose_name="Équipes liées",
+    )
+    members = models.ManyToManyField(
+        TeamMember, related_name="teams", blank=True,
+        verbose_name="Collaborateurs",
+    )
+    projects = models.ManyToManyField(
+        "projects.Project", related_name="teams", blank=True,
+        verbose_name="Projets gérés",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Équipe"
+        verbose_name_plural = "Équipes"
+
+    def __str__(self):
+        return self.name

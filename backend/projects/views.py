@@ -14,7 +14,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     queryset = (Project.objects
                 .select_related("client")
                 .prefetch_related("contacts", "documents",
-                                  "assignments__member__team").all())
+                                  "assignments__member__teams").all())
     serializer_class = ProjectSerializer
     parser_classes = [JSONParser, MultiPartParser, FormParser]
     filterset_fields = ["status", "client_name", "client"]
@@ -51,7 +51,7 @@ class ClientViewSet(viewsets.ModelViewSet):
         projects = (Project.objects
                     .filter(Q(client=client) | Q(clients=client))
                     .distinct()
-                    .prefetch_related("contacts", "assignments__member__team",
+                    .prefetch_related("contacts", "assignments__member__teams",
                                       "meetings"))
         pids = list(projects.values_list("id", flat=True))
         contacts = Contact.objects.filter(project_id__in=pids)

@@ -258,23 +258,45 @@ class Command(BaseCommand):
             defaults={"contact_name": "Jean Bono",
                       "email": "dsi@nice.example"})
 
-        team, _ = Team.objects.get_or_create(
-            company=company, name="Équipe Développement",
-            defaults={"description": "Ingénierie logicielle."})
+        # --- Collaborateurs (niveau entreprise) ---
         dev1, _ = TeamMember.objects.get_or_create(
-            team=team, first_name="Paul", last_name="Martin",
+            company=company, first_name="Paul", last_name="Martin",
             defaults={"role": "Lead développeur",
                       "email": "paul.martin@acme.example"})
         dev2, _ = TeamMember.objects.get_or_create(
-            team=team, first_name="Sofia", last_name="Ndiaye",
+            company=company, first_name="Sofia", last_name="Ndiaye",
             defaults={"role": "Développeuse full-stack",
                       "email": "sofia.ndiaye@acme.example"})
+        designer, _ = TeamMember.objects.get_or_create(
+            company=company, first_name="Léa", last_name="Fabre",
+            defaults={"role": "Designer UI", "email": "lea.fabre@acme.example"})
+        lead, _ = TeamMember.objects.get_or_create(
+            company=company, first_name="Karim", last_name="Benali",
+            defaults={"role": "Directeur technique",
+                      "email": "karim.benali@acme.example"})
+
+        # --- Équipes (avec hiérarchie et collaborateurs) ---
+        direction, _ = Team.objects.get_or_create(
+            company=company, name="Direction technique",
+            defaults={"description": "Pilotage technique global.",
+                      "color": "#6366F1"})
+        direction.members.add(lead)
+        team, _ = Team.objects.get_or_create(
+            company=company, name="Équipe Développement",
+            defaults={"description": "Ingénierie logicielle.",
+                      "color": "#38BDF8"})
+        team.members.add(dev1, dev2)
+        if team.parent_id is None:
+            team.parent = direction; team.save(update_fields=["parent"])
         design_team, _ = Team.objects.get_or_create(
             company=company, name="Équipe Design",
-            defaults={"description": "UX / UI."})
-        TeamMember.objects.get_or_create(
-            team=design_team, first_name="Léa", last_name="Fabre",
-            defaults={"role": "Designer UI", "email": "lea.fabre@acme.example"})
+            defaults={"description": "UX / UI.", "color": "#A855F7"})
+        design_team.members.add(designer)
+        if design_team.parent_id is None:
+            design_team.parent = direction
+            design_team.save(update_fields=["parent"])
+        # Un collaborateur peut appartenir à plusieurs équipes
+        team.members.add(designer)
 
         # --- Projet de démonstration (rattaché au client + équipe) ---
         project, _ = Project.objects.get_or_create(
@@ -292,6 +314,27 @@ class Command(BaseCommand):
             project=project, member=dev1, defaults={"role": "Chef de projet"})
         ProjectAssignment.objects.get_or_create(
             project=project, member=dev2, defaults={"role": "Développement"})
+        # L'équipe Développement gère ce projet
+        team.projects.add(project)
+        design_team.projects.add(project)
+
+        # --- Styles globaux par défaut, par type de modèle ---
+        if not company.styles:
+            company.styles = {
+                "global": {
+                    "title": {"font": "Montserrat", "size": 26, "bold": True,
+                              "color": "#1E3A8A"},
+                    "paragraph": {"font": "Roboto", "size": 11},
+                },
+                "types": {
+                    "docx": {"h1": {"color": "#1D4ED8", "bold": True}},
+                    "pdf": {"h1": {"color": "#0E7490", "bold": True}},
+                    "pptx": {"title": {"color": "#7C3AED", "size": 32,
+                                       "bold": True}},
+                    "md": {}, "xlsx": {}, "a3": {},
+                },
+            }
+            company.save(update_fields=["styles"])
         Contact.objects.get_or_create(
             project=project, kind=Contact.CLIENT, first_name="Marie",
             last_name="Durand", defaults={"role": "Directrice marketing",

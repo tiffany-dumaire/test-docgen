@@ -216,12 +216,10 @@ export class ProjectForm {
   constructor() {
     this.clientService.list().subscribe((r) => this.clients.set(r.results));
     this.service.list().subscribe((r) => this.allProjects.set(r.results));
-    this.teamService.teams().subscribe((r) => {
-      const flat: (TeamMember & { teamName?: string })[] = [];
-      for (const t of r.results) {
-        for (const mem of t.members) flat.push({ ...mem, teamName: t.name });
-      }
-      this.allMembers.set(flat);
+    this.teamService.members().subscribe((r) => {
+      this.allMembers.set(r.results.map((mem) => ({
+        ...mem, teamName: (mem.team_names || []).join(', '),
+      })));
     });
     setTimeout(() => {
       if (this.id) {
