@@ -82,6 +82,40 @@ def _table_data(block, ctx):
 # ===========================================================================
 # WORD  (base = Modele.docx)
 # ===========================================================================
+def _render_free_page_docx(ctx, layout) -> bytes:
+    """Document Word « page libre » : une seule page (A3/A4) à positionnement
+    libre, rendue comme image plein cadre, sans marge ni en-tête."""
+    from docx import Document as Docx
+    from docx.shared import Pt, Emu
+    from docx.enum.section import WD_ORIENT
+    from . import layout_render as LR
+
+    pw_pt, ph_pt = LR.page_dims(layout)
+    png, wpx, hpx = LR.render_png(layout, ctx)
+
+    doc = Docx()
+    sec = doc.sections[0]
+    sec.page_width = Pt(pw_pt)
+    sec.page_height = Pt(ph_pt)
+    sec.orientation = WD_ORIENT.LANDSCAPE if pw_pt > ph_pt else WD_ORIENT.PORTRAIT
+    for m in ("left_margin", "right_margin", "top_margin", "bottom_margin",
+              "header_distance", "footer_distance", "gutter"):
+        setattr(sec, m, Pt(0))
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(0)
+    if png:
+        run = p.add_run()
+        try:
+            run.add_picture(io.BytesIO(png), width=Pt(pw_pt), height=Pt(ph_pt))
+        except Exception:
+            pass
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    return buffer.getvalue()
+
+
+# ===========================================================================
 def render_docx(ctx: GenerationContext) -> bytes:
     from docx import Document as Docx
     from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -95,6 +129,11 @@ def render_docx(ctx: GenerationContext) -> bytes:
 
     from . import styles as STYLES
     _resolved_styles = STYLES.resolve(ctx)
+
+    # Document « page libre » (A3/A4, positionnement libre) : rendu autonome.
+    from . import layout_render as _LR
+    if _LR.has_layout(ctx, "page"):
+        return _render_free_page_docx(ctx, _LR.get_layout(ctx, "page"))
 
     def shade_cell(cell, fill_hex, white=True):
         tcPr = cell._tc.get_or_add_tcPr()
@@ -518,6 +557,21 @@ def render_pdf(ctx: GenerationContext) -> bytes:
                                     TableStyle)
     from reportlab.platypus.tableofcontents import TableOfContents
     from reportlab.lib.utils import ImageReader
+
+    from . import layout_render as _LR
+    if _LR.has_layout(ctx, "page"):
+        # Page libre (A3/A4) : une page image plein cadre.
+        import io as _io
+        from reportlab.pdfgen import canvas as _pdfcanvas
+        layout = _LR.get_layout(ctx, "page")
+        pw, ph = _LR.page_dims(layout)
+        png, _wpx, _hpx = _LR.render_png(layout, ctx)
+        buf = _io.BytesIO()
+        c = _pdfcanvas.Canvas(buf, pagesize=(pw, ph))
+        if png:
+            c.drawImage(ImageReader(_io.BytesIO(png)), 0, 0, width=pw, height=ph)
+        c.showPage(); c.save()
+        return buf.getvalue()
 
     HS.register_pdf_fonts()
     pctx = placeholder_context(ctx)

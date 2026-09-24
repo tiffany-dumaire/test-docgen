@@ -10,7 +10,7 @@ interface LEl {
   asset_url?: string; fit?: 'contain' | 'stretch';
   fill?: string; stroke?: string; stroke_width?: number; radius?: number; width?: number;
 }
-interface LLayout { background?: string; elements: LEl[]; }
+interface LLayout { background?: string; elements: LEl[]; page_size?: string; orientation?: string; }
 
 const PT_W = 595.2755;
 const PT_H = 841.8898;
@@ -24,10 +24,23 @@ const DISP_W = 460;
       <div class="tabs">
         <button class="tab" [class.active]="page() === 'cover'" (click)="setPage('cover')">📄 Page de garde</button>
         <button class="tab" [class.active]="page() === 'suivi'" (click)="setPage('suivi')">📋 Page de suivi</button>
+        <button class="tab" [class.active]="page() === 'page'" (click)="setPage('page')">🖼️ Page libre (A3/A4)</button>
         <label class="chk"><input type="checkbox" [ngModel]="enabled()" (ngModelChange)="toggle($event)" /> Activer la mise en page libre</label>
       </div>
 
       @if (enabled()) {
+        <div class="fmt">
+          <label>Format
+            <select [ngModel]="layout().page_size || 'a4'" (ngModelChange)="setSize($event)">
+              <option value="a4">A4</option><option value="a3">A3</option>
+            </select>
+          </label>
+          <label>Orientation
+            <select [ngModel]="layout().orientation || 'portrait'" (ngModelChange)="setOrient($event)">
+              <option value="portrait">Portrait</option><option value="landscape">Paysage</option>
+            </select>
+          </label>
+        </div>
         <div class="work">
           <!-- Palette + canvas -->
           <div>
@@ -132,6 +145,9 @@ const DISP_W = 460;
     </div>
   `,
   styles: [`
+    .fmt { display:flex; gap:1rem; margin:.2rem 0 .6rem; }
+    .fmt label { display:flex; align-items:center; gap:.4rem; font-size:.82rem; font-weight:600; }
+    .fmt select { width:auto; padding:.25rem .4rem; }
     .tabs { display:flex; gap:.4rem; align-items:center; margin-bottom:.6rem; flex-wrap:wrap; }
     .tab { border:1px solid var(--border); background:#fff; border-radius:8px; padding:.4rem .7rem; cursor:pointer; font-weight:600; font-size:.85rem; }
     .tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
@@ -169,11 +185,14 @@ const DISP_W = 460;
 export class LayoutEditor {
   @Input({ required: true }) settings!: TemplateSettings;
 
-  page = signal<'cover' | 'suivi'>('cover');
+  page = signal<'cover' | 'suivi' | 'page'>('cover');
+  rev = signal(0);
   selected = signal<string | null>(null);
-  scale = DISP_W / PT_W;
-  dispW = DISP_W;
-  dispH = Math.round(DISP_W * PT_H / PT_W);
+  private A = { a4: [595.2755, 841.8898], a3: [841.8898, 1190.5512] } as Record<string, number[]>;
+  pageWpt() { const l = this.layout(); let [w, h] = this.A[l.page_size || 'a4']; if (l.orientation === 'landscape') [w, h] = [h, w]; return { w, h }; }
+  get scale() { this.rev(); return DISP_W / this.pageWpt().w; }
+  get dispW() { this.rev(); return DISP_W; }
+  get dispH() { this.rev(); const { w, h } = this.pageWpt(); return Math.round(DISP_W * h / w); }
   variables = ['document_title', 'client_name', 'project_name', 'project_reference',
     'company_name', 'today', 'doc_date', 'version'];
 
@@ -198,7 +217,9 @@ export class LayoutEditor {
     return this.layout().elements.find((e) => e.id === id) ?? null;
   });
 
-  setPage(p: 'cover' | 'suivi') { this.page.set(p); this.selected.set(null); }
+  setPage(p: 'cover' | 'suivi' | 'page') { this.page.set(p); this.selected.set(null); this.rev.update((v) => v + 1); }
+  setSize(sz: string) { this.layout().page_size = sz; this.rev.update((v) => v + 1); }
+  setOrient(o: string) { this.layout().orientation = o; this.rev.update((v) => v + 1); }
   toggle(on: boolean) {
     const store = this.ensure();
     if (on) { if (!store[this.page()]) store[this.page()] = { background: '#ffffff', elements: [] }; }

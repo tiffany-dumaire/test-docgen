@@ -68,6 +68,12 @@ projets et de variables paramétrables.
   - **Mises en forme conditionnelles** : coloration selon la valeur
     (condition, échelle de couleurs, barres de données).
   - **Validations** : listes déroulantes et plages (entier / décimal / date).
+- **Modèles « page libre » A3 / A4** : un modèle peut être une page entière à
+  **positionnement libre** (textes, images, logo, formes, filets) au format
+  **A3 ou A4**, portrait ou paysage — idéal pour affiches et synthèses. Rendu
+  identique en Word et PDF.
+- **Rendu des mises en page portable** : cartes de garde/suivi, page libre et
+  diagrammes sont dessinés en interne (Pillow), sans dépendance système.
 - **PowerPoint fidèle au thème** : le rendu suit le **thème et les dispositions**
   (Titre / Contenu) d'un modèle PowerPoint de référence ; la personnalisation se
   limite au **logo** de la page de titre et à la **couleur principale**.

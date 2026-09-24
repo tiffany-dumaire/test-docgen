@@ -30,6 +30,16 @@ from . import housestyle as HS
 from .base import GenerationContext, interpolate, placeholder_context
 
 A4_W, A4_H = 595.2755905511812, 841.8897637795277  # points
+A3_W, A3_H = 841.8897637795277, 1190.551181102362   # points
+
+
+def page_dims(layout):
+    """Dimensions (points) selon page_size (a4/a3) et orientation de la mise en page."""
+    size = (layout or {}).get("page_size", "a4")
+    w, h = (A3_W, A3_H) if size == "a3" else (A4_W, A4_H)
+    if (layout or {}).get("orientation") == "landscape":
+        w, h = h, w
+    return w, h
 
 FONT_MAP = {
     "title": "Montserrat-SemiBold",
@@ -185,33 +195,137 @@ def render_pdf_page_bytes(layout, ctx, page_w=A4_W, page_h=A4_H) -> bytes:
     return buffer.getvalue()
 
 
-def render_png(layout, ctx, dpi=170):
-    """Rastérise la mise en page en PNG (via pdftoppm). Renvoie (bytes, w_px, h_px)."""
-    pdf_bytes = render_pdf_page_bytes(layout, ctx)
-    with tempfile.TemporaryDirectory() as tmp:
-        pdf_path = os.path.join(tmp, "page.pdf")
-        with open(pdf_path, "wb") as f:
-            f.write(pdf_bytes)
-        out_prefix = os.path.join(tmp, "page")
-        try:
-            subprocess.run(
-                ["pdftoppm", "-png", "-r", str(dpi), "-singlefile",
-                 pdf_path, out_prefix],
-                check=True, capture_output=True)
-            png_path = out_prefix + ".png"
-            with open(png_path, "rb") as f:
-                data = f.read()
-        except Exception:
-            return None, 0, 0
-    # dimensions
-    w_px = h_px = 0
+def _lay_font(key, bold=False, size=20):
+    from PIL import ImageFont
+    fmap = {"title": "Montserrat-SemiBold.ttf", "subtitle": "Montserrat-Regular.ttf",
+            "heading": "Montserrat-SemiBold.ttf", "body": "Roboto-Regular.ttf",
+            "light": "Montserrat-Light.ttf"}
+    fname = fmap.get(key, "Roboto-Regular.ttf")
+    if bold and key == "body":
+        fname = "Roboto-Bold.ttf"
     try:
-        from PIL import Image
-        with Image.open(io.BytesIO(data)) as im:
-            w_px, h_px = im.size
+        return ImageFont.truetype(os.path.join(HS.FONTS_DIR, fname), size)
     except Exception:
-        pass
-    return data, w_px, h_px
+        try:
+            return ImageFont.truetype(os.path.join(HS.FONTS_DIR, "Roboto-Regular.ttf"), size)
+        except Exception:
+            return ImageFont.load_default()
+
+
+def _rgb_pil(color, default=(0, 0, 0)):
+    try:
+        h = str(color or "").lstrip("#")
+        if len(h) == 3:
+            h = "".join(c * 2 for c in h)
+        return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+    except Exception:
+        return default
+
+
+def render_png(layout, ctx, dpi=150):
+    """Rastérise la mise en page en PNG avec Pillow (portable, sans poppler).
+
+    Renvoie (bytes, w_px, h_px). Coordonnées de la spec en points (A4/A3).
+    """
+    from PIL import Image, ImageDraw
+
+    pctx = placeholder_context(ctx)
+    pw_pt, ph_pt = page_dims(layout)
+    scale = dpi / 72.0
+    W, H = int(round(pw_pt * scale)), int(round(ph_pt * scale))
+
+    bg = layout.get("background") or "#FFFFFF"
+    img = Image.new("RGB", (W, H), _rgb_pil(bg, (255, 255, 255)))
+    d = ImageDraw.Draw(img)
+
+    def sx(v):
+        return int(round(float(v) * scale))
+
+    for el in layout.get("elements", []):
+        etype = el.get("type", "text")
+        x, y = sx(el.get("x", 0)), sx(el.get("y", 0))
+        w, h = sx(el.get("w", 100)), sx(el.get("h", 20))
+
+        if etype in ("image", "logo"):
+            src = None
+            if etype == "logo":
+                p = _logo_path(ctx)
+                if p:
+                    src = p
+            else:
+                url = el.get("asset_url") or ""
+                if url.startswith("data:"):
+                    try:
+                        import base64
+                        src = io.BytesIO(base64.b64decode(url.split(",", 1)[1]))
+                    except Exception:
+                        src = None
+                else:
+                    src = _resolve_asset(url)
+            if src is None:
+                continue
+            try:
+                im = Image.open(src).convert("RGBA")
+                if el.get("fit", "contain") == "stretch":
+                    im = im.resize((max(1, w), max(1, h)))
+                else:
+                    im.thumbnail((max(1, w), max(1, h)))
+                ox = x + (w - im.width) // 2
+                oy = y + (h - im.height) // 2
+                img.paste(im, (ox, oy), im)
+            except Exception:
+                pass
+
+        elif etype == "rect":
+            fill = _rgb_pil(el["fill"]) if el.get("fill") else None
+            outline = _rgb_pil(el["stroke"]) if el.get("stroke") else None
+            sw = sx(el.get("stroke_width", 0)) or (2 if outline else 0)
+            radius = sx(el.get("radius", 0))
+            box = [x, y, x + w, y + h]
+            if radius:
+                d.rounded_rectangle(box, radius=radius, fill=fill, outline=outline, width=sw or 1)
+            else:
+                d.rectangle(box, fill=fill, outline=outline, width=sw or 1)
+
+        elif etype == "line":
+            d.line([(x, y), (x + w, y)], fill=_rgb_pil(el.get("color", "#000000")),
+                   width=sx(el.get("width", 1)) or 1)
+
+        else:  # text
+            text = interpolate(el.get("text", ""), pctx)
+            size = sx(el.get("size", 14))
+            font = _lay_font(el.get("font", "body"), el.get("bold"), max(6, size))
+            fill = _rgb_pil(el.get("color", "#000000"))
+            align = el.get("align", "left")
+            # retour à la ligne + gestion des \n
+            lines = []
+            for raw in text.split("\n"):
+                words = raw.split()
+                cur = ""
+                for word in words:
+                    trial = (cur + " " + word).strip()
+                    if d.textlength(trial, font=font) <= w or not cur:
+                        cur = trial
+                    else:
+                        lines.append(cur); cur = word
+                lines.append(cur)
+            asc, desc = font.getmetrics()
+            lh = (asc + desc) * 1.2
+            cy = y
+            for ln in lines:
+                tw = d.textlength(ln, font=font)
+                if align == "center":
+                    tx = x + (w - tw) / 2
+                elif align == "right":
+                    tx = x + w - tw
+                else:
+                    tx = x
+                d.text((tx, cy), ln, font=font, fill=fill)
+                cy += lh
+
+    buf = io.BytesIO()
+    img.save(buf, "PNG")
+    return buf.getvalue(), img.width, img.height
 
 
 def has_layout(ctx, key):
