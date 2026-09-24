@@ -69,6 +69,9 @@ def to_pdf_for_preview(content: bytes, ext: str):
     """Convertit un document en PDF pour l'aperçu navigateur. (content_pdf | None)."""
     if ext == ".pdf":
         return content
+    if ext == ".md":
+        # Aperçu Markdown : HTML autonome rendu dans le navigateur (pas un PDF).
+        return None
     from .generators import pdf_convert
     if ext == ".docx" and pdf_convert.available():
         try:
@@ -153,3 +156,87 @@ def generate_version(document: Document, *, author_initials, author_name="",
     document.save(update_fields=["current_version", "data", "confidentiality",
                                  "updated_at"])
     return version
+
+
+def markdown_to_html_page(md_text: str) -> bytes:
+    """Convertit du Markdown en page HTML autonome et stylée (pour l'aperçu)."""
+    try:
+        import markdown as _md
+        body = _md.markdown(md_text, extensions=["tables", "fenced_code", "sane_lists"])
+    except Exception:
+        body = _basic_md_to_html(md_text)
+    html = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{font-family:-apple-system,'Segoe UI',Inter,sans-serif;max-width:820px;margin:0 auto;padding:2.5rem 1.5rem;color:#1e293b;line-height:1.65}
+  h1{font-size:2rem;border-bottom:2px solid #e2e8f0;padding-bottom:.3rem}
+  h2{font-size:1.5rem;margin-top:2rem} h3{font-size:1.2rem}
+  code{background:#f1f5f9;padding:.1rem .35rem;border-radius:4px;font-size:.9em}
+  pre{background:#0f172a;color:#e2e8f0;padding:1rem;border-radius:8px;overflow:auto}
+  pre code{background:transparent;color:inherit}
+  table{border-collapse:collapse;width:100%;margin:1rem 0}
+  th,td{border:1px solid #e2e8f0;padding:.5rem .75rem;text-align:left}
+  th{background:#f8fafc}
+  a{color:#4f46e5} blockquote{border-left:3px solid #cbd5e1;margin:0;padding-left:1rem;color:#64748b}
+  @media(prefers-color-scheme:dark){body{background:#0b1120;color:#e2e8f0}th{background:#1e293b}th,td{border-color:#334155}code{background:#1e293b}}
+</style></head><body>__BODY__</body></html>""".replace("__BODY__", body)
+    return html.encode("utf-8")
+
+
+def _basic_md_to_html(md):
+    import html as _h
+    import re
+    lines = md.split("\n")
+    out = []
+    in_code = False
+    in_table = False
+    in_list = None
+    def close_list():
+        nonlocal in_list
+        if in_list:
+            out.append(f"</{in_list}>"); in_list = None
+    def inline(t):
+        t = _h.escape(t)
+        t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+        t = re.sub(r"\*(.+?)\*", r"<em>\1</em>", t)
+        t = re.sub(r"`(.+?)`", r"<code>\1</code>", t)
+        t = re.sub(r"\[(.+?)\]\((.+?)\)", r'<a href="\2">\1</a>', t)
+        return t
+    i = 0
+    while i < len(lines):
+        ln = lines[i]
+        if ln.strip().startswith("```"):
+            if in_code:
+                out.append("</code></pre>"); in_code = False
+            else:
+                close_list(); out.append("<pre><code>"); in_code = True
+            i += 1; continue
+        if in_code:
+            out.append(_h.escape(ln)); i += 1; continue
+        if ln.strip().startswith("|") and i + 1 < len(lines) and set(lines[i+1].replace("|", "").strip()) <= {"-", " ", ":"}:
+            close_list()
+            headers = [c.strip() for c in ln.strip().strip("|").split("|")]
+            out.append("<table><thead><tr>" + "".join(f"<th>{inline(h)}</th>" for h in headers) + "</tr></thead><tbody>")
+            i += 2
+            while i < len(lines) and lines[i].strip().startswith("|"):
+                cells = [c.strip() for c in lines[i].strip().strip("|").split("|")]
+                out.append("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in cells) + "</tr>")
+                i += 1
+            out.append("</tbody></table>"); continue
+        m = re.match(r"^(#{1,6})\s+(.*)$", ln)
+        if m:
+            close_list(); lvl = len(m.group(1)); out.append(f"<h{lvl}>{inline(m.group(2))}</h{lvl}>"); i += 1; continue
+        if re.match(r"^\s*[-*]\s+", ln):
+            if in_list != "ul": close_list(); out.append("<ul>"); in_list = "ul"
+            item = re.sub(r"^\s*[-*]\s+", "", ln)
+            out.append("<li>" + inline(item) + "</li>"); i += 1; continue
+        if re.match(r"^\s*\d+\.\s+", ln):
+            if in_list != "ol": close_list(); out.append("<ol>"); in_list = "ol"
+            item = re.sub(r"^\s*\d+\.\s+", "", ln)
+            out.append("<li>" + inline(item) + "</li>"); i += 1; continue
+        if ln.strip() == "":
+            close_list(); i += 1; continue
+        close_list(); out.append(f"<p>{inline(ln)}</p>"); i += 1
+    if in_list: out.append(f"</{in_list}>")
+    if in_code: out.append("</code></pre>")
+    return "\n".join(out)

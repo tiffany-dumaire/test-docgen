@@ -56,11 +56,15 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
             confidentiality=ConfidentialityLevel.INTERNAL, data={})
         try:
             content, ext, _mime = preview_document(tmp)
-            pdf = to_pdf_for_preview(content, ext)
-            if pdf is not None:
-                content, ext, kind = pdf, ".pdf", "pdf"
+            if ext == ".md":
+                from .services import markdown_to_html_page
+                content, ext, kind = markdown_to_html_page(content.decode("utf-8")), ".html", "html"
             else:
-                kind = "native"
+                pdf = to_pdf_for_preview(content, ext)
+                if pdf is not None:
+                    content, ext, kind = pdf, ".pdf", "pdf"
+                else:
+                    kind = "native"
             name = f"previews/tpl-{template.pk}-{_uuid.uuid4().hex}{ext}"
             path = default_storage.save(name, ContentFile(content))
             return Response({"url": request.build_absolute_uri(default_storage.url(path)),
@@ -134,11 +138,15 @@ class DocumentViewSet(viewsets.ModelViewSet):
         except Exception as exc:
             return Response({"detail": f"Aperçu impossible : {exc}"},
                             status=status.HTTP_400_BAD_REQUEST)
-        pdf = to_pdf_for_preview(content, ext)
-        if pdf is not None:
-            content, ext, kind = pdf, ".pdf", "pdf"
+        if ext == ".md":
+            from .services import markdown_to_html_page
+            content, ext, kind = markdown_to_html_page(content.decode("utf-8")), ".html", "html"
         else:
-            kind = "native"
+            pdf = to_pdf_for_preview(content, ext)
+            if pdf is not None:
+                content, ext, kind = pdf, ".pdf", "pdf"
+            else:
+                kind = "native"
         name = f"previews/preview-{document.pk}-{_uuid.uuid4().hex}{ext}"
         path = default_storage.save(name, ContentFile(content))
         return Response({"url": request.build_absolute_uri(default_storage.url(path)),

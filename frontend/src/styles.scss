@@ -250,9 +250,7 @@ h1::after {
 
 /* Empty states plus doux */
 .empty { font-size: .95rem; }
-.empty::before {
-  content: "✨"; display: block; font-size: 1.8rem; margin-bottom: .4rem; opacity: .6;
-}
+
 
 /* Inputs : fond légèrement teinté au focus */
 input:focus, select:focus, textarea:focus {

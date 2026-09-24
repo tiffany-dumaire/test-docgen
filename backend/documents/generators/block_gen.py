@@ -1037,3 +1037,11 @@ def _render_pptx(ctx):
 
 
 BLOCK_RENDERERS["pptx"] = _render_pptx
+
+
+def _render_md(ctx):
+    from . import md_gen
+    return md_gen.render(ctx)
+
+
+BLOCK_RENDERERS["md"] = _render_md

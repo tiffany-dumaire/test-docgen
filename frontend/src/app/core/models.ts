@@ -106,7 +106,7 @@ export interface Project {
   updated_at?: string;
 }
 
-export type DocType = 'pdf' | 'xlsx' | 'docx';
+export type DocType = 'pdf' | 'xlsx' | 'docx' | 'pptx' | 'md';
 
 export type BlockType =
   | 'heading'

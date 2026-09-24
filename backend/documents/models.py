@@ -15,6 +15,7 @@ class DocumentType(models.TextChoices):
     XLSX = "xlsx", "Excel"
     DOCX = "docx", "Word"
     PPTX = "pptx", "PowerPoint"
+    MD = "md", "Markdown"
 
 
 class DocumentTemplate(models.Model):

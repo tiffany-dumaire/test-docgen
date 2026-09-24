@@ -13,3 +13,4 @@ pywin32>=306; sys_platform == "win32"  # requis par docx2pdf sous Windows
 PyJWT>=2.8.0
 cryptography>=42.0  # RS256 (JWKS) pour OIDC en production
 python-pptx>=0.6.23  # génération PowerPoint
+markdown>=3.5  # aperçu Markdown -> HTML

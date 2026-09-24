@@ -18,7 +18,7 @@ export interface PreviewData { url: string; kind: string; ext: string; title: st
       <button mat-icon-button (click)="ref.close()"><mat-icon>close</mat-icon></button>
     </div>
     <div class="pv-body">
-      @if (data.kind === 'pdf') {
+      @if (data.kind === 'pdf' || data.kind === 'html') {
         <iframe [src]="safe" title="Aperçu"></iframe>
       } @else {
         <div class="pv-native">

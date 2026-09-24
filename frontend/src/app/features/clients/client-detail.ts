@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MeetingCalendar } from '../../shared/meeting-calendar';
 import { ClientService } from '../../core/services/client.service';
 
 interface Bundle {
@@ -20,7 +21,7 @@ interface Bundle {
   selector: 'app-client-detail',
   imports: [
     RouterLink, FormsModule, DatePipe, MatTabsModule, MatTableModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, MatTooltipModule,
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, MatTooltipModule, MeetingCalendar,
   ],
   template: `
     @if (data(); as b) {
@@ -114,6 +115,7 @@ interface Bundle {
               <mat-form-field appearance="outline"><mat-label>Jusqu'au</mat-label><input matInput type="date" [(ngModel)]="fTo" /></mat-form-field>
               <button mat-icon-button (click)="resetFilters()" matTooltip="Réinitialiser"><mat-icon>filter_alt_off</mat-icon></button>
             </div>
+            <app-meeting-calendar [meetings]="filteredMeetings()" />
             <div class="tablecard">
               <table mat-table [dataSource]="filteredMeetings()">
                 <ng-container matColumnDef="date"><th mat-header-cell *matHeaderCellDef>Date</th>

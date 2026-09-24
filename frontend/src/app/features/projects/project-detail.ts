@@ -1,7 +1,8 @@
 import { Component, inject, signal, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SlicePipe } from '@angular/common';
+import { SlicePipe, DatePipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MeetingCalendar } from '../../shared/meeting-calendar';
 import { ProjectExtrasService } from '../../core/services/project-extras.service';
 import { Meeting, JournalEntry, ProjectLink } from '../../core/models';
 import { MembershipService, Membership } from '../../core/services/membership.service';
@@ -13,7 +14,7 @@ import { OnlineForm, Project, ProjectDocument } from '../../core/models';
 
 @Component({
   selector: 'app-project-detail',
-  imports: [RouterLink, FormsModule, SlicePipe, MatTabsModule],
+  imports: [RouterLink, FormsModule, SlicePipe, DatePipe, MatTabsModule, MeetingCalendar],
   template: `
     @if (project(); as p) {
       <div class="row between">
@@ -116,31 +117,46 @@ import { OnlineForm, Project, ProjectDocument } from '../../core/models';
           </div>
         </mat-tab>
 
-        <mat-tab label="Liens & réunions">
+        <mat-tab label="Liens utiles">
           <div class="tabpad">
-            <div class="grid-cards">
-              <div class="card"><h3>🔗 Liens utiles</h3>
-                @for (l of links(); track l.id) {
-                  <div class="row between" style="margin-bottom:.3rem">
-                    <div><span class="tag">{{ l.category || '—' }}</span> <a [href]="l.url" target="_blank">{{ l.name }}</a>
-                      @if (l.comment) { <div class="muted" style="font-size:.75rem">{{ l.comment }}</div> }</div>
-                    <button class="btn btn-sm btn-danger" (click)="delLink(l)">✕</button></div>
-                } @empty { <div class="muted">Aucun lien.</div> }
-                <div class="row" style="gap:.3rem;flex-wrap:wrap;margin-top:.4rem">
-                  <input [(ngModel)]="nlCat" placeholder="Catégorie" style="width:110px" />
-                  <input [(ngModel)]="nlName" placeholder="Nom" style="flex:1;min-width:100px" />
-                  <input [(ngModel)]="nlUrl" placeholder="https://…" style="flex:1;min-width:120px" />
-                  <button class="btn btn-ghost btn-sm" (click)="addLink(p.id!)">+ Ajouter</button></div>
+            <div class="card"><h3>🔗 Liens utiles</h3>
+              @for (l of links(); track l.id) {
+                <div class="row between" style="margin-bottom:.3rem">
+                  <div><span class="tag">{{ l.category || '—' }}</span> <a [href]="l.url" target="_blank">{{ l.name }}</a>
+                    @if (l.comment) { <div class="muted" style="font-size:.75rem">{{ l.comment }}</div> }</div>
+                  <button class="btn btn-sm btn-danger" (click)="delLink(l)">✕</button></div>
+              } @empty { <div class="muted">Aucun lien.</div> }
+              <div class="row" style="gap:.3rem;flex-wrap:wrap;margin-top:.6rem">
+                <input [(ngModel)]="nlCat" placeholder="Catégorie" style="width:130px" />
+                <input [(ngModel)]="nlName" placeholder="Nom" style="flex:1;min-width:120px" />
+                <input [(ngModel)]="nlUrl" placeholder="https://…" style="flex:1;min-width:140px" />
+                <input [(ngModel)]="nlComment" placeholder="Commentaire" style="flex:1;min-width:120px" />
+                <button class="btn btn-primary btn-sm" (click)="addLink(p.id!)">+ Ajouter</button></div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Réunions">
+          <div class="tabpad">
+            <app-meeting-calendar [meetings]="meetings()" />
+            <div class="card">
+              <h3>➕ Ajouter une réunion</h3>
+              <div class="row" style="gap:.3rem;flex-wrap:wrap;align-items:center">
+                <input [(ngModel)]="nmTitle" placeholder="Titre" style="flex:1;min-width:140px" />
+                <input type="datetime-local" [(ngModel)]="nmDate" style="width:210px" />
+                <input [(ngModel)]="nmLoc" placeholder="Lieu / lien" style="flex:1;min-width:140px" />
+                <button class="btn btn-primary btn-sm" (click)="addMeeting(p.id!)">+ Ajouter</button>
               </div>
-              <div class="card"><h3>📅 Réunions</h3>
+              <div class="listwrap">
                 @for (mtg of meetings(); track mtg.id) {
-                  <div class="row between" style="margin-bottom:.3rem"><div><b>{{ mtg.title }}</b> <span class="muted" style="font-size:.75rem">{{ mtg.location }}</span></div>
-                    <button class="btn btn-sm btn-danger" (click)="delMeeting(mtg)">✕</button></div>
-                } @empty { <div class="muted">Aucune réunion.</div> }
-                <div class="row" style="gap:.3rem;flex-wrap:wrap;margin-top:.4rem">
-                  <input [(ngModel)]="nmTitle" placeholder="Titre" style="flex:1;min-width:120px" />
-                  <input [(ngModel)]="nmLoc" placeholder="Lieu / lien" style="flex:1;min-width:120px" />
-                  <button class="btn btn-ghost btn-sm" (click)="addMeeting(p.id!)">+ Ajouter</button></div>
+                  <div class="row between mtg-line">
+                    <div><b>{{ mtg.title }}</b>
+                      <span class="muted" style="font-size:.78rem">
+                        @if (mtg.date) { · {{ mtg.date | date:'dd/MM/yyyy HH:mm' }} } @if (mtg.location) { · {{ mtg.location }} }
+                      </span></div>
+                    <button class="btn btn-sm btn-danger" (click)="delMeeting(mtg)">✕</button>
+                  </div>
+                } @empty { <div class="muted">Aucune réunion planifiée.</div> }
               </div>
             </div>
           </div>
@@ -200,8 +216,8 @@ export class ProjectDetail {
   links = signal<ProjectLink[]>([]);
   meetings = signal<Meeting[]>([]);
   journal = signal<JournalEntry[]>([]);
-  nlCat=''; nlName=''; nlUrl='';
-  nmTitle=''; nmLoc='';
+  nlCat=''; nlName=''; nlUrl=''; nlComment='';
+  nmTitle=''; nmLoc=''; nmDate='';
   njCat='note'; njConf='internal'; njBody='';
 
   constructor() {
@@ -223,14 +239,14 @@ export class ProjectDetail {
   }
   addLink(pid: number) {
     if (!this.nlName) return;
-    this.extras.addLink({ project: pid, category: this.nlCat, name: this.nlName, url: this.nlUrl }).subscribe(() => {
-      this.nlCat=''; this.nlName=''; this.nlUrl=''; this.reloadExtras(pid); });
+    this.extras.addLink({ project: pid, category: this.nlCat, name: this.nlName, url: this.nlUrl, comment: this.nlComment }).subscribe(() => {
+      this.nlCat=''; this.nlName=''; this.nlUrl=''; this.nlComment=''; this.reloadExtras(pid); });
   }
   delLink(l: ProjectLink) { if (l.id) this.extras.removeLink(l.id).subscribe(() => this.reloadExtras(+this.id)); }
   addMeeting(pid: number) {
     if (!this.nmTitle) return;
-    this.extras.addMeeting({ project: pid, title: this.nmTitle, location: this.nmLoc }).subscribe(() => {
-      this.nmTitle=''; this.nmLoc=''; this.reloadExtras(pid); });
+    this.extras.addMeeting({ project: pid, title: this.nmTitle, location: this.nmLoc, date: this.nmDate || null }).subscribe(() => {
+      this.nmTitle=''; this.nmLoc=''; this.nmDate=''; this.reloadExtras(pid); });
   }
   delMeeting(m: Meeting) { if (m.id) this.extras.removeMeeting(m.id).subscribe(() => this.reloadExtras(+this.id)); }
   addJournal(pid: number) {

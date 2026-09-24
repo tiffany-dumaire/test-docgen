@@ -71,6 +71,11 @@ projets et de variables paramétrables.
 - **Refonte Angular Material 21** : thème M3 entièrement personnalisé
   (mode sombre / clair, couleur d'entreprise appliquée au thème), menu latéral
   repliable, barre d'outils, police d'icônes auto-hébergée (hors-ligne).
+- **Modèles Markdown (.md)** : nouveau format de document, généré depuis le
+  schéma par blocs ; aperçu HTML rendu directement dans l'application.
+- **Réunions dans un calendrier** : la fiche projet (et le détail client)
+  affichent les réunions dans un **calendrier mensuel** navigable. Les sections
+  **Liens utiles** et **Réunions** sont désormais dans des onglets séparés.
 - **Détail client** (nouvelle vue en onglets) : Informations · Projets (détail
   par sous-onglet) · Contacts (tous projets) · **Réunions** (calendrier tous
   projets confondus, filtrable par projet et par plage de dates).

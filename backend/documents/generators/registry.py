@@ -15,6 +15,7 @@ FILE_META = {
              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
     "pptx": (".pptx",
              "application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+    "md": (".md", "text/markdown"),
 }
 
 # builder_key -> (module, doc_type attendu)
