@@ -6,6 +6,7 @@ import { DocumentService } from '../../core/services/document.service';
 import { ProjectService } from '../../core/services/project.service';
 import { CompanyService } from '../../core/services/company.service';
 import { ToastService } from '../../core/services/api.service';
+import { PreviewService } from '../../core/services/preview.service';
 import { DataGrid } from '../../shared/data-grid';
 import {
   Block,
@@ -286,6 +287,7 @@ export class DocumentEditor {
   private projectSvc = inject(ProjectService);
   private companySvc = inject(CompanyService);
   private toast = inject(ToastService);
+  private previewSvc = inject(PreviewService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -490,7 +492,7 @@ export class DocumentEditor {
     this.service.update(d.id, d).subscribe({
       next: () => {
         this.service.preview(d.id!).subscribe({
-          next: (r) => { this.previewing.set(false); window.open(r.url, '_blank'); },
+          next: (r) => { this.previewing.set(false); this.previewSvc.open(r, d.title || 'Aperçu'); },
           error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
         });
       },

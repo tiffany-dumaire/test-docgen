@@ -109,15 +109,35 @@ export class AuthService {
   }
 
   applyTheme(): void {
-    const accent = (this.user()?.ui_prefs?.["accent"] as string) || "";
+    const prefs = this.user()?.ui_prefs || {};
+    const accent = (prefs["accent"] as string) || "";
+    const dark = !!prefs["dark"];
     const root = document.documentElement;
-    const keys = ["--primary", "--primary-dark", "--primary-light", "--primary-050", "--ring"];
-    if (!accent) { keys.forEach((k) => root.style.removeProperty(k)); return; }
+    // Mode sombre (Material + custom)
+    root.classList.toggle("dark", dark);
+    // Couleur d'entreprise -> Material (--brand) + tokens custom
+    const keys = ["--primary", "--primary-dark", "--primary-light", "--primary-050", "--ring", "--brand"];
+    if (!accent) {
+      keys.forEach((k) => root.style.removeProperty(k));
+      root.removeAttribute("data-brand");
+      return;
+    }
+    root.setAttribute("data-brand", "");
+    root.style.setProperty("--brand", accent);
     root.style.setProperty("--primary", accent);
     root.style.setProperty("--primary-dark", this.shade(accent, -0.16));
     root.style.setProperty("--primary-light", this.mix(accent, "#ffffff", 0.82));
     root.style.setProperty("--primary-050", this.mix(accent, "#ffffff", 0.92));
     root.style.setProperty("--ring", `0 0 0 3px ${this.rgba(accent, 0.22)}`);
+  }
+
+  isDark(): boolean { return !!this.user()?.ui_prefs?.["dark"]; }
+  async toggleDark(): Promise<void> {
+    const dark = !this.isDark();
+    document.documentElement.classList.toggle("dark", dark);
+    const u = this.user();
+    if (u) { u.ui_prefs = { ...(u.ui_prefs || {}), dark }; this.user.set({ ...u }); }
+    try { await this.updatePrefs({ dark }); } catch { /* noop */ }
   }
   private hexToRgb(h: string) {
     h = h.replace("#", ""); if (h.length === 3) h = h.split("").map((c) => c + c).join("");

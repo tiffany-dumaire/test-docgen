@@ -68,6 +68,13 @@ projets et de variables paramétrables.
   - **Mises en forme conditionnelles** : coloration selon la valeur
     (condition, échelle de couleurs, barres de données).
   - **Validations** : listes déroulantes et plages (entier / décimal / date).
+- **Interface Angular Material 21** : thème **100 % personnalisé** avec **mode
+  sombre / clair**, **menu latéral repliable**, barre d'outils, et
+  **couleur d'entreprise / utilisateur** appliquée dynamiquement au thème.
+- **Vues détail en onglets** (ex. fiche projet : Vue d'ensemble, Équipe & accès,
+  Documents & formulaires, Liens & réunions, Journal).
+- **Aperçu dans le navigateur** (modèles et documents) : prévisualisation PDF
+  intégrée à l'application, sans téléchargement préalable.
 - **Modèles « page libre » A3 / A4** : un modèle peut être une page entière à
   **positionnement libre** (textes, images, logo, formes, filets) au format
   **A3 ou A4**, portrait ou paysage — idéal pour affiches et synthèses. Rendu

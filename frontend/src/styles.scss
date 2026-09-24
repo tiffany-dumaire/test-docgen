@@ -1,3 +1,31 @@
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: light;
+  @include mat.theme((
+    color: (theme-type: light, primary: mat.$violet-palette, tertiary: mat.$cyan-palette),
+    typography: (plain-family: 'Inter, system-ui, sans-serif',
+                 brand-family: 'Inter, system-ui, sans-serif'),
+    density: 0,
+  ));
+  --mat-sys-corner-medium: 14px;
+  --mat-sys-corner-large: 18px;
+}
+html.dark {
+  color-scheme: dark;
+  @include mat.theme((
+    color: (theme-type: dark, primary: mat.$violet-palette, tertiary: mat.$cyan-palette),
+  ));
+}
+/* Couleur d'entreprise / utilisateur : surcharge dynamique du primaire Material */
+html[data-brand] {
+  --mat-sys-primary: var(--brand);
+  --mat-sys-on-primary: #fff;
+  --mat-sys-primary-container: color-mix(in srgb, var(--brand) 22%, var(--mat-sys-surface));
+  --mat-sys-on-primary-container: var(--brand);
+  --mat-sys-inverse-primary: color-mix(in srgb, var(--brand) 60%, #fff);
+}
+
 :root {
   /* Palette raffinée */
   --primary: #4f46e5;         /* indigo profond */

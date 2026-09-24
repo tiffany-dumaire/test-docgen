@@ -1,4 +1,5 @@
 """Service de (re)génération de documents et de création des versions."""
+import os
 import re
 from django.core.files.base import ContentFile
 from django.db import transaction
@@ -62,6 +63,39 @@ def preview_document(document: Document):
     content = render_content(document, ctx)
     ext, mime = file_meta(document.doc_type)
     return content, ext, mime
+
+
+def to_pdf_for_preview(content: bytes, ext: str):
+    """Convertit un document en PDF pour l'aperçu navigateur. (content_pdf | None)."""
+    if ext == ".pdf":
+        return content
+    from .generators import pdf_convert
+    if ext == ".docx" and pdf_convert.available():
+        try:
+            return pdf_convert.docx_to_pdf(content)
+        except Exception:
+            return None
+    # Autres formats (pptx/xlsx) : conversion d'aperçu via LibreOffice si présent.
+    import shutil
+    import subprocess
+    import tempfile
+    soffice = shutil.which("soffice") or shutil.which("libreoffice")
+    if not soffice:
+        return None
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            src = os.path.join(tmp, "d" + ext)
+            with open(src, "wb") as f:
+                f.write(content)
+            subprocess.run([soffice, "--headless", "--convert-to", "pdf",
+                            "--outdir", tmp, src], check=True, capture_output=True, timeout=90)
+            out = os.path.join(tmp, "d.pdf")
+            if os.path.exists(out):
+                with open(out, "rb") as f:
+                    return f.read()
+    except Exception:
+        return None
+    return None
 
 
 def generate_version(document: Document, *, author_initials, author_name="",

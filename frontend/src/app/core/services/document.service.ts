@@ -41,8 +41,11 @@ export class DocumentService {
   duplicateDocument(id: number): Observable<ProjectDocument> {
     return this.http.post<ProjectDocument>(`${this.base}/${id}/duplicate/`, {});
   }
-  preview(id: number): Observable<{ url: string; ext: string }> {
-    return this.http.get<{ url: string; ext: string }>(`${this.base}/${id}/preview/`);
+  preview(id: number): Observable<{ url: string; ext: string; kind: string }> {
+    return this.http.get<{ url: string; ext: string; kind: string }>(`${this.base}/${id}/preview/`);
+  }
+  previewTemplate(id: number): Observable<{ url: string; ext: string; kind: string }> {
+    return this.http.get<{ url: string; ext: string; kind: string }>(`${this.base}/templates/${id}/preview/`);
   }
   restoreVersion(id: number, versionId: number, authorInitials: string): Observable<DocumentVersion> {
     return this.http.post<DocumentVersion>(`${this.base}/${id}/restore/`,

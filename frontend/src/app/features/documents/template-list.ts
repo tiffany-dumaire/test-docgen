@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { DocumentService } from '../../core/services/document.service';
 import { ToastService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { PreviewService } from '../../core/services/preview.service';
 import { Block, DocumentTemplate } from '../../core/models';
 
 @Component({
@@ -33,6 +34,7 @@ import { Block, DocumentTemplate } from '../../core/models';
             } @else {
               <span class="tag">modèle avancé</span>
             }
+            <button class="btn btn-sm btn-ghost" (click)="preview(t)">👁 Aperçu</button>
             <button class="btn btn-sm btn-ghost" (click)="duplicate(t)">⧉ Dupliquer</button>
             @if (!t.is_system) {
               @if (canManage()) { <button class="btn btn-sm btn-danger" (click)="remove(t)">Suppr.</button> }
@@ -49,6 +51,7 @@ export class TemplateList {
   private service = inject(DocumentService);
   private toast = inject(ToastService);
   auth = inject(AuthService);
+  private previewSvc = inject(PreviewService);
   canManage = () => this.auth.hasRole('admin') || this.auth.hasRole('manager') || !this.auth.user();
 
   templates = signal<DocumentTemplate[]>([]);
@@ -61,6 +64,13 @@ export class TemplateList {
     this.service.templates().subscribe((r) => this.templates.set(r.results));
   }
 
+  preview(t: DocumentTemplate) {
+    this.toast.success('Génération de l\'aperçu…');
+    this.service.previewTemplate(t.id!).subscribe({
+      next: (r) => this.previewSvc.open(r, t.name),
+      error: () => this.toast.error('Aperçu impossible.'),
+    });
+  }
   duplicate(t: DocumentTemplate) {
     this.service.duplicateTemplate(t.id!).subscribe({
       next: () => { this.toast.success('Modèle dupliqué.'); this.reload(); },

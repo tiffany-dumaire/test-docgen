@@ -37,6 +37,40 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST)
         return super().destroy(request, *args, **kwargs)
 
+    @action(detail=True, methods=["get", "post"])
+    def preview(self, request, pk=None):
+        """Aperçu d'un modèle : génère un exemple (PDF si possible), sans le conserver."""
+        import uuid as _uuid
+        from django.core.files.storage import default_storage
+        from django.core.files.base import ContentFile
+        from projects.models import Project
+        from .models import Document, ConfidentialityLevel
+        from .services import preview_document, to_pdf_for_preview
+        template = self.get_object()
+        project = Project.objects.first()
+        if project is None:
+            return Response({"detail": "Créez d'abord un projet pour prévisualiser."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        tmp = Document.objects.create(
+            project=project, template=template, title=f"Aperçu — {template.name}",
+            confidentiality=ConfidentialityLevel.INTERNAL, data={})
+        try:
+            content, ext, _mime = preview_document(tmp)
+            pdf = to_pdf_for_preview(content, ext)
+            if pdf is not None:
+                content, ext, kind = pdf, ".pdf", "pdf"
+            else:
+                kind = "native"
+            name = f"previews/tpl-{template.pk}-{_uuid.uuid4().hex}{ext}"
+            path = default_storage.save(name, ContentFile(content))
+            return Response({"url": request.build_absolute_uri(default_storage.url(path)),
+                             "ext": ext, "kind": kind})
+        except Exception as exc:
+            return Response({"detail": f"Aperçu impossible : {exc}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        finally:
+            tmp.delete()
+
     @action(detail=True, methods=["post"])
     def duplicate(self, request, pk=None):
         """Duplique un modèle (copie éditable, non-système)."""
@@ -89,21 +123,26 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get", "post"])
     def preview(self, request, pk=None):
-        """Aperçu du document (génération sans créer de version). Renvoie une URL."""
+        """Aperçu du document dans le navigateur (PDF si possible), sans version."""
         import uuid as _uuid
         from django.core.files.storage import default_storage
         from django.core.files.base import ContentFile
-        from .services import preview_document
+        from .services import preview_document, to_pdf_for_preview
         document = self.get_object()
         try:
             content, ext, _mime = preview_document(document)
         except Exception as exc:
             return Response({"detail": f"Aperçu impossible : {exc}"},
                             status=status.HTTP_400_BAD_REQUEST)
+        pdf = to_pdf_for_preview(content, ext)
+        if pdf is not None:
+            content, ext, kind = pdf, ".pdf", "pdf"
+        else:
+            kind = "native"
         name = f"previews/preview-{document.pk}-{_uuid.uuid4().hex}{ext}"
         path = default_storage.save(name, ContentFile(content))
-        url = default_storage.url(path)
-        return Response({"url": request.build_absolute_uri(url), "ext": ext})
+        return Response({"url": request.build_absolute_uri(default_storage.url(path)),
+                         "ext": ext, "kind": kind})
 
     @action(detail=True, methods=["get"])
     def versions(self, request, pk=None):
