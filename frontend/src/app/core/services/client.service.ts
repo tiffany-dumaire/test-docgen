@@ -19,4 +19,5 @@ export class ClientService {
     return this.http.put<Client>(`${this.url}${id}/`, data);
   }
   remove(id: number): Observable<void> { return this.http.delete<void>(`${this.url}${id}/`); }
+  detailBundle(id: number): Observable<any> { return this.http.get<any>(`${this.url}${id}/detail_bundle/`); }
 }

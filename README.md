@@ -71,6 +71,9 @@ projets et de variables paramétrables.
 - **Refonte Angular Material 21** : thème M3 entièrement personnalisé
   (mode sombre / clair, couleur d'entreprise appliquée au thème), menu latéral
   repliable, barre d'outils, police d'icônes auto-hébergée (hors-ligne).
+- **Détail client** (nouvelle vue en onglets) : Informations · Projets (détail
+  par sous-onglet) · Contacts (tous projets) · **Réunions** (calendrier tous
+  projets confondus, filtrable par projet et par plage de dates).
 - **Listes en `mat-table`** (projets, documents, clients) : tri par colonne,
   pagination, recherche Material et actions en icônes. Formulaires en
   `mat-form-field` (ex. fiche client).

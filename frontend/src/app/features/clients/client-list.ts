@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,7 +13,7 @@ import { Client } from '../../core/models';
 
 @Component({
   selector: 'app-client-list',
-  imports: [FormsModule, MatTableModule, MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatTooltipModule],
+  imports: [FormsModule, RouterLink, MatTableModule, MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatTooltipModule],
   template: `
     <div class="row between">
       <h1>Clients</h1>
@@ -23,12 +24,13 @@ import { Client } from '../../core/models';
     <div class="grid-2" style="display:grid;grid-template-columns:1fr 340px;gap:1rem;align-items:start">
       <div class="tablecard">
         <table mat-table [dataSource]="clients()">
-          <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Nom</th><td mat-cell *matCellDef="let c"><b>{{ c.name }}</b></td></ng-container>
+          <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Nom</th><td mat-cell *matCellDef="let c"><a [routerLink]="['/clients', c.id]" class="strong">{{ c.name }}</a></td></ng-container>
           <ng-container matColumnDef="contact"><th mat-header-cell *matHeaderCellDef>Contact</th><td mat-cell *matCellDef="let c">{{ c.contact_name || '—' }}</td></ng-container>
           <ng-container matColumnDef="email"><th mat-header-cell *matHeaderCellDef>Email</th><td mat-cell *matCellDef="let c">{{ c.email || '—' }}</td></ng-container>
           <ng-container matColumnDef="projects"><th mat-header-cell *matHeaderCellDef>Projets</th><td mat-cell *matCellDef="let c">{{ c.project_count }}</td></ng-container>
           <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef></th>
             <td mat-cell *matCellDef="let c" style="text-align:right;white-space:nowrap">
+              <a mat-icon-button [routerLink]="['/clients', c.id]" matTooltip="Détail"><mat-icon>visibility</mat-icon></a>
               <button mat-icon-button (click)="edit(c)" matTooltip="Éditer"><mat-icon>edit</mat-icon></button>
               <button mat-icon-button (click)="remove(c)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
             </td></ng-container>
@@ -55,7 +57,7 @@ import { Client } from '../../core/models';
       }
     </div>
   `,
-  styles: [`.tablecard{background:var(--mat-sys-surface);border:1px solid var(--mat-sys-outline-variant);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)} table{width:100%;background:transparent} .editpanel mat-form-field{width:100%}`],
+  styles: [`.tablecard{background:var(--mat-sys-surface);border:1px solid var(--mat-sys-outline-variant);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)} table{width:100%;background:transparent} .editpanel mat-form-field{width:100%} .strong{font-weight:600}`],
 })
 export class ClientList {
   private service = inject(ClientService);
