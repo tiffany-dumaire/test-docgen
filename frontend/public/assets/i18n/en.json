@@ -5,7 +5,9 @@
     "tracking": "Overview",
     "templates": "Templates",
     "clients": "Clients",
-    "company": "My company"
+    "company": "My company",
+    "documents": "Documents",
+    "forms": "Forms"
   },
   "topbar": {
     "menu": "Menu",
@@ -16,6 +18,108 @@
   },
   "theme": { "light": "Light", "dark": "Dark", "auto": "Auto" },
   "user": { "preferences": "Preferences", "logout": "Sign out" },
+  "common": {
+    "save": "Save", "cancel": "Cancel", "reset": "Reset",
+    "search": "Search", "edit": "Edit", "delete": "Delete"
+  },
+  "dash": {
+    "subtitle": "Create projects, generate documents (PDF, Word, Excel, PowerPoint) and share online forms.",
+    "quick": "Quick actions",
+    "new_project": "New project",
+    "new_document": "New document",
+    "new_form": "New form"
+  },
+  "projects": {
+    "new": "New project",
+    "search_ph": "Project, client…",
+    "col_project": "Project",
+    "col_client": "Client",
+    "col_reference": "Reference",
+    "col_status": "Status",
+    "col_docs": "Docs",
+    "empty": "No project yet. Create one to get started.",
+    "status": { "active": "Active", "on_hold": "On hold", "archived": "Archived" },
+    "confirm_delete": "Delete project \"{{name}}\" and its documents?",
+    "deleted": "Project deleted."
+  },
+  "documents": {
+    "new": "New document",
+    "search_ph": "Document title…",
+    "col_title": "Title",
+    "col_type": "Type",
+    "col_confidentiality": "Confidentiality",
+    "col_version": "Ver.",
+    "preview": "Preview",
+    "open": "Open",
+    "duplicate": "Duplicate",
+    "empty": "No document yet. Create one to get started.",
+    "previewing": "Generating preview…",
+    "preview_error": "Preview failed.",
+    "duplicated": "Document duplicated.",
+    "duplicate_error": "Duplication failed.",
+    "confirm_delete": "Delete \"{{title}}\" and all its versions?",
+    "deleted": "Document deleted."
+  },
+  "clients": {
+    "new": "New client",
+    "edit": "Edit client",
+    "subtitle": "Manage your clients and link them to your projects.",
+    "col_name": "Name",
+    "col_contact": "Contact",
+    "col_email": "Email",
+    "detail": "Details",
+    "empty": "No client yet. Create one.",
+    "f_name": "Name *",
+    "f_contact": "Main contact",
+    "f_phone": "Phone",
+    "f_address": "Address",
+    "f_notes": "Notes",
+    "name_required": "Name is required.",
+    "saved": "Client saved.",
+    "save_error": "Could not save.",
+    "confirm_delete": "Delete client \"{{name}}\"?",
+    "deleted": "Client deleted.",
+    "delete_error": "Could not delete."
+  },
+  "forms": {
+    "title": "Online forms",
+    "new": "New form",
+    "subtitle": "Create forms shareable via a short link and collect responses.",
+    "copy": "Copy",
+    "copied": "Link copied.",
+    "open": "🟢 Open",
+    "closed": "🔴 Closed",
+    "responses": "{{count}} response(s)",
+    "manage": "Manage",
+    "empty": "No form yet. Create one to get started."
+  },
+  "templates": {
+    "new": "New template",
+    "subtitle": "Template configuration is split into tabs by type: Word, PDF, Excel, A3 Template (PDF / PNG / SVG), Markdown, PowerPoint and Forms.",
+    "language": "Language",
+    "all_langs": "All",
+    "advanced": "advanced template",
+    "preview": "Preview",
+    "duplicate": "Duplicate",
+    "delete_short": "Delete",
+    "system": "system",
+    "empty": "No {{type}} template.",
+    "create_one": "Create one",
+    "forms_hint": "Reusable form templates (questions + diagrams). Generate an online form from a project or directly here.",
+    "new_form_template": "New form template",
+    "form_badge": "Form",
+    "form_summary": "{{q}} question(s) · {{d}} diagram(s) · {{f}} form(s)",
+    "generate_form": "Generate a form",
+    "no_form_templates": "No form template.",
+    "export_error": "Export failed.",
+    "duplicated": "Template duplicated.",
+    "confirm_delete": "Delete template \"{{name}}\"?",
+    "confirm_delete_form": "Delete form template \"{{name}}\"?",
+    "deleted": "Template deleted.",
+    "delete_error": "Could not delete (template in use?).",
+    "form_generated": "Form generated.",
+    "form_generate_error": "Could not generate."
+  },
   "login": {
     "tagline": "Document generation",
     "title": "Sign in",
@@ -60,6 +164,5 @@
     "save_error": "Could not save.",
     "language": "Interface language",
     "language_hint": "Language of the application menus and labels."
-  },
-  "common": { "save": "Save", "cancel": "Cancel", "reset": "Reset" }
+  }
 }

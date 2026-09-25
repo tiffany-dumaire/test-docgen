@@ -5,7 +5,9 @@
     "tracking": "Gesamtübersicht",
     "templates": "Vorlagen",
     "clients": "Kunden",
-    "company": "Mein Unternehmen"
+    "company": "Mein Unternehmen",
+    "documents": "Dokumente",
+    "forms": "Formulare"
   },
   "topbar": {
     "menu": "Menü",
@@ -16,6 +18,108 @@
   },
   "theme": { "light": "Hell", "dark": "Dunkel", "auto": "Auto" },
   "user": { "preferences": "Einstellungen", "logout": "Abmelden" },
+  "common": {
+    "save": "Speichern", "cancel": "Abbrechen", "reset": "Zurücksetzen",
+    "search": "Suchen", "edit": "Bearbeiten", "delete": "Löschen"
+  },
+  "dash": {
+    "subtitle": "Erstellen Sie Projekte, generieren Sie Dokumente (PDF, Word, Excel, PowerPoint) und teilen Sie Online-Formulare.",
+    "quick": "Schnellaktionen",
+    "new_project": "Neues Projekt",
+    "new_document": "Neues Dokument",
+    "new_form": "Neues Formular"
+  },
+  "projects": {
+    "new": "Neues Projekt",
+    "search_ph": "Projekt, Kunde…",
+    "col_project": "Projekt",
+    "col_client": "Kunde",
+    "col_reference": "Referenz",
+    "col_status": "Status",
+    "col_docs": "Dok.",
+    "empty": "Noch kein Projekt. Erstellen Sie eines, um zu beginnen.",
+    "status": { "active": "Aktiv", "on_hold": "Pausiert", "archived": "Archiviert" },
+    "confirm_delete": "Projekt „{{name}}\" und seine Dokumente löschen?",
+    "deleted": "Projekt gelöscht."
+  },
+  "documents": {
+    "new": "Neues Dokument",
+    "search_ph": "Dokumenttitel…",
+    "col_title": "Titel",
+    "col_type": "Typ",
+    "col_confidentiality": "Vertraulichkeit",
+    "col_version": "Ver.",
+    "preview": "Vorschau",
+    "open": "Öffnen",
+    "duplicate": "Duplizieren",
+    "empty": "Noch kein Dokument. Erstellen Sie eines, um zu beginnen.",
+    "previewing": "Vorschau wird erstellt…",
+    "preview_error": "Vorschau fehlgeschlagen.",
+    "duplicated": "Dokument dupliziert.",
+    "duplicate_error": "Duplizieren fehlgeschlagen.",
+    "confirm_delete": "„{{title}}\" und alle Versionen löschen?",
+    "deleted": "Dokument gelöscht."
+  },
+  "clients": {
+    "new": "Neuer Kunde",
+    "edit": "Kunde bearbeiten",
+    "subtitle": "Verwalten Sie Ihre Kunden und verknüpfen Sie sie mit Ihren Projekten.",
+    "col_name": "Name",
+    "col_contact": "Kontakt",
+    "col_email": "E-Mail",
+    "detail": "Details",
+    "empty": "Noch kein Kunde. Erstellen Sie einen.",
+    "f_name": "Name *",
+    "f_contact": "Hauptkontakt",
+    "f_phone": "Telefon",
+    "f_address": "Adresse",
+    "f_notes": "Notizen",
+    "name_required": "Name ist erforderlich.",
+    "saved": "Kunde gespeichert.",
+    "save_error": "Speichern fehlgeschlagen.",
+    "confirm_delete": "Kunde „{{name}}\" löschen?",
+    "deleted": "Kunde gelöscht.",
+    "delete_error": "Löschen fehlgeschlagen."
+  },
+  "forms": {
+    "title": "Online-Formulare",
+    "new": "Neues Formular",
+    "subtitle": "Erstellen Sie über einen Kurzlink teilbare Formulare und sammeln Sie Antworten.",
+    "copy": "Kopieren",
+    "copied": "Link kopiert.",
+    "open": "🟢 Offen",
+    "closed": "🔴 Geschlossen",
+    "responses": "{{count}} Antwort(en)",
+    "manage": "Verwalten",
+    "empty": "Noch kein Formular. Erstellen Sie eines, um zu beginnen."
+  },
+  "templates": {
+    "new": "Neue Vorlage",
+    "subtitle": "Die Vorlagenkonfiguration ist nach Typ in Registerkarten aufgeteilt: Word, PDF, Excel, A3-Vorlage (PDF / PNG / SVG), Markdown, PowerPoint und Formulare.",
+    "language": "Sprache",
+    "all_langs": "Alle",
+    "advanced": "erweiterte Vorlage",
+    "preview": "Vorschau",
+    "duplicate": "Duplizieren",
+    "delete_short": "Löschen",
+    "system": "System",
+    "empty": "Keine {{type}}-Vorlage.",
+    "create_one": "Erstellen Sie eine",
+    "forms_hint": "Wiederverwendbare Formularvorlagen (Fragen + Diagramme). Generieren Sie ein Online-Formular aus einem Projekt oder direkt hier.",
+    "new_form_template": "Neue Formularvorlage",
+    "form_badge": "Formular",
+    "form_summary": "{{q}} Frage(n) · {{d}} Diagramm(e) · {{f}} Formular(e)",
+    "generate_form": "Formular generieren",
+    "no_form_templates": "Keine Formularvorlage.",
+    "export_error": "Export fehlgeschlagen.",
+    "duplicated": "Vorlage dupliziert.",
+    "confirm_delete": "Vorlage „{{name}}\" löschen?",
+    "confirm_delete_form": "Formularvorlage „{{name}}\" löschen?",
+    "deleted": "Vorlage gelöscht.",
+    "delete_error": "Löschen fehlgeschlagen (Vorlage in Verwendung?).",
+    "form_generated": "Formular generiert.",
+    "form_generate_error": "Generierung fehlgeschlagen."
+  },
   "login": {
     "tagline": "Dokumentenerstellung",
     "title": "Anmeldung",
@@ -60,6 +164,5 @@
     "save_error": "Speichern fehlgeschlagen.",
     "language": "Sprache der Oberfläche",
     "language_hint": "Sprache der Menüs und Beschriftungen der Anwendung."
-  },
-  "common": { "save": "Speichern", "cancel": "Abbrechen", "reset": "Zurücksetzen" }
+  }
 }

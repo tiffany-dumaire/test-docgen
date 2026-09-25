@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ProjectService } from '../../core/services/project.service';
 import { ToastService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -20,52 +21,53 @@ import { Project } from '../../core/models';
   imports: [
     RouterLink, FormsModule, MatTableModule, MatSortModule, MatPaginatorModule,
     MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatChipsModule, MatTooltipModule,
+    TranslocoModule,
   ],
   template: `
     <div class="row between">
-      <h1>Projets</h1>
-      <a mat-flat-button color="primary" routerLink="/projects/new"><mat-icon>add</mat-icon> Nouveau projet</a>
+      <h1>{{ 'nav.projects' | transloco }}</h1>
+      <a mat-flat-button color="primary" routerLink="/projects/new"><mat-icon>add</mat-icon> {{ 'projects.new' | transloco }}</a>
     </div>
 
     <mat-form-field appearance="outline" class="search">
-      <mat-label>Rechercher</mat-label>
+      <mat-label>{{ 'common.search' | transloco }}</mat-label>
       <mat-icon matPrefix>search</mat-icon>
-      <input matInput [(ngModel)]="search" (ngModelChange)="reload()" placeholder="Projet, client…" />
+      <input matInput [(ngModel)]="search" (ngModelChange)="reload()" [placeholder]="'projects.search_ph' | transloco" />
     </mat-form-field>
 
     <div class="tablecard">
       <table mat-table [dataSource]="ds" matSort>
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Projet</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'projects.col_project' | transloco }}</th>
           <td mat-cell *matCellDef="let p"><a [routerLink]="['/projects', p.id]" class="strong">{{ p.name }}</a></td>
         </ng-container>
         <ng-container matColumnDef="client_name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Client</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'projects.col_client' | transloco }}</th>
           <td mat-cell *matCellDef="let p">{{ p.client_name }}</td>
         </ng-container>
         <ng-container matColumnDef="reference">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Référence</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'projects.col_reference' | transloco }}</th>
           <td mat-cell *matCellDef="let p">{{ p.reference || '—' }}</td>
         </ng-container>
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Statut</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'projects.col_status' | transloco }}</th>
           <td mat-cell *matCellDef="let p"><span class="chip" [class]="'st-' + p.status">{{ statusLabel(p.status) }}</span></td>
         </ng-container>
         <ng-container matColumnDef="document_count">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Docs</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'projects.col_docs' | transloco }}</th>
           <td mat-cell *matCellDef="let p">{{ p.document_count }}</td>
         </ng-container>
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let p" class="actions">
-            <a mat-icon-button [routerLink]="['/projects', p.id, 'edit']" matTooltip="Éditer"><mat-icon>edit</mat-icon></a>
-            @if (canManage()) { <button mat-icon-button (click)="remove(p)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button> }
+            <a mat-icon-button [routerLink]="['/projects', p.id, 'edit']" [matTooltip]="'common.edit' | transloco"><mat-icon>edit</mat-icon></a>
+            @if (canManage()) { <button mat-icon-button (click)="remove(p)" [matTooltip]="'common.delete' | transloco"><mat-icon>delete</mat-icon></button> }
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="cols"></tr>
         <tr mat-row *matRowDef="let row; columns: cols"></tr>
       </table>
-      @if (!ds.data.length) { <div class="empty">Aucun projet. Créez-en un pour commencer.</div> }
+      @if (!ds.data.length) { <div class="empty">{{ 'projects.empty' | transloco }}</div> }
       <mat-paginator [pageSizeOptions]="[10, 25, 50]" pageSize="10" showFirstLastButtons />
     </div>
   `,
@@ -85,6 +87,7 @@ import { Project } from '../../core/models';
 export class ProjectList implements AfterViewInit {
   private service = inject(ProjectService);
   private toast = inject(ToastService);
+  private t = inject(TranslocoService);
   auth = inject(AuthService);
 
   ds = new MatTableDataSource<Project>([]);
@@ -113,10 +116,12 @@ export class ProjectList implements AfterViewInit {
     this.service.list({ search: this.search }).subscribe((r) => (this.ds.data = r.results));
   }
   statusLabel(s: string) {
-    return ({ active: 'Actif', on_hold: 'En pause', archived: 'Archivé' } as Record<string, string>)[s] ?? s;
+    const key = ({ active: 'projects.status.active', on_hold: 'projects.status.on_hold',
+      archived: 'projects.status.archived' } as Record<string, string>)[s];
+    return key ? this.t.translate(key) : s;
   }
   remove(p: Project) {
-    if (!confirm(`Supprimer le projet « ${p.name} » et ses documents ?`)) return;
-    this.service.remove(p.id!).subscribe(() => { this.toast.success('Projet supprimé.'); this.reload(); });
+    if (!confirm(this.t.translate('projects.confirm_delete', { name: p.name }))) return;
+    this.service.remove(p.id!).subscribe(() => { this.toast.success(this.t.translate('projects.deleted')); this.reload(); });
   }
 }

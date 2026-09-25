@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DocumentService } from '../../core/services/document.service';
 import { ToastService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -20,54 +21,55 @@ import { ProjectDocument } from '../../core/models';
   imports: [
     RouterLink, FormsModule, MatTableModule, MatSortModule, MatPaginatorModule,
     MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatTooltipModule,
+    TranslocoModule,
   ],
   template: `
     <div class="row between">
-      <h1>Documents</h1>
-      <a mat-flat-button color="primary" routerLink="/documents/new"><mat-icon>add</mat-icon> Nouveau document</a>
+      <h1>{{ 'nav.documents' | transloco }}</h1>
+      <a mat-flat-button color="primary" routerLink="/documents/new"><mat-icon>add</mat-icon> {{ 'documents.new' | transloco }}</a>
     </div>
 
     <mat-form-field appearance="outline" class="search">
-      <mat-label>Rechercher</mat-label>
+      <mat-label>{{ 'common.search' | transloco }}</mat-label>
       <mat-icon matPrefix>search</mat-icon>
-      <input matInput [(ngModel)]="search" (ngModelChange)="reload()" placeholder="Titre du document…" />
+      <input matInput [(ngModel)]="search" (ngModelChange)="reload()" [placeholder]="'documents.search_ph' | transloco" />
     </mat-form-field>
 
     <div class="tablecard">
       <table mat-table [dataSource]="ds" matSort>
         <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Titre</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'documents.col_title' | transloco }}</th>
           <td mat-cell *matCellDef="let d"><a [routerLink]="['/documents', d.id]" class="strong">{{ d.title }}</a></td>
         </ng-container>
         <ng-container matColumnDef="project_name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Projet</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'projects.col_project' | transloco }}</th>
           <td mat-cell *matCellDef="let d">{{ d.project_name }}</td>
         </ng-container>
         <ng-container matColumnDef="doc_type">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'documents.col_type' | transloco }}</th>
           <td mat-cell *matCellDef="let d"><span class="ty">{{ d.doc_type }}</span></td>
         </ng-container>
         <ng-container matColumnDef="confidentiality">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Confidentialité</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'documents.col_confidentiality' | transloco }}</th>
           <td mat-cell *matCellDef="let d"><span class="chip" [class]="'cf-' + d.confidentiality">{{ d.confidentiality_display }}</span></td>
         </ng-container>
         <ng-container matColumnDef="current_version">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Ver.</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'documents.col_version' | transloco }}</th>
           <td mat-cell *matCellDef="let d">v{{ d.current_version }}</td>
         </ng-container>
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let d" class="actions">
-            <button mat-icon-button (click)="preview(d)" matTooltip="Aperçu"><mat-icon>visibility</mat-icon></button>
-            <a mat-icon-button [routerLink]="['/documents', d.id]" matTooltip="Ouvrir"><mat-icon>open_in_new</mat-icon></a>
-            <button mat-icon-button (click)="duplicate(d)" matTooltip="Dupliquer"><mat-icon>content_copy</mat-icon></button>
-            @if (canManage()) { <button mat-icon-button (click)="remove(d)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button> }
+            <button mat-icon-button (click)="preview(d)" [matTooltip]="'documents.preview' | transloco"><mat-icon>visibility</mat-icon></button>
+            <a mat-icon-button [routerLink]="['/documents', d.id]" [matTooltip]="'documents.open' | transloco"><mat-icon>open_in_new</mat-icon></a>
+            <button mat-icon-button (click)="duplicate(d)" [matTooltip]="'documents.duplicate' | transloco"><mat-icon>content_copy</mat-icon></button>
+            @if (canManage()) { <button mat-icon-button (click)="remove(d)" [matTooltip]="'common.delete' | transloco"><mat-icon>delete</mat-icon></button> }
           </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="cols"></tr>
         <tr mat-row *matRowDef="let row; columns: cols"></tr>
       </table>
-      @if (!ds.data.length) { <div class="empty">Aucun document. Créez-en un pour commencer.</div> }
+      @if (!ds.data.length) { <div class="empty">{{ 'documents.empty' | transloco }}</div> }
       <mat-paginator [pageSizeOptions]="[10, 25, 50]" pageSize="10" showFirstLastButtons />
     </div>
   `,
@@ -88,6 +90,7 @@ export class DocumentList implements AfterViewInit {
   private service = inject(DocumentService);
   private toast = inject(ToastService);
   private previewSvc = inject(PreviewService);
+  private t = inject(TranslocoService);
   auth = inject(AuthService);
 
   ds = new MatTableDataSource<ProjectDocument>([]);
@@ -105,14 +108,14 @@ export class DocumentList implements AfterViewInit {
   canManage() { return this.auth.hasRole('admin') || this.auth.hasRole('manager') || !this.auth.user(); }
   reload() { this.service.list({ search: this.search }).subscribe((r) => (this.ds.data = r.results)); }
   preview(d: ProjectDocument) {
-    this.toast.success('Génération de l\'aperçu…');
-    this.service.preview(d.id!).subscribe({ next: (r) => this.previewSvc.open(r, d.title), error: () => this.toast.error('Aperçu impossible.') });
+    this.toast.success(this.t.translate('documents.previewing'));
+    this.service.preview(d.id!).subscribe({ next: (r) => this.previewSvc.open(r, d.title), error: () => this.toast.error(this.t.translate('documents.preview_error')) });
   }
   duplicate(d: ProjectDocument) {
-    this.service.duplicateDocument(d.id!).subscribe({ next: () => { this.toast.success('Document dupliqué.'); this.reload(); }, error: () => this.toast.error('Duplication impossible.') });
+    this.service.duplicateDocument(d.id!).subscribe({ next: () => { this.toast.success(this.t.translate('documents.duplicated')); this.reload(); }, error: () => this.toast.error(this.t.translate('documents.duplicate_error')) });
   }
   remove(d: ProjectDocument) {
-    if (!confirm(`Supprimer « ${d.title} » et toutes ses versions ?`)) return;
-    this.service.remove(d.id!).subscribe(() => { this.toast.success('Document supprimé.'); this.reload(); });
+    if (!confirm(this.t.translate('documents.confirm_delete', { title: d.title }))) return;
+    this.service.remove(d.id!).subscribe(() => { this.toast.success(this.t.translate('documents.deleted')); this.reload(); });
   }
 }

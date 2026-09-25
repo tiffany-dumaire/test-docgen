@@ -5,7 +5,9 @@
     "tracking": "Panoramica",
     "templates": "Modelli",
     "clients": "Clienti",
-    "company": "La mia azienda"
+    "company": "La mia azienda",
+    "documents": "Documenti",
+    "forms": "Moduli"
   },
   "topbar": {
     "menu": "Menu",
@@ -16,6 +18,108 @@
   },
   "theme": { "light": "Chiaro", "dark": "Scuro", "auto": "Auto" },
   "user": { "preferences": "Preferenze", "logout": "Esci" },
+  "common": {
+    "save": "Salva", "cancel": "Annulla", "reset": "Reimposta",
+    "search": "Cerca", "edit": "Modifica", "delete": "Elimina"
+  },
+  "dash": {
+    "subtitle": "Crea progetti, genera documenti (PDF, Word, Excel, PowerPoint) e condividi moduli online.",
+    "quick": "Azioni rapide",
+    "new_project": "Nuovo progetto",
+    "new_document": "Nuovo documento",
+    "new_form": "Nuovo modulo"
+  },
+  "projects": {
+    "new": "Nuovo progetto",
+    "search_ph": "Progetto, cliente…",
+    "col_project": "Progetto",
+    "col_client": "Cliente",
+    "col_reference": "Riferimento",
+    "col_status": "Stato",
+    "col_docs": "Doc.",
+    "empty": "Nessun progetto. Creane uno per iniziare.",
+    "status": { "active": "Attivo", "on_hold": "In pausa", "archived": "Archiviato" },
+    "confirm_delete": "Eliminare il progetto «{{name}}» e i suoi documenti?",
+    "deleted": "Progetto eliminato."
+  },
+  "documents": {
+    "new": "Nuovo documento",
+    "search_ph": "Titolo del documento…",
+    "col_title": "Titolo",
+    "col_type": "Tipo",
+    "col_confidentiality": "Riservatezza",
+    "col_version": "Ver.",
+    "preview": "Anteprima",
+    "open": "Apri",
+    "duplicate": "Duplica",
+    "empty": "Nessun documento. Creane uno per iniziare.",
+    "previewing": "Generazione dell'anteprima…",
+    "preview_error": "Anteprima non riuscita.",
+    "duplicated": "Documento duplicato.",
+    "duplicate_error": "Duplicazione non riuscita.",
+    "confirm_delete": "Eliminare «{{title}}» e tutte le sue versioni?",
+    "deleted": "Documento eliminato."
+  },
+  "clients": {
+    "new": "Nuovo cliente",
+    "edit": "Modifica cliente",
+    "subtitle": "Gestisci i tuoi clienti e collegali ai tuoi progetti.",
+    "col_name": "Nome",
+    "col_contact": "Contatto",
+    "col_email": "Email",
+    "detail": "Dettagli",
+    "empty": "Nessun cliente. Creane uno.",
+    "f_name": "Nome *",
+    "f_contact": "Contatto principale",
+    "f_phone": "Telefono",
+    "f_address": "Indirizzo",
+    "f_notes": "Note",
+    "name_required": "Il nome è obbligatorio.",
+    "saved": "Cliente salvato.",
+    "save_error": "Impossibile salvare.",
+    "confirm_delete": "Eliminare il cliente «{{name}}»?",
+    "deleted": "Cliente eliminato.",
+    "delete_error": "Impossibile eliminare."
+  },
+  "forms": {
+    "title": "Moduli online",
+    "new": "Nuovo modulo",
+    "subtitle": "Crea moduli condivisibili tramite un link breve e raccogli le risposte.",
+    "copy": "Copia",
+    "copied": "Link copiato.",
+    "open": "🟢 Aperto",
+    "closed": "🔴 Chiuso",
+    "responses": "{{count}} risposta/e",
+    "manage": "Gestisci",
+    "empty": "Nessun modulo. Creane uno per iniziare."
+  },
+  "templates": {
+    "new": "Nuovo modello",
+    "subtitle": "La configurazione dei modelli è suddivisa in schede per tipo: Word, PDF, Excel, Modello A3 (PDF / PNG / SVG), Markdown, PowerPoint e Moduli.",
+    "language": "Lingua",
+    "all_langs": "Tutte",
+    "advanced": "modello avanzato",
+    "preview": "Anteprima",
+    "duplicate": "Duplica",
+    "delete_short": "Elimina",
+    "system": "sistema",
+    "empty": "Nessun modello {{type}}.",
+    "create_one": "Creane uno",
+    "forms_hint": "Modelli di modulo riutilizzabili (domande + diagrammi). Genera un modulo online da un progetto o direttamente qui.",
+    "new_form_template": "Nuovo modello di modulo",
+    "form_badge": "Modulo",
+    "form_summary": "{{q}} domanda/e · {{d}} diagramma/i · {{f}} modulo/i",
+    "generate_form": "Genera un modulo",
+    "no_form_templates": "Nessun modello di modulo.",
+    "export_error": "Esportazione non riuscita.",
+    "duplicated": "Modello duplicato.",
+    "confirm_delete": "Eliminare il modello «{{name}}»?",
+    "confirm_delete_form": "Eliminare il modello di modulo «{{name}}»?",
+    "deleted": "Modello eliminato.",
+    "delete_error": "Impossibile eliminare (modello in uso?).",
+    "form_generated": "Modulo generato.",
+    "form_generate_error": "Impossibile generare."
+  },
   "login": {
     "tagline": "Generazione di documenti",
     "title": "Accesso",
@@ -60,6 +164,5 @@
     "save_error": "Impossibile salvare.",
     "language": "Lingua dell'interfaccia",
     "language_hint": "Lingua dei menu e delle etichette dell'applicazione."
-  },
-  "common": { "save": "Salva", "cancel": "Annulla", "reset": "Reimposta" }
+  }
 }

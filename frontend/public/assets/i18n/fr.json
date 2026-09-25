@@ -5,7 +5,9 @@
     "tracking": "Suivi général",
     "templates": "Modèles",
     "clients": "Clients",
-    "company": "Mon entreprise"
+    "company": "Mon entreprise",
+    "documents": "Documents",
+    "forms": "Formulaires"
   },
   "topbar": {
     "menu": "Menu",
@@ -16,6 +18,108 @@
   },
   "theme": { "light": "Clair", "dark": "Sombre", "auto": "Auto" },
   "user": { "preferences": "Préférences", "logout": "Se déconnecter" },
+  "common": {
+    "save": "Enregistrer", "cancel": "Annuler", "reset": "Réinitialiser",
+    "search": "Rechercher", "edit": "Éditer", "delete": "Supprimer"
+  },
+  "dash": {
+    "subtitle": "Créez des projets, générez des documents (PDF, Word, Excel, PowerPoint) et partagez des formulaires en ligne.",
+    "quick": "Actions rapides",
+    "new_project": "Nouveau projet",
+    "new_document": "Nouveau document",
+    "new_form": "Nouveau formulaire"
+  },
+  "projects": {
+    "new": "Nouveau projet",
+    "search_ph": "Projet, client…",
+    "col_project": "Projet",
+    "col_client": "Client",
+    "col_reference": "Référence",
+    "col_status": "Statut",
+    "col_docs": "Docs",
+    "empty": "Aucun projet. Créez-en un pour commencer.",
+    "status": { "active": "Actif", "on_hold": "En pause", "archived": "Archivé" },
+    "confirm_delete": "Supprimer le projet « {{name}} » et ses documents ?",
+    "deleted": "Projet supprimé."
+  },
+  "documents": {
+    "new": "Nouveau document",
+    "search_ph": "Titre du document…",
+    "col_title": "Titre",
+    "col_type": "Type",
+    "col_confidentiality": "Confidentialité",
+    "col_version": "Ver.",
+    "preview": "Aperçu",
+    "open": "Ouvrir",
+    "duplicate": "Dupliquer",
+    "empty": "Aucun document. Créez-en un pour commencer.",
+    "previewing": "Génération de l'aperçu…",
+    "preview_error": "Aperçu impossible.",
+    "duplicated": "Document dupliqué.",
+    "duplicate_error": "Duplication impossible.",
+    "confirm_delete": "Supprimer « {{title}} » et toutes ses versions ?",
+    "deleted": "Document supprimé."
+  },
+  "clients": {
+    "new": "Nouveau client",
+    "edit": "Modifier le client",
+    "subtitle": "Gérez vos clients et rattachez-les à vos projets.",
+    "col_name": "Nom",
+    "col_contact": "Contact",
+    "col_email": "Email",
+    "detail": "Détail",
+    "empty": "Aucun client. Créez-en un.",
+    "f_name": "Nom *",
+    "f_contact": "Contact principal",
+    "f_phone": "Téléphone",
+    "f_address": "Adresse",
+    "f_notes": "Notes",
+    "name_required": "Le nom est obligatoire.",
+    "saved": "Client enregistré.",
+    "save_error": "Enregistrement impossible.",
+    "confirm_delete": "Supprimer le client « {{name}} » ?",
+    "deleted": "Client supprimé.",
+    "delete_error": "Suppression impossible."
+  },
+  "forms": {
+    "title": "Formulaires en ligne",
+    "new": "Nouveau formulaire",
+    "subtitle": "Créez des formulaires partageables via un lien réduit et collectez les réponses.",
+    "copy": "Copier",
+    "copied": "Lien copié.",
+    "open": "🟢 Ouvert",
+    "closed": "🔴 Fermé",
+    "responses": "{{count}} réponse(s)",
+    "manage": "Gérer",
+    "empty": "Aucun formulaire. Créez-en un pour commencer."
+  },
+  "templates": {
+    "new": "Nouveau modèle",
+    "subtitle": "La configuration des modèles est séparée par onglet selon leur type : Word, PDF, Excel, Template A3 (PDF / PNG / SVG), Markdown, PowerPoint et Formulaires.",
+    "language": "Langue",
+    "all_langs": "Toutes",
+    "advanced": "modèle avancé",
+    "preview": "Aperçu",
+    "duplicate": "Dupliquer",
+    "delete_short": "Suppr.",
+    "system": "système",
+    "empty": "Aucun modèle {{type}}.",
+    "create_one": "Créez-en un",
+    "forms_hint": "Modèles de formulaire réutilisables (questions + diagrammes). Générez un formulaire en ligne depuis un projet ou directement ici.",
+    "new_form_template": "Nouveau modèle de formulaire",
+    "form_badge": "Formulaire",
+    "form_summary": "{{q}} question(s) · {{d}} diagramme(s) · {{f}} formulaire(s)",
+    "generate_form": "Générer un formulaire",
+    "no_form_templates": "Aucun modèle de formulaire.",
+    "export_error": "Export impossible.",
+    "duplicated": "Modèle dupliqué.",
+    "confirm_delete": "Supprimer le modèle « {{name}} » ?",
+    "confirm_delete_form": "Supprimer le modèle de formulaire « {{name}} » ?",
+    "deleted": "Modèle supprimé.",
+    "delete_error": "Suppression impossible (modèle utilisé ?).",
+    "form_generated": "Formulaire généré.",
+    "form_generate_error": "Génération impossible."
+  },
   "login": {
     "tagline": "Génération de documents",
     "title": "Connexion",
@@ -60,6 +164,5 @@
     "save_error": "Enregistrement impossible.",
     "language": "Langue de l'interface",
     "language_hint": "Langue des menus et libellés de l'application."
-  },
-  "common": { "save": "Enregistrer", "cancel": "Annuler", "reset": "Réinitialiser" }
+  }
 }

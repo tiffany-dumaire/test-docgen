@@ -2,43 +2,44 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslocoModule } from '@jsverse/transloco';
 import { ProjectService } from '../../core/services/project.service';
 import { DocumentService } from '../../core/services/document.service';
 import { FormService } from '../../core/services/form.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, MatIconModule, MatButtonModule],
+  imports: [RouterLink, MatIconModule, MatButtonModule, TranslocoModule],
   template: `
-    <h1>Tableau de bord</h1>
-    <p class="muted">Créez des projets, générez des documents (PDF, Word, Excel, PowerPoint) et partagez des formulaires en ligne.</p>
+    <h1>{{ 'nav.dashboard' | transloco }}</h1>
+    <p class="muted">{{ 'dash.subtitle' | transloco }}</p>
 
     <div class="stats">
       <a class="stat" routerLink="/projects">
         <div class="ic ic1"><mat-icon>folder</mat-icon></div>
-        <div class="meta"><div class="num">{{ projectCount() }}</div><div class="lbl">Projets</div></div>
+        <div class="meta"><div class="num">{{ projectCount() }}</div><div class="lbl">{{ 'nav.projects' | transloco }}</div></div>
       </a>
       <a class="stat" routerLink="/documents">
         <div class="ic ic2"><mat-icon>description</mat-icon></div>
-        <div class="meta"><div class="num">{{ documentCount() }}</div><div class="lbl">Documents</div></div>
+        <div class="meta"><div class="num">{{ documentCount() }}</div><div class="lbl">{{ 'nav.documents' | transloco }}</div></div>
       </a>
       <a class="stat" routerLink="/forms">
         <div class="ic ic3"><mat-icon>assignment</mat-icon></div>
-        <div class="meta"><div class="num">{{ formCount() }}</div><div class="lbl">Formulaires</div></div>
+        <div class="meta"><div class="num">{{ formCount() }}</div><div class="lbl">{{ 'nav.forms' | transloco }}</div></div>
       </a>
       <a class="stat" routerLink="/templates">
         <div class="ic ic4"><mat-icon>grid_view</mat-icon></div>
-        <div class="meta"><div class="num">{{ templateCount() }}</div><div class="lbl">Modèles</div></div>
+        <div class="meta"><div class="num">{{ templateCount() }}</div><div class="lbl">{{ 'nav.templates' | transloco }}</div></div>
       </a>
     </div>
 
     <div class="quick">
-      <h3><mat-icon>bolt</mat-icon> Actions rapides</h3>
+      <h3><mat-icon>bolt</mat-icon> {{ 'dash.quick' | transloco }}</h3>
       <div class="qgrid">
-        <a mat-flat-button color="primary" routerLink="/projects/new"><mat-icon>add</mat-icon> Nouveau projet</a>
-        <a mat-stroked-button routerLink="/documents/new"><mat-icon>note_add</mat-icon> Nouveau document</a>
-        <a mat-stroked-button routerLink="/forms/new"><mat-icon>post_add</mat-icon> Nouveau formulaire</a>
-        <a mat-stroked-button routerLink="/company"><mat-icon>business</mat-icon> Mon entreprise</a>
+        <a mat-flat-button color="primary" routerLink="/projects/new"><mat-icon>add</mat-icon> {{ 'dash.new_project' | transloco }}</a>
+        <a mat-stroked-button routerLink="/documents/new"><mat-icon>note_add</mat-icon> {{ 'dash.new_document' | transloco }}</a>
+        <a mat-stroked-button routerLink="/forms/new"><mat-icon>post_add</mat-icon> {{ 'dash.new_form' | transloco }}</a>
+        <a mat-stroked-button routerLink="/company"><mat-icon>business</mat-icon> {{ 'nav.company' | transloco }}</a>
       </div>
     </div>
   `,

@@ -1,20 +1,19 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { FormService } from '../../core/services/form.service';
 import { ToastService } from '../../core/services/api.service';
 import { OnlineForm } from '../../core/models';
 
 @Component({
   selector: 'app-form-list',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslocoModule],
   template: `
     <div class="row between">
-      <h1>Formulaires en ligne</h1>
-      <a class="btn btn-primary" routerLink="/forms/new">+ Nouveau formulaire</a>
+      <h1>{{ 'forms.title' | transloco }}</h1>
+      <a class="btn btn-primary" routerLink="/forms/new">+ {{ 'forms.new' | transloco }}</a>
     </div>
-    <p class="muted">
-      Créez des formulaires partageables via un lien réduit et collectez les réponses.
-    </p>
+    <p class="muted">{{ 'forms.subtitle' | transloco }}</p>
 
     @if (forms().length) {
       <div class="grid-cards">
@@ -27,19 +26,19 @@ import { OnlineForm } from '../../core/models';
             <p class="muted" style="min-height:2.4em">{{ f.description }}</p>
             <div class="linkbox">
               <input readonly [value]="f.short_url" #urlInput />
-              <button class="btn btn-sm btn-ghost" (click)="copy(f.short_url!)">Copier</button>
+              <button class="btn btn-sm btn-ghost" (click)="copy(f.short_url!)">{{ 'forms.copy' | transloco }}</button>
             </div>
             <div class="row between" style="margin-top:.6rem">
               <span class="tag">
-                {{ f.is_open ? '🟢 Ouvert' : '🔴 Fermé' }} · {{ f.submission_count }} réponse(s)
+                {{ (f.is_open ? 'forms.open' : 'forms.closed') | transloco }} · {{ 'forms.responses' | transloco: { count: f.submission_count } }}
               </span>
-              <a class="btn btn-sm btn-ghost" [routerLink]="['/forms', f.id]">Gérer</a>
+              <a class="btn btn-sm btn-ghost" [routerLink]="['/forms', f.id]">{{ 'forms.manage' | transloco }}</a>
             </div>
           </div>
         }
       </div>
     } @else {
-      <div class="empty">Aucun formulaire. Créez-en un pour commencer.</div>
+      <div class="empty">{{ 'forms.empty' | transloco }}</div>
     }
   `,
   styles: [
@@ -52,6 +51,7 @@ import { OnlineForm } from '../../core/models';
 export class FormList {
   private service = inject(FormService);
   private toast = inject(ToastService);
+  private t = inject(TranslocoService);
 
   forms = signal<OnlineForm[]>([]);
 
@@ -61,6 +61,6 @@ export class FormList {
 
   copy(url: string) {
     navigator.clipboard?.writeText(url);
-    this.toast.success('Lien copié.');
+    this.toast.success(this.t.translate('forms.copied'));
   }
 }

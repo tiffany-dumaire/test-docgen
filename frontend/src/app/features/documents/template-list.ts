@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { DocumentService } from '../../core/services/document.service';
 import { FormService } from '../../core/services/form.service';
 import { ToastService } from '../../core/services/api.service';
@@ -24,19 +25,16 @@ const TYPE_TABS: TypeTab[] = [
 
 @Component({
   selector: 'app-template-list',
-  imports: [RouterLink, MatTabsModule],
+  imports: [RouterLink, MatTabsModule, TranslocoModule],
   template: `
     <div class="row between">
-      <h1>Modèles</h1>
-      <a class="btn btn-primary" routerLink="/templates/new">+ Nouveau modèle</a>
+      <h1>{{ 'nav.templates' | transloco }}</h1>
+      <a class="btn btn-primary" routerLink="/templates/new">+ {{ 'templates.new' | transloco }}</a>
     </div>
-    <p class="muted">
-      La configuration des modèles est séparée par onglet selon leur type :
-      Word, PDF, Excel, Template A3 (PDF / PNG / SVG), Markdown, PowerPoint et Formulaires.
-    </p>
+    <p class="muted">{{ 'templates.subtitle' | transloco }}</p>
     <div class="row" style="gap:.5rem; align-items:center; margin-bottom:.4rem">
-      <span class="tag">Langue :</span>
-      <button class="lang-pill" [class.active]="lang() === 'all'" (click)="lang.set('all')">Toutes</button>
+      <span class="tag">{{ 'templates.language' | transloco }} :</span>
+      <button class="lang-pill" [class.active]="lang() === 'all'" (click)="lang.set('all')">{{ 'templates.all_langs' | transloco }}</button>
       @for (l of languages; track l.value) {
         <button class="lang-pill" [class.active]="lang() === l.value" (click)="lang.set(l.value)">{{ l.flag }} {{ l.label }}</button>
       }
@@ -51,28 +49,28 @@ const TYPE_TABS: TypeTab[] = [
                 @for (t of byType(tab.key); track t.id) {
                   <div class="card">
                     <div class="row between">
-                      <strong>{{ t.name }}</strong>
+                      <strong>{{ t.display_name || t.name }}</strong>
                       <span class="badge badge-type">{{ langFlag(t.language) }} {{ tab.label }}</span>
                     </div>
                     <p class="muted" style="min-height:2.4em">{{ t.description }}</p>
                     <div class="tag">{{ summary(t) }}</div>
                     <div class="row" style="gap:.4rem; margin-top:.6rem; flex-wrap:wrap">
                       @if (t.is_block_based || t.builder_key === 'excel_workbook' || t.doc_type === 'a3') {
-                        <a class="btn btn-sm btn-ghost" [routerLink]="['/templates', t.id]">✏️ Éditer</a>
+                        <a class="btn btn-sm btn-ghost" [routerLink]="['/templates', t.id]">✏️ {{ 'common.edit' | transloco }}</a>
                       } @else {
-                        <span class="tag">modèle avancé</span>
+                        <span class="tag">{{ 'templates.advanced' | transloco }}</span>
                       }
-                      <button class="btn btn-sm btn-ghost" (click)="preview(t)">👁 Aperçu</button>
+                      <button class="btn btn-sm btn-ghost" (click)="preview(t)">👁 {{ 'templates.preview' | transloco }}</button>
                       @if (t.doc_type === 'a3') {
                         <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'pdf')">⬇ PDF</button>
                         <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'png')">⬇ PNG</button>
                         <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'svg')">⬇ SVG</button>
                       }
-                      <button class="btn btn-sm btn-ghost" (click)="duplicate(t)">⧉ Dupliquer</button>
+                      <button class="btn btn-sm btn-ghost" (click)="duplicate(t)">⧉ {{ 'templates.duplicate' | transloco }}</button>
                       @if (!t.is_system) {
-                        @if (canManage()) { <button class="btn btn-sm btn-danger" (click)="remove(t)">Suppr.</button> }
+                        @if (canManage()) { <button class="btn btn-sm btn-danger" (click)="remove(t)">{{ 'templates.delete_short' | transloco }}</button> }
                       } @else {
-                        <span class="tag">système</span>
+                        <span class="tag">{{ 'templates.system' | transloco }}</span>
                       }
                     </div>
                   </div>
@@ -80,8 +78,8 @@ const TYPE_TABS: TypeTab[] = [
               </div>
             } @else {
               <div class="empty">
-                Aucun modèle {{ tab.label }}.
-                <a routerLink="/templates/new">Créez-en un</a>.
+                {{ 'templates.empty' | transloco: { type: tab.label } }}
+                <a routerLink="/templates/new">{{ 'templates.create_one' | transloco }}</a>.
               </div>
             }
           </div>
@@ -89,14 +87,11 @@ const TYPE_TABS: TypeTab[] = [
       }
 
       <!-- ============ FORMULAIRES (modèles de formulaire) ============ -->
-      <mat-tab label="📋 Formulaires ({{ filteredForms().length }})">
+      <mat-tab label="📋 {{ 'forms.title' | transloco }} ({{ filteredForms().length }})">
         <div class="tabpad">
           <div class="row between">
-            <p class="muted" style="margin:0">
-              Modèles de formulaire réutilisables (questions + diagrammes). Générez un
-              formulaire en ligne depuis un projet ou directement ici.
-            </p>
-            <a class="btn btn-sm btn-primary" routerLink="/form-templates/new">+ Nouveau modèle de formulaire</a>
+            <p class="muted" style="margin:0">{{ 'templates.forms_hint' | transloco }}</p>
+            <a class="btn btn-sm btn-primary" routerLink="/form-templates/new">+ {{ 'templates.new_form_template' | transloco }}</a>
           </div>
           @if (filteredForms().length) {
             <div class="grid-cards" style="margin-top:1rem">
@@ -104,21 +99,21 @@ const TYPE_TABS: TypeTab[] = [
                 <div class="card">
                   <div class="row between">
                     <strong>{{ ft.name }}</strong>
-                    <span class="badge badge-type">Formulaire</span>
+                    <span class="badge badge-type">{{ 'templates.form_badge' | transloco }}</span>
                   </div>
                   <p class="muted" style="min-height:2.4em">{{ ft.description }}</p>
-                  <div class="tag">{{ ft.schema.length }} question(s) · {{ ft.diagrams.length }} diagramme(s) · {{ ft.form_count }} formulaire(s)</div>
+                  <div class="tag">{{ 'templates.form_summary' | transloco: { q: ft.schema.length, d: ft.diagrams.length, f: ft.form_count } }}</div>
                   <div class="row" style="gap:.4rem; margin-top:.6rem; flex-wrap:wrap">
-                    <a class="btn btn-sm btn-ghost" [routerLink]="['/form-templates', ft.id]">✏️ Éditer</a>
-                    <button class="btn btn-sm btn-ghost" (click)="instantiate(ft)">＋ Générer un formulaire</button>
-                    @if (canManage()) { <button class="btn btn-sm btn-danger" (click)="removeForm(ft)">Suppr.</button> }
+                    <a class="btn btn-sm btn-ghost" [routerLink]="['/form-templates', ft.id]">✏️ {{ 'common.edit' | transloco }}</a>
+                    <button class="btn btn-sm btn-ghost" (click)="instantiate(ft)">＋ {{ 'templates.generate_form' | transloco }}</button>
+                    @if (canManage()) { <button class="btn btn-sm btn-danger" (click)="removeForm(ft)">{{ 'templates.delete_short' | transloco }}</button> }
                   </div>
                 </div>
               }
             </div>
           } @else {
             <div class="empty" style="margin-top:1rem">
-              Aucun modèle de formulaire. <a routerLink="/form-templates/new">Créez-en un</a>.
+              {{ 'templates.no_form_templates' | transloco }} <a routerLink="/form-templates/new">{{ 'templates.create_one' | transloco }}</a>.
             </div>
           }
         </div>
@@ -139,6 +134,7 @@ export class TemplateList {
   auth = inject(AuthService);
   private router = inject(Router);
   private previewSvc = inject(PreviewService);
+  private t = inject(TranslocoService);
   canManage = () => this.auth.hasRole('admin') || this.auth.hasRole('manager') || !this.auth.user();
 
   typeTabs = TYPE_TABS;
@@ -176,10 +172,10 @@ export class TemplateList {
   }
 
   preview(t: DocumentTemplate) {
-    this.toast.success('Génération de l\'aperçu…');
+    this.toast.success(this.t.translate('documents.previewing'));
     this.service.previewTemplate(t.id!).subscribe({
-      next: (r) => this.previewSvc.open(r, t.name),
-      error: () => this.toast.error('Aperçu impossible.'),
+      next: (r) => this.previewSvc.open(r, t.display_name || t.name),
+      error: () => this.toast.error(this.t.translate('documents.preview_error')),
     });
   }
   exportA3(t: DocumentTemplate, fmt: 'pdf' | 'png' | 'svg') {
@@ -190,34 +186,34 @@ export class TemplateList {
         a.href = u; a.download = `${t.slug || 'template'}.${fmt}`;
         a.click(); URL.revokeObjectURL(u);
       },
-      error: () => this.toast.error('Export impossible.'),
+      error: () => this.toast.error(this.t.translate('templates.export_error')),
     });
   }
   duplicate(t: DocumentTemplate) {
     this.service.duplicateTemplate(t.id!).subscribe({
-      next: () => { this.toast.success('Modèle dupliqué.'); this.reload(); },
-      error: () => this.toast.error('Duplication impossible.'),
+      next: () => { this.toast.success(this.t.translate('templates.duplicated')); this.reload(); },
+      error: () => this.toast.error(this.t.translate('documents.duplicate_error')),
     });
   }
   remove(t: DocumentTemplate) {
-    if (!confirm(`Supprimer le modèle « ${t.name} » ?`)) return;
+    if (!confirm(this.t.translate('templates.confirm_delete', { name: t.display_name || t.name }))) return;
     this.service.removeTemplate(t.id!).subscribe({
-      next: () => { this.toast.success('Modèle supprimé.'); this.reload(); },
-      error: () => this.toast.error('Suppression impossible (modèle utilisé ?).'),
+      next: () => { this.toast.success(this.t.translate('templates.deleted')); this.reload(); },
+      error: () => this.toast.error(this.t.translate('templates.delete_error')),
     });
   }
 
   instantiate(ft: FormTemplate) {
     this.formSvc.instantiate(ft.id!, { title: ft.name }).subscribe({
-      next: (form) => { this.toast.success('Formulaire généré.'); this.router.navigate(['/forms', form.id]); },
-      error: () => this.toast.error('Génération impossible.'),
+      next: (form) => { this.toast.success(this.t.translate('templates.form_generated')); this.router.navigate(['/forms', form.id]); },
+      error: () => this.toast.error(this.t.translate('templates.form_generate_error')),
     });
   }
   removeForm(ft: FormTemplate) {
-    if (!confirm(`Supprimer le modèle de formulaire « ${ft.name} » ?`)) return;
+    if (!confirm(this.t.translate('templates.confirm_delete_form', { name: ft.name }))) return;
     this.formSvc.removeTemplate(ft.id!).subscribe({
-      next: () => { this.toast.success('Modèle supprimé.'); this.reload(); },
-      error: () => this.toast.error('Suppression impossible.'),
+      next: () => { this.toast.success(this.t.translate('templates.deleted')); this.reload(); },
+      error: () => this.toast.error(this.t.translate('templates.delete_error')),
     });
   }
 }
