@@ -594,7 +594,7 @@ export interface FormTemplate {
   id?: number;
   name: string;
   description: string;
-  schema: FormField[];
+  schema: FormSchema;
   diagrams: FormDiagram[];
   report_template?: number | null;
   language?: TemplateLanguage;

@@ -63,6 +63,8 @@ class FormTemplateViewSet(viewsets.ModelViewSet):
             report_template=template.report_template,
             confidentiality=template.confidentiality,
             success_message=template.success_message,
+            show_progress=template.show_progress,
+            theme=copy.deepcopy(template.theme or {}),
         )
         form.ensure_short_link()
         return Response(OnlineFormSerializer(form, context={"request": request}).data,

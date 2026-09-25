@@ -6,10 +6,13 @@ import { FormService } from '../../core/services/form.service';
 import { ProjectService } from '../../core/services/project.service';
 import { DocumentService } from '../../core/services/document.service';
 import { ToastService } from '../../core/services/api.service';
+import { FormSchemaEditor } from './form-schema-editor';
+import { FormAppearanceEditor } from './form-appearance-editor';
 import {
   Choice,
   FormDiagram,
   FormField,
+  FormSection,
   FormTemplate,
   LANGUAGES,
   Project,
@@ -25,7 +28,7 @@ const VARIANTS: { value: string; label: string }[] = [
 
 @Component({
   selector: 'app-form-template-builder',
-  imports: [FormsModule, RouterLink, MatTabsModule],
+  imports: [FormsModule, RouterLink, MatTabsModule, FormSchemaEditor, FormAppearanceEditor],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? 'Modifier le modèle de formulaire' : 'Nouveau modèle de formulaire' }}</h1>
@@ -101,35 +104,11 @@ const VARIANTS: { value: string; label: string }[] = [
           </div>
         </mat-tab>
 
-        <!-- ============ QUESTIONS ============ -->
-        <mat-tab label="Questions ({{ m.schema.length }})">
+        <!-- ============ QUESTIONS & APPARENCE ============ -->
+        <mat-tab label="Questions ({{ qCount(m) }})">
           <div class="tabpad">
-            <div class="card stack">
-              <div class="row between">
-                <h3>Questions du formulaire</h3>
-                <button class="btn btn-sm btn-primary" (click)="addField(m)">+ Question</button>
-              </div>
-              @for (f of m.schema; track $index) {
-                <div class="field-row">
-                  <input [(ngModel)]="f.label" placeholder="Libellé" (ngModelChange)="syncKey(f)" />
-                  <select [(ngModel)]="f.type">
-                    <option value="text">Texte</option>
-                    <option value="textarea">Texte long</option>
-                    <option value="email">Email</option>
-                    <option value="number">Nombre</option>
-                    <option value="date">Date</option>
-                    <option value="select">Liste déroulante</option>
-                    <option value="checkbox">Case à cocher</option>
-                  </select>
-                  <label class="chk"><input type="checkbox" [(ngModel)]="f.required" /> Requis</label>
-                  <button class="btn btn-sm btn-danger" (click)="removeField(m, $index)">✕</button>
-                  @if (f.type === 'select') {
-                    <input class="opts" [ngModel]="(f.options ?? []).join(', ')" (ngModelChange)="setOptions(f, $event)" placeholder="Options séparées par des virgules" />
-                  }
-                </div>
-              }
-              @if (!m.schema.length) { <small>Aucune question. Ajoutez-en une.</small> }
-            </div>
+            <app-form-appearance-editor [theme]="theme(m)" [(showProgress)]="m.show_progress!" (changed)="touch()" />
+            <app-form-schema-editor [sections]="sections(m)" (changed)="touch()" />
           </div>
         </mat-tab>
 
@@ -139,13 +118,13 @@ const VARIANTS: { value: string; label: string }[] = [
             <div class="card stack">
               <div class="row between">
                 <h3>Diagrammes à générer</h3>
-                <button class="btn btn-sm btn-primary" (click)="addDiagram(m)" [disabled]="!m.schema.length">+ Diagramme</button>
+                <button class="btn btn-sm btn-primary" (click)="addDiagram(m)" [disabled]="!qCount(m)">+ Diagramme</button>
               </div>
               <p class="muted" style="margin:0">
                 Chaque diagramme est calculé à partir des réponses collectées et exportable
                 en PNG / SVG. Choisissez une question à analyser et le type de graphique.
               </p>
-              @if (!m.schema.length) {
+              @if (!qCount(m)) {
                 <div class="empty">Ajoutez d'abord des questions pour configurer des diagrammes.</div>
               }
               @for (dg of m.diagrams; track dg.id; let i = $index) {
@@ -178,7 +157,7 @@ const VARIANTS: { value: string; label: string }[] = [
                       <label>Question analysée</label>
                       <select [(ngModel)]="dg.question">
                         <option [ngValue]="undefined" disabled>— choisir —</option>
-                        @for (f of m.schema; track f.key) { <option [value]="f.key">{{ f.label || f.key }}</option> }
+                        @for (f of questions(m); track f.key) { <option [value]="f.key">{{ f.label || f.key }}</option> }
                       </select>
                       <small class="muted">Compte le nombre de réponses par valeur (idéal pour listes et cases à cocher).</small>
                     </div>
@@ -188,7 +167,7 @@ const VARIANTS: { value: string; label: string }[] = [
                         <label>Regrouper par (question)</label>
                         <select [(ngModel)]="dg.group_by">
                           <option [ngValue]="undefined" disabled>— choisir —</option>
-                          @for (f of m.schema; track f.key) { <option [value]="f.key">{{ f.label || f.key }}</option> }
+                          @for (f of questions(m); track f.key) { <option [value]="f.key">{{ f.label || f.key }}</option> }
                         </select>
                       </div>
                       <div class="field">
@@ -277,23 +256,33 @@ export class FormTemplateBuilder {
       if (this.id) {
         this.service.template(+this.id).subscribe((t) => {
           t.diagrams = t.diagrams ?? [];
-          t.schema = t.schema ?? [];
-          this.model.set(t);
+          this.model.set(this.normalize(t));
         });
       } else {
-        this.model.set({
+        this.model.set(this.normalize({
           name: '', description: '', schema: [], diagrams: [],
           language: 'fr',
           confidentiality: 'internal', success_message: 'Merci, votre réponse a bien été enregistrée.',
           is_active: true, scope: 'global', projects: [],
-        });
+        } as FormTemplate));
       }
     });
   }
 
   isEdit() { return !!this.id; }
+  touch() { const m = this.model(); if (m) this.model.set({ ...m }); }
 
-  numericFields = (m: FormTemplate) => m.schema.filter((f) => f.type === 'number');
+  private normalize(t: FormTemplate): FormTemplate {
+    t.schema = FormSchemaEditor.toSections((t.schema || []) as any[]);
+    if (!t.theme) t.theme = { layout: 'card', accent: '#ec6608', background: '#f4f5f7' };
+    if (t.show_progress === undefined) t.show_progress = true;
+    return t;
+  }
+  sections(m: FormTemplate): FormSection[] { return m.schema as FormSection[]; }
+  theme(m: FormTemplate) { return m.theme || (m.theme = {}); }
+  questions(m: FormTemplate): FormField[] { return FormSchemaEditor.questions(this.sections(m)); }
+  qCount(m: FormTemplate) { return this.questions(m).length; }
+  numericFields = (m: FormTemplate) => this.questions(m).filter((f) => f.type === 'number');
 
   isProjSel(m: FormTemplate, id: number) { return (m.projects ?? []).includes(id); }
   toggleProj(m: FormTemplate, id: number) {
@@ -302,16 +291,13 @@ export class FormTemplateBuilder {
     if (i >= 0) m.projects.splice(i, 1); else m.projects.push(id);
   }
 
-  addField(m: FormTemplate) { m.schema.push({ key: '', label: '', type: 'text', required: false }); this.model.set({ ...m }); }
-  removeField(m: FormTemplate, i: number) { m.schema.splice(i, 1); this.model.set({ ...m }); }
   syncKey(f: FormField) {
     f.key = (f.label || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
       .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'champ';
   }
-  setOptions(f: FormField, raw: string) { f.options = raw.split(',').map((s) => s.trim()).filter(Boolean); }
 
   addDiagram(m: FormTemplate) {
-    const first = m.schema[0]?.key;
+    const first = this.questions(m)[0]?.key;
     m.diagrams.push({
       id: `dg${Date.now()}`, title: 'Nouveau diagramme', variant: 'bar',
       mode: 'distribution', question: first, agg: 'count', color: '#1F497D',
@@ -327,7 +313,7 @@ export class FormTemplateBuilder {
   save() {
     const m = this.model(); if (!m) return;
     if (!m.name) { this.toast.error('Le nom est obligatoire.'); return; }
-    m.schema.forEach((f) => this.syncKey(f));
+    this.questions(m).forEach((f) => this.syncKey(f));
     this.saving.set(true);
     const req = this.isEdit() ? this.service.updateTemplate(+this.id!, m) : this.service.createTemplate(m);
     req.subscribe({
@@ -335,7 +321,7 @@ export class FormTemplateBuilder {
         this.saving.set(false);
         this.toast.success('Modèle de formulaire enregistré.');
         if (!this.isEdit()) this.router.navigate(['/form-templates', saved.id]);
-        else this.model.set({ ...saved, diagrams: saved.diagrams ?? [], schema: saved.schema ?? [] });
+        else this.model.set(this.normalize({ ...saved, diagrams: saved.diagrams ?? [] }));
       },
       error: () => { this.saving.set(false); this.toast.error("Erreur lors de l'enregistrement."); },
     });
