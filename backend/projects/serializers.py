@@ -82,7 +82,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "client_logo", "client_logo_url", "description", "reference",
             "status", "start_date", "end_date", "styles", "parent", "clients",
             "clients_detail", "children", "custom_field_defs", "custom_fields",
-            "links", "contacts", "assignments",
+            "tracking", "links", "contacts", "assignments",
             "document_count", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]

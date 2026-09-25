@@ -18,6 +18,11 @@ FILE_META = {
     "md": (".md", "text/markdown"),
     "a3": (".pdf", "application/pdf"),
     "a3_png": (".png", "image/png"),
+    "brochure": (".docx",
+                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+    "lettre": (".docx",
+               "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+    "mail": (".md", "text/markdown"),
 }
 
 # builder_key -> (module, doc_type attendu)

@@ -82,6 +82,43 @@ def preview_document(document: Document):
     return content, ext, mime
 
 
+def preview_inline(document: Document):
+    """
+    Aperçu portable pour affichage direct dans le navigateur.
+    Renvoie (kind, mime, content_bytes) avec kind ∈ {'html', 'image', 'pdf'}.
+    Aucune dépendance Word/LibreOffice, aucun fichier média intermédiaire.
+    """
+    ctx = GenerationContext.build(
+        document,
+        version_number=max(document.current_version, 1),
+        data=document.data,
+        author_initials="—",
+        author_name="",
+        comment="Aperçu",
+        confidentiality=document.confidentiality,
+    )
+    doc_type = document.doc_type
+    if doc_type == "a3":
+        from .generators import a3_gen
+        return "image", "image/png", a3_gen.render_png(ctx)
+    from .generators import html_preview
+    html = html_preview.render(document, ctx)
+    if html is not None:
+        return "html", "text/html", html
+    # Repli ultime : vrai fichier, éventuellement converti en PDF si possible.
+    content = render_content(document, ctx)
+    ext, _mime = output_meta(document)
+    if ext == ".pdf":
+        return "pdf", "application/pdf", content
+    pdf = to_pdf_for_preview(content, ext)
+    if pdf is not None:
+        return "pdf", "application/pdf", pdf
+    return "html", "text/html", (
+        "<!doctype html><meta charset='utf-8'>"
+        "<p style='font-family:sans-serif;padding:2rem'>"
+        "Aperçu indisponible pour ce format.</p>").encode("utf-8")
+
+
 def to_pdf_for_preview(content: bytes, ext: str):
     """Convertit un document en PDF pour l'aperçu navigateur. (content_pdf | None)."""
     if ext == ".pdf":

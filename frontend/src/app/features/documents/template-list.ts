@@ -17,6 +17,9 @@ const TYPE_TABS: TypeTab[] = [
   { key: 'a3', label: 'Template A3', icon: '🖼️' },
   { key: 'md', label: 'Markdown', icon: 'M↓' },
   { key: 'pptx', label: 'PowerPoint', icon: '📽️' },
+  { key: 'brochure', label: 'Brochure', icon: '📕' },
+  { key: 'lettre', label: 'Lettre', icon: '✉️' },
+  { key: 'mail', label: 'Mail', icon: '📧' },
 ];
 
 @Component({

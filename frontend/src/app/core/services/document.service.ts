@@ -11,6 +11,13 @@ import {
   ProjectDocument,
 } from '../models';
 
+/** Résultat d'aperçu inline : contenu en base64 (aucune requête média externe). */
+export interface PreviewResult {
+  kind: 'html' | 'image' | 'pdf' | 'native';
+  mime: string;
+  b64: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DocumentService {
   private http = inject(HttpClient);
@@ -41,11 +48,11 @@ export class DocumentService {
   duplicateDocument(id: number): Observable<ProjectDocument> {
     return this.http.post<ProjectDocument>(`${this.base}/${id}/duplicate/`, {});
   }
-  preview(id: number): Observable<{ url: string; ext: string; kind: string }> {
-    return this.http.get<{ url: string; ext: string; kind: string }>(`${this.base}/${id}/preview/`);
+  preview(id: number): Observable<PreviewResult> {
+    return this.http.get<PreviewResult>(`${this.base}/${id}/preview/`);
   }
-  previewTemplate(id: number): Observable<{ url: string; ext: string; kind: string }> {
-    return this.http.get<{ url: string; ext: string; kind: string }>(`${this.base}/templates/${id}/preview/`);
+  previewTemplate(id: number): Observable<PreviewResult> {
+    return this.http.get<PreviewResult>(`${this.base}/templates/${id}/preview/`);
   }
   restoreVersion(id: number, versionId: number, authorInitials: string): Observable<DocumentVersion> {
     return this.http.post<DocumentVersion>(`${this.base}/${id}/restore/`,

@@ -8,7 +8,7 @@ import { CompanyService, TeamService } from '../../core/services/company.service
 import { ProjectService } from '../../core/services/project.service';
 import { ToastService } from '../../core/services/api.service';
 import {
-  CompanyProfile, CompanyStyles, Project, StyleMap, Team, TeamMember,
+  CompanyProfile, CompanyStyles, Project, StyleMap, Team, TeamMember, UsefulLink,
 } from '../../core/models';
 
 const DOC_TYPES: { key: string; label: string; icon: string }[] = [
@@ -25,56 +25,44 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
   selector: 'app-company-settings',
   imports: [FormsModule, RouterLink, StyleEditor, OrgChart, MatTabsModule],
   template: `
-    <div class="row between">
-      <h1>Mon entreprise</h1>
-      @if (tab() === 0 || tab() === 3) {
-        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">Enregistrer</button>
-      }
-    </div>
-
     @if (model(); as m) {
+      <div class="company-head">
+        <label class="logo-slot" [class.empty]="!m.logo_url">
+          @if (m.logo_url) { <img [src]="m.logo_url" alt="logo" /> }
+          @else { <span class="material-icons">add_photo_alternate</span> }
+          <input type="file" accept="image/*" (change)="onLogo($event)" hidden />
+          <span class="logo-edit"><span class="material-icons">edit</span></span>
+        </label>
+        <input class="company-title" [(ngModel)]="m.name" placeholder="Nom de l'entreprise" />
+        <span class="spacer"></span>
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">Enregistrer</button>
+      </div>
+
       <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false"
                      [selectedIndex]="tab()" (selectedIndexChange)="tab.set($event)">
-        <!-- ============ INFORMATIONS + ORGANIGRAMME ============ -->
-        <mat-tab label="Informations">
+        <!-- ============ GÉNÉRAL (Description + Organigramme) ============ -->
+        <mat-tab label="Général">
           <div class="tabpad">
             <div class="card stack">
-              <div class="form-grid">
-                <div class="field"><label>Nom *</label><input [(ngModel)]="m.name" placeholder="Nom de l'entreprise" /></div>
-                <div class="field"><label>Email de contact</label><input [(ngModel)]="m.email" type="email" placeholder="contact@..." /></div>
-              </div>
-              <div class="field"><label>Description</label><textarea [(ngModel)]="m.description" rows="3"></textarea></div>
-              <div class="field">
-                <label>Logo</label>
-                @if (m.logo_url) { <div class="row" style="margin-bottom:.5rem"><img [src]="m.logo_url" alt="logo" style="height:48px" /></div> }
-                <input type="file" accept="image/*" (change)="onLogo($event)" />
-                <small>PNG/JPG. Utilisé dans les documents.</small>
-              </div>
-              <div class="form-grid">
-                <div class="field"><label>Site web</label><input [(ngModel)]="m.website_url" placeholder="https://..." /></div>
-                <div class="field"><label>Conditions générales (URL)</label><input [(ngModel)]="m.terms_url" placeholder="https://.../cgv" /></div>
-              </div>
-              <div class="form-grid">
-                <div class="field"><label>Téléphone</label><input [(ngModel)]="m.phone" /></div>
-                <div class="field"><label>Adresse</label><textarea [(ngModel)]="m.address" rows="2"></textarea></div>
-              </div>
-              <div class="field">
-                <div class="row between"><label>Liens utiles</label><button class="btn btn-sm btn-ghost" (click)="addLink(m)">+ Ajouter</button></div>
-                @for (link of m.useful_links; track $index) {
-                  <div class="row" style="margin-bottom:.5rem">
-                    <input [(ngModel)]="link.label" placeholder="Libellé" style="flex:1" />
-                    <input [(ngModel)]="link.url" placeholder="https://..." style="flex:2" />
-                    <button class="btn btn-sm btn-danger" (click)="removeLink(m, $index)">✕</button>
-                  </div>
-                }
-                @if (!m.useful_links.length) { <small>Aucun lien. Cliquez sur « Ajouter ».</small> }
-              </div>
+              <h3>Description</h3>
+              <div class="field"><textarea [(ngModel)]="m.description" rows="4" placeholder="Présentation de l'entreprise…"></textarea></div>
             </div>
-
             <div class="card stack">
               <h3>Organigramme</h3>
               <p class="muted" style="margin:0">Reconstruit automatiquement à partir des équipes et de leurs liens hiérarchiques. Cliquez sur une équipe pour voir son détail.</p>
               <app-org-chart [teams]="teams()" />
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- ============ INFORMATIONS DE CONTACT ============ -->
+        <mat-tab label="Informations de contact">
+          <div class="tabpad">
+            <div class="card stack">
+              <h3>Coordonnées</h3>
+              <div class="field"><label>Email de contact</label><input [(ngModel)]="m.email" type="email" placeholder="contact@…" /></div>
+              <div class="field"><label>Adresse</label><textarea [(ngModel)]="m.address" rows="3" placeholder="Adresse postale…"></textarea></div>
+              <div class="field"><label>Téléphone</label><input [(ngModel)]="m.phone" placeholder="+33 …" /></div>
             </div>
           </div>
         </mat-tab>
@@ -156,6 +144,31 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
           </div>
         </mat-tab>
 
+        <!-- ============ LIENS UTILES ============ -->
+        <mat-tab label="Liens utiles">
+          <div class="tabpad">
+            <div class="card stack">
+              <div class="row between"><h3>Liens utiles</h3><button class="btn btn-sm btn-primary" (click)="addLink(m)">+ Ajouter un lien</button></div>
+              <p class="muted" style="margin:0">Catégories : Conditions générales, Site web, Support, ou une catégorie personnalisée.</p>
+              @for (link of m.useful_links; track $index) {
+                <div class="link-row">
+                  <select [ngModel]="catValue(link)" (ngModelChange)="onCat(link, $event)" style="width:170px">
+                    @for (c of linkCategories; track c) { <option [value]="c">{{ c }}</option> }
+                    <option value="__custom">Autre (personnalisée)…</option>
+                  </select>
+                  @if (isCustom(link)) {
+                    <input [(ngModel)]="link.category" placeholder="Nouvelle catégorie" style="width:150px" />
+                  }
+                  <input [(ngModel)]="link.label" placeholder="Libellé" style="flex:1" />
+                  <input [(ngModel)]="link.url" placeholder="https://…" style="flex:2" />
+                  <button class="btn btn-sm btn-danger" (click)="removeLink(m, $index)">✕</button>
+                </div>
+              }
+              @if (!m.useful_links.length) { <small>Aucun lien. Cliquez sur « Ajouter un lien ».</small> }
+            </div>
+          </div>
+        </mat-tab>
+
         <!-- ============ STYLES GLOBAUX (par type) ============ -->
         <mat-tab label="Styles par type">
           <div class="tabpad">
@@ -177,6 +190,21 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
     }
   `,
   styles: [`
+    .company-head { display:flex; align-items:center; gap:1rem; margin:.4rem 0 .2rem; }
+    .logo-slot { position:relative; width:64px; height:64px; border-radius:16px; flex:none; cursor:pointer;
+      display:grid; place-items:center; overflow:hidden; border:1px solid var(--border-strong);
+      background:var(--surface); box-shadow:var(--shadow); }
+    .logo-slot.empty { background:linear-gradient(135deg, var(--frost), #fff); color:var(--primary); }
+    .logo-slot img { width:100%; height:100%; object-fit:contain; }
+    .logo-slot .material-icons { font-size:26px; }
+    .logo-slot .logo-edit { position:absolute; right:0; bottom:0; background:var(--primary); color:#fff;
+      width:20px; height:20px; display:grid; place-items:center; border-top-left-radius:8px; }
+    .logo-slot .logo-edit .material-icons { font-size:13px; }
+    .company-title { max-width:520px; font-size:1.7rem; font-weight:800; letter-spacing:-.02em;
+      border:1px solid transparent; background:transparent; padding:.2rem .4rem; border-radius:8px; color:var(--dark); }
+    .company-title:hover { border-color:var(--border); }
+    .company-title:focus { background:var(--surface); }
+    .link-row { display:flex; gap:.4rem; margin-bottom:.5rem; align-items:center; }
     .detail-tabs { margin-top: 1rem; }
     .tabpad { padding-top: 1.2rem; display:flex; flex-direction:column; gap:1rem; }
     .ava { display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; font-size:.66rem; font-weight:700; color:#fff; background:linear-gradient(135deg,#38BDF8,#6366F1); margin-right:.4rem; vertical-align:middle; }
@@ -206,6 +234,7 @@ export class CompanySettings {
 
   nc: Partial<TeamMember> = {};
   ntName = ''; ntColor = '#38BDF8'; ntParent: number | null = null;
+  linkCategories = ['Conditions générales', 'Site web', 'Support'];
 
   constructor() {
     this.service.get().subscribe((c) => this.model.set(c));
@@ -239,9 +268,16 @@ export class CompanySettings {
     return s.types![type];
   }
 
-  addLink(m: CompanyProfile) { m.useful_links.push({ label: '', url: '', order: m.useful_links.length }); }
+  addLink(m: CompanyProfile) { m.useful_links.push({ category: 'Site web', label: '', url: '', order: m.useful_links.length }); }
   removeLink(m: CompanyProfile, i: number) { m.useful_links.splice(i, 1); }
-  onLogo(event: Event) { this.logoFile = (event.target as HTMLInputElement).files?.[0] ?? null; }
+  catValue(l: UsefulLink) { return this.linkCategories.includes(l.category || '') ? l.category : '__custom'; }
+  isCustom(l: UsefulLink) { return !this.linkCategories.includes(l.category || ''); }
+  onCat(l: UsefulLink, v: string) { l.category = v === '__custom' ? '' : v; }
+  onLogo(event: Event) {
+    const f = (event.target as HTMLInputElement).files?.[0] ?? null;
+    this.logoFile = f;
+    if (f) { const m = this.model(); if (m) m.logo_url = URL.createObjectURL(f); }
+  }
 
   // ---- Collaborateurs ----
   addCollaborator() {
@@ -275,18 +311,32 @@ export class CompanySettings {
     });
   }
 
+  private syncUrls(m: CompanyProfile) {
+    // Les liens catégorisés alimentent les champs utilisés dans les documents.
+    const site = m.useful_links.find((l) => l.category === 'Site web');
+    const cgv = m.useful_links.find((l) => l.category === 'Conditions générales');
+    if (site) m.website_url = site.url;
+    if (cgv) m.terms_url = cgv.url;
+  }
+
   save() {
     const m = this.model();
     if (!m) return;
+    this.syncUrls(m);
     this.saving.set(true);
     if (this.logoFile) {
+      // 1) upload du logo (multipart), 2) mise à jour complète (JSON: liens, styles…)
       const fd = new FormData();
-      for (const k of ['name', 'description', 'website_url', 'terms_url', 'address', 'phone', 'email'] as const) {
-        fd.append(k, (m[k] as string) ?? '');
-      }
-      fd.append('styles', JSON.stringify(m.styles ?? {}));
+      fd.append('name', m.name);
       fd.append('logo', this.logoFile);
-      this.service.updateWithLogo(fd).subscribe({ next: (c) => this.done(c), error: () => this.fail() });
+      this.service.updateWithLogo(fd).subscribe({
+        next: (c) => {
+          m.logo_url = c.logo_url;
+          this.logoFile = null;
+          this.service.update(m).subscribe({ next: (c2) => this.done(c2), error: () => this.fail() });
+        },
+        error: () => this.fail(),
+      });
     } else {
       this.service.update(m).subscribe({ next: (c) => this.done(c), error: () => this.fail() });
     }

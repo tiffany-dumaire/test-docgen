@@ -340,6 +340,43 @@ docugen/
 
 ---
 
+## Aperçu in-app · Suivi de projet · Nouveaux types · Rapports de formulaire
+
+**Aperçu fiable, sans téléchargement.** L'aperçu des modèles et documents est
+désormais rendu **inline** dans l'application (HTML/PNG/PDF en base64, affiché via
+`srcdoc`/data-URI). Plus de dépendance à Word/LibreOffice ni de requête vers un
+hôte média : fini les erreurs « localhost n'autorise pas la connexion » et
+« aperçu PDF non disponible ».
+
+**Diagrammes de suivi de projet** (onglet *Suivi de projet* pour saisir les
+données, onglet *Documents de suivi* pour les diagrammes exportables en SVG) :
+Gantt, planning prévu/réalisé, courbe d'avancement, tableau de bord, diagramme de
+charge, roadmap, dépendances, burndown, burnup, suivi des risques, suivi des
+jalons. Rendu SVG portable, sans dépendance système.
+
+**Nouveaux types de modèles** : Brochure, Lettre, Mail (en plus de Word, PDF,
+Excel, Template A3, Markdown, PowerPoint), plus un **modèle de CV au format
+suisse** (Word) prêt à l'emploi (état civil, permis, expérience, formation,
+langues).
+
+**Rapport statistiques lié à un formulaire.** Un modèle de formulaire peut être
+lié à un **modèle de document Word ou PDF**. Le bloc « Diagramme de formulaire »
+(clés `d1`, `d2`…) insère les diagrammes des questions comme **variables** dans le
+document. Depuis un formulaire : *Générer le rapport* produit le document rempli.
+
+**Mon entreprise** : en-tête avec logo (modifiable) et nom ; onglets *Général*
+(description + organigramme), *Informations de contact*, *Liens utiles* (par
+catégories : Conditions générales, Site web, Support, Autre + personnalisée),
+*Collaborateurs*, *Équipes*, *Styles par type*. Les liens de projet reprennent ces
+catégories en ajoutant Sharepoint, Gitlab, Teamwork.
+
+> Placement dynamique : les pages à positionnement libre (A3 multi-pages,
+> pages de garde/suivi Word/PDF) permettent déjà de placer librement les
+> éléments ; l'extension à des pages PDF arbitraires et à chaque diapositive
+> PowerPoint est prévue comme évolution.
+
+---
+
 ## Thème hivernal · Organisation (entreprise, équipes, collaborateurs) · Suivi général
 
 **Thème hivernal.** L'interface adopte une charte « hiver » colorée et originale :

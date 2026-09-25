@@ -56,8 +56,10 @@ class UsefulLink(models.Model):
     company = models.ForeignKey(
         CompanyProfile, related_name="useful_links", on_delete=models.CASCADE
     )
+    category = models.CharField("Catégorie", max_length=100, blank=True,
+                                default="Autre")
     label = models.CharField("Libellé", max_length=255)
-    url = models.URLField("URL")
+    url = models.URLField("URL", max_length=1000)
     order = models.PositiveIntegerField("Ordre", default=0)
 
     class Meta:

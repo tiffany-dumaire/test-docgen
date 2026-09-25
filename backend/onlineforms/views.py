@@ -58,6 +58,7 @@ class FormTemplateViewSet(viewsets.ModelViewSet):
             template=template,
             schema=copy.deepcopy(template.schema),
             diagrams=copy.deepcopy(template.diagrams),
+            report_template=template.report_template,
             confidentiality=template.confidentiality,
             success_message=template.success_message,
         )
@@ -79,6 +80,41 @@ class OnlineFormViewSet(viewsets.ModelViewSet):
         data = FormSubmissionSerializer(
             form.submissions.all(), many=True).data
         return Response(data)
+
+    @action(detail=True, methods=["post"])
+    def generate_report(self, request, pk=None):
+        """Génère un document (Word/PDF) de rapport statistiques à partir du
+        modèle de rapport lié, en y insérant les diagrammes du formulaire."""
+        from documents.models import Document, ConfidentialityLevel
+        from documents.services import generate_version
+        form = self.get_object()
+        template = form.report_template
+        if template is None:
+            return Response(
+                {"detail": "Aucun modèle de rapport lié à ce formulaire."},
+                status=status.HTTP_400_BAD_REQUEST)
+        project = form.project
+        if project is None:
+            from projects.models import Project
+            project = Project.objects.first()
+        if project is None:
+            return Response({"detail": "Aucun projet disponible."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        doc = Document.objects.create(
+            project=project, template=template,
+            title=f"Rapport — {form.title}",
+            confidentiality=ConfidentialityLevel.INTERNAL,
+            data={"__form_id__": form.id})
+        version = generate_version(
+            doc, author_initials="—",
+            comment=f"Rapport statistiques du formulaire « {form.title} »",
+            data={"__form_id__": form.id})
+        from documents.serializers import DocumentSerializer
+        return Response({
+            "document": DocumentSerializer(doc, context={"request": request}).data,
+            "version_id": version.id,
+            "detail": "Rapport généré.",
+        }, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["get"])
     def diagrams_data(self, request, pk=None):

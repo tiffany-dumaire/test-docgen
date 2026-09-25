@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { SlicePipe, DatePipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MeetingCalendar } from '../../shared/meeting-calendar';
+import { ProjectTracking } from './project-tracking';
 import { ProjectExtrasService } from '../../core/services/project-extras.service';
 import { Meeting, JournalEntry, ProjectLink } from '../../core/models';
 import { MembershipService, Membership } from '../../core/services/membership.service';
@@ -16,7 +17,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-project-detail',
-  imports: [RouterLink, FormsModule, SlicePipe, DatePipe, MatTabsModule, MeetingCalendar],
+  imports: [RouterLink, FormsModule, SlicePipe, DatePipe, MatTabsModule, MeetingCalendar, ProjectTracking],
   template: `
     @if (project(); as p) {
       <div class="row between">
@@ -131,6 +132,18 @@ import { Router } from '@angular/router';
           </div>
         </mat-tab>
 
+        <mat-tab label="Suivi de projet">
+          <div class="tabpad">
+            <app-project-tracking [id]="p.id!" mode="data" />
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Documents de suivi">
+          <div class="tabpad">
+            <app-project-tracking [id]="p.id!" mode="diagrams" />
+          </div>
+        </mat-tab>
+
         <mat-tab label="Liens utiles">
           <div class="tabpad">
             <div class="card"><h3>🔗 Liens utiles</h3>
@@ -140,8 +153,12 @@ import { Router } from '@angular/router';
                     @if (l.comment) { <div class="muted" style="font-size:.75rem">{{ l.comment }}</div> }</div>
                   <button class="btn btn-sm btn-danger" (click)="delLink(l)">✕</button></div>
               } @empty { <div class="muted">Aucun lien.</div> }
-              <div class="row" style="gap:.3rem;flex-wrap:wrap;margin-top:.6rem">
-                <input [(ngModel)]="nlCat" placeholder="Catégorie" style="width:130px" />
+              <div class="row" style="gap:.3rem;flex-wrap:wrap;margin-top:.6rem;align-items:center">
+                <select [ngModel]="nlCatSel" (ngModelChange)="onNlCat($event)" style="width:170px">
+                  @for (c of linkCategories; track c) { <option [value]="c">{{ c }}</option> }
+                  <option value="__custom">Autre (personnalisée)…</option>
+                </select>
+                @if (nlCatSel === '__custom') { <input [(ngModel)]="nlCat" placeholder="Nouvelle catégorie" style="width:150px" /> }
                 <input [(ngModel)]="nlName" placeholder="Nom" style="flex:1;min-width:120px" />
                 <input [(ngModel)]="nlUrl" placeholder="https://…" style="flex:1;min-width:140px" />
                 <input [(ngModel)]="nlComment" placeholder="Commentaire" style="flex:1;min-width:120px" />
@@ -234,7 +251,9 @@ export class ProjectDetail {
   links = signal<ProjectLink[]>([]);
   meetings = signal<Meeting[]>([]);
   journal = signal<JournalEntry[]>([]);
-  nlCat=''; nlName=''; nlUrl=''; nlComment='';
+  nlCat='Sharepoint'; nlCatSel='Sharepoint'; nlName=''; nlUrl=''; nlComment='';
+  linkCategories = ['Conditions générales', 'Site web', 'Support', 'Sharepoint', 'Gitlab', 'Teamwork'];
+  onNlCat(v: string) { this.nlCatSel = v; this.nlCat = v === '__custom' ? '' : v; }
   nmTitle=''; nmLoc=''; nmDate='';
   njCat='note'; njConf='internal'; njBody='';
 

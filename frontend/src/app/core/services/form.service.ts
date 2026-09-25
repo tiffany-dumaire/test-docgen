@@ -72,6 +72,10 @@ export class FormService {
   instantiate(id: number, body: { project?: number | null; title?: string }): Observable<OnlineForm> {
     return this.http.post<OnlineForm>(`${this.base}/form-templates/${id}/instantiate/`, body);
   }
+  generateReport(id: number): Observable<{ document: { id: number }; detail: string }> {
+    return this.http.post<{ document: { id: number }; detail: string }>(
+      `${this.base}/forms/${id}/generate_report/`, {});
+  }
 
   // Endpoints publics (par code de lien réduit)
   publicForm(code: string): Observable<OnlineForm> {

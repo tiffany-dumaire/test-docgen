@@ -27,6 +27,12 @@ export class ProjectService {
   update(id: number, data: Partial<Project>): Observable<Project> {
     return this.http.put<Project>(`${this.url}${id}/`, data);
   }
+  patch(id: number, data: Partial<Project>): Observable<Project> {
+    return this.http.patch<Project>(`${this.url}${id}/`, data);
+  }
+  trackingDiagramUrl(id: number, type: string): string {
+    return `${this.url}${id}/tracking_diagram/?type=${encodeURIComponent(type)}`;
+  }
 
   remove(id: number): Observable<void> {
     return this.http.delete<void>(`${this.url}${id}/`);

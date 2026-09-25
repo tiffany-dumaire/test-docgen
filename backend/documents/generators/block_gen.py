@@ -82,6 +82,35 @@ def _table_data(block, ctx):
 # ===========================================================================
 # WORD  (base = Modele.docx)
 # ===========================================================================
+def _form_diagram_png(block, ctx):
+    """Rend en PNG un diagramme d'un formulaire lié (rapport statistiques).
+
+    Le formulaire est identifié par ctx.data['__form_id__'] ; le diagramme par
+    block['diagram_key'] (id du diagramme dans form.diagrams).
+    """
+    form_id = (ctx.data or {}).get("__form_id__")
+    if not form_id:
+        return None
+    try:
+        from onlineforms.models import OnlineForm
+        from onlineforms import diagrams as FD
+        form = OnlineForm.objects.filter(pk=form_id).first()
+        if not form:
+            return None
+        key = str(block.get("diagram_key") or "")
+        cfg = next((c for c in (form.diagrams or [])
+                    if str(c.get("id")) == key), None)
+        if cfg is None and form.diagrams:
+            cfg = form.diagrams[0]
+        if cfg is None:
+            return None
+        subs = list(form.submissions.values_list("data", flat=True))
+        png, _mime, _ext = FD.render(cfg, form.schema, subs, fmt="png")
+        return png
+    except Exception:
+        return None
+
+
 def _render_free_page_docx(ctx, layout) -> bytes:
     """Document Word « page libre » : une seule page (A3/A4) à positionnement
     libre, rendue comme image plein cadre, sans marge ni en-tête."""
@@ -415,6 +444,21 @@ def render_docx(ctx: GenerationContext) -> bytes:
                     run.add_picture(io.BytesIO(png), width=Emu(width_emu), height=Emu(height_emu))
                 except Exception:
                     p.add_run("[diagramme]")
+        elif bt == "form_diagram":
+            png = _form_diagram_png(block, ctx)
+            if png:
+                p = doc.add_paragraph()
+                align(p, block.get("align", "center"))
+                run = p.add_run()
+                try:
+                    from PIL import Image as _PILImage
+                    w, h = _PILImage.open(io.BytesIO(png)).size
+                    pct = float(block.get("width_pct", 90)) / 100.0
+                    width_emu = int(usable_width_emu() * max(0.3, min(pct, 1.0)))
+                    run.add_picture(io.BytesIO(png), width=Emu(width_emu),
+                                    height=Emu(int(width_emu * h / w)))
+                except Exception:
+                    p.add_run("[diagramme du formulaire]")
         elif bt in ("image", "logo"):
             path = _logo_path(ctx) if bt == "logo" else _resolve_asset(block.get("asset_url"))
             if path:
@@ -1045,3 +1089,8 @@ def _render_md(ctx):
 
 
 BLOCK_RENDERERS["md"] = _render_md
+
+# Types documentaires basés sur les blocs Word / Markdown
+BLOCK_RENDERERS["brochure"] = render_docx   # Brochure -> Word
+BLOCK_RENDERERS["lettre"] = render_docx     # Lettre  -> Word
+BLOCK_RENDERERS["mail"] = _render_md        # Mail    -> Markdown

@@ -37,6 +37,9 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
   a3: { label: 'Template A3 (PNG / PDF)', icon: '🖼️', hint: 'Affiche / planche A3 ou A4 à positionnement libre, exportée en PNG ou PDF.' },
   md: { label: 'Markdown', icon: 'M↓', hint: 'Document Markdown par blocs, exporté en .md.' },
   pptx: { label: 'PowerPoint', icon: '📽️', hint: 'Présentation PowerPoint : chaque titre démarre une diapositive.' },
+  brochure: { label: 'Brochure', icon: '📕', hint: 'Brochure par blocs, exportée en Word (.docx).' },
+  lettre: { label: 'Lettre', icon: '✉️', hint: 'Lettre par blocs, exportée en Word (.docx).' },
+  mail: { label: 'Mail', icon: '📧', hint: 'E-mail par blocs, exporté en Markdown (.md).' },
 };
 
 @Component({
@@ -253,6 +256,17 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
                             </select>
                           </div>
                         </div>
+                      }
+                      @case ('form_diagram') {
+                        <div class="form-grid">
+                          <div class="field"><label>Identifiant du diagramme (formulaire)</label>
+                            <input [(ngModel)]="block.diagram_key" placeholder="ex : d1" />
+                          </div>
+                          <div class="field"><label>Largeur : {{ block.width_pct || 90 }}%</label>
+                            <input type="range" min="40" max="100" [ngModel]="block.width_pct || 90" (ngModelChange)="block.width_pct = +$event" />
+                          </div>
+                        </div>
+                        <p class="muted" style="font-size:.78rem;margin:0">Insère, lors de la génération d'un rapport lié à un formulaire, le diagramme correspondant (calculé sur les réponses).</p>
                       }
                       @case ('spacer') { <div class="muted">Espace vertical.</div> }
                     }
@@ -491,6 +505,7 @@ export class TemplateBuilder {
     { type: 'link', label: 'Lien URL', icon: '🔗' },
     { type: 'contacts', label: 'Contacts', icon: '📇' },
     { type: 'diagram', label: 'Diagramme (SmartArt)', icon: '⬗' },
+    { type: 'form_diagram', label: 'Diagramme de formulaire', icon: '📊' },
     { type: 'spacer', label: 'Espace', icon: '␣' },
   ];
 
@@ -505,7 +520,7 @@ export class TemplateBuilder {
   isPdf = computed(() => this.model()?.doc_type === 'pdf');
   isWord = computed(() => this.model()?.doc_type === 'docx');
   /** Types rendus à partir de blocs (contenu). */
-  isBlocks = computed(() => ['docx', 'pdf', 'md', 'pptx'].includes(this.model()?.doc_type ?? ''));
+  isBlocks = computed(() => ['docx', 'pdf', 'md', 'pptx', 'brochure', 'lettre', 'mail'].includes(this.model()?.doc_type ?? ''));
   /** Onglet Structure & styles (mise en page libre + styles). */
   hasStructure = computed(() => this.isWord() || this.isPdf());
   hasTableColor = computed(() => this.isWord() || this.isPdf() || this.isExcel());
@@ -523,7 +538,7 @@ export class TemplateBuilder {
 
   /** Options du sélecteur de type : types de document + « Formulaire ». */
   typeOptions = computed<Choice[]>(() => {
-    const order = ['docx', 'pdf', 'xlsx', 'a3', 'md', 'pptx'];
+    const order = ['docx', 'pdf', 'xlsx', 'a3', 'md', 'pptx', 'brochure', 'lettre', 'mail'];
     const base = this.docTypes()
       .filter((d) => order.includes(d.value))
       .sort((a, b) => order.indexOf(a.value) - order.indexOf(b.value));
@@ -704,6 +719,7 @@ export class TemplateBuilder {
       b.variant = 'process'; b.width_pct = 100; b.align = 'center';
       b.diagram_items = [{ title: 'Étape 1', text: '' }, { title: 'Étape 2', text: '' }, { title: 'Étape 3', text: '' }];
     }
+    else if (type === 'form_diagram') { b.diagram_key = 'd1'; b.width_pct = 90; b.align = 'center'; }
     return b;
   }
 

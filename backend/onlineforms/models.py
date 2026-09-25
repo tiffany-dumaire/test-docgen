@@ -71,6 +71,12 @@ class FormTemplate(models.Model):
         "Message de confirmation", max_length=255,
         default="Merci, votre réponse a bien été enregistrée.")
     is_active = models.BooleanField("Actif", default=True)
+    report_template = models.ForeignKey(
+        "documents.DocumentTemplate", related_name="form_report_templates",
+        on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name="Modèle de rapport (Word/PDF)",
+        help_text="Document Word ou PDF servant de rapport statistiques, dans "
+                  "lequel les diagrammes des questions s'insèrent comme variables.")
 
     SCOPE_GLOBAL = "global"
     SCOPE_PROJECTS = "projects"
@@ -112,6 +118,10 @@ class OnlineForm(models.Model):
         null=True, blank=True)
     schema = models.JSONField("Champs", default=list, blank=True)
     diagrams = models.JSONField("Diagrammes", default=list, blank=True)
+    report_template = models.ForeignKey(
+        "documents.DocumentTemplate", related_name="form_reports",
+        on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name="Modèle de rapport (Word/PDF)")
     confidentiality = models.CharField(
         "Confidentialité", max_length=20,
         choices=ConfidentialityLevel.choices,

@@ -39,13 +39,11 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get", "post"])
     def preview(self, request, pk=None):
-        """Aperçu d'un modèle : génère un exemple (PDF si possible), sans le conserver."""
-        import uuid as _uuid
-        from django.core.files.storage import default_storage
-        from django.core.files.base import ContentFile
+        """Aperçu portable d'un modèle, renvoyé inline (HTML/PNG/PDF en base64)."""
+        import base64
         from projects.models import Project
         from .models import Document, ConfidentialityLevel
-        from .services import preview_document, to_pdf_for_preview
+        from .services import preview_inline
         template = self.get_object()
         project = Project.objects.first()
         if project is None:
@@ -55,22 +53,9 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
             project=project, template=template, title=f"Aperçu — {template.name}",
             confidentiality=ConfidentialityLevel.INTERNAL, data={})
         try:
-            content, ext, _mime = preview_document(tmp)
-            if ext == ".md":
-                from .services import markdown_to_html_page
-                content, ext, kind = markdown_to_html_page(content.decode("utf-8")), ".html", "html"
-            elif ext == ".png":
-                kind = "image"
-            else:
-                pdf = to_pdf_for_preview(content, ext)
-                if pdf is not None:
-                    content, ext, kind = pdf, ".pdf", "pdf"
-                else:
-                    kind = "native"
-            name = f"previews/tpl-{template.pk}-{_uuid.uuid4().hex}{ext}"
-            path = default_storage.save(name, ContentFile(content))
-            return Response({"url": request.build_absolute_uri(default_storage.url(path)),
-                             "ext": ext, "kind": kind})
+            kind, mime, content = preview_inline(tmp)
+            return Response({"kind": kind, "mime": mime,
+                             "b64": base64.b64encode(content).decode("ascii")})
         except Exception as exc:
             return Response({"detail": f"Aperçu impossible : {exc}"},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -129,32 +114,17 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get", "post"])
     def preview(self, request, pk=None):
-        """Aperçu du document dans le navigateur (PDF si possible), sans version."""
-        import uuid as _uuid
-        from django.core.files.storage import default_storage
-        from django.core.files.base import ContentFile
-        from .services import preview_document, to_pdf_for_preview
+        """Aperçu portable du document, renvoyé inline (HTML/PNG/PDF en base64)."""
+        import base64
+        from .services import preview_inline
         document = self.get_object()
         try:
-            content, ext, _mime = preview_document(document)
+            kind, mime, content = preview_inline(document)
         except Exception as exc:
             return Response({"detail": f"Aperçu impossible : {exc}"},
                             status=status.HTTP_400_BAD_REQUEST)
-        if ext == ".md":
-            from .services import markdown_to_html_page
-            content, ext, kind = markdown_to_html_page(content.decode("utf-8")), ".html", "html"
-        elif ext == ".png":
-            kind = "image"
-        else:
-            pdf = to_pdf_for_preview(content, ext)
-            if pdf is not None:
-                content, ext, kind = pdf, ".pdf", "pdf"
-            else:
-                kind = "native"
-        name = f"previews/preview-{document.pk}-{_uuid.uuid4().hex}{ext}"
-        path = default_storage.save(name, ContentFile(content))
-        return Response({"url": request.build_absolute_uri(default_storage.url(path)),
-                         "ext": ext, "kind": kind})
+        return Response({"kind": kind, "mime": mime,
+                         "b64": base64.b64encode(content).decode("ascii")})
 
     @action(detail=True, methods=["get"])
     def versions(self, request, pk=None):

@@ -115,6 +115,16 @@ import {
             </div>
           }
 
+          @if (isEdit() && m.report_template) {
+            <div class="card">
+              <div class="row between">
+                <h3>Rapport statistiques</h3>
+                <button class="btn btn-sm btn-primary" (click)="genReport()" [disabled]="reporting()">Générer le rapport</button>
+              </div>
+              <p class="muted" style="margin:.2rem 0 0">Génère le document Word/PDF lié, avec les diagrammes du formulaire insérés comme variables.</p>
+            </div>
+          }
+
           @if (isEdit() && (m.diagrams?.length || 0) > 0) {
             <div class="card">
               <div class="row between">
@@ -191,6 +201,16 @@ export class FormBuilder {
   private docSvc = inject(DocumentService);
   private toast = inject(ToastService);
   private router = inject(Router);
+  reporting = signal(false);
+
+  genReport() {
+    if (!this.id) return;
+    this.reporting.set(true);
+    this.service.generateReport(+this.id).subscribe({
+      next: (r) => { this.reporting.set(false); this.toast.success('Rapport généré.'); this.router.navigate(['/documents', r.document.id]); },
+      error: (e) => { this.reporting.set(false); this.toast.error(e?.error?.detail || 'Génération impossible.'); },
+    });
+  }
 
   @Input() id?: string;
 

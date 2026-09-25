@@ -12,7 +12,7 @@ class FormTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormTemplate
         fields = [
-            "id", "name", "description", "schema", "diagrams",
+            "id", "name", "description", "schema", "diagrams", "report_template",
             "confidentiality", "confidentiality_display", "success_message",
             "is_active", "scope", "projects", "form_count",
             "created_at", "updated_at",
@@ -52,7 +52,7 @@ class OnlineFormSerializer(serializers.ModelSerializer):
         model = OnlineForm
         fields = [
             "id", "title", "description", "project", "project_name",
-            "template", "template_name",
+            "template", "template_name", "report_template",
             "schema", "diagrams",
             "confidentiality", "confidentiality_display", "is_open",
             "success_message", "deadline", "short_link", "short_url", "submission_count",

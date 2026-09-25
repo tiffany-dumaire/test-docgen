@@ -1,5 +1,6 @@
 export interface UsefulLink {
   id?: number;
+  category?: string;
   label: string;
   url: string;
   order?: number;
@@ -121,6 +122,7 @@ export interface Project {
   children?: { id: number; name: string; status: string }[];
   custom_field_defs?: { key: string; label: string; type: string; options?: string[] }[];
   custom_fields?: Record<string, unknown>;
+  tracking?: ProjectTracking;
   links?: ProjectLink[];
   styles?: StyleMap;
   contacts: Contact[];
@@ -130,7 +132,21 @@ export interface Project {
   updated_at?: string;
 }
 
-export type DocType = 'pdf' | 'xlsx' | 'docx' | 'pptx' | 'md' | 'a3';
+export interface TrackTask {
+  id: string; name: string; start?: string; end?: string; progress?: number;
+  planned_end?: string; team?: string; status?: string; deps?: string[];
+}
+export interface TrackMilestone { name: string; planned?: string; actual?: string; }
+export interface TrackRisk { name: string; probability?: number; impact?: number; status?: string; action?: string; }
+export interface TrackSnapshot { date?: string; planned?: number; actual?: number; }
+export interface TrackRoadmapItem { title: string; date?: string; }
+export interface ProjectTracking {
+  tasks?: TrackTask[]; milestones?: TrackMilestone[]; risks?: TrackRisk[];
+  snapshots?: TrackSnapshot[]; roadmap?: TrackRoadmapItem[];
+}
+
+export type DocType = 'pdf' | 'xlsx' | 'docx' | 'pptx' | 'md' | 'a3'
+  | 'brochure' | 'lettre' | 'mail';
 
 export type BlockType =
   | 'heading'
@@ -146,6 +162,7 @@ export type BlockType =
   | 'link'
   | 'contacts'
   | 'diagram'
+  | 'form_diagram'
   | 'spacer';
 
 export type FieldType = 'text' | 'textarea' | 'number' | 'date' | 'select';
@@ -183,6 +200,8 @@ export interface Block {
   // diagram (SmartArt)
   variant?: string;
   diagram_items?: { title: string; text?: string }[];
+  // form_diagram : référence un diagramme d'un formulaire lié (rapport)
+  diagram_key?: string;
 }
 
 export interface LayoutElement {
@@ -447,6 +466,7 @@ export interface FormTemplate {
   description: string;
   schema: FormField[];
   diagrams: FormDiagram[];
+  report_template?: number | null;
   confidentiality: Confidentiality;
   confidentiality_display?: string;
   success_message: string;
@@ -468,6 +488,7 @@ export interface OnlineForm {
   template_name?: string | null;
   schema: FormField[];
   diagrams?: FormDiagram[];
+  report_template?: number | null;
   confidentiality: Confidentiality;
   confidentiality_display?: string;
   is_open: boolean;

@@ -7,6 +7,53 @@ from documents.services import generate_version
 from onlineforms.models import OnlineForm
 from projects.models import Contact, Project
 
+CV_SWISS_TEMPLATE = {
+    "name": "CV — format suisse (Word)",
+    "slug": "cv-suisse-word",
+    "doc_type": DocumentType.DOCX,
+    "builder_key": "custom",
+    "is_block_based": True,
+    "description": "Curriculum vitae au format suisse : informations "
+                   "personnelles, expériences, formation, langues, compétences.",
+    "schema": [
+        {"id": "cv_photo", "type": "image", "asset_url": "",
+         "width_pct": 25, "align": "right"},
+        {"id": "cv_name", "type": "field", "key": "nom_complet",
+         "label": "Prénom Nom", "field_type": "text", "show_label": False,
+         "required": True},
+        {"id": "cv_role", "type": "field", "key": "titre_poste",
+         "label": "Titre / poste visé", "field_type": "text",
+         "show_label": False},
+        {"id": "cv_h_perso", "type": "heading", "level": 2,
+         "text": "Informations personnelles"},
+        {"id": "cv_perso", "type": "table", "key": "infos_perso", "label": "",
+         "columns": [{"label": "Rubrique"}, {"label": "Détail"}]},
+        {"id": "cv_h_exp", "type": "heading", "level": 2,
+         "text": "Expériences professionnelles"},
+        {"id": "cv_exp", "type": "table", "key": "experiences", "label": "",
+         "columns": [{"label": "Période"}, {"label": "Entreprise"},
+                     {"label": "Poste"}, {"label": "Missions"}]},
+        {"id": "cv_h_edu", "type": "heading", "level": 2, "text": "Formation"},
+        {"id": "cv_edu", "type": "table", "key": "formation", "label": "",
+         "columns": [{"label": "Période"}, {"label": "Établissement"},
+                     {"label": "Diplôme"}]},
+        {"id": "cv_h_lang", "type": "heading", "level": 2, "text": "Langues"},
+        {"id": "cv_lang", "type": "table", "key": "langues", "label": "",
+         "columns": [{"label": "Langue"}, {"label": "Niveau"}]},
+        {"id": "cv_h_skill", "type": "heading", "level": 2,
+         "text": "Compétences informatiques"},
+        {"id": "cv_skill", "type": "table", "key": "competences", "label": "",
+         "columns": [{"label": "Domaine"}, {"label": "Outils / niveau"}]},
+        {"id": "cv_h_int", "type": "heading", "level": 2,
+         "text": "Centres d'intérêt"},
+        {"id": "cv_int", "type": "field", "key": "interets",
+         "label": "Centres d'intérêt", "field_type": "textarea",
+         "show_label": False},
+    ],
+    "settings": {"include_cover": False, "include_suivi": False,
+                 "include_toc": False, "pdf_from_docx": True},
+}
+
 SYSTEM_TEMPLATES = [
     {
         "name": "Suivi de projet (PDF)",
@@ -214,7 +261,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # --- Modèles système ---
-        for tpl in SYSTEM_TEMPLATES + [SHOWCASE_TEMPLATE, EXCEL_WORKBOOK_TEMPLATE]:
+        for tpl in SYSTEM_TEMPLATES + [SHOWCASE_TEMPLATE, EXCEL_WORKBOOK_TEMPLATE,
+                                       CV_SWISS_TEMPLATE]:
             defaults = {**tpl, "is_system": True, "is_active": True}
             defaults.setdefault("settings", dict(DEFAULT_SETTINGS))
             obj, created = DocumentTemplate.objects.update_or_create(
@@ -234,9 +282,14 @@ class Command(BaseCommand):
             company.phone = "+33 4 00 00 00 00"
             company.email = "contact@acme-consulting.example"
             company.save()
-            UsefulLink.objects.get_or_create(
-                company=company, label="Support",
-                defaults={"url": "https://support.acme-consulting.example"})
+            for cat, label, url in [
+                ("Site web", "Site officiel", "https://www.acme-consulting.example"),
+                ("Conditions générales", "CGV", "https://www.acme-consulting.example/cgv"),
+                ("Support", "Support client", "https://support.acme-consulting.example"),
+            ]:
+                UsefulLink.objects.get_or_create(
+                    company=company, label=label,
+                    defaults={"url": url, "category": cat})
             self.stdout.write("Profil entreprise initialisé.")
 
         if not options["demo"]:
@@ -317,6 +370,47 @@ class Command(BaseCommand):
         # L'équipe Développement gère ce projet
         team.projects.add(project)
         design_team.projects.add(project)
+
+        # Données de suivi de projet (pour les diagrammes de suivi)
+        if not project.tracking:
+            project.tracking = {
+                "tasks": [
+                    {"id": "t1", "name": "Cadrage", "start": "2026-01-05",
+                     "end": "2026-01-20", "progress": 100, "planned_end": "2026-01-18",
+                     "team": "Direction", "status": "done", "deps": []},
+                    {"id": "t2", "name": "Design UI", "start": "2026-01-21",
+                     "end": "2026-02-15", "progress": 80, "planned_end": "2026-02-10",
+                     "team": "Design", "status": "in_progress", "deps": ["t1"]},
+                    {"id": "t3", "name": "Développement", "start": "2026-02-10",
+                     "end": "2026-04-10", "progress": 45, "planned_end": "2026-04-05",
+                     "team": "Développement", "status": "in_progress", "deps": ["t2"]},
+                    {"id": "t4", "name": "Recette", "start": "2026-04-11",
+                     "end": "2026-04-30", "progress": 0, "planned_end": "2026-04-28",
+                     "team": "Développement", "status": "late", "deps": ["t3"]},
+                ],
+                "milestones": [
+                    {"name": "Kickoff", "planned": "2026-01-05", "actual": "2026-01-06"},
+                    {"name": "Go-live", "planned": "2026-05-02", "actual": ""},
+                ],
+                "risks": [
+                    {"name": "Retard fournisseur", "probability": 4, "impact": 5,
+                     "status": "open", "action": "Relance hebdomadaire"},
+                    {"name": "Périmètre flou", "probability": 3, "impact": 3,
+                     "status": "mitigated", "action": "Atelier de cadrage"},
+                ],
+                "snapshots": [
+                    {"date": "2026-01-31", "planned": 20, "actual": 18},
+                    {"date": "2026-02-28", "planned": 45, "actual": 40},
+                    {"date": "2026-03-31", "planned": 70, "actual": 58},
+                ],
+                "roadmap": [
+                    {"title": "Phase 1 — Cadrage", "date": "2026-01"},
+                    {"title": "Phase 2 — Build", "date": "2026-02"},
+                    {"title": "Phase 3 — Recette", "date": "2026-04"},
+                    {"title": "Lancement", "date": "2026-05"},
+                ],
+            }
+            project.save(update_fields=["tracking"])
 
         # --- Styles globaux par défaut, par type de modèle ---
         if not company.styles:
@@ -464,5 +558,97 @@ class Command(BaseCommand):
                         ]}}]},
             })
         self.stdout.write("Modèle Template A3 démo créé.")
+
+        # --- Modèle CV suisse (Word) ---
+        def _b(i, **kw):
+            return {"id": f"cv{i}", **kw}
+        cv_schema = [
+            _b(1, type="logo", width_pct=22, align="right"),
+            _b(2, type="heading", level=1, text="Curriculum Vitae"),
+            _b(3, type="field", key="nom_prenom", label="Nom et prénom",
+               field_type="text", show_label=True, required=True),
+            _b(4, type="field", key="date_naissance", label="Date de naissance",
+               field_type="date", show_label=True),
+            _b(5, type="field", key="nationalite", label="Nationalité",
+               field_type="text", show_label=True),
+            _b(6, type="field", key="etat_civil", label="État civil",
+               field_type="text", show_label=True),
+            _b(7, type="field", key="permis", label="Permis de travail",
+               field_type="text", show_label=True),
+            _b(8, type="field", key="adresse", label="Adresse", field_type="textarea",
+               show_label=True),
+            _b(9, type="field", key="telephone", label="Téléphone", field_type="text",
+               show_label=True),
+            _b(10, type="field", key="email", label="E-mail", field_type="text",
+               show_label=True),
+            _b(11, type="heading", level=2, text="Profil"),
+            _b(12, type="text", text="Résumé professionnel en quelques lignes."),
+            _b(13, type="heading", level=2, text="Expérience professionnelle"),
+            _b(14, type="table", label="",
+               columns=[{"label": "Période"}, {"label": "Poste"},
+                        {"label": "Entreprise"}, {"label": "Missions"}],
+               allow_edit_columns=False),
+            _b(15, type="heading", level=2, text="Formation"),
+            _b(16, type="table", label="",
+               columns=[{"label": "Période"}, {"label": "Diplôme"},
+                        {"label": "Établissement"}], allow_edit_columns=False),
+            _b(17, type="heading", level=2, text="Compétences"),
+            _b(18, type="bullet_list", items=["Compétence 1", "Compétence 2",
+                                              "Compétence 3"]),
+            _b(19, type="heading", level=2, text="Langues"),
+            _b(20, type="table", label="",
+               columns=[{"label": "Langue"}, {"label": "Niveau"}],
+               allow_edit_columns=False),
+            _b(21, type="heading", level=2, text="Centres d'intérêt"),
+            _b(22, type="text", text="Loisirs et centres d'intérêt."),
+            _b(23, type="heading", level=2, text="Références"),
+            _b(24, type="text", text="Disponibles sur demande."),
+        ]
+        DocumentTemplate.objects.get_or_create(
+            slug="cv-suisse",
+            defaults={
+                "name": "CV suisse", "doc_type": "docx", "builder_key": "custom",
+                "is_block_based": True, "schema": cv_schema,
+                "description": "Modèle de CV au format suisse (Word) : photo, état "
+                               "civil, permis, expérience, formation, langues.",
+                "settings": {"include_cover": False, "include_suivi": False,
+                             "include_toc": False, "table_color": "334155"},
+            })
+        self.stdout.write("Modèle CV suisse créé.")
+
+        # --- Modèle de rapport statistiques (Word) lié à un formulaire ---
+        report_schema = [
+            {"id": "rp1", "type": "heading", "level": 1,
+             "text": "Rapport statistiques — {{document_title}}"},
+            {"id": "rp2", "type": "text",
+             "text": "Synthèse des réponses collectées via le formulaire."},
+            {"id": "rp3", "type": "heading", "level": 2,
+             "text": "Répartition de la satisfaction"},
+            {"id": "rp4", "type": "form_diagram", "diagram_key": "d1",
+             "width_pct": 80, "align": "center"},
+            {"id": "rp5", "type": "heading", "level": 2,
+             "text": "Note moyenne par service"},
+            {"id": "rp6", "type": "form_diagram", "diagram_key": "d2",
+             "width_pct": 80, "align": "center"},
+        ]
+        report_tpl, _ = DocumentTemplate.objects.get_or_create(
+            slug="rapport-enquete",
+            defaults={
+                "name": "Rapport enquête (statistiques)", "doc_type": "docx",
+                "builder_key": "custom", "is_block_based": True,
+                "schema": report_schema,
+                "description": "Rapport Word intégrant les diagrammes d'un "
+                               "formulaire comme variables (bloc « Diagramme de "
+                               "formulaire », clés d1, d2…).",
+                "settings": {"include_cover": False, "include_suivi": False,
+                             "include_toc": False},
+            })
+        # Lie ce rapport au modèle de formulaire « Enquête de satisfaction »
+        from onlineforms.models import FormTemplate as _FT
+        _ft = _FT.objects.filter(name="Enquête de satisfaction").first()
+        if _ft and not _ft.report_template_id:
+            _ft.report_template = report_tpl
+            _ft.save(update_fields=["report_template"])
+        self.stdout.write("Modèle de rapport statistiques créé et lié.")
 
         self.stdout.write(self.style.SUCCESS("Seed (démo) terminé."))

@@ -47,6 +47,11 @@ class Project(models.Model):
     custom_fields = models.JSONField(
         "Valeurs des champs personnalisés", default=dict, blank=True,
     )
+    tracking = models.JSONField(
+        "Données de suivi de projet", default=dict, blank=True,
+        help_text="{tasks:[], milestones:[], risks:[], snapshots:[]} pour les "
+                  "diagrammes de suivi (Gantt, avancement, risques…).",
+    )
     client_logo = models.ImageField(
         "Logo du client", upload_to="projects/", blank=True, null=True
     )

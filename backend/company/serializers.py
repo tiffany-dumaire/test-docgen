@@ -21,7 +21,7 @@ def _project_qs():
 class UsefulLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = UsefulLink
-        fields = ["id", "label", "url", "order"]
+        fields = ["id", "category", "label", "url", "order"]
 
 
 class CompanyProfileSerializer(serializers.ModelSerializer):

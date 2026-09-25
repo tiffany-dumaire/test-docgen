@@ -26,6 +26,34 @@ class ProjectViewSet(viewsets.ModelViewSet):
         ctx["request"] = self.request
         return ctx
 
+    @action(detail=False, methods=["get"])
+    def tracking_types(self, request):
+        """Liste des types de diagrammes de suivi disponibles."""
+        from . import tracking_diagrams as TD
+        return Response([{"key": k, "label": lbl} for k, lbl in TD.TYPES])
+
+    @action(detail=True, methods=["get"])
+    def tracking_diagram(self, request, pk=None):
+        """Rend un diagramme de suivi de projet en SVG (ou PNG via cairosvg si dispo)."""
+        from django.http import HttpResponse
+        from . import tracking_diagrams as TD
+        project = self.get_object()
+        kind = request.query_params.get("type", "gantt")
+        svg = TD.render(kind, project.tracking or {})
+        svg_bytes = svg if isinstance(svg, bytes) else svg.encode("utf-8")
+        fmt = (request.query_params.get("fmt") or "svg").lower()
+        if fmt == "png":
+            try:
+                import cairosvg
+                png = cairosvg.svg2png(bytestring=svg_bytes, scale=2)
+                resp = HttpResponse(png, content_type="image/png")
+            except Exception:
+                resp = HttpResponse(svg_bytes, content_type="image/svg+xml")
+        else:
+            resp = HttpResponse(svg_bytes, content_type="image/svg+xml")
+        resp["Content-Disposition"] = f'inline; filename="{kind}.svg"'
+        return resp
+
 
 class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()

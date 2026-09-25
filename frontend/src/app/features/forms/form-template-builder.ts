@@ -69,6 +69,14 @@ const VARIANTS: { value: string; label: string }[] = [
                 <label>Message de confirmation</label>
                 <input [(ngModel)]="m.success_message" />
               </div>
+              <div class="field">
+                <label>Modèle de rapport (Word / PDF)</label>
+                <select [(ngModel)]="m.report_template">
+                  <option [ngValue]="null">— aucun —</option>
+                  @for (t of reportTemplates(); track t.id) { <option [ngValue]="t.id">{{ t.name }} ({{ t.doc_type }})</option> }
+                </select>
+                <small class="muted">Document dans lequel les diagrammes du formulaire s'insèrent (bloc « Diagramme de formulaire », identifiants d1, d2…).</small>
+              </div>
               @if (m.scope === 'projects') {
                 <div class="field">
                   <label>Projets autorisés</label>
@@ -247,12 +255,16 @@ export class FormTemplateBuilder {
   model = signal<FormTemplate | null>(null);
   projects = signal<Project[]>([]);
   confidentialityLevels = signal<Choice[]>([]);
+  reportTemplates = signal<{ id?: number; name: string; doc_type: string }[]>([]);
   saving = signal(false);
   variants = VARIANTS;
 
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
     this.docSvc.choices().subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
+    this.docSvc.templates().subscribe((r) => this.reportTemplates.set(
+      r.results.filter((t) => t.doc_type === 'docx' || t.doc_type === 'pdf')
+        .map((t) => ({ id: t.id, name: t.name, doc_type: t.doc_type }))));
     setTimeout(() => {
       if (this.id) {
         this.service.template(+this.id).subscribe((t) => {
