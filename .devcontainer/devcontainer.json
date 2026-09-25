@@ -1,0 +1,28 @@
+{
+  "name": "DocuGen (Django + Angular + PostgreSQL)",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "backend",
+  "workspaceFolder": "/app",
+  // Démarre les trois services quand le dev container s'ouvre.
+  "runServices": ["db", "backend", "frontend"],
+  "shutdownAction": "stopCompose",
+  "forwardPorts": [8000, 4200, 5432],
+  "portsAttributes": {
+    "8000": { "label": "Backend Django (API)" },
+    "4200": { "label": "Frontend Angular" },
+    "5432": { "label": "PostgreSQL" }
+  },
+  // Applique les migrations sur la base PostgreSQL après création du conteneur.
+  "postCreateCommand": "python manage.py migrate",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "Angular.ng-template",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}

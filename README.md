@@ -16,8 +16,9 @@ projets et de variables paramétrables.
 1. [Fonctionnalités](#fonctionnalités)
 2. [Architecture](#architecture)
 3. [Prérequis](#prérequis)
-4. [Lancement du backend](#1-lancement-du-backend-django)
-5. [Lancement du frontend](#2-lancement-du-frontend-angular-21)
+4. [Lancement via dev container](#0-lancement-via-dev-container-recommandé)
+5. [Lancement du backend](#1-lancement-du-backend-django)
+6. [Lancement du frontend](#2-lancement-du-frontend-angular-21)
 6. [Utilisation rapide](#utilisation-rapide)
 7. [Structure du projet](#structure-du-projet)
 8. [API REST](#api-rest-principaux-points-dentrée)
@@ -172,7 +173,7 @@ projets et de variables paramétrables.
 ```
 Navigateur ──HTTP──> Angular 21 (port 4200) ──REST/JSON──> Django + DRF (port 8000)
                                                               │
-                                                              ├── SQLite (base de données)
+                                                              ├── PostgreSQL (base de données, port 5432)
                                                               ├── Générateurs PDF / Excel / Word
                                                               └── /media (fichiers générés)
 ```
@@ -181,18 +182,81 @@ Navigateur ──HTTP──> Angular 21 (port 4200) ──REST/JSON──> Djang
 
 ## Prérequis
 
-| Outil    | Version recommandée |
-|----------|---------------------|
-| Python   | 3.11 ou supérieur   |
-| Node.js  | **24 ou supérieur** (requis par Angular 21) |
-| npm      | 10 ou supérieur     |
+| Outil        | Version recommandée |
+|--------------|---------------------|
+| Python       | 3.11 ou supérieur   |
+| Node.js      | **24 ou supérieur** (requis par Angular 21) |
+| npm          | 10 ou supérieur     |
+| PostgreSQL   | 14 ou supérieur (base de données par défaut) |
 
 > ℹ️ Angular 21 exige Node.js 24+. Avec une version antérieure, `npm install` affichera
 > un avertissement `EBADENGINE` ; privilégiez Node 24 pour `ng serve` / `ng build`.
 
+> 💡 **Le plus simple : le dev container.** Si vous disposez de Docker (+ l'extension
+> *Dev Containers* de VS Code), vous n'avez besoin d'installer ni Python, ni Node, ni
+> PostgreSQL sur votre machine — tout est fourni. Voir la section
+> [Lancement via dev container](#0-lancement-via-dev-container-recommandé) ci-dessous.
+
+---
+
+## 0. Lancement via dev container (recommandé)
+
+Le dépôt fournit une configuration **Dev Container** qui démarre l'ensemble de la
+stack (Django + Angular + PostgreSQL) sans installation locale.
+
+**Prérequis :** [Docker](https://www.docker.com/) et, pour l'expérience intégrée,
+[VS Code](https://code.visualstudio.com/) avec l'extension
+*Dev Containers*.
+
+### Option A — VS Code
+
+1. Ouvrez le dossier du projet dans VS Code.
+2. Commande *« Dev Containers: Reopen in Container »*.
+3. VS Code construit les images et démarre les trois services. Les migrations sont
+   appliquées automatiquement sur PostgreSQL (`postCreateCommand`).
+
+### Option B — Docker Compose en ligne de commande
+
+```bash
+docker compose -f .devcontainer/docker-compose.yml up --build
+```
+
+Une fois la stack démarrée :
+
+| Service       | URL / Port                    |
+|---------------|-------------------------------|
+| Frontend      | http://localhost:4200         |
+| Backend (API) | http://localhost:8000/api/    |
+| Admin Django  | http://localhost:8000/admin/  |
+| PostgreSQL    | `localhost:5432` (db/user/mot de passe : `docugen`) |
+
+Pour charger les données initiales (modèles système + profil entreprise) :
+
+```bash
+docker compose -f .devcontainer/docker-compose.yml exec backend python manage.py seed_data
+# ...avec un jeu de démonstration :
+docker compose -f .devcontainer/docker-compose.yml exec backend python manage.py seed_data --demo
+# ...compte administrateur :
+docker compose -f .devcontainer/docker-compose.yml exec backend python manage.py createsuperuser
+```
+
+Pour tout arrêter (et supprimer la base) :
+
+```bash
+docker compose -f .devcontainer/docker-compose.yml down          # arrêt
+docker compose -f .devcontainer/docker-compose.yml down -v       # arrêt + suppression du volume PostgreSQL
+```
+
 ---
 
 ## 1. Lancement du backend (Django)
+
+> ℹ️ **Base de données :** DocuGen utilise **PostgreSQL** par défaut. Assurez-vous
+> qu'une instance est accessible et que les variables `DB_*` de `.env` pointent
+> dessus (voir `backend/.env.example`). Le plus simple est d'utiliser le
+> [dev container](#0-lancement-via-dev-container-recommandé), qui fournit PostgreSQL.
+> Pour un test rapide sans PostgreSQL, positionnez
+> `DB_ENGINE=django.db.backends.sqlite3` dans `.env`.
 
 ```bash
 cd backend
@@ -206,9 +270,9 @@ pip install -r requirements.txt
 
 # c) Configuration
 cp .env.example .env              # Windows : copy .env.example .env
-# (ouvrez .env pour ajuster SECRET_KEY, les URLs, etc.)
+# (ouvrez .env pour ajuster SECRET_KEY, les URLs et la connexion DB_* PostgreSQL)
 
-# d) Base de données
+# d) Base de données (PostgreSQL doit être démarré et accessible)
 python manage.py migrate
 
 # e) Données initiales : modèles système + profil entreprise
@@ -492,8 +556,13 @@ est portable (Pillow pour le PNG, SVG généré à la main), sans dépendance sy
   fonctionne mais Angular 21 recommande Node 24+.
 - **Images/logos non affichés** : en développement, Django sert `/media` uniquement si
   `DEBUG=True`.
-- **Réinitialiser la base** : supprimez `backend/db.sqlite3` puis relancez
+- **Réinitialiser la base** (PostgreSQL) : recréez la base, par exemple avec le dev
+  container `docker compose -f .devcontainer/docker-compose.yml down -v` puis `up`,
+  ou manuellement `DROP DATABASE docugen; CREATE DATABASE docugen;`, puis relancez
   `python manage.py migrate` et `python manage.py seed_data`.
+  (En mode SQLite de secours, supprimez `backend/db.sqlite3` puis relancez les mêmes commandes.)
+- **`connection refused` / `could not connect to server`** : PostgreSQL n'est pas
+  démarré ou les variables `DB_*` de `.env` ne pointent pas sur la bonne instance.
 - **Les modèles système ont disparu** : relancez `python manage.py seed_data`
   (idempotent, il recrée/actualise les modèles PDF, Excel et Word).
 
