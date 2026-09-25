@@ -33,6 +33,7 @@ const CELL_TYPES: { value: CellType; label: string }[] = [
           <button class="mini" (click)="addSheet('table')">Table</button>
           <button class="mini" (click)="addSheet('pivot')">Croisé</button>
           <button class="mini" (click)="addSheet('info')">Infos</button>
+          <button class="mini" (click)="addSheet('grid')">Grille</button>
         </div>
       </div>
 
@@ -208,6 +209,49 @@ const CELL_TYPES: { value: CellType; label: string }[] = [
             <button class="btn-sm" (click)="addItem(s)">+ Information</button>
             <p class="hint">Astuce : utilisez des variables comme <code>{{ '{{' }}today{{ '}}' }}</code>, <code>{{ '{{' }}client_name{{ '}}' }}</code>.</p>
           }
+
+          @if (s.type === 'grid') {
+            <h4>Grille libre (style, fusion et taille par cellule)</h4>
+            <p class="hint">Chaque cellule a sa position (ligne/colonne), sa valeur (variables {{ '{{' }}…{{ '}}' }} acceptées), son style et sa fusion.</p>
+            <div class="gridcells">
+              @for (cl of s.cells ?? []; track $index) {
+                <div class="gcell">
+                  <div class="line">
+                    <span class="span">L</span><input type="number" min="1" [ngModel]="cl.row" (ngModelChange)="cl.row = +$event" style="width:52px" />
+                    <span class="span">C</span><input type="number" min="1" [ngModel]="cl.col" (ngModelChange)="cl.col = +$event" style="width:52px" />
+                    <input [(ngModel)]="cl.value" placeholder="Valeur" style="flex:2" />
+                    <button class="mini del" (click)="s.cells!.splice($index, 1)">✕</button>
+                  </div>
+                  <div class="line">
+                    <label class="chk"><input type="checkbox" [(ngModel)]="cl.bold" /> Gras</label>
+                    <label class="chk"><input type="checkbox" [(ngModel)]="cl.italic" /> Italique</label>
+                    <label class="chk"><input type="checkbox" [ngModel]="cl.border !== false" (ngModelChange)="cl.border = $event" /> Bordure</label>
+                    <label class="chk"><input type="checkbox" [(ngModel)]="cl.wrap" /> Retour ligne</label>
+                    <span class="span">Texte</span><input type="color" [ngModel]="cl.color || '#1d1e1b'" (ngModelChange)="cl.color = $event" title="Couleur du texte" />
+                    <span class="span">Fond</span><input type="color" [ngModel]="cl.bg || '#ffffff'" (ngModelChange)="cl.bg = $event" title="Couleur de fond" />
+                  </div>
+                  <div class="line">
+                    <select [ngModel]="cl.align || 'left'" (ngModelChange)="cl.align = $event"><option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option></select>
+                    <span class="span">Fusion L×C</span>
+                    <input type="number" min="1" [ngModel]="cl.row_span || 1" (ngModelChange)="cl.row_span = +$event" style="width:52px" title="Lignes fusionnées" />
+                    <input type="number" min="1" [ngModel]="cl.col_span || 1" (ngModelChange)="cl.col_span = +$event" style="width:52px" title="Colonnes fusionnées" />
+                    <span class="span">Taille</span><input type="number" min="6" max="48" [ngModel]="cl.size || 11" (ngModelChange)="cl.size = +$event" style="width:56px" />
+                    <input [(ngModel)]="cl.number_format" placeholder="Format (#,##0.00)" style="flex:1" />
+                  </div>
+                </div>
+              }
+            </div>
+            <button class="btn-sm" (click)="addCell(s)">+ Cellule</button>
+            <h4>Tailles de colonnes / lignes</h4>
+            <div class="line">
+              <span class="span">Largeurs colonnes (ex : 1:24, 2:30)</span>
+              <input [ngModel]="dimsToStr(s.col_widths)" (ngModelChange)="s.col_widths = strToDims($event)" style="flex:1" />
+            </div>
+            <div class="line">
+              <span class="span">Hauteurs lignes (ex : 1:28, 3:18)</span>
+              <input [ngModel]="dimsToStr(s.row_heights)" (ngModelChange)="s.row_heights = strToDims($event)" style="flex:1" />
+            </div>
+          }
         </div>
       } @else {
         <div class="empty">Aucun onglet. Ajoutez-en un ci-dessus.</div>
@@ -241,6 +285,10 @@ const CELL_TYPES: { value: CellType; label: string }[] = [
     @media (max-width:700px){ .grid2, .sheet-head { grid-template-columns:1fr; } }
     code { background:var(--bg); padding:.05rem .3rem; border-radius:4px; font-size:.8rem; }
     .empty { padding:1.5rem; text-align:center; color:var(--muted); border:2px dashed var(--border); border-radius:10px; }
+    .gridcells { display:flex; flex-direction:column; gap:.5rem; }
+    .gcell { border:1px solid var(--border); border-radius:8px; padding:.5rem .6rem; background:var(--surface,#fff); }
+    .gcell .line { margin-bottom:.3rem; flex-wrap:wrap; }
+    .gcell input[type=color] { width:38px; height:30px; padding:2px; }
   `],
 })
 export class ExcelBuilder {
@@ -251,9 +299,10 @@ export class ExcelBuilder {
 
   current = computed(() => this.sheets[this.active()]);
 
-  icon(t: SheetType) { return t === 'table' ? '▦' : t === 'pivot' ? '⊞' : 'ℹ'; }
+  icon(t: SheetType) { return t === 'table' ? '▦' : t === 'pivot' ? '⊞' : t === 'grid' ? '▧' : 'ℹ'; }
   typeLabel(t: SheetType) {
-    return t === 'table' ? 'Tableau à colonnes' : t === 'pivot' ? 'Tableau croisé' : 'Informations fixes';
+    return t === 'table' ? 'Tableau à colonnes' : t === 'pivot' ? 'Tableau croisé'
+      : t === 'grid' ? 'Grille libre' : 'Informations fixes';
   }
 
   tableSheets = computed(() => this.sheets.filter((s) => s.type === 'table'));
@@ -279,6 +328,14 @@ export class ExcelBuilder {
         source: src?.id ?? '', row_field: '', col_field: '', value_field: '',
         agg: 'sum', value_type: 'decimal',
       };
+    } else if (type === 'grid') {
+      base.cells = [
+        { row: 1, col: 1, value: '{{document_title}}', bold: true, bg: '#EC6608', color: '#FFFFFF', align: 'center', size: 14, col_span: 3, border: true },
+        { row: 2, col: 1, value: 'Libellé', bold: true, bg: '#F5F3EF', border: true },
+        { row: 2, col: 2, value: 'Valeur', bold: true, bg: '#F5F3EF', border: true },
+      ];
+      base.col_widths = { '1': 24, '2': 20, '3': 20 };
+      base.row_heights = { '1': 26 };
     } else {
       base.items = [{ label: 'Date', type: 'date', value: '{{today}}' }];
     }
@@ -288,7 +345,29 @@ export class ExcelBuilder {
 
   private defaultName(t: SheetType) {
     const n = this.sheets.length + 1;
-    return t === 'pivot' ? 'Synthèse' : t === 'info' ? 'Informations' : `Onglet ${n}`;
+    return t === 'pivot' ? 'Synthèse' : t === 'info' ? 'Informations'
+      : t === 'grid' ? 'Grille' : `Onglet ${n}`;
+  }
+
+  addCell(s: ExcelSheet) {
+    s.cells = s.cells ?? [];
+    const last = s.cells[s.cells.length - 1];
+    s.cells.push({ row: last ? last.row + 1 : 1, col: 1, value: '', border: true });
+  }
+  /** { "1": 24, "2": 30 } -> "1:24, 2:30" et inversement. */
+  dimsToStr(d?: Record<string, number>): string {
+    return Object.entries(d ?? {}).map(([k, v]) => `${k}:${v}`).join(', ');
+  }
+  strToDims(raw: string): Record<string, number> {
+    const out: Record<string, number> = {};
+    for (const part of (raw || '').split(',')) {
+      const m = part.split(':');
+      if (m.length === 2) {
+        const k = m[0].trim(); const v = parseFloat(m[1]);
+        if (k && !isNaN(v)) out[k] = v;
+      }
+    }
+    return out;
   }
 
   removeSheet() {

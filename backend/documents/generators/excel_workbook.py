@@ -427,6 +427,12 @@ def render(ctx: GenerationContext) -> bytes:
                          border, header_font, label_font, center,
                          PatternFill, get_column_letter, autosize)
 
+        # ---- Onglet GRID (grille libre : style par cellule, fusions, tailles) ----
+        elif stype == "grid":
+            _write_grid(ws, sdef, pctx, start_row,
+                        Font, PatternFill, Alignment, Border, Side,
+                        get_column_letter)
+
         # ---- Onglet INFO (cellules fixes typées) ----
         elif stype == "info":
             r = start_row
@@ -450,6 +456,75 @@ def render(ctx: GenerationContext) -> bytes:
     buffer = io.BytesIO()
     wb.save(buffer)
     return buffer.getvalue()
+
+
+def _write_grid(ws, sdef, pctx, start_row, Font, PatternFill, Alignment,
+                Border, Side, get_column_letter):
+    """Grille libre : chaque cellule porte sa valeur, son style, sa fusion.
+
+    sdef = {
+      "cells": [{row,col,value,bold,italic,color,bg,align,valign,size,wrap,
+                 number_format,border,col_span,row_span}],
+      "col_widths": {"<col>": width}, "row_heights": {"<row>": height},
+    }
+    Les index de ligne/colonne sont relatifs au début de l'onglet (1 = 1re ligne
+    sous le titre) et 1-indexés.
+    """
+    thin = Side(style="thin", color=BORDER_COLOR)
+    box = Border(left=thin, right=thin, top=thin, bottom=thin)
+    off = start_row - 1  # décalage pour laisser la place au titre
+
+    for cell in (sdef.get("cells") or []):
+        try:
+            r = int(cell.get("row", 1)) + off
+            c = int(cell.get("col", 1))
+        except (TypeError, ValueError):
+            continue
+        if r < 1 or c < 1:
+            continue
+        raw = cell.get("value", "")
+        value = interpolate(raw, pctx) if isinstance(raw, str) else raw
+        # Conversion numérique douce si demandé via number_format numérique.
+        target = ws.cell(row=r, column=c, value=value)
+        cspan = max(1, int(cell.get("col_span", 1) or 1))
+        rspan = max(1, int(cell.get("row_span", 1) or 1))
+        if cspan > 1 or rspan > 1:
+            try:
+                ws.merge_cells(start_row=r, start_column=c,
+                               end_row=r + rspan - 1, end_column=c + cspan - 1)
+            except Exception:
+                pass
+        color = _norm_hex(cell.get("color")) if cell.get("color") else None
+        target.font = Font(bold=bool(cell.get("bold")),
+                           italic=bool(cell.get("italic")),
+                           underline="single" if cell.get("underline") else None,
+                           size=float(cell.get("size") or 11),
+                           color=color or "000000")
+        bg = _norm_hex(cell.get("bg")) if cell.get("bg") else None
+        if bg:
+            target.fill = PatternFill("solid", fgColor=bg)
+        target.alignment = Alignment(
+            horizontal=cell.get("align") or "left",
+            vertical=cell.get("valign") or "center",
+            wrap_text=bool(cell.get("wrap")))
+        if cell.get("number_format"):
+            target.number_format = cell["number_format"]
+        if cell.get("border", True):
+            # Applique la bordure à toute la plage fusionnée.
+            for rr in range(r, r + rspan):
+                for cc in range(c, c + cspan):
+                    ws.cell(row=rr, column=cc).border = box
+
+    for col, width in (sdef.get("col_widths") or {}).items():
+        try:
+            ws.column_dimensions[get_column_letter(int(col))].width = float(width)
+        except (TypeError, ValueError):
+            pass
+    for row, height in (sdef.get("row_heights") or {}).items():
+        try:
+            ws.row_dimensions[int(row) + off].height = float(height)
+        except (TypeError, ValueError):
+            pass
 
 
 def _write_pivot(ws, sdef, tables, pctx, start_row, border, header_font,

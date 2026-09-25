@@ -285,7 +285,27 @@ export type CellType =
   | 'percent'
   | 'date';
 
-export type SheetType = 'table' | 'pivot' | 'info';
+export type SheetType = 'table' | 'pivot' | 'info' | 'grid';
+
+/** Cellule d'une grille libre (style/fusion/format par cellule). */
+export interface GridCell {
+  row: number;
+  col: number;
+  value?: string | number;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  color?: string;   // #rrggbb texte
+  bg?: string;      // #rrggbb fond
+  align?: 'left' | 'center' | 'right';
+  valign?: 'top' | 'center' | 'bottom';
+  size?: number;
+  wrap?: boolean;
+  number_format?: string;
+  border?: boolean;
+  col_span?: number;
+  row_span?: number;
+}
 
 export interface ExcelColumn {
   key: string;
@@ -363,6 +383,10 @@ export interface ExcelSheet {
   conditional_formats?: ConditionalFormat[];
   validations?: CellValidation[];
   cell_formulas?: CellFormula[];
+  // grid (grille libre)
+  cells?: GridCell[];
+  col_widths?: Record<string, number>;
+  row_heights?: Record<string, number>;
 }
 
 export interface ExcelWorkbook {
