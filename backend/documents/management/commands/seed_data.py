@@ -292,6 +292,67 @@ class Command(BaseCommand):
                     defaults={"url": url, "category": cat})
             self.stdout.write("Profil entreprise initialisé.")
 
+        # --- Thèmes globaux par type (charte VNV, déduits des modèles actuels) ---
+        # global = base commune ; types = surcharges par type de document (docx,
+        # pdf, pptx, xlsx, md, a3), appliquées à tous les modèles de ce type.
+        if not company.styles:
+            company.styles = {
+                "global": {
+                    "title": {"font": "Montserrat", "size": 26, "bold": True,
+                              "color": "#EC6608"},
+                    "subtitle": {"font": "Montserrat", "size": 14, "color": "#1D1E1B"},
+                    "section": {"font": "Montserrat", "size": 16, "bold": True,
+                                "color": "#EC6608"},
+                    "h1": {"font": "Montserrat", "size": 18, "bold": True,
+                           "color": "#1D1E1B"},
+                    "h2": {"font": "Montserrat", "size": 15, "bold": True,
+                           "color": "#1D1E1B"},
+                    "h3": {"font": "Montserrat", "size": 13, "bold": True,
+                           "color": "#EC6608"},
+                    "paragraph": {"font": "Montserrat", "size": 11, "color": "#1D1E1B"},
+                },
+                "types": {
+                    # Word : lettres, CV, offre d'emploi, document standard.
+                    "docx": {
+                        "title": {"color": "#1D1E1B"},
+                        "h1": {"color": "#1D1E1B", "bold": True},
+                        "h2": {"color": "#1D1E1B", "bold": True},
+                        "h3": {"color": "#EC6608", "bold": True},
+                        "paragraph": {"font": "Montserrat", "size": 11},
+                    },
+                    # PDF : suivi de projet, rapport d'enquête (accent orange).
+                    "pdf": {
+                        "title": {"color": "#EC6608", "bold": True},
+                        "section": {"color": "#EC6608", "bold": True},
+                        "h1": {"color": "#EC6608", "bold": True},
+                        "h2": {"color": "#1D1E1B", "bold": True},
+                    },
+                    # PowerPoint : présentation standard, statut de projet.
+                    "pptx": {
+                        "title": {"color": "#EC6608", "size": 32, "bold": True},
+                        "section": {"color": "#EC6608", "size": 20, "bold": True},
+                        "h1": {"color": "#EC6608", "size": 24, "bold": True},
+                        "paragraph": {"font": "Montserrat", "size": 16},
+                    },
+                    # Excel : cotation, note de frais, classeur (en-têtes orange).
+                    "xlsx": {
+                        "title": {"color": "#EC6608", "size": 16, "bold": True},
+                    },
+                    # Markdown : intertitres accentués.
+                    "md": {
+                        "title": {"color": "#EC6608", "bold": True},
+                        "h1": {"color": "#EC6608", "bold": True},
+                    },
+                    # Template A3 : titres d'outils accentués.
+                    "a3": {
+                        "title": {"color": "#EC6608", "bold": True},
+                        "h1": {"color": "#EC6608", "bold": True},
+                    },
+                },
+            }
+            company.save(update_fields=["styles"])
+            self.stdout.write("Thèmes globaux par type initialisés (charte VNV).")
+
         if not options["demo"]:
             self.stdout.write(self.style.SUCCESS("Seed terminé."))
             return
@@ -412,35 +473,6 @@ class Command(BaseCommand):
             }
             project.save(update_fields=["tracking"])
 
-        # --- Styles globaux par défaut : charte VNV (Corporate Identity) ---
-        # Orange VNV #ec6608, charcoal #1d1e1b, typographie Montserrat / Oswald.
-        if not company.styles:
-            company.styles = {
-                "global": {
-                    "title": {"font": "Montserrat", "size": 26, "bold": True,
-                              "color": "#EC6608"},
-                    "subtitle": {"font": "Montserrat", "size": 14,
-                                 "color": "#1D1E1B"},
-                    "section": {"font": "Montserrat", "size": 16, "bold": True,
-                                "color": "#EC6608"},
-                    "h1": {"font": "Montserrat", "size": 18, "bold": True,
-                           "color": "#1D1E1B"},
-                    "h2": {"font": "Montserrat", "size": 15, "bold": True,
-                           "color": "#1D1E1B"},
-                    "h3": {"font": "Montserrat", "size": 13, "bold": True,
-                           "color": "#EC6608"},
-                    "paragraph": {"font": "Montserrat", "size": 11,
-                                  "color": "#1D1E1B"},
-                },
-                "types": {
-                    "docx": {"h1": {"color": "#1D1E1B", "bold": True}},
-                    "pdf": {"h1": {"color": "#EC6608", "bold": True}},
-                    "pptx": {"title": {"color": "#EC6608", "size": 32,
-                                       "bold": True}},
-                    "md": {}, "xlsx": {}, "a3": {},
-                },
-            }
-            company.save(update_fields=["styles"])
         Contact.objects.get_or_create(
             project=project, kind=Contact.CLIENT, first_name="Marie",
             last_name="Durand", defaults={"role": "Directrice marketing",
