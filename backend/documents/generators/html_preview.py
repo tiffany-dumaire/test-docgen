@@ -46,6 +46,48 @@ def _logo_data_uri(ctx):
     return None
 
 
+def _file_data_uri(path):
+    import os
+    try:
+        if path and os.path.exists(path):
+            with open(path, "rb") as f:
+                ext = os.path.splitext(path)[1].lstrip(".").lower() or "png"
+                mime = "jpeg" if ext in ("jpg", "jpeg") else ext
+                return f"data:image/{mime};base64," + base64.b64encode(f.read()).decode("ascii")
+    except Exception:
+        pass
+    return None
+
+
+def _sheet_image(ctx, image):
+    """(data_uri, natural_w, natural_h) d'une image de feuille pour l'aperçu."""
+    import os
+    source = (image.get("source") or "company").lower()
+    path = None
+    if source == "url":
+        try:
+            from .block_gen import _resolve_asset
+            path = _resolve_asset(image.get("url"))
+        except Exception:
+            path = None
+    else:
+        logo = getattr(ctx.company, "logo", None)
+        try:
+            path = logo.path if (logo and os.path.exists(logo.path)) else None
+        except Exception:
+            path = None
+    uri = _file_data_uri(path)
+    natw = nath = None
+    if path:
+        try:
+            from PIL import Image as _PILImage
+            with _PILImage.open(path) as im:
+                natw, nath = im.size
+        except Exception:
+            pass
+    return uri, natw, nath
+
+
 # ---------------------------------------------------------------------------
 # Blocs -> HTML
 # ---------------------------------------------------------------------------
@@ -184,10 +226,57 @@ def _fmt_grid_value(value, number_format):
     return str(value)
 
 
-def _grid_html(sh, pctx):
+_DEFAULT_COL_PX = 64   # largeur Excel par défaut (~8.43 car.)
+_DEFAULT_ROW_PX = 20   # hauteur Excel par défaut (~15 pt)
+
+
+def _grid_images_html(sh, ctx, col_widths, row_heights, maxc, maxr):
+    """Calques d'images (logo) positionnés/dimensionnés, superposés à la grille."""
+    images = sh.get("images") or []
+    if not images or ctx is None:
+        return ""
+    def colpx(c):
+        return _col_px(col_widths[str(c)]) if str(c) in col_widths else _DEFAULT_COL_PX
+    def rowpx(r):
+        return _row_px(row_heights[str(r)]) if str(r) in row_heights else _DEFAULT_ROW_PX
+    out = []
+    for image in images:
+        uri, natw, nath = _sheet_image(ctx, image)
+        if not uri:
+            continue
+        try:
+            col = max(1, int(image.get("col", 1)))
+            row = max(1, int(image.get("row", 1)))
+        except (TypeError, ValueError):
+            continue
+        ratio = (natw / nath) if (natw and nath) else 2.61
+        w = image.get("width"); h = image.get("height")
+        try:
+            if w and not h:
+                w = float(w); h = w / ratio
+            elif h and not w:
+                h = float(h); w = h * ratio
+            elif w and h:
+                w = float(w); h = float(h)
+            elif natw and nath:
+                w, h = float(natw), float(nath)
+            else:
+                w, h = 140.0, 140.0 / ratio
+        except (TypeError, ValueError, ZeroDivisionError):
+            w, h = 140.0, 140.0 / ratio
+        left = sum(colpx(c) for c in range(1, col)) + int(image.get("offset_x", 0) or 0)
+        top = sum(rowpx(r) for r in range(1, row)) + int(image.get("offset_y", 0) or 0)
+        out.append(
+            f'<img src="{uri}" alt="logo" style="position:absolute;'
+            f'left:{left}px;top:{top}px;width:{w:.0f}px;height:{h:.0f}px;'
+            f'object-fit:contain;pointer-events:none">')
+    return "".join(out)
+
+
+def _grid_html(sh, pctx, ctx=None):
     """Rend un onglet « grille » en table HTML fidèle (fusions, styles, tailles)."""
     cells = sh.get("cells") or []
-    if not cells:
+    if not cells and not (sh.get("images")):
         return '<p class="muted">Onglet vide.</p>'
     col_widths = sh.get("col_widths") or {}
     row_heights = sh.get("row_heights") or {}
@@ -279,8 +368,11 @@ def _grid_html(sh, pctx):
         style = f' style="height:{_row_px(rh)}px"' if rh else ""
         rows_html.append(f"<tr{style}>{''.join(tds)}</tr>")
 
-    return (f'<div class="xl-wrap"><table class="xl-grid"><colgroup>{colgroup}</colgroup>'
-            f'<tbody>{"".join(rows_html)}</tbody></table></div>')
+    overlay = _grid_images_html(sh, ctx, col_widths, row_heights, maxc, maxr)
+    stage = "position:relative;display:inline-block;min-width:100%"
+    return (f'<div class="xl-wrap"><div style="{stage}">'
+            f'<table class="xl-grid"><colgroup>{colgroup}</colgroup>'
+            f'<tbody>{"".join(rows_html)}</tbody></table>{overlay}</div></div>')
 
 
 def _excel_html(ctx):
@@ -294,7 +386,7 @@ def _excel_html(ctx):
             out.append(f'<p class="tbl-title">{_esc(interpolate(sh["title"], pctx))}</p>')
         stype = sh.get("type", "table")
         if stype == "grid":
-            out.append(_grid_html(sh, pctx))
+            out.append(_grid_html(sh, pctx, ctx))
         elif stype == "info":
             out.append('<table class="doc-tbl"><tbody>')
             for it in (sh.get("items") or []):

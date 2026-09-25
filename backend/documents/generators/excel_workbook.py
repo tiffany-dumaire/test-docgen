@@ -432,6 +432,7 @@ def render(ctx: GenerationContext) -> bytes:
             _write_grid(ws, sdef, pctx, start_row,
                         Font, PatternFill, Alignment, Border, Side,
                         get_column_letter)
+            _add_sheet_images(ws, sdef, ctx, start_row)
 
         # ---- Onglet INFO (cellules fixes typées) ----
         elif stype == "info":
@@ -456,6 +457,73 @@ def render(ctx: GenerationContext) -> bytes:
     buffer = io.BytesIO()
     wb.save(buffer)
     return buffer.getvalue()
+
+
+def _logo_source_path(ctx, image):
+    """Chemin fichier local d'une image de feuille (logo entreprise ou média)."""
+    from .block_gen import _logo_path, _resolve_asset
+    source = (image.get("source") or "company").lower()
+    if source == "url":
+        return _resolve_asset(image.get("url"))
+    return _logo_path(ctx)
+
+
+def _add_sheet_images(ws, sdef, ctx, start_row):
+    """Ajoute les images (logo) positionnées et dimensionnées d'une grille.
+
+    sdef["images"] = [{
+        source: "company" | "url", url, col, row,
+        width, height,            # px (si une seule est donnée, ratio conservé)
+        offset_x, offset_y,       # décalage px depuis le coin de la cellule
+    }]
+    Les index col/row sont 1-indexés et relatifs au début de l'onglet.
+    """
+    images = sdef.get("images") or []
+    if not images:
+        return
+    try:
+        from openpyxl.drawing.image import Image as XLImage
+        from openpyxl.drawing.spreadsheet_drawing import (AnchorMarker,
+                                                          OneCellAnchor)
+        from openpyxl.drawing.xdr import XDRPositiveSize2D
+        from openpyxl.utils.units import pixels_to_EMU
+    except Exception:
+        return
+    off = start_row - 1
+    for image in images:
+        path = _logo_source_path(ctx, image)
+        if not path:
+            continue
+        try:
+            img = XLImage(path)
+        except Exception:
+            continue
+        # Dimensions : conserve le ratio si une seule dimension est fournie.
+        nat_w, nat_h = img.width or 1, img.height or 1
+        w = image.get("width"); h = image.get("height")
+        try:
+            if w and not h:
+                w = float(w); h = w * nat_h / nat_w
+            elif h and not w:
+                h = float(h); w = h * nat_w / nat_h
+            elif w and h:
+                w = float(w); h = float(h)
+            else:
+                w, h = float(nat_w), float(nat_h)
+        except (TypeError, ValueError, ZeroDivisionError):
+            w, h = float(nat_w), float(nat_h)
+        try:
+            c = max(1, int(image.get("col", 1))) - 1
+            r = max(1, int(image.get("row", 1))) - 1 + off
+        except (TypeError, ValueError):
+            continue
+        offx = pixels_to_EMU(int(image.get("offset_x", 0) or 0))
+        offy = pixels_to_EMU(int(image.get("offset_y", 0) or 0))
+        marker = AnchorMarker(col=c, colOff=offx, row=r, rowOff=offy)
+        img.anchor = OneCellAnchor(
+            _from=marker,
+            ext=XDRPositiveSize2D(pixels_to_EMU(int(w)), pixels_to_EMU(int(h))))
+        ws.add_image(img)
 
 
 def _write_grid(ws, sdef, pctx, start_row, Font, PatternFill, Alignment,

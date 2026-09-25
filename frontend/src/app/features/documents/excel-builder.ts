@@ -4,6 +4,7 @@ import {
   CellType,
   ExcelColumn,
   ExcelSheet,
+  SheetImage,
   SheetType,
 } from '../../core/models';
 
@@ -251,6 +252,36 @@ const CELL_TYPES: { value: CellType; label: string }[] = [
               <span class="span">Hauteurs lignes (ex : 1:28, 3:18)</span>
               <input [ngModel]="dimsToStr(s.row_heights)" (ngModelChange)="s.row_heights = strToDims($event)" style="flex:1" />
             </div>
+
+            <h4>Images / logo <span class="hint">(position et taille libres)</span></h4>
+            <p class="hint">Ancrée à une cellule (ligne/colonne), avec largeur/hauteur en pixels et décalage fin. Laissez une seule dimension pour conserver les proportions.</p>
+            <div class="gridcells">
+              @for (im of s.images ?? []; track $index) {
+                <div class="gcell">
+                  <div class="line">
+                    <select [ngModel]="im.source || 'company'" (ngModelChange)="im.source = $event" title="Source de l'image">
+                      <option value="company">Logo entreprise</option>
+                      <option value="url">Image (URL média)</option>
+                    </select>
+                    @if (im.source === 'url') {
+                      <input [(ngModel)]="im.url" placeholder="/media/…" style="flex:2" />
+                    }
+                    <button class="mini del" (click)="s.images!.splice($index, 1)">✕</button>
+                  </div>
+                  <div class="line">
+                    <span class="span">Ancrage L</span><input type="number" min="1" [ngModel]="im.row" (ngModelChange)="im.row = +$event" style="width:56px" />
+                    <span class="span">C</span><input type="number" min="1" [ngModel]="im.col" (ngModelChange)="im.col = +$event" style="width:56px" />
+                    <span class="span">Largeur px</span><input type="number" min="0" [ngModel]="im.width" (ngModelChange)="im.width = +$event || undefined" style="width:70px" />
+                    <span class="span">Hauteur px</span><input type="number" min="0" [ngModel]="im.height" (ngModelChange)="im.height = +$event || undefined" style="width:70px" />
+                  </div>
+                  <div class="line">
+                    <span class="span">Décalage X px</span><input type="number" [ngModel]="im.offset_x || 0" (ngModelChange)="im.offset_x = +$event" style="width:70px" />
+                    <span class="span">Y px</span><input type="number" [ngModel]="im.offset_y || 0" (ngModelChange)="im.offset_y = +$event" style="width:70px" />
+                  </div>
+                </div>
+              }
+            </div>
+            <button class="btn-sm" (click)="addImage(s)">+ Image / logo</button>
           }
         </div>
       } @else {
@@ -353,6 +384,11 @@ export class ExcelBuilder {
     s.cells = s.cells ?? [];
     const last = s.cells[s.cells.length - 1];
     s.cells.push({ row: last ? last.row + 1 : 1, col: 1, value: '', border: true });
+  }
+  addImage(s: ExcelSheet) {
+    s.images = s.images ?? [];
+    const img: SheetImage = { source: 'company', col: 1, row: 1, width: 160, offset_x: 0, offset_y: 0 };
+    s.images.push(img);
   }
   /** { "1": 24, "2": 30 } -> "1:24, 2:30" et inversement. */
   dimsToStr(d?: Record<string, number>): string {

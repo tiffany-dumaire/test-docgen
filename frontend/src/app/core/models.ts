@@ -364,6 +364,18 @@ export interface PivotConfig {
   decimals?: number;
 }
 
+/** Image (logo) positionnée dans une feuille (grille). */
+export interface SheetImage {
+  source: 'company' | 'url';
+  url?: string;        // si source === 'url'
+  col: number;         // cellule d'ancrage (coin haut-gauche, 1-indexé)
+  row: number;
+  width?: number;      // px
+  height?: number;     // px
+  offset_x?: number;   // décalage px depuis le coin de la cellule
+  offset_y?: number;   // décalage px
+}
+
 export interface ExcelSheet {
   id: string;
   name: string;
@@ -387,6 +399,7 @@ export interface ExcelSheet {
   cells?: GridCell[];
   col_widths?: Record<string, number>;
   row_heights?: Record<string, number>;
+  images?: SheetImage[];
 }
 
 export interface ExcelWorkbook {
