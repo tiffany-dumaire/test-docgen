@@ -506,6 +506,19 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
               </div>
 
               <div class="card stack">
+                <h3>Générer un rendu par langue</h3>
+                <p class="muted" style="margin:0">Chaque langue disponible du modèle produit sa propre planche. Enregistrez le modèle avant de générer.</p>
+                @for (l of availableLangs(m); track l) {
+                  <div class="row" style="gap:.6rem; align-items:center; flex-wrap:wrap">
+                    <span style="min-width:9rem">{{ flagOf(l) }} {{ labelOf(l) }}</span>
+                    <button class="btn btn-sm btn-ghost" [disabled]="!isEdit()" (click)="exportA3Lang('pdf', l)">⬇ PDF</button>
+                    <button class="btn btn-sm btn-ghost" [disabled]="!isEdit()" (click)="exportA3Lang('png', l)">⬇ PNG</button>
+                    <button class="btn btn-sm btn-ghost" [disabled]="!isEdit()" (click)="exportA3Lang('svg', l)">⬇ SVG</button>
+                  </div>
+                }
+              </div>
+
+              <div class="card stack">
                 <div class="row between">
                   <h3>Pages du modèle</h3>
                   <button class="btn btn-sm btn-primary" (click)="addA3Page()">+ Page</button>
@@ -768,6 +781,21 @@ export class TemplateBuilder {
   setName(m: DocumentTemplate, code: string, value: string) {
     m.names = { ...(m.names ?? {}) };
     if (value) m.names[code] = value; else delete m.names[code];
+  }
+
+  /** Génère et télécharge la planche A3 dans la langue demandée. */
+  exportA3Lang(fmt: 'pdf' | 'png' | 'svg', lang: string) {
+    const m = this.model();
+    if (!m?.id) { this.toast.error('Enregistrez le modèle avant de générer un rendu.'); return; }
+    this.service.exportA3(m.id, fmt, lang).subscribe({
+      next: (blob) => {
+        const u = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = u; a.download = `${m.slug || 'template'}-${lang}.${fmt}`;
+        a.click(); URL.revokeObjectURL(u);
+      },
+      error: () => this.toast.error('Export impossible.'),
+    });
   }
   excelSheets = computed<ExcelSheet[]>(() => {
     const s = this.model()?.settings;

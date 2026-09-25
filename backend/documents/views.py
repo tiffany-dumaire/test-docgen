@@ -75,13 +75,19 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Modèle non A3."},
                             status=status.HTTP_400_BAD_REQUEST)
         fmt = (request.query_params.get("fmt") or "pdf").lower()
+        # Langue demandée : rend la planche dans la langue choisie (a3_pages_i18n).
+        avail = template.available_languages()
+        lang = (request.query_params.get("lang") or "").strip()
+        if lang not in avail:
+            lang = template.language or (avail[0] if avail else "fr")
+        data = {"_lang": lang}
         project = Project.objects.first()
         tmp = Document.objects.create(
-            project=project, template=template, title=template.name,
-            confidentiality=ConfidentialityLevel.INTERNAL, data={})
+            project=project, template=template, title=template.name_for(lang),
+            confidentiality=ConfidentialityLevel.INTERNAL, data=data)
         try:
             ctx = GenerationContext.build(
-                tmp, version_number=1, data={}, author_initials="—")
+                tmp, version_number=1, data=data, author_initials="—")
             if fmt == "png":
                 content, mime, ext = a3_gen.render_png(ctx), "image/png", "png"
             elif fmt == "svg":
@@ -90,7 +96,7 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
                 content, mime, ext = a3_gen.render(ctx), "application/pdf", "pdf"
             resp = HttpResponse(content, content_type=mime)
             disp = "attachment" if request.query_params.get("download") else "inline"
-            name = (template.slug or "template") + "." + ext
+            name = f"{template.slug or 'template'}-{lang}.{ext}"
             resp["Content-Disposition"] = f'{disp}; filename="{name}"'
             return resp
         finally:
