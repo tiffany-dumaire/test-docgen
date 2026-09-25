@@ -633,11 +633,14 @@ export interface AuthConfig {
 
 export interface Meeting {
   id?: number; project: number; title: string; date?: string | null;
-  location?: string; notes?: string; documents?: number[];
+  location?: string; notes?: string; documents?: number[]; cancelled?: boolean;
 }
 export interface JournalEntry {
-  id?: number; project: number; meeting?: number | null; document_version?: number | null;
-  category: string; confidentiality: string; body: string; author?: string; created_at?: string;
+  id?: number; project?: number | null; project_name?: string; client?: number | null;
+  meeting?: number | null; document_version?: number | null;
+  category: string; category_label?: string; confidentiality: string;
+  body?: string; body_html?: string; is_automatic?: boolean; event?: string;
+  author?: string; created_at?: string;
 }
 export interface ProjectLink {
   id?: number; project: number; category?: string; name: string; url?: string; comment?: string; order?: number;

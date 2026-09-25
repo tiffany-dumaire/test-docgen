@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -61,12 +61,69 @@ class ContactViewSet(viewsets.ModelViewSet):
     serializer_class = ContactSerializer
     filterset_fields = ["project", "kind"]
 
+    def perform_create(self, serializer):
+        from . import journal
+        contact = serializer.save()
+        if contact.project_id:
+            journal.log_project(
+                contact.project, "contact_added",
+                f"Contact {contact.full_name} ({contact.get_kind_display()}) "
+                f"ajouté au projet.")
+
+    def perform_destroy(self, instance):
+        from . import journal
+        project = instance.project
+        name = instance.full_name
+        kind = instance.get_kind_display()
+        super().perform_destroy(instance)
+        if project is not None:
+            journal.log_project(
+                project, "contact_removed",
+                f"Contact {name} ({kind}) retiré du projet.")
+
 
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Client.objects.prefetch_related("projects").all()
     serializer_class = ClientSerializer
     search_fields = ["name", "contact_name", "email"]
     ordering_fields = ["name", "created_at"]
+
+    _CONTACT_FIELDS = ("contact_name", "email", "phone", "address")
+
+    def perform_update(self, serializer):
+        from . import journal
+        before = {f: getattr(serializer.instance, f) for f in self._CONTACT_FIELDS}
+        client = serializer.save()
+        changed = [f for f in self._CONTACT_FIELDS
+                   if before[f] != getattr(client, f)]
+        if changed:
+            journal.log_client(
+                client, "contact_changed",
+                "Coordonnées / contact du client mises à jour.")
+
+    def _client_journal_qs(self, client):
+        from django.db.models import Q
+        from .models import JournalEntry
+        return (JournalEntry.objects
+                .filter(Q(client=client) | Q(project__client=client)
+                        | Q(project__clients=client))
+                .select_related("project").distinct().order_by("-created_at"))
+
+    @action(detail=True, methods=["get", "post"])
+    def journal(self, request, pk=None):
+        """Journal agrégé du client (événements de ses projets + entrées client)."""
+        from .serializers import JournalEntrySerializer
+        client = self.get_object()
+        if request.method == "POST":
+            data = dict(request.data)
+            data["client"] = client.id
+            data.pop("project", None)
+            ser = JournalEntrySerializer(data=data)
+            ser.is_valid(raise_exception=True)
+            ser.save()
+            return Response(ser.data, status=status.HTTP_201_CREATED)
+        entries = self._client_journal_qs(client)[:300]
+        return Response(JournalEntrySerializer(entries, many=True).data)
 
     @action(detail=True, methods=["get"])
     def detail_bundle(self, request, pk=None):
@@ -85,6 +142,8 @@ class ClientViewSet(viewsets.ModelViewSet):
         pids = list(projects.values_list("id", flat=True))
         contacts = Contact.objects.filter(project_id__in=pids)
         meetings = Meeting.objects.filter(project_id__in=pids).order_by("-date", "-id")
+        from .serializers import JournalEntrySerializer
+        journal = self._client_journal_qs(client)[:200]
         ctx = {"request": request}
         return Response({
             "client": ClientSerializer(client, context=ctx).data,
@@ -98,6 +157,7 @@ class ClientViewSet(viewsets.ModelViewSet):
                 {**MeetingSerializer(m).data, "project_name": m.project.name}
                 for m in meetings
             ],
+            "journal": JournalEntrySerializer(journal, many=True).data,
         })
 
 
@@ -107,11 +167,22 @@ class MeetingViewSet(viewsets.ModelViewSet):
     filterset_fields = ["project"]
     ordering_fields = ["date", "created_at"]
 
+    def perform_update(self, serializer):
+        from . import journal
+        was_cancelled = serializer.instance.cancelled
+        meeting = serializer.save()
+        # Journalise l'annulation (passage à « annulée »).
+        if meeting.cancelled and not was_cancelled and meeting.project_id:
+            journal.log_project(
+                meeting.project, "meeting_cancelled",
+                f"Réunion « {meeting.title} » annulée.", meeting=meeting)
+
 
 class JournalEntryViewSet(viewsets.ModelViewSet):
     queryset = JournalEntry.objects.all()
     serializer_class = JournalEntrySerializer
-    filterset_fields = ["project", "meeting", "category", "confidentiality"]
+    filterset_fields = ["project", "client", "meeting", "category",
+                        "confidentiality", "is_automatic"]
 
 
 class ProjectLinkViewSet(viewsets.ModelViewSet):

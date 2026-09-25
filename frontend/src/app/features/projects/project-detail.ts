@@ -1,8 +1,9 @@
 import { Component, inject, signal, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SlicePipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MeetingCalendar } from '../../shared/meeting-calendar';
+import { RichTextEditor } from '../../shared/rich-text-editor';
 import { ProjectTracking } from './project-tracking';
 import { ProjectExtrasService } from '../../core/services/project-extras.service';
 import { Meeting, JournalEntry, ProjectLink } from '../../core/models';
@@ -17,7 +18,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-project-detail',
-  imports: [RouterLink, FormsModule, SlicePipe, DatePipe, MatTabsModule, MeetingCalendar, ProjectTracking],
+  imports: [RouterLink, FormsModule, DatePipe, MatTabsModule, MeetingCalendar, RichTextEditor, ProjectTracking],
   template: `
     @if (project(); as p) {
       <div class="row between">
@@ -181,11 +182,15 @@ import { Router } from '@angular/router';
               <div class="listwrap">
                 @for (mtg of meetings(); track mtg.id) {
                   <div class="row between mtg-line">
-                    <div><b>{{ mtg.title }}</b>
+                    <div><b [style.text-decoration]="mtg.cancelled ? 'line-through' : 'none'">{{ mtg.title }}</b>
+                      @if (mtg.cancelled) { <span class="chip-cancel">annulée</span> }
                       <span class="muted" style="font-size:.78rem">
                         @if (mtg.date) { · {{ mtg.date | date:'dd/MM/yyyy HH:mm' }} } @if (mtg.location) { · {{ mtg.location }} }
                       </span></div>
-                    <button class="btn btn-sm btn-danger" (click)="delMeeting(mtg)">✕</button>
+                    <div class="row" style="gap:.3rem">
+                      @if (!mtg.cancelled) { <button class="btn btn-sm btn-ghost" (click)="cancelMeeting(mtg)">Annuler</button> }
+                      <button class="btn btn-sm btn-danger" (click)="delMeeting(mtg)">✕</button>
+                    </div>
                   </div>
                 } @empty { <div class="muted">Aucune réunion planifiée.</div> }
               </div>
@@ -196,18 +201,42 @@ import { Router } from '@angular/router';
         <mat-tab label="Journal">
           <div class="tabpad">
             <div class="card"><h3>📓 Journal du projet</h3>
-              <div class="row" style="gap:.3rem;flex-wrap:wrap;align-items:end;margin-bottom:.6rem">
-                <select [(ngModel)]="njCat" style="width:130px"><option value="note">Note</option><option value="decision">Décision</option><option value="risk">Risque</option><option value="action">Action</option><option value="incident">Incident</option><option value="info">Info</option></select>
-                <select [(ngModel)]="njConf" style="width:150px"><option value="public">Public</option><option value="internal">Interne</option><option value="confidential">Confidentiel</option><option value="restricted">Strictement confidentiel</option></select>
-                <input [(ngModel)]="njBody" placeholder="Commentaire…" style="flex:1;min-width:180px" />
-                <button class="btn btn-ghost btn-sm" (click)="addJournal(p.id!)" [disabled]="!njBody">+ Ajouter</button>
+              <div class="jform">
+                <div class="row" style="gap:.3rem;flex-wrap:wrap;align-items:center;margin-bottom:.4rem">
+                  <select [(ngModel)]="njCat" style="width:130px"><option value="note">Note</option><option value="decision">Décision</option><option value="risk">Risque</option><option value="action">Action</option><option value="incident">Incident</option><option value="info">Info</option></select>
+                  <select [(ngModel)]="njConf" style="width:170px"><option value="public">Public</option><option value="internal">Interne</option><option value="confidential">Confidentiel</option><option value="restricted">Strictement confidentiel</option></select>
+                </div>
+                <app-rich-text-editor [(value)]="njHtml" />
+                <div class="row" style="justify-content:flex-end;margin-top:.4rem">
+                  <button class="btn btn-ghost btn-sm" (click)="addJournal(p.id!)" [disabled]="!hasContent(njHtml)">+ Ajouter au journal</button>
+                </div>
               </div>
-              @for (j of journal(); track j.id) {
-                <div class="row between" style="border-bottom:1px solid var(--border);padding:.4rem 0">
-                  <div><span class="badge" [class.badge-internal]="j.confidentiality==='internal'" [class.badge-confidential]="j.confidentiality==='confidential'" [class.badge-restricted]="j.confidentiality==='restricted'" [class.badge-public]="j.confidentiality==='public'">{{ j.category }}</span>
-                    <span style="margin-left:.5rem">{{ j.body }}</span>
-                    <div class="muted" style="font-size:.72rem">{{ j.author }} · {{ j.created_at | slice:0:10 }}</div></div>
-                  <button class="btn btn-sm btn-danger" (click)="delJournal(j)">✕</button></div>
+
+              <div class="row" style="gap:.6rem;align-items:center;margin:.6rem 0 .2rem">
+                <label class="muted" style="font-size:.8rem;display:flex;gap:.3rem;align-items:center">
+                  <input type="checkbox" [(ngModel)]="showAuto" /> Afficher les entrées automatiques
+                </label>
+              </div>
+
+              @for (j of visibleJournal(); track j.id) {
+                <div class="jentry" [class.auto]="j.is_automatic">
+                  <div class="jicon">{{ eventIcon(j) }}</div>
+                  <div class="jbody">
+                    <div class="jmeta">
+                      <span class="badge" [class.badge-internal]="j.confidentiality==='internal'" [class.badge-confidential]="j.confidentiality==='confidential'" [class.badge-restricted]="j.confidentiality==='restricted'" [class.badge-public]="j.confidentiality==='public'">{{ j.category_label || j.category }}</span>
+                      @if (j.is_automatic) { <span class="chip-auto">auto</span> }
+                      <span class="muted jdate">{{ j.author || '—' }} · {{ j.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    @if (j.body_html) {
+                      <div class="rich" [innerHTML]="j.body_html"></div>
+                    } @else {
+                      <div>{{ j.body }}</div>
+                    }
+                  </div>
+                  @if (!j.is_automatic) {
+                    <button class="btn btn-sm btn-danger" (click)="delJournal(j)">✕</button>
+                  }
+                </div>
               } @empty { <div class="muted">Aucune entrée.</div> }
             </div>
           </div>
@@ -226,6 +255,20 @@ import { Router } from '@angular/router';
       .contact:last-child {
         border-bottom: none;
       }
+      .jform { border: 1px solid var(--border); border-radius: 10px; padding: .6rem; background: var(--bg); margin-bottom: .8rem; }
+      .jentry { display: flex; gap: .6rem; align-items: flex-start; padding: .55rem 0; border-bottom: 1px solid var(--border); }
+      .jentry:last-child { border-bottom: none; }
+      .jentry.auto { opacity: .95; }
+      .jentry.auto .jbody { color: var(--muted); }
+      .jicon { width: 1.7rem; height: 1.7rem; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary-light, #fdece0); font-size: .95rem; }
+      .jbody { flex: 1; min-width: 0; }
+      .jmeta { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; margin-bottom: .15rem; }
+      .jdate { font-size: .72rem; }
+      .chip-auto { font-size: .62rem; text-transform: uppercase; letter-spacing: .04em; background: var(--border); color: var(--muted); border-radius: 6px; padding: .05rem .35rem; font-weight: 700; }
+      .rich :is(h1,h2,h3){ margin:.3em 0; font-size:1rem; }
+      .rich ul,.rich ol{ margin:.2em 0 .2em 1.1em; }
+      .rich p{ margin:.25em 0; }
+      .chip-cancel { font-size: .62rem; text-transform: uppercase; background: #fee2e2; color: #b91c1c; border-radius: 6px; padding: .05rem .35rem; font-weight: 700; margin-left: .3rem; }
     `,
   ],
 })
@@ -255,7 +298,27 @@ export class ProjectDetail {
   linkCategories = ['Conditions générales', 'Site web', 'Support', 'Sharepoint', 'Gitlab', 'Teamwork'];
   onNlCat(v: string) { this.nlCatSel = v; this.nlCat = v === '__custom' ? '' : v; }
   nmTitle=''; nmLoc=''; nmDate='';
-  njCat='note'; njConf='internal'; njBody='';
+  njCat='note'; njConf='internal'; njHtml='';
+  showAuto = true;
+
+  private static EVENT_ICONS: Record<string, string> = {
+    document_created: '📄', version_created: '🔄', form_added: '📝',
+    form_response: '📥', meeting_added: '📅', meeting_cancelled: '🚫',
+    contact_added: '➕', contact_removed: '➖', project_added: '📁',
+    team_updated: '🛠️', contact_changed: '✏️',
+  };
+  eventIcon(j: JournalEntry): string {
+    if (j.is_automatic && j.event) return ProjectDetail.EVENT_ICONS[j.event] || 'ℹ️';
+    return ({ note: '🗒️', decision: '✅', risk: '⚠️', action: '⚡',
+              incident: '🔥', info: 'ℹ️', event: '•' } as Record<string, string>)[j.category] || '🗒️';
+  }
+  hasContent(html: string): boolean {
+    return !!html && html.replace(/<[^>]*>/g, '').trim().length > 0;
+  }
+  visibleJournal(): JournalEntry[] {
+    const all = this.journal();
+    return this.showAuto ? all : all.filter((j) => !j.is_automatic);
+  }
 
   constructor() {
     setTimeout(() => {
@@ -297,10 +360,15 @@ export class ProjectDetail {
       this.nmTitle=''; this.nmLoc=''; this.nmDate=''; this.reloadExtras(pid); });
   }
   delMeeting(m: Meeting) { if (m.id) this.extras.removeMeeting(m.id).subscribe(() => this.reloadExtras(+this.id)); }
+  cancelMeeting(m: Meeting) {
+    if (!m.id) return;
+    if (!confirm(`Annuler la réunion « ${m.title} » ?`)) return;
+    this.extras.updateMeeting(m.id, { cancelled: true }).subscribe(() => this.reloadExtras(+this.id));
+  }
   addJournal(pid: number) {
-    if (!this.njBody) return;
-    this.extras.addJournal({ project: pid, category: this.njCat, confidentiality: this.njConf, body: this.njBody }).subscribe(() => {
-      this.njBody=''; this.reloadExtras(pid); });
+    if (!this.hasContent(this.njHtml)) return;
+    this.extras.addJournal({ project: pid, category: this.njCat, confidentiality: this.njConf, body_html: this.njHtml }).subscribe(() => {
+      this.njHtml=''; this.reloadExtras(pid); });
   }
   delJournal(j: JournalEntry) { if (j.id) this.extras.removeJournal(j.id).subscribe(() => this.reloadExtras(+this.id)); }
 

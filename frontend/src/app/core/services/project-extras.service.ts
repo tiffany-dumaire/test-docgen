@@ -13,6 +13,7 @@ export class ProjectExtrasService {
     return this.http.get<Paginated<Meeting>>(`${this.base}/meetings/?project=${pid}`);
   }
   addMeeting(m: Meeting) { return this.http.post<Meeting>(`${this.base}/meetings/`, m); }
+  updateMeeting(id: number, patch: Partial<Meeting>) { return this.http.patch<Meeting>(`${this.base}/meetings/${id}/`, patch); }
   removeMeeting(id: number) { return this.http.delete<void>(`${this.base}/meetings/${id}/`); }
 
   journal(pid: number): Observable<Paginated<JournalEntry>> {

@@ -273,6 +273,20 @@ def generate_version(document: Document, *, author_initials, author_name="",
     document.current_version = next_version
     document.save(update_fields=["current_version", "data", "confidentiality",
                                  "updated_at"])
+
+    # Journal automatique : nouvelle version générée.
+    try:
+        from projects.journal import log_project
+        if document.project_id:
+            log_project(
+                document.project, "version_created",
+                f"Version v{next_version} générée du document "
+                f"« {document.title} ».",
+                document_version=version,
+                author=author_name or author_initials or "Système",
+                confidentiality=document.confidentiality)
+    except Exception:
+        pass
     return version
 
 

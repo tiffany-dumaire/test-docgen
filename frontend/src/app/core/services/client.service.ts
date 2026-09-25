@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiConfig, toHttpParams } from './api.service';
-import { Client, Paginated } from '../models';
+import { Client, JournalEntry, Paginated } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class ClientService {
@@ -20,4 +20,10 @@ export class ClientService {
   }
   remove(id: number): Observable<void> { return this.http.delete<void>(`${this.url}${id}/`); }
   detailBundle(id: number): Observable<any> { return this.http.get<any>(`${this.url}${id}/detail_bundle/`); }
+  journal(id: number): Observable<JournalEntry[]> {
+    return this.http.get<JournalEntry[]>(`${this.url}${id}/journal/`);
+  }
+  addJournal(id: number, entry: Partial<JournalEntry>): Observable<JournalEntry> {
+    return this.http.post<JournalEntry>(`${this.url}${id}/journal/`, entry);
+  }
 }

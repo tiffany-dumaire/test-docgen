@@ -133,6 +133,18 @@ class DocumentViewSet(viewsets.ModelViewSet):
         ctx["request"] = self.request
         return ctx
 
+    def perform_create(self, serializer):
+        document = serializer.save()
+        try:
+            from projects.journal import log_project
+            if document.project_id:
+                log_project(
+                    document.project, "document_created",
+                    f"Nouveau document « {document.title} » créé.",
+                    confidentiality=document.confidentiality)
+        except Exception:
+            pass
+
     @action(detail=True, methods=["post"])
     def generate(self, request, pk=None):
         """(Re)génère le document : crée une nouvelle version."""

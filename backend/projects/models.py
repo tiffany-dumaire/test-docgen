@@ -159,6 +159,7 @@ class Meeting(models.Model):
     notes = models.TextField("Notes", blank=True)
     documents = models.ManyToManyField("documents.Document", blank=True,
                                        related_name="meetings")
+    cancelled = models.BooleanField("Annulée", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -179,14 +180,18 @@ class JournalEntry(models.Model):
     CATEGORY_CHOICES = [
         ("note", "Note"), ("decision", "Décision"), ("risk", "Risque"),
         ("action", "Action"), ("incident", "Incident"), ("info", "Information"),
+        ("event", "Événement"),
     ]
     CONFIDENTIALITY_CHOICES = [
         ("public", "Public"), ("internal", "Interne"),
         ("confidential", "Confidentiel"), ("restricted", "Strictement confidentiel"),
     ]
 
-    project = models.ForeignKey(Project, related_name="journal",
-                                on_delete=models.CASCADE)
+    # Entrée rattachable à un projet et/ou directement à un client (journal client).
+    project = models.ForeignKey(Project, related_name="journal", null=True,
+                                blank=True, on_delete=models.CASCADE)
+    client = models.ForeignKey("Client", related_name="journal", null=True,
+                               blank=True, on_delete=models.CASCADE)
     meeting = models.ForeignKey(Meeting, related_name="journal", null=True,
                                 blank=True, on_delete=models.SET_NULL)
     document_version = models.ForeignKey(
@@ -197,7 +202,11 @@ class JournalEntry(models.Model):
     confidentiality = models.CharField("Confidentialité", max_length=20,
                                        choices=CONFIDENTIALITY_CHOICES,
                                        default="internal")
-    body = models.TextField("Contenu")
+    body = models.TextField("Contenu", blank=True)
+    body_html = models.TextField("Contenu enrichi", blank=True)
+    # Entrées automatiques : posées par l'application (génération, réunion…).
+    is_automatic = models.BooleanField("Automatique", default=False)
+    event = models.CharField("Événement", max_length=40, blank=True)
     author = models.CharField("Auteur", max_length=150, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
