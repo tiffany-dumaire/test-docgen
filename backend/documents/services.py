@@ -184,6 +184,7 @@ def to_pdf_for_preview(content: bytes, ext: str):
     return None
 
 
+@transaction.atomic
 def generate_version(document: Document, *, author_initials, author_name="",
                      comment="", confidentiality=None, data=None):
     """
