@@ -339,8 +339,8 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
                   <label class="chk"><input type="checkbox" [ngModel]="hfVal('header','enabled')" (ngModelChange)="setHf('header','enabled',$event)" /> En-tête actif</label>
                   @if (hfVal('header','enabled')) {
                     <label class="chk"><input type="checkbox" [ngModel]="hfVal('header','show_logo')" (ngModelChange)="setHf('header','show_logo',$event)" /> Afficher le logo de l'entreprise</label>
-                    <div class="field"><label>Texte de l'en-tête (variables {{ '{{' }}…{{ '}}' }})</label>
-                      <textarea rows="2" [ngModel]="hfVal('header','text')" (ngModelChange)="setHf('header','text',$event)"></textarea></div>
+                    <div class="field"><label>Contenu de l'en-tête (texte enrichi : couleur, gras, listes… — variables {{ '{{' }}…{{ '}}' }})</label>
+                      <app-rich-text-editor [value]="$any(hfVal('header','html'))" (valueChange)="setHf('header','html',$event)" /></div>
                     <div class="field" style="max-width:220px"><label>Alignement</label>
                       <select [ngModel]="hfVal('header','align')" (ngModelChange)="setHf('header','align',$event)">
                         <option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option>
@@ -355,8 +355,8 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
                 @if (hfConfigured('footer')) {
                   <label class="chk"><input type="checkbox" [ngModel]="hfVal('footer','enabled')" (ngModelChange)="setHf('footer','enabled',$event)" /> Pied de page actif</label>
                   @if (hfVal('footer','enabled')) {
-                    <div class="field"><label>Texte du pied de page (une ligne par retour à la ligne, variables {{ '{{' }}…{{ '}}' }})</label>
-                      <textarea rows="2" [ngModel]="hfVal('footer','text')" (ngModelChange)="setHf('footer','text',$event)"></textarea></div>
+                    <div class="field"><label>Contenu du pied de page (texte enrichi : couleur, gras, listes… — variables {{ '{{' }}…{{ '}}' }})</label>
+                      <app-rich-text-editor [value]="$any(hfVal('footer','html'))" (valueChange)="setHf('footer','html',$event)" /></div>
                     <div class="field" style="max-width:220px"><label>Alignement</label>
                       <select [ngModel]="hfVal('footer','align')" (ngModelChange)="setHf('footer','align',$event)">
                         <option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option>
@@ -752,7 +752,7 @@ export class TemplateBuilder {
       delete m.settings[kind];
     }
   }
-  hfVal(kind: 'header' | 'footer', key: 'enabled' | 'text' | 'align' | 'show_logo') {
+  hfVal(kind: 'header' | 'footer', key: 'enabled' | 'text' | 'html' | 'align' | 'show_logo') {
     const o = (this.settings() as TemplateSettings)[kind] as Record<string, unknown> | undefined;
     if (!o) return key === 'enabled' ? true : (key === 'align' ? (kind === 'footer' ? 'center' : 'left') : '');
     return key === 'enabled' ? o['enabled'] !== false : (o[key] ?? '');

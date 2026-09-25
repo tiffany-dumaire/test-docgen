@@ -33,6 +33,10 @@ import {
         <button type="button" (click)="cmd('insertUnorderedList')" title="Liste à puces">• —</button>
         <button type="button" (click)="cmd('insertOrderedList')" title="Liste numérotée">1. —</button>
         <span class="sep"></span>
+        <label class="colorbtn" title="Couleur du texte">
+          <span style="font-weight:700">A</span>
+          <input type="color" (input)="setColor($event)" value="#ec6608" />
+        </label>
         <button type="button" (click)="addLink()" title="Lien">🔗</button>
         <button type="button" (click)="cmd('removeFormat')" title="Effacer le format">✕</button>
       </div>
@@ -53,6 +57,8 @@ import {
       .toolbar button:hover { background: var(--primary-light); }
       .toolbar select { width: auto; padding: 0.2rem 0.4rem; font-size: 0.82rem; }
       .sep { width: 1px; height: 1.2rem; background: var(--border); margin: 0 0.2rem; }
+      .colorbtn { position: relative; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: #fff; border-radius: 6px; padding: 0.2rem 0.5rem; cursor: pointer; min-width: 2rem; }
+      .colorbtn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
       .editable { min-height: 130px; padding: 0.7rem 0.9rem; font-size: 0.9rem; outline: none; }
       .editable:focus { box-shadow: inset 0 0 0 2px var(--primary-light); }
       .editable h1 { font-size: 1.4rem; } .editable h2 { font-size: 1.2rem; }
@@ -76,6 +82,13 @@ export class RichTextEditor implements AfterViewInit {
   cmd(command: string) {
     document.execCommand(command, false);
     this.editor.nativeElement.focus();
+    this.onInput();
+  }
+
+  setColor(event: Event) {
+    const color = (event.target as HTMLInputElement).value;
+    this.editor.nativeElement.focus();
+    document.execCommand('foreColor', false, color);
     this.onInput();
   }
 

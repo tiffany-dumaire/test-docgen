@@ -588,14 +588,20 @@ def _apply_docx_header_footer(doc, cfg, ctx, pctx):
                     p.add_run().add_picture(logo, height=Inches(0.7))
                 except Exception:
                     pass
-        text = interpolate(conf.get("text", "") or "", pctx)
-        lines = text.split("\n") if text.strip() else []
-        for line in lines:
-            p = part.add_paragraph(); p.alignment = alignment
-            run = p.add_run(line)
-            run.font.size = Pt(8 if is_footer else 10)
-            if is_footer:
-                run.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+        html = conf.get("html")
+        if html and html.strip():
+            # Texte enrichi (couleur, gras, listes…) interpolé puis rendu.
+            _render_rich_into(part, interpolate(html, pctx), alignment,
+                              8 if is_footer else 10, is_footer)
+        else:
+            text = interpolate(conf.get("text", "") or "", pctx)
+            lines = text.split("\n") if text.strip() else []
+            for line in lines:
+                p = part.add_paragraph(); p.alignment = alignment
+                run = p.add_run(line)
+                run.font.size = Pt(8 if is_footer else 10)
+                if is_footer:
+                    run.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
         if not part.paragraphs:
             part.add_paragraph("")
 
@@ -628,6 +634,53 @@ def _add_inline(paragraph, html, doc, add_hyperlink):
         run.bold = seg.get("bold", False)
         run.italic = seg.get("italic", False)
         run.underline = seg.get("underline", False)
+        color = seg.get("color")
+        if color:
+            try:
+                run.font.color.rgb = RGBColor.from_string(color.lstrip("#").upper())
+            except Exception:
+                pass
+
+
+def _add_hyperlink_part(paragraph, url, text):
+    """Ajoute un lien hypertexte dans un paragraphe (corps, en-tête ou pied)."""
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+    part = paragraph.part
+    r_id = part.relate_to(
+        url, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+        is_external=True)
+    hyper = OxmlElement("w:hyperlink"); hyper.set(qn("r:id"), r_id)
+    run = OxmlElement("w:r"); rpr = OxmlElement("w:rPr")
+    c = OxmlElement("w:color"); c.set(qn("w:val"), "0000FF"); rpr.append(c)
+    u = OxmlElement("w:u"); u.set(qn("w:val"), "single"); rpr.append(u)
+    run.append(rpr)
+    t = OxmlElement("w:t"); t.text = text; run.append(t)
+    hyper.append(run); paragraph._p.append(hyper)
+
+
+def _render_rich_into(part, html, alignment, base_size, is_footer):
+    """Rend un fragment HTML enrichi (couleur/gras/listes) dans un en-tête/pied."""
+    from docx.shared import Pt, RGBColor
+    added = False
+    for node in parse_html(html):
+        if node["kind"] in ("heading", "paragraph"):
+            p = part.add_paragraph(); p.alignment = alignment
+            _add_inline(p, node["html"], None, _add_hyperlink_part)
+            for run in p.runs:
+                run.font.size = Pt(base_size + (1 if node["kind"] == "heading" else 0))
+                if node["kind"] == "heading":
+                    run.bold = True
+            added = True
+        elif node["kind"] == "list":
+            for item in node["items"]:
+                p = part.add_paragraph(); p.alignment = alignment
+                p.add_run("• ").font.size = Pt(base_size)
+                _add_inline(p, item, None, _add_hyperlink_part)
+                for run in p.runs:
+                    run.font.size = Pt(base_size)
+                added = True
+    return added
 
 
 def _contacts_docx(doc, block, ctx, styles):

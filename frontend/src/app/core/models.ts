@@ -268,6 +268,8 @@ export interface TemplateSettings {
 export interface HeaderFooter {
   enabled?: boolean;
   text?: string;
+  /** Texte enrichi (HTML : couleur, gras, listes…). Prioritaire sur `text`. */
+  html?: string;
   align?: 'left' | 'center' | 'right';
   show_logo?: boolean;
 }
