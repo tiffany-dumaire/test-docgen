@@ -1,6 +1,7 @@
-import { Component, Input, signal, computed, HostListener } from '@angular/core';
+import { Component, Input, signal, computed, HostListener, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TemplateSettings } from '../../core/models';
+import { CompanyService } from '../../core/services/company.service';
 
 type LType = 'text' | 'image' | 'logo' | 'rect' | 'ellipse' | 'line';
 interface LEl {
@@ -62,6 +63,10 @@ const DISP_W = 460;
               <button (click)="add('rect')">Rectangle</button>
               <button (click)="add('ellipse')">Ellipse</button>
               <button (click)="add('line')">Ligne</button>
+              <label class="chk2 previewtgl" title="Remplace les variables par des valeurs réelles dans l'aperçu">
+                <input type="checkbox" [ngModel]="previewData()" (ngModelChange)="previewData.set($event)" />
+                👁 Aperçu des données
+              </label>
             </div>
             <div class="canvas" [style.width.px]="dispW" [style.height.px]="dispH"
                  [style.background]="layout().background || '#ffffff'"
@@ -75,12 +80,18 @@ const DISP_W = 460;
                     @case ('rect') { <div class="fillbox" [style.background]="el.fill || '#1F497D'" [style.borderRadius.px]="(el.radius||0)*scale"></div> }
                     @case ('ellipse') { <div class="fillbox" [style.background]="el.fill || 'transparent'" [style.border]="'2px solid ' + (el.stroke || '#1F497D')" style="border-radius:50%"></div> }
                     @case ('line') { <div class="linebox" [style.background]="el.color || '#1F497D'"></div> }
-                    @case ('image') { <div class="ph">🖼️ image</div> }
-                    @case ('logo') { <div class="ph">🏢 logo</div> }
+                    @case ('image') {
+                      @if (el.asset_url) { <img class="fillimg" [src]="el.asset_url" /> }
+                      @else { <div class="ph">🖼️ image</div> }
+                    }
+                    @case ('logo') {
+                      @if (previewData() && companyLogo()) { <img class="fillimg" [src]="companyLogo()" /> }
+                      @else { <div class="ph">🏢 logo</div> }
+                    }
                     @default {
                       <div class="txt" [style.color]="el.color || '#000'" [style.fontSize.px]="(el.size||14)*scale"
                            [style.fontWeight]="el.bold ? 700 : 400" [style.textAlign]="el.align || 'left'"
-                           [style.fontStyle]="el.italic ? 'italic' : 'normal'">{{ el.text || 'Texte' }}</div>
+                           [style.fontStyle]="el.italic ? 'italic' : 'normal'">{{ resolveText(el.text) }}</div>
                     }
                   }
                   @if (selected() === el.id) {
@@ -185,6 +196,8 @@ const DISP_W = 460;
     .el.sel { outline:2px solid var(--primary); }
     .fillbox, .linebox { width:100%; height:100%; }
     .linebox { align-self:center; }
+    .fillimg { width:100%; height:100%; object-fit:contain; }
+    .previewtgl { margin-left:auto; display:inline-flex; align-items:center; gap:.3rem; font-size:.78rem; color:var(--muted); cursor:pointer; white-space:nowrap; }
     .ph { width:100%; height:100%; display:grid; place-items:center; background:#eef2f9; color:#64748b; font-size:.72rem; border:1px dashed #cbd5e1; }
     .txt { width:100%; height:100%; overflow:hidden; line-height:1.2; white-space:pre-wrap; }
     .rz { position:absolute; right:-5px; bottom:-5px; width:12px; height:12px; background:var(--primary); border:2px solid #fff; border-radius:2px; cursor:nwse-resize; }
@@ -203,13 +216,56 @@ const DISP_W = 460;
     .muted { color:var(--muted); font-size:.85rem; }
   `],
 })
-export class LayoutEditor {
+export class LayoutEditor implements OnInit {
   @Input() settings!: TemplateSettings;
   /** Mode « page unique » : édite directement cet objet de mise en page
    *  (utilisé par les templates A3 multi-pages et les calques dynamiques). */
   @Input() single?: LLayout;
   /** Jeu de formats proposés : 'page' (A4/A3 + orientation) ou 'slide' (16:9 / 4:3). */
   @Input() sizeMode: 'page' | 'slide' = 'page';
+  /** Valeurs réelles supplémentaires pour l'aperçu des variables (facultatif). */
+  @Input() previewValues?: Record<string, string>;
+
+  private companySvc = inject(CompanyService);
+  /** Aperçu des données : remplace les {{variables}} par des valeurs réelles. */
+  previewData = signal(false);
+  companyName = signal('VNV SA');
+  companyLogo = signal<string | null>(null);
+
+  ngOnInit() {
+    // Récupère le nom + logo de l'entreprise pour l'aperçu « données réelles ».
+    this.companySvc.get().subscribe({
+      next: (c) => {
+        if (c?.name) this.companyName.set(c.name);
+        this.companyLogo.set(c?.logo_url || c?.logo || null);
+      },
+      error: () => { /* aperçu avec valeurs d'exemple */ },
+    });
+  }
+
+  /** Valeurs d'exemple/réelles pour interpoler les variables dans l'aperçu. */
+  private previewVars(): Record<string, string> {
+    const today = new Date().toLocaleDateString('fr-CH');
+    return {
+      document_title: 'Document de démonstration',
+      client_name: 'Client Démo SA',
+      project_name: 'Projet Démo',
+      project_reference: 'REF-2024-001',
+      project_description: 'Description du projet de démonstration.',
+      version: 'v1',
+      today, doc_date: today,
+      company_name: this.companyName(),
+      ...(this.previewValues || {}),
+    };
+  }
+
+  /** Texte affiché dans le canvas : brut, ou interpolé si l'aperçu est actif. */
+  resolveText(text?: string): string {
+    const t = text || 'Texte';
+    if (!this.previewData()) return t;
+    const vars = this.previewVars();
+    return t.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (m, k) => vars[k] ?? m);
+  }
 
   page = signal<'cover' | 'suivi' | 'page'>('cover');
   rev = signal(0);
