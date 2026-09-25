@@ -22,6 +22,7 @@ import {
   Overlay,
   Project,
   StyleMap,
+  TemplateLanguage,
   TemplateSettings,
 } from '../../core/models';
 
@@ -86,11 +87,40 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
                   <input [(ngModel)]="m.description" placeholder="À quoi sert ce modèle ?" />
                 </div>
                 <div class="field">
-                  <label>Langue</label>
+                  <label>Langue principale</label>
                   <select [(ngModel)]="m.language">
-                    @for (l of languages; track l.value) { <option [value]="l.value">{{ l.flag }} {{ l.label }}</option> }
+                    @for (l of availableLangs(m); track l) {
+                      <option [value]="l">{{ flagOf(l) }} {{ labelOf(l) }}</option>
+                    }
                   </select>
+                  <small class="muted">Repli si une langue demandée n'est pas disponible.</small>
                 </div>
+              </div>
+
+              <div class="field">
+                <label>Langues disponibles</label>
+                <div class="row" style="gap:.8rem; flex-wrap:wrap">
+                  @for (l of languages; track l.value) {
+                    <label class="chk">
+                      <input type="checkbox" [checked]="hasLang(m, l.value)"
+                             (change)="toggleLang(m, l.value)" /> {{ l.flag }} {{ l.label }}
+                    </label>
+                  }
+                </div>
+                <small class="muted">Un modèle peut proposer une ou plusieurs langues.</small>
+              </div>
+
+              <div class="field">
+                <label>Nom du modèle par langue</label>
+                @for (l of availableLangs(m); track l) {
+                  <div class="row" style="gap:.6rem; align-items:center; margin-bottom:.35rem">
+                    <span style="width:2.2rem">{{ flagOf(l) }}</span>
+                    <input style="flex:1" [ngModel]="nameFor(m, l)"
+                           (ngModelChange)="setName(m, l, $event)"
+                           [placeholder]="labelOf(l)" />
+                  </div>
+                }
+                <small class="muted">Laissez vide pour utiliser le nom principal ci-dessus.</small>
               </div>
 
               @if (hasTableColor()) {
@@ -641,6 +671,35 @@ export class TemplateBuilder {
     m.projects = m.projects ?? [];
     const i = m.projects.indexOf(id);
     if (i >= 0) m.projects.splice(i, 1); else m.projects.push(id);
+  }
+
+  // --- Multilingue (point 5) : langues disponibles + nom par langue ---
+  flagOf(code: string) { return this.languages.find((l) => l.value === code)?.flag ?? ''; }
+  labelOf(code: string) { return this.languages.find((l) => l.value === code)?.label ?? code; }
+  /** Langues du modèle (principale incluse, ordre des langues connues). */
+  availableLangs(m: DocumentTemplate): TemplateLanguage[] {
+    const set = new Set<TemplateLanguage>(m.languages ?? []);
+    if (m.language) set.add(m.language);
+    if (set.size === 0) set.add((m.language ?? 'fr') as TemplateLanguage);
+    return this.languages.map((l) => l.value).filter((v) => set.has(v));
+  }
+  hasLang(m: DocumentTemplate, code: TemplateLanguage) { return (m.languages ?? []).includes(code); }
+  toggleLang(m: DocumentTemplate, code: TemplateLanguage) {
+    const list = [...(m.languages ?? [])];
+    const i = list.indexOf(code);
+    if (i >= 0) {
+      if (code === m.language) return;          // la langue principale reste active
+      list.splice(i, 1);
+      if (m.names) delete m.names[code];
+    } else {
+      list.push(code);
+    }
+    m.languages = list;
+  }
+  nameFor(m: DocumentTemplate, code: string) { return (m.names ?? {})[code] ?? ''; }
+  setName(m: DocumentTemplate, code: string, value: string) {
+    m.names = { ...(m.names ?? {}) };
+    if (value) m.names[code] = value; else delete m.names[code];
   }
   excelSheets = computed<ExcelSheet[]>(() => {
     const s = this.model()?.settings;

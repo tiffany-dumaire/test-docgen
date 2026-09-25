@@ -386,6 +386,14 @@ export interface DocumentTemplate {
   scope?: 'global' | 'projects';
   projects?: number[];
   language?: TemplateLanguage;
+  /** Langues prises en charge par le modèle (point 5). */
+  languages?: TemplateLanguage[];
+  /** Nom du modèle par langue, ex: { fr: 'Offre', en: 'Job offer' }. */
+  names?: Record<string, string>;
+  /** Lecture seule : langues résolues (principale incluse). */
+  available_languages?: TemplateLanguage[];
+  /** Lecture seule : nom résolu selon la langue demandée. */
+  display_name?: string;
 }
 
 export type TemplateLanguage = 'fr' | 'en' | 'de' | 'it';
