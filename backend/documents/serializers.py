@@ -7,15 +7,29 @@ from .models import (ConfidentialityLevel, Document, DocumentTemplate,
 class DocumentTemplateSerializer(serializers.ModelSerializer):
     doc_type_display = serializers.CharField(
         source="get_doc_type_display", read_only=True)
+    available_languages = serializers.SerializerMethodField()
+    display_name = serializers.SerializerMethodField()
 
     class Meta:
         model = DocumentTemplate
         fields = [
             "id", "name", "slug", "description", "doc_type", "doc_type_display",
             "builder_key", "is_block_based", "schema", "settings", "is_active",
-            "is_system", "scope", "projects", "language", "created_at", "updated_at",
+            "is_system", "scope", "projects", "language", "languages", "names",
+            "available_languages", "display_name", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "is_system", "created_at", "updated_at"]
+
+    def get_available_languages(self, obj):
+        return obj.available_languages()
+
+    def get_display_name(self, obj):
+        """Nom résolu dans la langue passée en contexte (?lang=xx), sinon principale."""
+        lang = None
+        request = self.context.get("request")
+        if request is not None:
+            lang = request.query_params.get("lang")
+        return obj.name_for(lang)
 
 
 class DocumentVersionSerializer(serializers.ModelSerializer):
