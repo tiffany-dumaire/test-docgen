@@ -271,6 +271,19 @@ class Command(BaseCommand):
             self.stdout.write(
                 ("Créé" if created else "Mis à jour") + f" : {obj.name}")
 
+        # --- Modèles Excel : migration vers le moteur « grille » ---
+        from documents.generators.excel_convert import convert_sheets
+        for xt in DocumentTemplate.objects.filter(doc_type="xlsx"):
+            s = dict(xt.settings or {})
+            excel = s.get("excel") or {}
+            sheets = excel.get("sheets") or []
+            if not sheets or "excel_legacy" in s:
+                continue
+            s["excel_legacy"] = excel
+            s["excel"] = {"sheets": convert_sheets(sheets)}
+            xt.settings = s
+            xt.save(update_fields=["settings"])
+
         # --- Profil entreprise ---
         company = CompanyProfile.load()
         if company.name in ("", "Mon entreprise"):
