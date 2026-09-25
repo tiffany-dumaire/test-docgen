@@ -7,6 +7,42 @@
    "type": "grid",
    "cells": [
     {
+     "row": 1,
+     "col": 7,
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 2,
+     "col": 7,
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 3,
+     "col": 7,
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 4,
+     "col": 7,
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 5,
+     "col": 1,
+     "number_format": "d-mmm-yy",
+     "border": false
+    },
+    {
+     "row": 5,
+     "col": 7,
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
      "row": 6,
      "col": 1,
      "value": "28.08.2024",
@@ -14,10 +50,28 @@
      "border": false
     },
     {
+     "row": 6,
+     "col": 7,
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
      "row": 7,
      "col": 1,
      "value": "Titre de l'offre",
      "size": 18.0,
+     "border": false
+    },
+    {
+     "row": 7,
+     "col": 7,
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 8,
+     "col": 7,
+     "number_format": "#,##0.00\\ \"CHF\"",
      "border": false
     },
     {
@@ -92,6 +146,41 @@
      "border": false
     },
     {
+     "row": 10,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 10,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 10,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 10,
+     "col": 6,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 10,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
      "row": 11,
      "col": 1,
      "value": "Analyse",
@@ -142,6 +231,41 @@
      "row": 11,
      "col": 7,
      "value": "=D11*E11",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 12,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 12,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 12,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 12,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 12,
+     "col": 7,
      "valign": "top",
      "number_format": "#,##0.00\\ \"CHF\"",
      "border": false
@@ -212,6 +336,47 @@
      "border": false
     },
     {
+     "row": 14,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 14,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 14,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 14,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 14,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 14,
+     "col": 10,
+     "number_format": "0.00",
+     "border": false
+    },
+    {
      "row": 15,
      "col": 1,
      "value": "Frontend",
@@ -267,6 +432,18 @@
      "border": false
     },
     {
+     "row": 15,
+     "col": 13,
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 15,
+     "col": 14,
+     "number_format": "0.00",
+     "border": false
+    },
+    {
      "row": 16,
      "col": 2,
      "value": "  - …",
@@ -312,6 +489,41 @@
      "row": 16,
      "col": 7,
      "value": "=D16*E16",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 17,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 17,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 17,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 17,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 17,
+     "col": 7,
      "valign": "top",
      "number_format": "#,##0.00\\ \"CHF\"",
      "border": false
@@ -371,6 +583,41 @@
      "border": false
     },
     {
+     "row": 19,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 19,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 19,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 19,
+     "col": 6,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 19,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
      "row": 20,
      "col": 2,
      "value": "Total DEV",
@@ -392,6 +639,13 @@
      "value": "=SUM(D11:D18)",
      "valign": "top",
      "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 20,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
      "border": false
     },
     {
@@ -507,6 +761,41 @@
      "border": false
     },
     {
+     "row": 23,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 23,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 23,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 23,
+     "col": 6,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 23,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
      "row": 24,
      "col": 2,
      "value": "Total Hors TVA",
@@ -554,6 +843,48 @@
      "valign": "top",
      "number_format": "#,##0.00\\ \"CHF\"",
      "border": true
+    },
+    {
+     "row": 25,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 25,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 25,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 26,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 26,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 26,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
     },
     {
      "row": 27,
@@ -617,6 +948,20 @@
      "align": "center",
      "valign": "top",
      "wrap": true,
+     "border": false
+    },
+    {
+     "row": 28,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 28,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
      "border": false
     },
     {
@@ -685,6 +1030,41 @@
      "border": false
     },
     {
+     "row": 30,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 30,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 30,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 30,
+     "col": 6,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 30,
+     "col": 7,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
      "row": 31,
      "col": 1,
      "value": "Frontend",
@@ -750,6 +1130,41 @@
      "border": false
     },
     {
+     "row": 32,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 32,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 32,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 32,
+     "col": 6,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 32,
+     "col": 7,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
      "row": 33,
      "col": 2,
      "value": "Total hors TVA",
@@ -799,6 +1214,123 @@
      "valign": "top",
      "number_format": "#,##0.00\\ \"CHF\"",
      "border": true
+    },
+    {
+     "row": 34,
+     "col": 3,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 34,
+     "col": 4,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 34,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 34,
+     "col": 6,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 34,
+     "col": 7,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 35,
+     "col": 3,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 35,
+     "col": 4,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 35,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 35,
+     "col": 6,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 35,
+     "col": 7,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 36,
+     "col": 3,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 36,
+     "col": 4,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 36,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 36,
+     "col": 6,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 36,
+     "col": 7,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
     },
     {
      "row": 37,
@@ -862,6 +1394,20 @@
      "align": "center",
      "valign": "top",
      "wrap": true,
+     "border": false
+    },
+    {
+     "row": 38,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 38,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
      "border": false
     },
     {
@@ -929,6 +1475,41 @@
      "border": false
     },
     {
+     "row": 40,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 40,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 40,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 40,
+     "col": 6,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 40,
+     "col": 7,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
      "row": 41,
      "col": 2,
      "value": "(optionnel) Mises à jour et assistance (frais annuels - J/H)",
@@ -987,6 +1568,41 @@
      "border": false
     },
     {
+     "row": 42,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 42,
+     "col": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 42,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 42,
+     "col": 6,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 42,
+     "col": 7,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
      "row": 43,
      "col": 2,
      "value": "Total hors TVA",
@@ -1036,6 +1652,123 @@
      "valign": "top",
      "number_format": "#,##0.00\\ \"CHF\"",
      "border": true
+    },
+    {
+     "row": 44,
+     "col": 3,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 44,
+     "col": 4,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 44,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 44,
+     "col": 6,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 44,
+     "col": 7,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 45,
+     "col": 3,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 45,
+     "col": 4,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 45,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 45,
+     "col": 6,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 45,
+     "col": 7,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 46,
+     "col": 3,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 46,
+     "col": 4,
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 46,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 46,
+     "col": 6,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 46,
+     "col": 7,
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
     },
     {
      "row": 47,
@@ -1128,6 +1861,27 @@
      "border": false
     },
     {
+     "row": 50,
+     "col": 3,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 50,
+     "col": 4,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 50,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
      "row": 51,
      "col": 2,
      "value": "Mise en place initial (frais uniques)",
@@ -1159,12 +1913,180 @@
      "border": false
     },
     {
+     "row": 52,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 52,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 52,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 53,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 53,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 53,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 54,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 54,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 54,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 55,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 55,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 55,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
      "row": 56,
      "col": 2,
      "value": " ---\nNE PAS IMPRIMER LA PARTIE CI-DESSOUS",
      "bold": true,
      "valign": "top",
      "wrap": true,
+     "border": false
+    },
+    {
+     "row": 56,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 56,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 56,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 57,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 57,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 57,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 58,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 58,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 58,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 59,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 59,
+     "col": 6,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 59,
+     "col": 7,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
      "border": false
     },
     {
@@ -1180,6 +2102,14 @@
      "row": 61,
      "col": 5,
      "value": "Dev",
+     "align": "right",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 61,
+     "col": 6,
      "align": "right",
      "valign": "top",
      "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
@@ -1276,6 +2206,14 @@
     },
     {
      "row": 62,
+     "col": 6,
+     "align": "right",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 62,
      "col": 7,
      "value": "=L62*8",
      "valign": "top",
@@ -1352,6 +2290,14 @@
      "row": 63,
      "col": 5,
      "value": "Ingé.",
+     "align": "right",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 63,
+     "col": 6,
      "align": "right",
      "valign": "top",
      "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",

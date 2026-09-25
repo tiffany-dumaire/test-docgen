@@ -1419,6 +1419,15 @@
      "border": true
     },
     {
+     "row": 23,
+     "col": 10,
+     "size": 8.0,
+     "align": "center",
+     "valign": "center",
+     "number_format": "@",
+     "border": false
+    },
+    {
      "row": 24,
      "col": 1,
      "value": "Visé par :",

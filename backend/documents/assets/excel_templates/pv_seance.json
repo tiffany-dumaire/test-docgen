@@ -8,6 +8,16 @@
    "cells": [
     {
      "row": 1,
+     "col": 2,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 1,
      "col": 4,
      "value": "PROCÈS-VERBAL DE SÉANCE",
      "bold": true,
@@ -16,6 +26,46 @@
      "number_format": "dd/mm/yy;@",
      "border": false,
      "col_span": 4
+    },
+    {
+     "row": 2,
+     "col": 2,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 2,
+     "col": 5,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 2,
+     "col": 6,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 2,
+     "col": 7,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
     },
     {
      "row": 3,

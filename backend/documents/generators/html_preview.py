@@ -141,21 +141,169 @@ def _blocks_html(ctx, resolved):
     return "\n".join(out)
 
 
+def _col_px(width):
+    """Largeur de colonne Excel (en « caractères ») -> pixels approximatifs."""
+    try:
+        return max(24, int(round(float(width) * 7)) + 5)
+    except (TypeError, ValueError):
+        return 64
+
+
+def _row_px(height):
+    """Hauteur de ligne Excel (en points) -> pixels approximatifs."""
+    try:
+        return max(18, int(round(float(height) * 4 / 3)))
+    except (TypeError, ValueError):
+        return 20
+
+
+_XL_ALIGN = {"center": "center", "centre": "center", "right": "right",
+             "left": "left", "justify": "justify", "general": "left"}
+_XL_VALIGN = {"top": "top", "center": "middle", "centre": "middle",
+              "bottom": "bottom", "middle": "middle"}
+
+
+def _fmt_grid_value(value, number_format):
+    """Rend une valeur de cellule pour l'aperçu, en tenant compte du format."""
+    if value is None or value == "":
+        return ""
+    nf = number_format or ""
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        # Pourcentage
+        if "%" in nf:
+            dec = nf.count("0", nf.find(".")) if "." in nf else 0
+            return f"{value * 100:.{dec}f} %"
+        # Monnaie / séparateur de milliers
+        if "#,##0" in nf or "0.00" in nf:
+            dec = 2 if ".00" in nf or "0.00" in nf else 0
+            txt = f"{value:,.{dec}f}".replace(",", " ").replace(".", ",")
+            for sym in ("CHF", "€", "$", "£"):
+                if sym in nf:
+                    return f"{txt} {sym}"
+            return txt
+    return str(value)
+
+
+def _grid_html(sh, pctx):
+    """Rend un onglet « grille » en table HTML fidèle (fusions, styles, tailles)."""
+    cells = sh.get("cells") or []
+    if not cells:
+        return '<p class="muted">Onglet vide.</p>'
+    col_widths = sh.get("col_widths") or {}
+    row_heights = sh.get("row_heights") or {}
+
+    cmap = {}
+    covered = set()
+    maxr, maxc = 1, 1
+    for cell in cells:
+        try:
+            r = int(cell.get("row", 1)); c = int(cell.get("col", 1))
+        except (TypeError, ValueError):
+            continue
+        if r < 1 or c < 1:
+            continue
+        cmap[(r, c)] = cell
+        rspan = max(1, int(cell.get("row_span", 1) or 1))
+        cspan = max(1, int(cell.get("col_span", 1) or 1))
+        maxr = max(maxr, r + rspan - 1)
+        maxc = max(maxc, c + cspan - 1)
+        for rr in range(r, r + rspan):
+            for cc in range(c, c + cspan):
+                if (rr, cc) != (r, c):
+                    covered.add((rr, cc))
+    for k in col_widths:
+        try:
+            maxc = max(maxc, int(k))
+        except (TypeError, ValueError):
+            pass
+    for k in row_heights:
+        try:
+            maxr = max(maxr, int(k))
+        except (TypeError, ValueError):
+            pass
+
+    colgroup = "".join(
+        f'<col style="width:{_col_px(col_widths.get(str(c)))}px">'
+        if str(c) in col_widths else "<col>"
+        for c in range(1, maxc + 1))
+
+    rows_html = []
+    for r in range(1, maxr + 1):
+        tds = []
+        rh = row_heights.get(str(r))
+        for c in range(1, maxc + 1):
+            if (r, c) in covered:
+                continue
+            cell = cmap.get((r, c))
+            if cell is None:
+                tds.append('<td class="xl-e"></td>')
+                continue
+            raw = cell.get("value", "")
+            if isinstance(raw, str):
+                raw = interpolate(raw, pctx)
+            text = _esc(_fmt_grid_value(raw, cell.get("number_format")))
+            st = []
+            if cell.get("bg"):
+                st.append(f"background:{_esc(cell['bg'])}")
+            if cell.get("color"):
+                st.append(f"color:{_esc(cell['color'])}")
+            if cell.get("bold"):
+                st.append("font-weight:700")
+            if cell.get("italic"):
+                st.append("font-style:italic")
+            if cell.get("underline"):
+                st.append("text-decoration:underline")
+            if cell.get("size"):
+                try:
+                    st.append(f"font-size:{float(cell['size'])}pt")
+                except (TypeError, ValueError):
+                    pass
+            align = _XL_ALIGN.get((cell.get("align") or "").lower())
+            if align:
+                st.append(f"text-align:{align}")
+            valign = _XL_VALIGN.get((cell.get("valign") or "").lower())
+            if valign:
+                st.append(f"vertical-align:{valign}")
+            st.append("white-space:normal" if cell.get("wrap") else "white-space:nowrap")
+            if cell.get("border"):
+                st.append("border:1px solid #94a3b8")
+            attrs = []
+            cspan = max(1, int(cell.get("col_span", 1) or 1))
+            rspan = max(1, int(cell.get("row_span", 1) or 1))
+            if cspan > 1:
+                attrs.append(f'colspan="{cspan}"')
+            if rspan > 1:
+                attrs.append(f'rowspan="{rspan}"')
+            attrs.append(f'style="{";".join(st)}"')
+            tds.append(f'<td {" ".join(attrs)}>{text or "&nbsp;"}</td>')
+        style = f' style="height:{_row_px(rh)}px"' if rh else ""
+        rows_html.append(f"<tr{style}>{''.join(tds)}</tr>")
+
+    return (f'<div class="xl-wrap"><table class="xl-grid"><colgroup>{colgroup}</colgroup>'
+            f'<tbody>{"".join(rows_html)}</tbody></table></div>')
+
+
 def _excel_html(ctx):
     settings = ctx.document.template.settings or {}
     sheets = (settings.get("excel") or {}).get("sheets") or []
+    pctx = placeholder_context(ctx)
     out = []
     for sh in sheets:
         out.append(f'<h2>📊 {_esc(sh.get("name","Onglet"))}</h2>')
         if sh.get("title"):
-            out.append(f'<p class="tbl-title">{_esc(sh["title"])}</p>')
+            out.append(f'<p class="tbl-title">{_esc(interpolate(sh["title"], pctx))}</p>')
         stype = sh.get("type", "table")
-        if stype == "info":
+        if stype == "grid":
+            out.append(_grid_html(sh, pctx))
+        elif stype == "info":
             out.append('<table class="doc-tbl"><tbody>')
             for it in (sh.get("items") or []):
-                out.append(f'<tr><th>{_esc(it.get("label",""))}</th><td>{_esc(it.get("value",""))}</td></tr>')
+                out.append(f'<tr><th>{_esc(it.get("label",""))}</th>'
+                           f'<td>{_esc(interpolate(str(it.get("value","")), pctx))}</td></tr>')
             out.append("</tbody></table>")
-        else:
+        elif stype == "pivot":
+            out.append('<p class="muted">Tableau croisé calculé à la génération.</p>')
+        else:  # table
             cols = sh.get("columns") or []
             head = "".join(f'<th>{_esc(c.get("label",""))}</th>' for c in cols)
             empty = "".join("<td>&nbsp;</td>" for _ in cols)
@@ -218,6 +366,13 @@ table.doc-tbl{{border-collapse:collapse;width:100%;margin:.4em 0 1em}}
 table.doc-tbl th,table.doc-tbl td{{border:1px solid #d9e0ec;padding:.45rem .6rem;text-align:left;font-size:.9rem}}
 table.doc-tbl th{{color:#fff;font-weight:600}}
 table.doc-tbl tbody th{{background:#f1f5f9;color:var(--ink)}}
+.page--wide{{max-width:1180px;padding:32px 36px}}
+.xl-wrap{{overflow-x:auto;margin:.4em 0 1.2em;border:1px solid #e2e8f0;border-radius:6px}}
+table.xl-grid{{border-collapse:collapse;table-layout:fixed;font-size:.82rem;background:#fff}}
+table.xl-grid td{{border:1px solid #eef1f6;padding:2px 6px;vertical-align:middle;
+  overflow:hidden;text-overflow:ellipsis;color:var(--ink)}}
+table.xl-grid td.xl-e{{color:#cbd5e1}}
+h2{{display:flex;align-items:center;gap:.4rem}}
 pre{{background:#0f172a;color:#e2e8f0;padding:1rem;border-radius:8px;overflow:auto}}
 .doc-img{{max-width:100%;border-radius:6px}}
 .freepage img{{width:100%;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:1rem}}
@@ -230,7 +385,9 @@ pre{{background:#0f172a;color:#e2e8f0;padding:1rem;border-radius:8px;overflow:au
 .sl-body{{margin-top:1rem;font-size:1.05rem}} .sl-line{{margin:.4rem 0}}
 .sl-num{{position:absolute;bottom:16px;right:22px;color:#94a3b8;font-size:.8rem}}
 @media(prefers-color-scheme:dark){{body{{background:#0b1120}}.page{{background:#0f1a2e;color:#e2e8f0}}
- table.doc-tbl td,table.doc-tbl th{{border-color:#334155}} table.doc-tbl tbody th{{background:#1e293b;color:#e2e8f0}}}}
+ table.doc-tbl td,table.doc-tbl th{{border-color:#334155}} table.doc-tbl tbody th{{background:#1e293b;color:#e2e8f0}}
+ .xl-wrap{{border-color:#334155}} table.xl-grid{{background:#0f1a2e}}
+ table.xl-grid td{{border-color:#22304a;color:#e2e8f0}} table.xl-grid td.xl-e{{color:#475569}}}}
 </style></head><body>{body}</body></html>"""
 
 
@@ -248,7 +405,7 @@ def render(document, ctx):
 
     if doc_type == "xlsx":
         inner = _excel_html(ctx)
-        body = f'<div class="page">{inner}</div>'
+        body = f'<div class="page page--wide">{inner}</div>'
     elif doc_type == "pptx":
         body = _pptx_html(ctx)
     elif doc_type in ("md", "mail"):
