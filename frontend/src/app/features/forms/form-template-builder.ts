@@ -8,6 +8,8 @@ import { DocumentService } from '../../core/services/document.service';
 import { ToastService } from '../../core/services/api.service';
 import { FormSchemaEditor } from './form-schema-editor';
 import { FormAppearanceEditor } from './form-appearance-editor';
+import { FormPreview } from './form-preview';
+import { CompanyService } from '../../core/services/company.service';
 import {
   Choice,
   FormDiagram,
@@ -28,11 +30,14 @@ const VARIANTS: { value: string; label: string }[] = [
 
 @Component({
   selector: 'app-form-template-builder',
-  imports: [FormsModule, RouterLink, MatTabsModule, FormSchemaEditor, FormAppearanceEditor],
+  imports: [FormsModule, RouterLink, MatTabsModule, FormSchemaEditor, FormAppearanceEditor, FormPreview],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? 'Modifier le modèle de formulaire' : 'Nouveau modèle de formulaire' }}</h1>
-      <a class="btn btn-ghost" routerLink="/templates">Retour aux modèles</a>
+      <div class="row" style="gap:.5rem">
+        <button class="btn btn-ghost" (click)="showPreview.set(true)" [disabled]="!model()">👁 Aperçu</button>
+        <a class="btn btn-ghost" routerLink="/templates">Retour aux modèles</a>
+      </div>
     </div>
     <p class="muted">
       Un modèle de formulaire regroupe des questions réutilisables et des diagrammes
@@ -209,6 +214,20 @@ const VARIANTS: { value: string; label: string }[] = [
           <button class="btn btn-ghost" (click)="remove()">Supprimer</button>
         }
       </div>
+
+      @if (showPreview()) {
+        <div class="pv-overlay" (click)="showPreview.set(false)">
+          <div class="pv-panel" (click)="$event.stopPropagation()">
+            <div class="pv-bar">
+              <span>Aperçu du modèle</span>
+              <button class="btn btn-sm btn-ghost" (click)="showPreview.set(false)">✕ Fermer</button>
+            </div>
+            <app-form-preview [title]="m.name" [description]="m.description"
+              [sections]="sections(m)" [theme]="theme(m)" [showProgress]="m.show_progress !== false"
+              [logoUrl]="logoUrl()" [companyName]="companyName()" />
+          </div>
+        </div>
+      }
     }
   `,
   styles: [`
@@ -227,12 +246,16 @@ const VARIANTS: { value: string; label: string }[] = [
     .dg-title { font-weight:600; }
     .mini { border:1px solid var(--border); background:#fff; border-radius:6px; cursor:pointer; padding:.1rem .45rem; font-size:.8rem; color:var(--muted); }
     .mini.del:hover { background:#fee2e2; color:var(--danger); }
+    .pv-overlay { position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:1000; display:flex; justify-content:center; align-items:flex-start; padding:2rem 1rem; overflow:auto; }
+    .pv-panel { width:700px; max-width:100%; }
+    .pv-bar { display:flex; justify-content:space-between; align-items:center; color:#fff; margin-bottom:.5rem; font-weight:600; }
   `],
 })
 export class FormTemplateBuilder {
   private service = inject(FormService);
   private projectSvc = inject(ProjectService);
   private docSvc = inject(DocumentService);
+  private companySvc = inject(CompanyService);
   private toast = inject(ToastService);
   private router = inject(Router);
 
@@ -245,10 +268,14 @@ export class FormTemplateBuilder {
   languages = LANGUAGES;
   saving = signal(false);
   variants = VARIANTS;
+  showPreview = signal(false);
+  logoUrl = signal<string | null>(null);
+  companyName = signal<string | null>(null);
 
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
     this.docSvc.choices().subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
+    this.companySvc.get().subscribe((c) => { this.logoUrl.set(c.logo_url || null); this.companyName.set(c.name || null); });
     this.docSvc.templates({ page_size: 1000 }).subscribe((r) => this.reportTemplates.set(
       r.results.filter((t) => t.doc_type === 'docx' || t.doc_type === 'pdf')
         .map((t) => ({ id: t.id, name: t.name, doc_type: t.doc_type }))));

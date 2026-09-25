@@ -8,15 +8,20 @@ import { DocumentService } from '../../core/services/document.service';
 import { ToastService } from '../../core/services/api.service';
 import { FormSchemaEditor } from './form-schema-editor';
 import { FormAppearanceEditor } from './form-appearance-editor';
+import { FormPreview } from './form-preview';
+import { CompanyService } from '../../core/services/company.service';
 import { Choice, FormField, FormSection, FormSubmission, OnlineForm, Project } from '../../core/models';
 
 @Component({
   selector: 'app-form-builder',
-  imports: [FormsModule, RouterLink, DatePipe, FormSchemaEditor, FormAppearanceEditor],
+  imports: [FormsModule, RouterLink, DatePipe, FormSchemaEditor, FormAppearanceEditor, FormPreview],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? 'Gérer le formulaire' : 'Nouveau formulaire' }}</h1>
-      <a class="btn btn-ghost" routerLink="/forms">Retour</a>
+      <div class="row" style="gap:.5rem">
+        <button class="btn btn-ghost" (click)="showPreview.set(true)" [disabled]="!model()">👁 Aperçu</button>
+        <a class="btn btn-ghost" routerLink="/forms">Retour</a>
+      </div>
     </div>
 
     @if (model(); as m) {
@@ -125,10 +130,27 @@ import { Choice, FormField, FormSection, FormSubmission, OnlineForm, Project } f
           }
         </div>
       </div>
+
+      @if (showPreview()) {
+        <div class="pv-overlay" (click)="showPreview.set(false)">
+          <div class="pv-panel" (click)="$event.stopPropagation()">
+            <div class="pv-bar">
+              <span>Aperçu du formulaire</span>
+              <button class="btn btn-sm btn-ghost" (click)="showPreview.set(false)">✕ Fermer</button>
+            </div>
+            <app-form-preview [title]="m.title" [description]="m.description"
+              [sections]="sections(m)" [theme]="theme(m)" [showProgress]="m.show_progress !== false"
+              [logoUrl]="logoUrl()" [companyName]="companyName()" />
+          </div>
+        </div>
+      }
     }
   `,
   styles: [`
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+    .pv-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 1000; display: flex; justify-content: center; align-items: flex-start; padding: 2rem 1rem; overflow: auto; }
+    .pv-panel { width: 700px; max-width: 100%; }
+    .pv-bar { display: flex; justify-content: space-between; align-items: center; color: #fff; margin-bottom: .5rem; font-weight: 600; }
     @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
     .chk { display: flex; align-items: center; gap: 0.3rem; font-weight: 600; }
     .chk input { width: auto; }
@@ -146,6 +168,7 @@ export class FormBuilder {
   private service = inject(FormService);
   private projectSvc = inject(ProjectService);
   private docSvc = inject(DocumentService);
+  private companySvc = inject(CompanyService);
   private toast = inject(ToastService);
   private router = inject(Router);
 
@@ -158,6 +181,9 @@ export class FormBuilder {
   saving = signal(false);
   reporting = signal(false);
   subCount = signal(0);
+  showPreview = signal(false);
+  logoUrl = signal<string | null>(null);
+  companyName = signal<string | null>(null);
   private diagramUrls = signal<Record<string, string>>({});
 
   imgUrl(id: string): string | null { return this.diagramUrls()[id] ?? null; }
@@ -166,6 +192,7 @@ export class FormBuilder {
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
     this.docSvc.choices().subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
+    this.companySvc.get().subscribe((c) => { this.logoUrl.set(c.logo_url || null); this.companyName.set(c.name || null); });
     setTimeout(() => {
       if (this.id) {
         this.service.get(+this.id).subscribe((f) => { this.model.set(this.normalize(f)); this.loadDiagrams(); });
