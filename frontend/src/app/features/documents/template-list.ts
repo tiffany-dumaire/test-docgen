@@ -49,8 +49,8 @@ const TYPE_TABS: TypeTab[] = [
                 @for (t of byType(tab.key); track t.id) {
                   <div class="card">
                     <div class="row between">
-                      <strong>{{ t.display_name || t.name }}</strong>
-                      <span class="badge badge-type">{{ langFlag(t.language) }} {{ tab.label }}</span>
+                      <strong>{{ cardName(t) }}</strong>
+                      <span class="badge badge-type">{{ cardFlag(t) }} {{ tab.label }}</span>
                     </div>
                     <p class="muted" style="min-height:2.4em">{{ t.description }}</p>
                     <div class="tag">{{ summary(t) }}</div>
@@ -152,17 +152,35 @@ export class TemplateList {
     this.formSvc.templates({ page_size: 1000 }).subscribe((r) => this.formTemplates.set(r.results));
   }
 
+  /** Langues proposées par un modèle (principale + langues additionnelles). */
+  private langsOf(t: { language?: string; languages?: string[]; available_languages?: string[] }): string[] {
+    if (t.available_languages?.length) return t.available_languages;
+    const set = new Set<string>([...(t.languages ?? [])]);
+    set.add(t.language || 'fr');
+    return [...set];
+  }
   byType(key: string): DocumentTemplate[] {
     const l = this.lang();
     return this.templates().filter((t) => t.doc_type === key &&
-      (l === 'all' || (t.language || 'fr') === l));
+      (l === 'all' || this.langsOf(t).includes(l)));
   }
   langFlag(code?: string): string {
     return LANGUAGES.find((l) => l.value === code)?.flag ?? '🇫🇷';
   }
+  /** Drapeau à afficher sur la carte : la langue filtrée, sinon la principale. */
+  cardFlag(t: DocumentTemplate): string {
+    const l = this.lang();
+    return this.langFlag(l !== 'all' ? l : (t.language || 'fr'));
+  }
+  /** Nom du modèle dans la langue filtrée (sinon nom résolu / principal). */
+  cardName(t: DocumentTemplate): string {
+    const l = this.lang();
+    if (l !== 'all' && t.names && t.names[l]) return t.names[l];
+    return t.display_name || t.name;
+  }
   filteredForms(): FormTemplate[] {
     const l = this.lang();
-    return this.formTemplates().filter((t) => l === 'all' || (t.language || 'fr') === l);
+    return this.formTemplates().filter((t) => l === 'all' || this.langsOf(t).includes(l));
   }
 
   summary(t: DocumentTemplate): string {
