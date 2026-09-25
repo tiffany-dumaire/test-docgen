@@ -172,6 +172,8 @@ OIDC_ISSUER = os.environ.get("OIDC_ISSUER", "")
 OIDC_JWKS_URL = os.environ.get("OIDC_JWKS_URL", "")
 OIDC_AUDIENCE = os.environ.get("OIDC_AUDIENCE", "")
 OIDC_CLIENT_ID = os.environ.get("OIDC_CLIENT_ID", "")
+# Secret client (clients « confidentiels ») — facultatif avec PKCE (clients publics).
+OIDC_CLIENT_SECRET = os.environ.get("OIDC_CLIENT_SECRET", "")
 OIDC_AUTHORIZE_URL = os.environ.get("OIDC_AUTHORIZE_URL", "")
 OIDC_TOKEN_URL = os.environ.get("OIDC_TOKEN_URL", "")
 OIDC_END_SESSION_URL = os.environ.get("OIDC_END_SESSION_URL", "")
