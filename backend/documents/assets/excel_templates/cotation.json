@@ -1,0 +1,1713 @@
+{
+ "sheets": [
+  {
+   "id": "cotation",
+   "name": "Feuil1",
+   "title": "",
+   "type": "grid",
+   "cells": [
+    {
+     "row": 6,
+     "col": 1,
+     "value": "28.08.2024",
+     "number_format": "d-mmm-yy",
+     "border": false
+    },
+    {
+     "row": 7,
+     "col": 1,
+     "value": "Titre de l'offre",
+     "size": 18.0,
+     "border": false
+    },
+    {
+     "row": 9,
+     "col": 1,
+     "value": "Module",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 9,
+     "col": 2,
+     "value": "Fonction",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 9,
+     "col": 3,
+     "value": "Est. basse\n(J/H)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 9,
+     "col": 4,
+     "value": "Est. Haute\n(J/H)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 9,
+     "col": 5,
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 9,
+     "col": 6,
+     "value": "Est.basse\n(CHF)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 9,
+     "col": 7,
+     "value": "Est.haute\n(CHF)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 11,
+     "col": 1,
+     "value": "Analyse",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 11,
+     "col": 2,
+     "value": "Analyse et conception",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 11,
+     "col": 3,
+     "value": 1,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 11,
+     "col": 4,
+     "value": 1.5,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 11,
+     "col": 5,
+     "value": "=$G$63",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 11,
+     "col": 6,
+     "value": "=C11*E11",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 11,
+     "col": 7,
+     "value": "=D11*E11",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 13,
+     "col": 1,
+     "value": "Backend",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 13,
+     "col": 2,
+     "value": "…",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 13,
+     "col": 3,
+     "value": 0,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 13,
+     "col": 4,
+     "value": 0,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 13,
+     "col": 5,
+     "value": "=$G$61",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 13,
+     "col": 6,
+     "value": "=C13*E13",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 13,
+     "col": 7,
+     "value": "=D13*E13",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 14,
+     "col": 2,
+     "value": "  - ...",
+     "italic": true,
+     "size": 10.0,
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 15,
+     "col": 1,
+     "value": "Frontend",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 15,
+     "col": 2,
+     "value": "…",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 15,
+     "col": 3,
+     "value": 0,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 15,
+     "col": 4,
+     "value": 0,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 15,
+     "col": 5,
+     "value": "=$G$61",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 15,
+     "col": 6,
+     "value": "=C15*E15",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 15,
+     "col": 7,
+     "value": "=D15*E15",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 16,
+     "col": 2,
+     "value": "  - …",
+     "italic": true,
+     "size": 10.0,
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 16,
+     "col": 3,
+     "value": 0,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 16,
+     "col": 4,
+     "value": 0,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 16,
+     "col": 5,
+     "value": "=$G$61",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 16,
+     "col": 6,
+     "value": "=C16*E16",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 16,
+     "col": 7,
+     "value": "=D16*E16",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 18,
+     "col": 1,
+     "value": "Opérations",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 18,
+     "col": 2,
+     "value": "Mise en production",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 18,
+     "col": 3,
+     "value": 0.5,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 18,
+     "col": 4,
+     "value": 1,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 18,
+     "col": 5,
+     "value": "=$G$61",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 18,
+     "col": 6,
+     "value": "=C18*E18",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 18,
+     "col": 7,
+     "value": "=D18*E18",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 20,
+     "col": 2,
+     "value": "Total DEV",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 20,
+     "col": 3,
+     "value": "=SUM(C11:C18)",
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 20,
+     "col": 4,
+     "value": "=SUM(D11:D18)",
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 20,
+     "col": 6,
+     "value": "=SUM(F10:F18)",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 20,
+     "col": 7,
+     "value": "=SUM(G10:G18)",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 21,
+     "col": 2,
+     "value": "Gestion de projet",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 21,
+     "col": 3,
+     "value": "=C20*0.15",
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 21,
+     "col": 4,
+     "value": "=D20*0.15",
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 21,
+     "col": 5,
+     "value": "=$G$62",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 21,
+     "col": 6,
+     "value": "=C21*E21",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 21,
+     "col": 7,
+     "value": "=D21*E21",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 22,
+     "col": 2,
+     "value": "Test et validations",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 22,
+     "col": 3,
+     "value": "=C20*0.1",
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 22,
+     "col": 4,
+     "value": "=D20*0.1",
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 22,
+     "col": 5,
+     "value": "=$G$62",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 22,
+     "col": 6,
+     "value": "=C22*E22",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 22,
+     "col": 7,
+     "value": "=D22*E22",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 24,
+     "col": 2,
+     "value": "Total Hors TVA",
+     "bold": true,
+     "valign": "top",
+     "border": true
+    },
+    {
+     "row": 24,
+     "col": 3,
+     "value": "=SUM(C20:C23)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": true
+    },
+    {
+     "row": 24,
+     "col": 4,
+     "value": "=SUM(D20:D23)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": true
+    },
+    {
+     "row": 24,
+     "col": 5,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": true
+    },
+    {
+     "row": 24,
+     "col": 6,
+     "value": "=SUM(F20:F22)",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": true
+    },
+    {
+     "row": 24,
+     "col": 7,
+     "value": "=SUM(G20:G22)",
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": true
+    },
+    {
+     "row": 27,
+     "col": 1,
+     "value": "Options (facultatif)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "valign": "top",
+     "border": false,
+     "col_span": 2
+    },
+    {
+     "row": 27,
+     "col": 3,
+     "value": "Esti. basse \n(J/H)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 27,
+     "col": 4,
+     "value": "Esti. haute \n(J/H)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 27,
+     "col": 5,
+     "value": "Tarif CHF",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 27,
+     "col": 6,
+     "value": "CHF H.T\n(esti. basse)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 27,
+     "col": 7,
+     "value": "CHF H.T\n(esti. haute)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 29,
+     "col": 1,
+     "value": "Backend",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 29,
+     "col": 2,
+     "value": "..",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 29,
+     "col": 3,
+     "value": 1.5,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 29,
+     "col": 4,
+     "value": 2.5,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 29,
+     "col": 5,
+     "value": "=$G$61",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 29,
+     "col": 6,
+     "value": "=C29*$E29",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 29,
+     "col": 7,
+     "value": "=D29*$E29",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 30,
+     "col": 2,
+     "value": "  - …",
+     "italic": true,
+     "size": 10.0,
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 31,
+     "col": 1,
+     "value": "Frontend",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 31,
+     "col": 2,
+     "value": "…",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 31,
+     "col": 3,
+     "value": 2,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 31,
+     "col": 4,
+     "value": 4,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 31,
+     "col": 5,
+     "value": "=$G$61",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 31,
+     "col": 6,
+     "value": "=C31*$E31",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 31,
+     "col": 7,
+     "value": "=D31*$E31",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 32,
+     "col": 2,
+     "value": "  - …",
+     "italic": true,
+     "size": 10.0,
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 33,
+     "col": 2,
+     "value": "Total hors TVA",
+     "bold": true,
+     "valign": "top",
+     "border": true
+    },
+    {
+     "row": 33,
+     "col": 3,
+     "value": "=SUM(C29:C32)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": true
+    },
+    {
+     "row": 33,
+     "col": 4,
+     "value": "=SUM(D29:D32)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": true
+    },
+    {
+     "row": 33,
+     "col": 5,
+     "bold": true,
+     "valign": "top",
+     "border": true
+    },
+    {
+     "row": 33,
+     "col": 6,
+     "value": "=SUM(F29:F32)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": true
+    },
+    {
+     "row": 33,
+     "col": 7,
+     "value": "=SUM(G29:G32)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": true
+    },
+    {
+     "row": 37,
+     "col": 1,
+     "value": "Maintenance applicative (frais annuels)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "valign": "top",
+     "border": false,
+     "col_span": 2
+    },
+    {
+     "row": 37,
+     "col": 3,
+     "value": "Esti. basse \n(J/H)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 37,
+     "col": 4,
+     "value": "Esti. haute \n(J/H)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 37,
+     "col": 5,
+     "value": "Tarif CHF",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 37,
+     "col": 6,
+     "value": "CHF H.T\n(esti. basse)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 37,
+     "col": 7,
+     "value": "CHF H.T\n(esti. haute)",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 39,
+     "col": 1,
+     "value": "Maintenance",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 39,
+     "col": 2,
+     "value": "Maintenance curative (15% des coût du projet - frais annuels)",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 39,
+     "col": 3,
+     "value": "=C20*0.15",
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 39,
+     "col": 4,
+     "value": "=D20*0.15",
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 39,
+     "col": 5,
+     "value": "=$G$61",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 39,
+     "col": 6,
+     "value": "=C39*$E39",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 39,
+     "col": 7,
+     "value": "=D39*$E39",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 40,
+     "col": 2,
+     "value": "  - Suivi des mise à jour, monitoring\n  - Suivi et patch des alertes de sécurité",
+     "italic": true,
+     "size": 10.0,
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 41,
+     "col": 2,
+     "value": "(optionnel) Mises à jour et assistance (frais annuels - J/H)",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 41,
+     "col": 3,
+     "value": 0,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 41,
+     "col": 4,
+     "value": 0,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 41,
+     "col": 5,
+     "value": "=$G$61",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 41,
+     "col": 6,
+     "value": "=C41*$E41",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 41,
+     "col": 7,
+     "value": "=D41*$E41",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 42,
+     "col": 2,
+     "value": "  - Carnet d'heure (jours/ an)\n  - Destiné au développement de nouvelles fonctionnalitées",
+     "italic": true,
+     "size": 10.0,
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 43,
+     "col": 2,
+     "value": "Total hors TVA",
+     "bold": true,
+     "valign": "top",
+     "border": true
+    },
+    {
+     "row": 43,
+     "col": 3,
+     "value": "=SUM(C39:C42)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": true
+    },
+    {
+     "row": 43,
+     "col": 4,
+     "value": "=SUM(D39:D42)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": true
+    },
+    {
+     "row": 43,
+     "col": 5,
+     "bold": true,
+     "valign": "top",
+     "border": true
+    },
+    {
+     "row": 43,
+     "col": 6,
+     "value": "=SUM(F39:F42)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": true
+    },
+    {
+     "row": 43,
+     "col": 7,
+     "value": "=SUM(G39:G42)",
+     "bold": true,
+     "valign": "top",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": true
+    },
+    {
+     "row": 47,
+     "col": 1,
+     "value": "Hébergement",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "valign": "top",
+     "border": false,
+     "col_span": 2
+    },
+    {
+     "row": 47,
+     "col": 3,
+     "value": "Quantité",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 47,
+     "col": 4,
+     "value": "Tarif CHF",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 47,
+     "col": 5,
+     "value": "CHF H.T",
+     "bold": true,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 49,
+     "col": 1,
+     "value": "Hébergement",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 49,
+     "col": 2,
+     "value": "Hébérgement au sein du datacenter de VNV (frais menseuls)",
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 49,
+     "col": 3,
+     "value": 12,
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 49,
+     "col": 4,
+     "value": 419,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 49,
+     "col": 5,
+     "value": "=C49*D49",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 50,
+     "col": 2,
+     "value": "  - Machine virtuelle dédiée, managé\n  - 4 VCPU, 16Go, 500Go SSD\n  - Backup inclus",
+     "italic": true,
+     "size": 10.0,
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 51,
+     "col": 2,
+     "value": "Mise en place initial (frais uniques)",
+     "valign": "top",
+     "border": false
+    },
+    {
+     "row": 51,
+     "col": 3,
+     "value": 1,
+     "valign": "top",
+     "number_format": "0.00",
+     "border": false
+    },
+    {
+     "row": 51,
+     "col": 4,
+     "value": 1200,
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 51,
+     "col": 5,
+     "value": "=C51*D51",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 56,
+     "col": 2,
+     "value": " ---\nNE PAS IMPRIMER LA PARTIE CI-DESSOUS",
+     "bold": true,
+     "valign": "top",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 60,
+     "col": 7,
+     "value": "Prix J/H",
+     "bold": true,
+     "align": "center",
+     "number_format": "#,##0.00\\ \"CHF\"",
+     "border": false
+    },
+    {
+     "row": 61,
+     "col": 5,
+     "value": "Dev",
+     "align": "right",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 61,
+     "col": 7,
+     "value": "=M62*8",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 61,
+     "col": 10,
+     "value": "N. heures annuel",
+     "bold": true,
+     "color": "#FFFFFF",
+     "bg": "#000000",
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 61,
+     "col": 11,
+     "value": "Ingénieur Sénior",
+     "bold": true,
+     "color": "#FFFFFF",
+     "bg": "#000000",
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 61,
+     "col": 12,
+     "value": "Chef de projet",
+     "bold": true,
+     "color": "#FFFFFF",
+     "bg": "#000000",
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 61,
+     "col": 13,
+     "value": "Développeur",
+     "bold": true,
+     "color": "#FFFFFF",
+     "bg": "#000000",
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 61,
+     "col": 14,
+     "value": "jours /mois",
+     "bold": true,
+     "color": "#FFFFFF",
+     "bg": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 61,
+     "col": 15,
+     "value": "jours / année",
+     "bold": true,
+     "color": "#FFFFFF",
+     "bg": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 62,
+     "col": 5,
+     "value": "PM",
+     "align": "right",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 62,
+     "col": 7,
+     "value": "=L62*8",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 62,
+     "col": 10,
+     "value": "< 96",
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 62,
+     "col": 11,
+     "value": 230,
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 62,
+     "col": 12,
+     "value": 195,
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 62,
+     "col": 13,
+     "value": 165,
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 62,
+     "col": 14,
+     "value": "< 1",
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 62,
+     "col": 15,
+     "value": "< 12",
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 63,
+     "col": 5,
+     "value": "Ingé.",
+     "align": "right",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 63,
+     "col": 7,
+     "value": "=K62*8",
+     "valign": "top",
+     "number_format": "_-* #,##0.00\\ \"CHF\"_-;\\-* #,##0.00\\ \"CHF\"_-;_-* \"-\"??\\ \"CHF\"_-;_-@_-",
+     "border": false
+    },
+    {
+     "row": 63,
+     "col": 10,
+     "value": "97-192",
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 63,
+     "col": 11,
+     "value": 210,
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 63,
+     "col": 12,
+     "value": 175,
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 63,
+     "col": 13,
+     "value": 155,
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 63,
+     "col": 14,
+     "value": "1 à 2",
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 63,
+     "col": 15,
+     "value": "12 à 24",
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 64,
+     "col": 10,
+     "value": "193-288",
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 64,
+     "col": 11,
+     "value": 200,
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 64,
+     "col": 12,
+     "value": 165,
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 64,
+     "col": 13,
+     "value": 145,
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 64,
+     "col": 14,
+     "value": "2 à 3",
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 64,
+     "col": 15,
+     "value": "25 à 36",
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 65,
+     "col": 10,
+     "value": "289-480",
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 65,
+     "col": 11,
+     "value": 190,
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 65,
+     "col": 12,
+     "value": 155,
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 65,
+     "col": 13,
+     "value": 140,
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 65,
+     "col": 14,
+     "value": "3 à 5",
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 65,
+     "col": 15,
+     "value": "37 à 60",
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 66,
+     "col": 10,
+     "value": "481-768",
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 66,
+     "col": 11,
+     "value": 180,
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 66,
+     "col": 12,
+     "value": 150,
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 66,
+     "col": 13,
+     "value": 135,
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 66,
+     "col": 14,
+     "value": "5 à 8",
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 66,
+     "col": 15,
+     "value": "61 à 96",
+     "color": "#000000",
+     "bg": "#C0C0C0",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 67,
+     "col": 10,
+     "value": "> 768",
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 67,
+     "col": 11,
+     "value": 170,
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 67,
+     "col": 12,
+     "value": 145,
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 67,
+     "col": 13,
+     "value": 130,
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 67,
+     "col": 14,
+     "value": "> 8",
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 67,
+     "col": 15,
+     "value": "> 96",
+     "color": "#000000",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    }
+   ],
+   "col_widths": {
+    "1": 14.6,
+    "2": 56.0,
+    "3": 10.1,
+    "4": 13.3,
+    "10": 9.6,
+    "12": 7.9,
+    "13": 12.6,
+    "14": 11.0,
+    "15": 12.7,
+    "16": 13.1
+   },
+   "row_heights": {
+    "7": 23.2,
+    "9": 30.0,
+    "27": 30.0,
+    "37": 30.0,
+    "40": 25.5,
+    "42": 25.5,
+    "50": 38.2,
+    "56": 30.0,
+    "60": 15.8,
+    "61": 30.8,
+    "62": 15.8,
+    "63": 15.8,
+    "64": 15.8,
+    "65": 15.8,
+    "66": 15.8,
+    "67": 15.8
+   }
+  }
+ ]
+}
