@@ -24,10 +24,11 @@ export interface PreviewData {
       <button mat-icon-button (click)="ref.close()"><mat-icon>close</mat-icon></button>
     </div>
     <div class="pv-body">
-      @if (data.kind === 'html') {
-        <iframe [srcdoc]="data.srcdoc" title="Aperçu" sandbox="allow-same-origin"></iframe>
-      } @else if (data.kind === 'pdf') {
-        <iframe [src]="blobSafe" title="Aperçu"></iframe>
+      @if (data.kind === 'html' || data.kind === 'pdf') {
+        <!-- On charge le document depuis son URL blob (et non via [srcdoc]) :
+             Angular assainit [srcdoc] et retire <style>/<head>, ce qui cassait
+             l'aperçu HTML. Le blob rend le document complet dans l'iframe. -->
+        <iframe [src]="blobSafe" title="Aperçu" sandbox="allow-same-origin"></iframe>
       } @else if (data.kind === 'image') {
         <div class="pv-image"><img [src]="data.blobUrl" alt="Aperçu" /></div>
       } @else {
