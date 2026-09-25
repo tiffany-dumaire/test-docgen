@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ApiConfig } from './api.service';
 import { AuthConfig, AuthUser } from '../models';
-import { ThemeService, Proposition, ThemeMode } from './theme.service';
+import { ThemeService, Proposition, ThemeMode, PROPOSITION_IDS } from './theme.service';
 
 const TOKEN_KEY = 'docugen_token';
 const VERIFIER_KEY = 'docugen_pkce_verifier';
@@ -112,48 +112,19 @@ export class AuthService {
 
   applyTheme(): void {
     const prefs = this.user()?.ui_prefs || {};
-    // Thème « Trois vents » synchronisé depuis le profil (multi-appareils).
+    // Thème de base synchronisé depuis le profil (multi-appareils).
     const prop = prefs["theme_proposition"] as Proposition | undefined;
-    if (prop && ["bise", "noire", "joran"].includes(prop)) this.theme.setProposition(prop);
+    if (prop && PROPOSITION_IDS.includes(prop)) this.theme.setProposition(prop);
     const mode = prefs["theme_mode"] as ThemeMode | undefined;
     if (mode && ["light", "dark", "auto"].includes(mode)) this.theme.setMode(mode);
-    const accent = (prefs["accent"] as string) || "";
-    const root = document.documentElement;
-    // Le mode clair/sombre est géré par ThemeService (proposition + luminosité).
-    // Couleur d'entreprise -> Material (--brand) + tokens custom
-    const keys = ["--primary", "--primary-dark", "--primary-light", "--primary-050", "--ring", "--brand"];
-    if (!accent) {
-      keys.forEach((k) => root.style.removeProperty(k));
-      root.removeAttribute("data-brand");
-      return;
-    }
-    root.setAttribute("data-brand", "");
-    root.style.setProperty("--brand", accent);
-    root.style.setProperty("--primary", accent);
-    root.style.setProperty("--primary-dark", this.shade(accent, -0.16));
-    root.style.setProperty("--primary-light", this.mix(accent, "#ffffff", 0.82));
-    root.style.setProperty("--primary-050", this.mix(accent, "#ffffff", 0.92));
-    root.style.setProperty("--ring", `0 0 0 3px ${this.rgba(accent, 0.22)}`);
+    // Couleur primaire et typographie personnalisées (point 4).
+    this.theme.applyAccent((prefs["accent"] as string) || "");
+    this.theme.applyFonts(
+      (prefs["font_title"] as string) || "",
+      (prefs["font_body"] as string) || "");
   }
 
   isDark(): boolean { return document.documentElement.classList.contains("dark"); }
-  private hexToRgb(h: string) {
-    h = h.replace("#", ""); if (h.length === 3) h = h.split("").map((c) => c + c).join("");
-    return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
-  }
-  private shade(hex: string, amt: number) {
-    const { r, g, b } = this.hexToRgb(hex);
-    const f = (v: number) => Math.max(0, Math.min(255, Math.round(v + (amt < 0 ? v * amt : (255 - v) * amt))));
-    return `#${[f(r),f(g),f(b)].map((v)=>v.toString(16).padStart(2,"0")).join("")}`;
-  }
-  private mix(hex: string, other: string, ratio: number) {
-    const a = this.hexToRgb(hex), b = this.hexToRgb(other);
-    const m = (x: number, y: number) => Math.round(x * (1 - ratio) + y * ratio);
-    return `#${[m(a.r,b.r),m(a.g,b.g),m(a.b,b.b)].map((v)=>v.toString(16).padStart(2,"0")).join("")}`;
-  }
-  private rgba(hex: string, alpha: number) {
-    const { r, g, b } = this.hexToRgb(hex); return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
 
   // --- PKCE helpers ---
   private randomString(len: number): string {

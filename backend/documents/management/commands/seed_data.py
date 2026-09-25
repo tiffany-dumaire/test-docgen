@@ -412,18 +412,30 @@ class Command(BaseCommand):
             }
             project.save(update_fields=["tracking"])
 
-        # --- Styles globaux par défaut, par type de modèle ---
+        # --- Styles globaux par défaut : charte VNV (Corporate Identity) ---
+        # Orange VNV #ec6608, charcoal #1d1e1b, typographie Montserrat / Oswald.
         if not company.styles:
             company.styles = {
                 "global": {
                     "title": {"font": "Montserrat", "size": 26, "bold": True,
-                              "color": "#1E3A8A"},
-                    "paragraph": {"font": "Roboto", "size": 11},
+                              "color": "#EC6608"},
+                    "subtitle": {"font": "Montserrat", "size": 14,
+                                 "color": "#1D1E1B"},
+                    "section": {"font": "Montserrat", "size": 16, "bold": True,
+                                "color": "#EC6608"},
+                    "h1": {"font": "Montserrat", "size": 18, "bold": True,
+                           "color": "#1D1E1B"},
+                    "h2": {"font": "Montserrat", "size": 15, "bold": True,
+                           "color": "#1D1E1B"},
+                    "h3": {"font": "Montserrat", "size": 13, "bold": True,
+                           "color": "#EC6608"},
+                    "paragraph": {"font": "Montserrat", "size": 11,
+                                  "color": "#1D1E1B"},
                 },
                 "types": {
-                    "docx": {"h1": {"color": "#1D4ED8", "bold": True}},
-                    "pdf": {"h1": {"color": "#0E7490", "bold": True}},
-                    "pptx": {"title": {"color": "#7C3AED", "size": 32,
+                    "docx": {"h1": {"color": "#1D1E1B", "bold": True}},
+                    "pdf": {"h1": {"color": "#EC6608", "bold": True}},
+                    "pptx": {"title": {"color": "#EC6608", "size": 32,
                                        "bold": True}},
                     "md": {}, "xlsx": {}, "a3": {},
                 },
