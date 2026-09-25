@@ -77,6 +77,13 @@ export class FormService {
       `${this.base}/forms/${id}/generate_report/`, {});
   }
 
+  // Téléversement d'un fichier réutilisable dans l'éditeur (image, modèle).
+  uploadAsset(file: File): Observable<{ id: number; url: string; name: string }> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<{ id: number; url: string; name: string }>(`${this.base}/assets/`, fd);
+  }
+
   // Endpoints publics (par code de lien réduit)
   publicForm(code: string): Observable<OnlineForm> {
     return this.http.get<OnlineForm>(`${this.base}/public/${code}/`);
@@ -85,5 +92,11 @@ export class FormService {
     return this.http.post<{ detail: string }>(`${this.base}/public/${code}/submit/`, {
       data,
     });
+  }
+  publicUpload(code: string, field: string, file: File): Observable<{ id: number; url: string; name: string }> {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('field', field);
+    return this.http.post<{ id: number; url: string; name: string }>(`${this.base}/public/${code}/upload/`, fd);
   }
 }

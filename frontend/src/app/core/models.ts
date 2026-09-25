@@ -507,13 +507,63 @@ export interface ShortLink {
   short_url: string;
 }
 
+export type QuestionType =
+  | 'text' | 'textarea' | 'email' | 'number' | 'date' | 'time'
+  | 'select' | 'radio' | 'checkbox' | 'checkboxes'
+  | 'scale' | 'rating' | 'slot' | 'file';
+
 export interface FormField {
+  kind?: 'question';
   key: string;
   label: string;
-  type: 'text' | 'textarea' | 'email' | 'number' | 'date' | 'select' | 'checkbox';
+  type: QuestionType;
+  hint?: string;
   required?: boolean;
   options?: string[];
+  image?: string;          // image d'illustration (URL)
+  template_file?: string;  // fichier modèle à télécharger (URL)
+  template_file_name?: string;
+  // échelle linéaire
+  scale_min?: number;
+  scale_max?: number;
+  scale_min_label?: string;
+  scale_max_label?: string;
+  // avis (nombre d'étoiles)
+  rating_max?: number;
+  // créneaux proposés
+  slots?: string[];
 }
+
+export interface FormContent {
+  kind: 'content';
+  id: string;
+  content_type: 'text' | 'image' | 'file';
+  title?: string;
+  text?: string;
+  url?: string;
+  name?: string;
+}
+
+export type FormElement = FormField | FormContent;
+
+export interface FormSection {
+  kind: 'section';
+  id: string;
+  title?: string;
+  description?: string;
+  elements: FormElement[];
+}
+
+export interface FormTheme {
+  accent?: string;
+  background?: string;
+  layout?: 'card' | 'cover' | 'plain';
+  cover_image?: string;
+  button_label?: string;
+}
+
+/** Un schéma peut être plat (ancien) ou par sections (nouveau). */
+export type FormSchema = FormSection[] | FormField[];
 
 export type DiagramVariant = 'bar' | 'hbar' | 'pie' | 'donut' | 'line';
 export type DiagramMode = 'distribution' | 'crosstab';
@@ -551,6 +601,8 @@ export interface FormTemplate {
   confidentiality: Confidentiality;
   confidentiality_display?: string;
   success_message: string;
+  show_progress?: boolean;
+  theme?: FormTheme;
   is_active: boolean;
   scope: 'global' | 'projects';
   projects: number[];
@@ -567,7 +619,7 @@ export interface OnlineForm {
   project_name?: string | null;
   template?: number | null;
   template_name?: string | null;
-  schema: FormField[];
+  schema: FormSchema;
   diagrams?: FormDiagram[];
   report_template?: number | null;
   confidentiality: Confidentiality;
@@ -575,9 +627,14 @@ export interface OnlineForm {
   is_open: boolean;
   deadline?: string | null;
   success_message: string;
+  show_progress?: boolean;
+  theme?: FormTheme;
   short_link?: ShortLink | null;
   short_url?: string | null;
   submission_count?: number;
+  // public
+  logo_url?: string | null;
+  company_name?: string | null;
 }
 
 export interface FormSubmission {

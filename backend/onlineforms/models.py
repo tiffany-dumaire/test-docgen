@@ -73,6 +73,8 @@ class FormTemplate(models.Model):
     success_message = models.CharField(
         "Message de confirmation", max_length=255,
         default="Merci, votre réponse a bien été enregistrée.")
+    show_progress = models.BooleanField("Afficher la progression", default=True)
+    theme = models.JSONField("Apparence", default=dict, blank=True)
     is_active = models.BooleanField("Actif", default=True)
     report_template = models.ForeignKey(
         "documents.DocumentTemplate", related_name="form_report_templates",
@@ -134,6 +136,8 @@ class OnlineForm(models.Model):
     success_message = models.CharField(
         "Message de confirmation", max_length=255,
         default="Merci, votre réponse a bien été enregistrée.")
+    show_progress = models.BooleanField("Afficher la progression", default=True)
+    theme = models.JSONField("Apparence", default=dict, blank=True)
 
     short_link = models.OneToOneField(
         ShortLink, related_name="form", on_delete=models.SET_NULL,
@@ -155,6 +159,33 @@ class OnlineForm(models.Model):
             self.short_link = ShortLink.objects.create()
             self.save(update_fields=["short_link"])
         return self.short_link
+
+
+class FormAsset(models.Model):
+    """Fichier réutilisable dans un formulaire (image d'illustration, fichier
+    modèle, information fixe) — téléversé depuis l'éditeur (authentifié)."""
+
+    file = models.FileField("Fichier", upload_to="forms/assets/")
+    name = models.CharField("Nom d'origine", max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name or self.file.name
+
+
+class FormUpload(models.Model):
+    """Fichier déposé par un répondant en réponse à une question de type
+    « fichier » (endpoint public)."""
+
+    form = models.ForeignKey(OnlineForm, related_name="uploads",
+                             on_delete=models.CASCADE, null=True, blank=True)
+    field_key = models.CharField("Clé de la question", max_length=100, blank=True)
+    file = models.FileField("Fichier", upload_to="forms/uploads/")
+    original_name = models.CharField("Nom d'origine", max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.original_name or self.file.name
 
 
 class FormSubmission(models.Model):

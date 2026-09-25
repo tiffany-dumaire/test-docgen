@@ -33,14 +33,16 @@ except Exception:  # pragma: no cover
 # Calcul du jeu de données
 # ---------------------------------------------------------------------------
 def _label_for(schema, key):
-    for f in schema or []:
+    from .schema_utils import iter_questions
+    for f in iter_questions(schema):
         if f.get("key") == key:
             return f.get("label") or key
     return key
 
 
 def _options_for(schema, key):
-    for f in schema or []:
+    from .schema_utils import iter_questions
+    for f in iter_questions(schema):
         if f.get("key") == key:
             return f.get("options") or []
     return []
