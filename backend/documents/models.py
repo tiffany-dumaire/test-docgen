@@ -20,6 +20,7 @@ class DocumentType(models.TextChoices):
     BROCHURE = "brochure", "Brochure"
     LETTRE = "lettre", "Lettre"
     MAIL = "mail", "Mail"
+    OFFRE = "offre", "Offre"
 
 
 class TemplateLanguage(models.TextChoices):

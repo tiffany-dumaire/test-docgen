@@ -1227,3 +1227,4 @@ BLOCK_RENDERERS["md"] = _render_md
 BLOCK_RENDERERS["brochure"] = render_docx   # Brochure -> Word
 BLOCK_RENDERERS["lettre"] = render_docx     # Lettre  -> Word
 BLOCK_RENDERERS["mail"] = _render_md        # Mail    -> Markdown
+BLOCK_RENDERERS["offre"] = render_docx      # Offre   -> Word

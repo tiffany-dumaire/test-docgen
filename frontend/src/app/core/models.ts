@@ -146,7 +146,7 @@ export interface ProjectTracking {
 }
 
 export type DocType = 'pdf' | 'xlsx' | 'docx' | 'pptx' | 'md' | 'a3'
-  | 'brochure' | 'lettre' | 'mail';
+  | 'brochure' | 'lettre' | 'mail' | 'offre';
 
 export type BlockType =
   | 'heading'

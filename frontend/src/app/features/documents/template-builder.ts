@@ -680,12 +680,13 @@ export class TemplateBuilder {
   isPdf = computed(() => this.model()?.doc_type === 'pdf');
   isWord = computed(() => this.model()?.doc_type === 'docx');
   /** Types rendus à partir de blocs (contenu). */
-  isBlocks = computed(() => ['docx', 'pdf', 'md', 'pptx', 'brochure', 'lettre', 'mail'].includes(this.model()?.doc_type ?? ''));
+  isBlocks = computed(() => ['docx', 'pdf', 'md', 'pptx', 'brochure', 'lettre', 'mail', 'offre'].includes(this.model()?.doc_type ?? ''));
   /** Onglet Structure & styles (mise en page libre + styles). */
   hasStructure = computed(() => this.isWord() || this.isPdf());
   hasTableColor = computed(() => this.isWord() || this.isPdf() || this.isExcel());
   /** En-tête / pied de page configurables : Word, PDF et Lettre. */
-  hasHeaderFooter = computed(() => this.isWord() || this.isPdf() || this.model()?.doc_type === 'lettre');
+  hasHeaderFooter = computed(() => this.isWord() || this.isPdf()
+    || this.model()?.doc_type === 'lettre' || this.model()?.doc_type === 'offre');
   /** Onglet « Éléments dynamiques » : calques libres PDF / PPTX. */
   hasOverlays = computed(() => this.isPdf() || this.isPptx());
   overlayNoun = computed(() => (this.isPptx() ? 'diapositives' : 'pages'));

@@ -24,6 +24,8 @@ FILE_META = {
     "lettre": (".docx",
                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
     "mail": (".md", "text/markdown"),
+    "offre": (".docx",
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
 }
 
 # builder_key -> (module, doc_type attendu)

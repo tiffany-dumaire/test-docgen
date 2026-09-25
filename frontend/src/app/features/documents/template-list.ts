@@ -21,6 +21,7 @@ const TYPE_TABS: TypeTab[] = [
   { key: 'brochure', label: 'Brochure', icon: '📕' },
   { key: 'lettre', label: 'Lettre', icon: '✉️' },
   { key: 'mail', label: 'Mail', icon: '📧' },
+  { key: 'offre', label: 'Offre', icon: '💼' },
 ];
 
 @Component({
