@@ -33,15 +33,23 @@ const DISP_W = 460;
       @if (enabled()) {
         <div class="fmt">
           <label>Format
-            <select [ngModel]="layout().page_size || 'a4'" (ngModelChange)="setSize($event)">
-              <option value="a4">A4</option><option value="a3">A3</option>
-            </select>
+            @if (sizeMode === 'slide') {
+              <select [ngModel]="layout().page_size || 'slide'" (ngModelChange)="setSize($event)">
+                <option value="slide">Diapo 16:9</option><option value="slide43">Diapo 4:3</option>
+              </select>
+            } @else {
+              <select [ngModel]="layout().page_size || 'a4'" (ngModelChange)="setSize($event)">
+                <option value="a4">A4</option><option value="a3">A3</option>
+              </select>
+            }
           </label>
-          <label>Orientation
-            <select [ngModel]="layout().orientation || 'portrait'" (ngModelChange)="setOrient($event)">
-              <option value="portrait">Portrait</option><option value="landscape">Paysage</option>
-            </select>
-          </label>
+          @if (sizeMode !== 'slide') {
+            <label>Orientation
+              <select [ngModel]="layout().orientation || 'portrait'" (ngModelChange)="setOrient($event)">
+                <option value="portrait">Portrait</option><option value="landscape">Paysage</option>
+              </select>
+            </label>
+          }
         </div>
         <div class="work">
           <!-- Palette + canvas -->
@@ -81,7 +89,7 @@ const DISP_W = 460;
                 </div>
               }
             </div>
-            <p class="hint">Format A4. Glissez pour déplacer, tirez le coin ▟ pour redimensionner.</p>
+            <p class="hint">Glissez pour déplacer, tirez le coin ▟ pour redimensionner.</p>
           </div>
 
           <!-- Propriétés -->
@@ -198,13 +206,18 @@ const DISP_W = 460;
 export class LayoutEditor {
   @Input() settings!: TemplateSettings;
   /** Mode « page unique » : édite directement cet objet de mise en page
-   *  (utilisé par les templates A3 multi-pages). */
+   *  (utilisé par les templates A3 multi-pages et les calques dynamiques). */
   @Input() single?: LLayout;
+  /** Jeu de formats proposés : 'page' (A4/A3 + orientation) ou 'slide' (16:9 / 4:3). */
+  @Input() sizeMode: 'page' | 'slide' = 'page';
 
   page = signal<'cover' | 'suivi' | 'page'>('cover');
   rev = signal(0);
   selected = signal<string | null>(null);
-  private A = { a4: [595.2755, 841.8898], a3: [841.8898, 1190.5512] } as Record<string, number[]>;
+  private A = {
+    a4: [595.2755, 841.8898], a3: [841.8898, 1190.5512],
+    slide: [960, 540], slide43: [720, 540],
+  } as Record<string, number[]>;
   pageWpt() { const l = this.layout(); let [w, h] = this.A[l.page_size || 'a4']; if (l.orientation === 'landscape') [w, h] = [h, w]; return { w, h }; }
   get scale() { this.rev(); return DISP_W / this.pageWpt().w; }
   get dispW() { this.rev(); return DISP_W; }

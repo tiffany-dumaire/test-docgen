@@ -25,11 +25,111 @@ C = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Traductions des libellés (fr = source). Ordre des valeurs : (en, de, it).
+# Toute chaîne absente du dictionnaire est laissée telle quelle (variables, noms).
+# ---------------------------------------------------------------------------
+_TR_ROWS = {
+    # En-tête
+    "Date : {{today}}": ("Date: {{today}}", "Datum: {{today}}", "Data: {{today}}"),
+    "Projet : {{project_name}}": ("Project: {{project_name}}", "Projekt: {{project_name}}", "Progetto: {{project_name}}"),
+    "Réf. : {{project_reference}}": ("Ref.: {{project_reference}}", "Ref.: {{project_reference}}", "Rif.: {{project_reference}}"),
+    # Business Model Canvas
+    "Partenaires clés": ("Key Partners", "Schlüsselpartner", "Partner chiave"),
+    "Activités clés": ("Key Activities", "Schlüsselaktivitäten", "Attività chiave"),
+    "Ressources clés": ("Key Resources", "Schlüsselressourcen", "Risorse chiave"),
+    "Proposition de valeur": ("Value Proposition", "Wertversprechen", "Proposta di valore"),
+    "Relations clients": ("Customer Relationships", "Kundenbeziehungen", "Relazioni con i clienti"),
+    "Canaux": ("Channels", "Kanäle", "Canali"),
+    "Segments de clientèle": ("Customer Segments", "Kundensegmente", "Segmenti di clientela"),
+    "Structure de coûts": ("Cost Structure", "Kostenstruktur", "Struttura dei costi"),
+    "Flux de revenus": ("Revenue Streams", "Einnahmequellen", "Flussi di ricavi"),
+    # Value Proposition Canvas
+    "Produits & services": ("Products & Services", "Produkte & Dienstleistungen", "Prodotti e servizi"),
+    "Créateurs de gains": ("Gain Creators", "Nutzenstifter", "Generatori di vantaggi"),
+    "Solutions à la douleur": ("Pain Relievers", "Problemlöser", "Riduttori di sofferenze"),
+    "Profil du client": ("Customer Profile", "Kundenprofil", "Profilo del cliente"),
+    "Tâches du client": ("Customer Jobs", "Kundenaufgaben", "Attività del cliente"),
+    "Gains attendus": ("Gains", "Gewinne", "Vantaggi"),
+    "Douleurs / freins": ("Pains", "Probleme", "Sofferenze"),
+    # Empathy Map
+    "Pense & ressent": ("Thinks & Feels", "Denkt & fühlt", "Pensa e prova"),
+    "Voit": ("Sees", "Sieht", "Vede"),
+    "Entend": ("Hears", "Hört", "Sente"),
+    "Dit & fait": ("Says & Does", "Sagt & tut", "Dice e fa"),
+    "Utilisateur / persona": ("User / persona", "Nutzer / Persona", "Utente / persona"),
+    "Douleurs / peurs / freins": ("Pains / fears / barriers", "Probleme / Ängste / Hürden", "Sofferenze / paure / freni"),
+    "Gains / besoins / objectifs": ("Gains / needs / goals", "Gewinne / Bedürfnisse / Ziele", "Vantaggi / bisogni / obiettivi"),
+    # Persona
+    "Prénom NOM": ("First LAST", "Vorname NAME", "Nome COGNOME"),
+    "Rôle / fonction": ("Role / position", "Rolle / Funktion", "Ruolo / funzione"),
+    "Âge :": ("Age:", "Alter:", "Età:"),
+    "Localisation :": ("Location:", "Standort:", "Località:"),
+    "Métier :": ("Occupation:", "Beruf:", "Professione:"),
+    "Situation :": ("Status:", "Situation:", "Situazione:"),
+    "Niveau technique :": ("Tech level:", "Technik-Niveau:", "Livello tecnico:"),
+    "Objectifs": ("Goals", "Ziele", "Obiettivi"),
+    "Frustrations": ("Frustrations", "Frustrationen", "Frustrazioni"),
+    "Motivations": ("Motivations", "Motivationen", "Motivazioni"),
+    "Canaux préférés": ("Preferred channels", "Bevorzugte Kanäle", "Canali preferiti"),
+    "Bio / contexte": ("Bio / context", "Bio / Kontext", "Bio / contesto"),
+    "Citation": ("Quote", "Zitat", "Citazione"),
+    # Customer Journey Map
+    "Actions": ("Actions", "Aktionen", "Azioni"),
+    "Points de contact": ("Touchpoints", "Kontaktpunkte", "Punti di contatto"),
+    "Pensées": ("Thoughts", "Gedanken", "Pensieri"),
+    "Émotions": ("Emotions", "Emotionen", "Emozioni"),
+    "Douleurs": ("Pains", "Probleme", "Sofferenze"),
+    "Opportunités": ("Opportunities", "Chancen", "Opportunità"),
+    "Étapes": ("Stages", "Phasen", "Fasi"),
+    "Découverte": ("Discovery", "Entdeckung", "Scoperta"),
+    "Considération": ("Consideration", "Erwägung", "Considerazione"),
+    "Décision / achat": ("Decision / purchase", "Entscheidung / Kauf", "Decisione / acquisto"),
+    "Utilisation": ("Usage", "Nutzung", "Utilizzo"),
+    "Fidélisation": ("Loyalty", "Bindung", "Fidelizzazione"),
+    # Problem Statement
+    "Problème observé :": ("Observed problem:", "Beobachtetes Problem:", "Problema osservato:"),
+    "Personnes concernées :": ("People affected:", "Betroffene Personen:", "Persone coinvolte:"),
+    "Contexte / quand :": ("Context / when:", "Kontext / wann:", "Contesto / quando:"),
+    "Impact / conséquence :": ("Impact / consequence:", "Auswirkung / Folge:", "Impatto / conseguenza:"),
+    "Hypothèse de solution :": ("Solution hypothesis:", "Lösungshypothese:", "Ipotesi di soluzione:"),
+    "Énoncé du problème #1": ("Problem statement #1", "Problemstellung #1", "Enunciato del problema #1"),
+    "Énoncé du problème #2": ("Problem statement #2", "Problemstellung #2", "Enunciato del problema #2"),
+    "Énoncé du problème #3": ("Problem statement #3", "Problemstellung #3", "Enunciato del problema #3"),
+    # PESTEL
+    "Politique": ("Political", "Politisch", "Politico"),
+    "Économique": ("Economic", "Wirtschaftlich", "Economico"),
+    "Socioculturel": ("Sociocultural", "Soziokulturell", "Socioculturale"),
+    "Technologique": ("Technological", "Technologisch", "Tecnologico"),
+    "Environnemental": ("Environmental", "Ökologisch", "Ambientale"),
+    "Légal": ("Legal", "Rechtlich", "Legale"),
+    # Onion diagram
+    "Environnement / marché": ("Environment / market", "Umfeld / Markt", "Ambiente / mercato"),
+    "Organisation & partenaires": ("Organization & partners", "Organisation & Partner", "Organizzazione e partner"),
+    "Parties prenantes directes": ("Direct stakeholders", "Direkte Stakeholder", "Parti interessate dirette"),
+    "Cœur : produit / valeur": ("Core: product / value", "Kern: Produkt / Wert", "Nucleo: prodotto / valore"),
+    "Diagramme en oignon — parties prenantes": (
+        "Onion diagram — stakeholders", "Zwiebeldiagramm — Stakeholder",
+        "Diagramma a cipolla — parti interessate"),
+}
+_LANG_IDX = {"en": 0, "de": 1, "it": 2}
+TR = {lang: {fr: vals[i] for fr, vals in _TR_ROWS.items()}
+      for lang, i in _LANG_IDX.items()}
+
+
+def _t(lang, s):
+    """Traduit une chaîne depuis le français ; renvoie l'original si absent/fr."""
+    if lang == "fr" or not isinstance(s, str):
+        return s
+    return TR.get(lang, {}).get(s, s)
+
+
 class _B:
     """Petit constructeur d'éléments avec ids uniques."""
-    def __init__(self):
+    def __init__(self, lang="fr"):
         self.n = 0
         self.els = []
+        self.lang = lang
 
     def _id(self):
         self.n += 1
@@ -52,7 +152,8 @@ class _B:
     def text(self, x, y, w, h, t, size=13, color="#0f172a", bold=False,
              align="left", font="body", italic=False):
         self.els.append({"id": self._id(), "type": "text", "x": round(x),
-                         "y": round(y), "w": round(w), "h": round(h), "text": t,
+                         "y": round(y), "w": round(w), "h": round(h),
+                         "text": _t(self.lang, t),
                          "size": size, "color": color, "bold": bold,
                          "align": align, "font": font, "italic": italic})
 
@@ -82,9 +183,9 @@ class _B:
                   color="#CBD5E1", align="right")
 
 
-def _page(name, landscape, build):
+def _page(name, landscape, build, lang="fr"):
     W, H = (A3L if landscape else A3P)
-    b = _B()
+    b = _B(lang)
     b.header(name, W)
     build(b, W, H)
     return {"id": "p1", "name": name,
@@ -299,27 +400,53 @@ TOOLS = [
 ]
 
 
+# Orientation et gabarit de description par langue.
+_ORIENT = {
+    "fr": ("paysage", "portrait"), "en": ("landscape", "portrait"),
+    "de": ("Querformat", "Hochformat"), "it": ("orizzontale", "verticale"),
+}
+_DESC = {
+    "fr": "Outil d'analyse « {name} » au format Template A3 ({o}), modifiable et exportable en PDF / PNG / SVG.",
+    "en": "«{name}» analysis tool in A3 Template format ({o}), editable and exportable to PDF / PNG / SVG.",
+    "de": "Analysewerkzeug „{name}“ im A3-Vorlagenformat ({o}), bearbeitbar und exportierbar als PDF / PNG / SVG.",
+    "it": "Strumento di analisi «{name}» in formato Template A3 ({o}), modificabile ed esportabile in PDF / PNG / SVG.",
+}
+ALL_LANGS = ["fr", "en", "de", "it"]
+
+
 class Command(BaseCommand):
-    help = "Génère les 8 outils d'analyse au format Template A3."
+    help = "Génère les 8 outils d'analyse au format Template A3 (fr/en/de/it)."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--langs", default=",".join(ALL_LANGS),
+            help="Langues à générer, séparées par des virgules (défaut : fr,en,de,it).")
 
     def handle(self, *args, **options):
         from documents.models import DocumentTemplate
-        for slug, name, landscape, fn in TOOLS:
-            page = _page(name, landscape, fn)
-            defaults = {
-                "name": name, "doc_type": "a3", "builder_key": "a3",
-                "is_block_based": False, "schema": [],
-                "language": "fr",
-                "description": f"Outil d'analyse « {name} » au format Template A3 "
-                               f"({'paysage' if landscape else 'portrait'}), "
-                               f"modifiable et exportable en PDF / PNG / SVG.",
-                "settings": {"a3_export": "pdf", "a3_pages": [page]},
-            }
-            obj, created = DocumentTemplate.objects.get_or_create(
-                slug=slug, defaults=defaults)
-            if not created:
-                for k, v in defaults.items():
-                    setattr(obj, k, v)
-                obj.save()
-            self.stdout.write(f"{'Créé' if created else 'Mis à jour'} : {name}")
-        self.stdout.write(self.style.SUCCESS("Outils A3 générés."))
+        langs = [l.strip() for l in str(options["langs"]).split(",")
+                 if l.strip() in ALL_LANGS] or ALL_LANGS
+        count = 0
+        for lang in langs:
+            for slug, name, landscape, fn in TOOLS:
+                page = _page(name, landscape, fn, lang)
+                lslug = slug if lang == "fr" else f"{slug}-{lang}"
+                o = _ORIENT[lang][0 if landscape else 1]
+                defaults = {
+                    "name": name, "doc_type": "a3", "builder_key": "a3",
+                    "is_block_based": False, "schema": [],
+                    "language": lang,
+                    "description": _DESC[lang].format(name=name, o=o),
+                    "settings": {"a3_export": "pdf", "a3_pages": [page]},
+                }
+                obj, created = DocumentTemplate.objects.get_or_create(
+                    slug=lslug, defaults=defaults)
+                if not created:
+                    for k, v in defaults.items():
+                        setattr(obj, k, v)
+                    obj.save()
+                count += 1
+                self.stdout.write(
+                    f"[{lang}] {'Créé' if created else 'Mis à jour'} : {name}")
+        self.stdout.write(self.style.SUCCESS(
+            f"Outils A3 générés : {count} modèle(s) sur {len(langs)} langue(s)."))

@@ -19,7 +19,7 @@ data:
 user:
 	cd backend && .venv/bin/python manage.py createsuperuser
 
-backend: venv deps env migrate data
+backend: venv deps env migrate
 	cd backend && .venv/bin/python manage.py runserver
 
 frontend:

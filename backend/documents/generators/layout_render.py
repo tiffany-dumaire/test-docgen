@@ -31,11 +31,17 @@ from .base import GenerationContext, interpolate, placeholder_context
 
 A4_W, A4_H = 595.2755905511812, 841.8897637795277  # points
 A3_W, A3_H = 841.8897637795277, 1190.551181102362   # points
+SLIDE_W, SLIDE_H = 960.0, 540.0                     # diapo 16:9 en points
+SLIDE43_W, SLIDE43_H = 720.0, 540.0                 # diapo 4:3 en points
 
 
 def page_dims(layout):
-    """Dimensions (points) selon page_size (a4/a3) et orientation de la mise en page."""
+    """Dimensions (points) selon page_size (a4/a3/slide/slide43) et orientation."""
     size = (layout or {}).get("page_size", "a4")
+    if size == "slide":
+        return SLIDE_W, SLIDE_H
+    if size == "slide43":
+        return SLIDE43_W, SLIDE43_H
     w, h = (A3_W, A3_H) if size == "a3" else (A4_W, A4_H)
     if (layout or {}).get("orientation") == "landscape":
         w, h = h, w
@@ -191,9 +197,19 @@ def draw_on_canvas(c, layout, ctx, page_w=A4_W, page_h=A4_H):
                 text = f"<b>{text}</b>"
             if el.get("italic"):
                 text = f"<i>{text}</i>"
-            frame = Frame(x, ry, w, h, leftPadding=0, rightPadding=0,
+            para = Paragraph(text, style)
+            # Hauteur naturelle : on n'écrête jamais le texte, on déborde vers
+            # le bas si la boîte est trop courte (ancrage sur le bord supérieur).
+            try:
+                _pw, nat_h = para.wrap(w, 1_000_000)
+            except Exception:
+                nat_h = h
+            draw_h = max(h, nat_h)
+            top_from_bottom = page_h - y
+            frame = Frame(x, top_from_bottom - draw_h, w, draw_h,
+                          leftPadding=0, rightPadding=0,
                           topPadding=0, bottomPadding=0, showBoundary=0)
-            frame.addFromList([Paragraph(text, style)], c)
+            frame.addFromList([para], c)
 
 
 def render_pdf_page_bytes(layout, ctx, page_w=A4_W, page_h=A4_H) -> bytes:

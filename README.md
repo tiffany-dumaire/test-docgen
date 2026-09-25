@@ -340,6 +340,27 @@ docugen/
 
 ---
 
+## Thèmes « Trois vents » (commutables)
+
+L'application propose trois thèmes complets, chacun avec sa palette, sa
+typographie et sa forme, déclinés en clair / sombre :
+
+- **Bise · Givre** (défaut) — bleu glacier, *Bricolage Grotesque* / *Figtree*, coins arrondis.
+- **Bise Noire · Acier** — bleu acier, *Red Hat Display* / *Red Hat Text*, coins nets.
+- **Joran · Nuit polaire** — indigo, *Young Serif* / *Onest*, coins généreux.
+
+Le changement se fait depuis la barre supérieure (icône palette) : choix de
+l'ambiance + luminosité **Clair / Sombre / Auto** (suit le système). La
+préférence est mémorisée (localStorage). Techniquement, tout repose sur les
+jetons `--mat-sys-*` (identiques à Angular Material 21) + des extensions
+`--pd-*` (polices, rayons, densité), pilotés par les attributs `data-p`
+(proposition) et `data-theme` (clair/sombre) sur `<html>` — voir
+`core/services/theme.service.ts`. Les polices sont auto-hébergées via
+`@fontsource` (aucune dépendance à Google Fonts). La couleur d'entreprise reste
+une surcharge possible du primaire, quel que soit le thème.
+
+---
+
 ## Outils d'analyse A3 · Export SVG · Multi-langue
 
 **8 outils d'analyse au format Template A3** (planches à positionnement libre,

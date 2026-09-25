@@ -39,7 +39,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         from . import tracking_diagrams as TD
         project = self.get_object()
         kind = request.query_params.get("type", "gantt")
-        svg = TD.render(kind, project.tracking or {})
+        primary = request.query_params.get("primary")
+        svg = TD.render(kind, project.tracking or {}, primary=primary)
         svg_bytes = svg if isinstance(svg, bytes) else svg.encode("utf-8")
         fmt = (request.query_params.get("fmt") or "svg").lower()
         if fmt == "png":

@@ -30,8 +30,10 @@ export class ProjectService {
   patch(id: number, data: Partial<Project>): Observable<Project> {
     return this.http.patch<Project>(`${this.url}${id}/`, data);
   }
-  trackingDiagramUrl(id: number, type: string): string {
-    return `${this.url}${id}/tracking_diagram/?type=${encodeURIComponent(type)}`;
+  trackingDiagramUrl(id: number, type: string, primary?: string): string {
+    let u = `${this.url}${id}/tracking_diagram/?type=${encodeURIComponent(type)}`;
+    if (primary) u += `&primary=${encodeURIComponent(primary)}`;
+    return u;
   }
 
   remove(id: number): Observable<void> {

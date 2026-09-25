@@ -159,9 +159,25 @@ export class ProjectTracking {
     this.tk().tasks!.push({ id, name: '', start: '', end: '', progress: 0, planned_end: '', team: '', status: 'planned', deps: [] } as TrackTask);
   }
 
+  /** Couleur principale du thème actif (résolue via une sonde), au format #rrggbb. */
+  private themePrimary(): string {
+    try {
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--primary)';
+      probe.style.display = 'none';
+      document.body.appendChild(probe);
+      const rgb = getComputedStyle(probe).color;
+      probe.remove();
+      const m = rgb.match(/\d+/g);
+      if (!m || m.length < 3) return '';
+      return '#' + m.slice(0, 3).map((n) => (+n).toString(16).padStart(2, '0')).join('');
+    } catch { return ''; }
+  }
+
   loadDiagrams() {
+    const primary = this.themePrimary();
     for (const t of TYPES) {
-      const url = this.svc.trackingDiagramUrl(this.id, t.key);
+      const url = this.svc.trackingDiagramUrl(this.id, t.key, primary);
       this.http.get(url, { responseType: 'text' }).subscribe({
         next: (svg) => this.svgs.update((cur) => ({ ...cur, [t.key]: this.san.bypassSecurityTrustHtml(svg) })),
         error: () => {},
@@ -170,7 +186,7 @@ export class ProjectTracking {
   }
 
   download(type: string, label: string) {
-    const url = this.svc.trackingDiagramUrl(this.id, type);
+    const url = this.svc.trackingDiagramUrl(this.id, type, this.themePrimary());
     this.http.get(url, { responseType: 'blob' }).subscribe((blob) => {
       const u = URL.createObjectURL(blob);
       const a = document.createElement('a');

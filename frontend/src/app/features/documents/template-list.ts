@@ -152,8 +152,8 @@ export class TemplateList {
   }
 
   reload() {
-    this.service.templates().subscribe((r) => this.templates.set(r.results));
-    this.formSvc.templates().subscribe((r) => this.formTemplates.set(r.results));
+    this.service.templates({ page_size: 1000 }).subscribe((r) => this.templates.set(r.results));
+    this.formSvc.templates({ page_size: 1000 }).subscribe((r) => this.formTemplates.set(r.results));
   }
 
   byType(key: string): DocumentTemplate[] {

@@ -9,6 +9,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ToastService } from './core/services/api.service';
 import { AuthService } from './core/services/auth.service';
+import { ThemeService } from './core/services/theme.service';
 
 interface NavItem { path: string; icon: string; label: string; }
 
@@ -56,8 +57,28 @@ interface NavItem { path: string; icon: string; label: string; }
               <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
             </button>
             <span class="grow"></span>
-            <button mat-icon-button (click)="auth.toggleDark()" [matTooltip]="auth.isDark() ? 'Mode clair' : 'Mode sombre'">
-              <mat-icon>{{ auth.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            <button mat-icon-button [matMenuTriggerFor]="themeMenu" matTooltip="Thème">
+              <mat-icon>palette</mat-icon>
+            </button>
+            <mat-menu #themeMenu="matMenu" class="theme-menu">
+              <div class="tm-head">Ambiance</div>
+              @for (p of theme.propositions; track p.id) {
+                <button mat-menu-item (click)="$event.stopPropagation(); theme.setProposition(p.id)">
+                  <span class="tm-dot" [style.background]="p.primary"></span>
+                  <span class="tm-name" [style.font-family]="p.font">{{ p.name }}</span>
+                  <span class="tm-sub">{{ p.sub }}</span>
+                  @if (theme.proposition() === p.id) { <mat-icon class="tm-check">check</mat-icon> }
+                </button>
+              }
+              <div class="tm-head">Luminosité</div>
+              <div class="tm-modes" (click)="$event.stopPropagation()">
+                <button [class.on]="theme.mode() === 'light'" (click)="theme.setMode('light')"><mat-icon>light_mode</mat-icon> Clair</button>
+                <button [class.on]="theme.mode() === 'dark'" (click)="theme.setMode('dark')"><mat-icon>dark_mode</mat-icon> Sombre</button>
+                <button [class.on]="theme.mode() === 'auto'" (click)="theme.setMode('auto')"><mat-icon>brightness_auto</mat-icon> Auto</button>
+              </div>
+            </mat-menu>
+            <button mat-icon-button (click)="theme.toggleDark()" [matTooltip]="theme.resolvedDark() ? 'Mode clair' : 'Mode sombre'">
+              <mat-icon>{{ theme.resolvedDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
             </button>
             @if (auth.user(); as u) {
               <button mat-button [matMenuTriggerFor]="menu" class="userbtn">
@@ -90,25 +111,33 @@ interface NavItem { path: string; icon: string; label: string; }
   styles: [`
     .shell { height: 100vh; background: var(--mat-sys-surface-container-low, #f4f5fb); }
     .nav { width: 244px; border: none !important;
-      background:
-        radial-gradient(420px 220px at 20% 0%, rgba(45,212,191,.16), transparent 60%),
-        radial-gradient(420px 260px at 90% 12%, rgba(139,92,246,.20), transparent 60%),
-        linear-gradient(190deg, #0c1730, #070d1c 70%) !important;
-      color: #cfe0f5; transition: width .18s ease; overflow-x: hidden; }
+      background: var(--mat-sys-surface-container-low) !important;
+      border-right: 1px solid var(--mat-sys-outline-variant) !important;
+      color: var(--mat-sys-on-surface); transition: width .18s ease; overflow-x: hidden; }
     .nav.rail { width: 72px; }
     .brand { display: flex; align-items: center; gap: .6rem; padding: 1rem 1.1rem; }
     .brand.center { justify-content: center; padding: 1rem .5rem; }
-    .brand .logo { font-size: 1.4rem; width: 40px; height: 40px; border-radius: 12px; flex: none;
-      display: grid; place-items: center; background: linear-gradient(135deg, #2dd4bf, var(--brand, #3b82f6) 55%, #8b5cf6);
-      box-shadow: 0 8px 20px rgba(59,130,246,.45); }
-    .brand strong { color: #fff; letter-spacing: -.02em; font-size: 1.1rem; }
-    .brand .tag { color: #8ea6cc; font-size: .7rem; }
-    mat-nav-list { --mat-list-list-item-label-text-color: #cfe0f5; padding: 0 .5rem; }
-    mat-nav-list a.active { background: linear-gradient(100deg, color-mix(in srgb, var(--brand,#3b82f6) 92%, transparent), #8b5cf6 130%);
-      color: #fff; border-radius: 12px; box-shadow: 0 8px 20px rgba(59,130,246,.28); }
-    mat-nav-list a.active mat-icon { color: #fff; }
-    mat-nav-list mat-icon { color: #93b0d6; }
-    .sep { height: 1px; background: rgba(255,255,255,.10); margin: .5rem .8rem; }
+    .brand .logo { font-size: 1.2rem; width: 40px; height: 40px; border-radius: var(--pd-r-s); flex: none;
+      display: grid; place-items: center; background: var(--brand, var(--mat-sys-primary)); color: var(--mat-sys-on-primary); }
+    .brand strong { color: var(--mat-sys-on-surface); font-family: var(--pd-display); letter-spacing: var(--pd-display-track); font-size: 1.1rem; }
+    .brand .tag { color: var(--mat-sys-on-surface-variant); font-size: .7rem; }
+    mat-nav-list { --mat-list-list-item-label-text-color: var(--mat-sys-on-surface-variant); padding: 0 .5rem; }
+    mat-nav-list a { border-radius: var(--pd-r-btn); }
+    mat-nav-list a.active { background: var(--mat-sys-secondary-container);
+      color: var(--mat-sys-on-secondary-container); border-radius: var(--pd-r-btn); }
+    mat-nav-list a.active mat-icon, mat-nav-list a.active span { color: var(--mat-sys-on-secondary-container); }
+    mat-nav-list mat-icon { color: var(--mat-sys-on-surface-variant); }
+    .sep { height: 1px; background: var(--mat-sys-outline-variant); margin: .5rem .8rem; }
+    /* Menu de thème */
+    .tm-head { padding: .4rem 1rem .2rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--mat-sys-on-surface-variant); font-weight: 700; }
+    .tm-dot { width: 14px; height: 14px; border-radius: 50%; margin-right: .6rem; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+    .tm-name { font-weight: 600; }
+    .tm-sub { margin-left: .5rem; color: var(--mat-sys-on-surface-variant); font-size: .75rem; }
+    .tm-check { margin-left: auto; color: var(--mat-sys-primary); }
+    .tm-modes { display: flex; gap: .3rem; padding: .2rem .8rem .6rem; }
+    .tm-modes button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .2rem; border: 1px solid var(--mat-sys-outline-variant); background: transparent; color: var(--mat-sys-on-surface-variant); border-radius: var(--pd-r-s); padding: .4rem; cursor: pointer; font-size: .72rem; }
+    .tm-modes button mat-icon { font-size: 20px; width: 20px; height: 20px; }
+    .tm-modes button.on { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); border-color: transparent; }
     .main { background: var(--mat-sys-surface-container-low, #f4f5fb); }
     .topbar { position: sticky; top: 0; z-index: 5;
       background: color-mix(in srgb, var(--mat-sys-surface) 88%, transparent);
@@ -132,8 +161,11 @@ interface NavItem { path: string; icon: string; label: string; }
 export class App {
   toast = inject(ToastService);
   auth = inject(AuthService);
+  theme = inject(ThemeService);
   private router = inject(Router);
   collapsed = signal(false);
+
+  constructor() { this.theme.init(); }
 
   nav: NavItem[] = [
     { path: '/dashboard', icon: 'dashboard', label: 'Tableau de bord' },

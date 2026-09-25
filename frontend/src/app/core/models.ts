@@ -228,6 +228,16 @@ export interface A3Page {
   layout: PageLayout & { page_size?: string; orientation?: string };
 }
 
+/** Calque dynamique : éléments libres estampillés sur des pages PDF / diapos PPTX. */
+export interface Overlay {
+  id: string;
+  name: string;
+  enabled?: boolean;
+  doc_type: 'pdf' | 'pptx';
+  target: { pages: string };   // 'all' | 'first' | 'last' | 'odd' | 'even' | '1,3-5'
+  layout: PageLayout & { page_size?: string; orientation?: string };
+}
+
 export interface PptxSettings {
   main_color?: string;
   include_logo?: boolean;
@@ -248,6 +258,8 @@ export interface TemplateSettings {
   // Template A3 (PNG / PDF)
   a3_export?: 'pdf' | 'png';
   a3_pages?: A3Page[];
+  // Calques dynamiques (placement libre PDF / PPTX)
+  overlays?: Overlay[];
 }
 
 // ---- Classeurs Excel personnalisables ----

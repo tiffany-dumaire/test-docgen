@@ -19,6 +19,7 @@ import {
   DocumentTemplate,
   ExcelSheet,
   LANGUAGES,
+  Overlay,
   Project,
   StyleMap,
   TemplateSettings,
@@ -355,6 +356,70 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
           </mat-tab>
         }
 
+        <!-- ===================== ÉLÉMENTS DYNAMIQUES (calques PDF / PPTX) ===================== -->
+        @if (hasOverlays()) {
+          <mat-tab label="Éléments dynamiques">
+            <div class="tabpad">
+              <div class="card stack">
+                <h3>Calques dynamiques</h3>
+                <p class="muted" style="margin:0">
+                  Placez librement des éléments (texte, image, logo, formes) estampillés
+                  @if (isPptx()) { sur les diapositives choisies, en conservant le template titre / contenu. }
+                  @else { sur les pages choisies du document PDF (page de garde comprise). }
+                  Chaque calque cible un ensemble de {{ overlayNoun() }}.
+                </p>
+              </div>
+
+              <div class="card stack">
+                <div class="row between">
+                  <h3>Calques</h3>
+                  <button class="btn btn-sm btn-primary" (click)="addOverlay()">+ Calque</button>
+                </div>
+                <div class="a3-tabs">
+                  @for (ov of overlays(); track ov.id) {
+                    <button class="a3-tab" [class.active]="activeOverlay() === ov.id" (click)="activeOverlay.set(ov.id)">
+                      {{ ov.name }}
+                      <span class="x" (click)="removeOverlay(ov.id); $event.stopPropagation()">✕</span>
+                    </button>
+                  }
+                  @if (!overlays().length) { <span class="muted">Aucun calque. Ajoutez-en un.</span> }
+                </div>
+
+                @for (ov of overlays(); track ov.id) {
+                  @if (activeOverlay() === ov.id) {
+                    <div class="form-grid">
+                      <div class="field">
+                        <label>Nom du calque</label>
+                        <input [(ngModel)]="ov.name" />
+                      </div>
+                      <div class="field">
+                        <label>{{ isPptx() ? 'Diapositives ciblées' : 'Pages ciblées' }}</label>
+                        <select [ngModel]="pagePreset(ov)" (ngModelChange)="setPagePreset(ov, $event)">
+                          <option value="all">Toutes</option>
+                          <option value="first">{{ isPptx() ? 'Première diapo' : 'Première page' }}</option>
+                          <option value="last">{{ isPptx() ? 'Dernière diapo' : 'Dernière page' }}</option>
+                          <option value="odd">{{ isPptx() ? 'Diapos impaires' : 'Pages impaires' }}</option>
+                          <option value="even">{{ isPptx() ? 'Diapos paires' : 'Pages paires' }}</option>
+                          <option value="custom">Personnalisé…</option>
+                        </select>
+                      </div>
+                    </div>
+                    @if (pagePreset(ov) === 'custom') {
+                      <div class="field" style="max-width:360px">
+                        <label>{{ isPptx() ? 'N° de diapositives' : 'N° de pages' }} (ex : 1,3-5)</label>
+                        <input [(ngModel)]="ov.target.pages" placeholder="1,3-5" />
+                        <small class="muted">Numéros séparés par des virgules ; plages avec un tiret. Mots-clés : first, last.</small>
+                      </div>
+                    }
+                    <label class="chk"><input type="checkbox" [ngModel]="ov.enabled !== false" (ngModelChange)="ov.enabled = $event" /> Calque actif</label>
+                    <app-layout-editor [single]="ov.layout" [sizeMode]="isPptx() ? 'slide' : 'page'" />
+                  }
+                }
+              </div>
+            </div>
+          </mat-tab>
+        }
+
         <!-- ===================== PAGES A3 / A4 ===================== -->
         @if (isA3()) {
           <mat-tab label="Pages (A3 / A4)">
@@ -498,6 +563,7 @@ export class TemplateBuilder {
   languages = LANGUAGES;
   saving = signal(false);
   activeA3 = signal<string>('');
+  activeOverlay = signal<string>('');
   private counter = 0;
   private dragType: BlockType | null = null;
   private dragIndex: number | null = null;
@@ -535,6 +601,9 @@ export class TemplateBuilder {
   /** Onglet Structure & styles (mise en page libre + styles). */
   hasStructure = computed(() => this.isWord() || this.isPdf());
   hasTableColor = computed(() => this.isWord() || this.isPdf() || this.isExcel());
+  /** Onglet « Éléments dynamiques » : calques libres PDF / PPTX. */
+  hasOverlays = computed(() => this.isPdf() || this.isPptx());
+  overlayNoun = computed(() => (this.isPptx() ? 'diapositives' : 'pages'));
 
   typeMeta = computed(() => TYPE_META[this.model()?.doc_type ?? 'docx'] ?? TYPE_META['docx']);
 
@@ -585,6 +654,54 @@ export class TemplateBuilder {
     return s?.a3_pages ?? [];
   });
 
+  overlays = computed<Overlay[]>(() => {
+    const s = this.model()?.settings;
+    if (s && !s.overlays) s.overlays = [];
+    return s?.overlays ?? [];
+  });
+
+  private readonly pagePresets = new Set(['all', 'first', 'last', 'odd', 'even']);
+  pagePreset(ov: Overlay): string {
+    const p = (ov.target?.pages || 'all').trim();
+    return this.pagePresets.has(p) ? p : 'custom';
+  }
+  setPagePreset(ov: Overlay, v: string) {
+    ov.target = ov.target ?? { pages: 'all' };
+    ov.target.pages = v === 'custom' ? (this.pagePresets.has(ov.target.pages) ? '' : ov.target.pages) : v;
+  }
+
+  addOverlay() {
+    const m = this.model(); if (!m) return;
+    m.settings = m.settings ?? {};
+    m.settings.overlays = m.settings.overlays ?? [];
+    const isPptx = m.doc_type === 'pptx';
+    const ov: Overlay = {
+      id: `ov_${Date.now()}_${this.counter++}`,
+      name: `Calque ${m.settings.overlays.length + 1}`,
+      enabled: true,
+      doc_type: isPptx ? 'pptx' : 'pdf',
+      target: { pages: 'all' },
+      layout: {
+        page_size: isPptx ? 'slide' : 'a4',
+        orientation: 'portrait',
+        background: undefined,
+        elements: [],
+      },
+    };
+    m.settings.overlays.push(ov);
+    this.activeOverlay.set(ov.id);
+    this.model.set({ ...m });
+  }
+  removeOverlay(id: string) {
+    const m = this.model(); if (!m) return;
+    const list = m.settings?.overlays ?? [];
+    m.settings!.overlays = list.filter((o) => o.id !== id);
+    if (this.activeOverlay() === id) {
+      this.activeOverlay.set(m.settings!.overlays[0]?.id ?? '');
+    }
+    this.model.set({ ...m });
+  }
+
   allVariables = computed(() => {
     const builtins = ['project_name', 'client_name', 'project_reference',
       'company_name', 'document_title', 'today', 'version'];
@@ -601,6 +718,7 @@ export class TemplateBuilder {
           if (!t.settings) t.settings = this.defaultSettings();
           this.model.set(t);
           if (t.doc_type === 'a3') this.ensureA3(t);
+          if (t.settings?.overlays?.length) this.activeOverlay.set(t.settings.overlays[0].id);
         });
       } else {
         this.model.set({

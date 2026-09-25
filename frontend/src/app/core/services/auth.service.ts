@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ApiConfig } from './api.service';
 import { AuthConfig, AuthUser } from '../models';
+import { ThemeService, Proposition, ThemeMode } from './theme.service';
 
 const TOKEN_KEY = 'docugen_token';
 const VERIFIER_KEY = 'docugen_pkce_verifier';
@@ -11,6 +12,7 @@ const VERIFIER_KEY = 'docugen_pkce_verifier';
 export class AuthService {
   private http = inject(HttpClient);
   private cfg = inject(ApiConfig);
+  private theme = inject(ThemeService);
   private base = this.cfg.base;
 
   config = signal<AuthConfig | null>(null);
@@ -110,11 +112,14 @@ export class AuthService {
 
   applyTheme(): void {
     const prefs = this.user()?.ui_prefs || {};
+    // Thème « Trois vents » synchronisé depuis le profil (multi-appareils).
+    const prop = prefs["theme_proposition"] as Proposition | undefined;
+    if (prop && ["bise", "noire", "joran"].includes(prop)) this.theme.setProposition(prop);
+    const mode = prefs["theme_mode"] as ThemeMode | undefined;
+    if (mode && ["light", "dark", "auto"].includes(mode)) this.theme.setMode(mode);
     const accent = (prefs["accent"] as string) || "";
-    const dark = !!prefs["dark"];
     const root = document.documentElement;
-    // Mode sombre (Material + custom)
-    root.classList.toggle("dark", dark);
+    // Le mode clair/sombre est géré par ThemeService (proposition + luminosité).
     // Couleur d'entreprise -> Material (--brand) + tokens custom
     const keys = ["--primary", "--primary-dark", "--primary-light", "--primary-050", "--ring", "--brand"];
     if (!accent) {
@@ -131,14 +136,7 @@ export class AuthService {
     root.style.setProperty("--ring", `0 0 0 3px ${this.rgba(accent, 0.22)}`);
   }
 
-  isDark(): boolean { return !!this.user()?.ui_prefs?.["dark"]; }
-  async toggleDark(): Promise<void> {
-    const dark = !this.isDark();
-    document.documentElement.classList.toggle("dark", dark);
-    const u = this.user();
-    if (u) { u.ui_prefs = { ...(u.ui_prefs || {}), dark }; this.user.set({ ...u }); }
-    try { await this.updatePrefs({ dark }); } catch { /* noop */ }
-  }
+  isDark(): boolean { return document.documentElement.classList.contains("dark"); }
   private hexToRgb(h: string) {
     h = h.replace("#", ""); if (h.length === 3) h = h.split("").map((c) => c + c).join("");
     return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };

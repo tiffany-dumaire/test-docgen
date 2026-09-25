@@ -419,11 +419,46 @@ TYPES = [
 ]
 
 
-def render(kind, tracking):
+DEFAULT_ACCENT = "#2563eb"
+
+
+def _norm_hex(value):
+    """Valide/normalise une couleur #rrggbb ; renvoie None si invalide."""
+    if not value:
+        return None
+    v = str(value).strip()
+    if not v.startswith("#"):
+        v = "#" + v
+    if len(v) == 4:  # #abc -> #aabbcc
+        v = "#" + "".join(c * 2 for c in v[1:])
+    if len(v) != 7:
+        return None
+    try:
+        int(v[1:], 16)
+    except ValueError:
+        return None
+    return v.lower()
+
+
+def _recolor(svg_bytes, primary):
+    """Remplace l'accent par défaut par la couleur principale du thème actif."""
+    p = _norm_hex(primary)
+    if not p or p == DEFAULT_ACCENT:
+        return svg_bytes
+    try:
+        s = svg_bytes.decode("utf-8")
+        s = s.replace(DEFAULT_ACCENT, p).replace(DEFAULT_ACCENT.upper(), p)
+        return s.encode("utf-8")
+    except Exception:
+        return svg_bytes
+
+
+def render(kind, tracking, primary=None):
     fn = RENDERERS.get(kind)
     if not fn:
         return _empty("Diagramme", "Type de diagramme inconnu.")
     try:
-        return fn(tracking or {})
+        out = fn(tracking or {})
     except Exception as exc:  # robustesse : ne casse jamais l'UI
         return _empty(kind, f"Erreur de rendu : {exc}")
+    return _recolor(out, primary) if primary else out

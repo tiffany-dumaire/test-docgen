@@ -322,7 +322,7 @@ export class DocumentEditor {
 
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
-    this.service.templates({ is_active: true }).subscribe((r) => this.templates.set(r.results));
+    this.service.templates({ is_active: true, page_size: 1000 }).subscribe((r) => this.templates.set(r.results));
     this.service.choices().subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
     this.companySvc.get().subscribe((c) => this.companyName.set(c.name));
 

@@ -70,6 +70,17 @@ def render_content(document: Document, ctx) -> bytes:
         generator = get_generator(document.template.builder_key, document.doc_type)
     if content is None:
         content = generator(ctx)
+    # Calques dynamiques : estampillage PDF / formes PPTX sur les pages visées.
+    if document.doc_type in ("pdf", "pptx"):
+        from .generators import overlay
+        if overlay.has_overlays(document, document.doc_type):
+            try:
+                if document.doc_type == "pdf":
+                    content = overlay.stamp_pdf(content, document, ctx)
+                else:
+                    content = overlay.apply_pptx(content, document, ctx)
+            except Exception:
+                pass
     return content
 
 
@@ -113,6 +124,12 @@ def preview_inline(document: Document):
         if fmt == "svg":
             return "image", "image/svg+xml", a3_gen.render_svg(ctx)
         return "image", "image/png", a3_gen.render_png(ctx)
+    # PDF avec calques dynamiques : rendu du vrai PDF (l'aperçu HTML ne peut
+    # pas montrer les éléments estampillés sur les pages).
+    if doc_type == "pdf":
+        from .generators import overlay
+        if overlay.has_overlays(document, "pdf"):
+            return "pdf", "application/pdf", render_content(document, ctx)
     from .generators import html_preview
     html = html_preview.render(document, ctx)
     if html is not None:

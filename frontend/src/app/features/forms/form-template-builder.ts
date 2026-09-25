@@ -270,7 +270,7 @@ export class FormTemplateBuilder {
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
     this.docSvc.choices().subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
-    this.docSvc.templates().subscribe((r) => this.reportTemplates.set(
+    this.docSvc.templates({ page_size: 1000 }).subscribe((r) => this.reportTemplates.set(
       r.results.filter((t) => t.doc_type === 'docx' || t.doc_type === 'pdf')
         .map((t) => ({ id: t.id, name: t.name, doc_type: t.doc_type }))));
     setTimeout(() => {
