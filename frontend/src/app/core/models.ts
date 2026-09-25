@@ -260,6 +260,16 @@ export interface TemplateSettings {
   a3_pages?: A3Page[];
   // Calques dynamiques (placement libre PDF / PPTX)
   overlays?: Overlay[];
+  // En-tête / pied de page configurables (Word, PDF, Lettre)
+  header?: HeaderFooter;
+  footer?: HeaderFooter;
+}
+
+export interface HeaderFooter {
+  enabled?: boolean;
+  text?: string;
+  align?: 'left' | 'center' | 'right';
+  show_logo?: boolean;
 }
 
 // ---- Classeurs Excel personnalisables ----

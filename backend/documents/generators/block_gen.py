@@ -33,6 +33,9 @@ def _tpl_settings(ctx):
         "include_suivi": s.get("include_suivi", True),
         "include_toc": s.get("include_toc", True),
         "table_color": (s.get("table_color") or "").lstrip("#") or None,
+        # En-tête / pied de page configurables (None = conserver le modèle de base).
+        "header": s.get("header"),
+        "footer": s.get("footer"),
     }
 
 
@@ -507,22 +510,99 @@ def render_docx(ctx: GenerationContext) -> bytes:
         elif bt == "spacer":
             doc.add_paragraph()
 
-    # -- Pied : profil entreprise --
-    foot = doc.add_paragraph()
-    align(foot, "center")
-    bits = [b for b in [ctx.company.website_url, ctx.company.email,
-                        ctx.company.phone] if b]
-    if bits:
-        fr = foot.add_run("  ·  ".join(bits))
-        fr.font.size = Pt(8)
-        fr.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+    # -- Pied de page « profil entreprise » dans le corps --
+    # Conservé uniquement si le modèle ne définit PAS d'en-tête/pied configurables
+    # (settings.footer). Sinon, c'est le vrai pied de page de section qui gère.
+    if cfg.get("footer") is None:
+        foot = doc.add_paragraph()
+        align(foot, "center")
+        bits = [b for b in [ctx.company.website_url, ctx.company.email,
+                            ctx.company.phone] if b]
+        if bits:
+            fr = foot.add_run("  ·  ".join(bits))
+            fr.font.size = Pt(8)
+            fr.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
 
     if sectPr is not None:
         body.append(sectPr)
 
+    # En-tête / pied de page configurables (Word, PDF-via-Word, Lettre).
+    _apply_docx_header_footer(doc, cfg, ctx, pctx)
+
     buffer = io.BytesIO()
     doc.save(buffer)
     return buffer.getvalue()
+
+
+def _apply_docx_header_footer(doc, cfg, ctx, pctx):
+    """Applique l'en-tête et le pied de page définis dans les réglages du modèle.
+
+    settings.header / settings.footer = {
+        "enabled": bool, "text": "…\\n…" (variables {{…}} interpolées),
+        "align": "left|center|right", "show_logo": bool (en-tête).
+    }
+    Clé absente → on ne touche pas (comportement du modèle de base conservé).
+    """
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Inches, Pt, RGBColor
+
+    from docx.oxml.ns import qn as _qn
+
+    header_cfg = cfg.get("header")
+    footer_cfg = cfg.get("footer")
+    if header_cfg is None and footer_cfg is None:
+        return
+    try:
+        sec = doc.sections[0]
+    except (IndexError, AttributeError):
+        return
+    # Le modèle de base (Modele.docx) définit un en-tête/pied de PREMIÈRE PAGE
+    # (titlePg) ; sur une lettre d'une page, c'est lui qui s'affiche. On retire
+    # titlePg pour que l'en-tête/pied principal (celui qu'on configure) s'applique
+    # à toutes les pages.
+    try:
+        tp = sec._sectPr.find(_qn("w:titlePg"))
+        if tp is not None:
+            sec._sectPr.remove(tp)
+    except Exception:
+        pass
+    amap = {"left": WD_ALIGN_PARAGRAPH.LEFT, "center": WD_ALIGN_PARAGRAPH.CENTER,
+            "right": WD_ALIGN_PARAGRAPH.RIGHT}
+
+    def fill(part, conf, is_footer):
+        part.is_linked_to_previous = False
+        for p in list(part.paragraphs):
+            p._element.getparent().remove(p._element)
+        for t in list(part.tables):
+            t._element.getparent().remove(t._element)
+        if not conf.get("enabled", True):
+            part.add_paragraph("")  # pied/en-tête volontairement vide
+            return
+        alignment = amap.get(conf.get("align", "center" if is_footer else "left"),
+                             WD_ALIGN_PARAGRAPH.LEFT)
+        if not is_footer and conf.get("show_logo"):
+            logo = _logo_path(ctx)
+            if logo:
+                p = part.add_paragraph(); p.alignment = alignment
+                try:
+                    p.add_run().add_picture(logo, height=Inches(0.7))
+                except Exception:
+                    pass
+        text = interpolate(conf.get("text", "") or "", pctx)
+        lines = text.split("\n") if text.strip() else []
+        for line in lines:
+            p = part.add_paragraph(); p.alignment = alignment
+            run = p.add_run(line)
+            run.font.size = Pt(8 if is_footer else 10)
+            if is_footer:
+                run.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+        if not part.paragraphs:
+            part.add_paragraph("")
+
+    if header_cfg is not None:
+        fill(sec.header, header_cfg, False)
+    if footer_cfg is not None:
+        fill(sec.footer, footer_cfg, True)
 
 
 def _list_style(styles, ordered):

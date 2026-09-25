@@ -328,6 +328,46 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
           </mat-tab>
         }
 
+        <!-- ===================== EN-TÊTE & PIED (Word / PDF / Lettre) ===================== -->
+        @if (hasHeaderFooter()) {
+          <mat-tab label="En-tête & pied">
+            <div class="tabpad">
+              <div class="card stack">
+                <h3>En-tête</h3>
+                <label class="chk"><input type="checkbox" [ngModel]="hfConfigured('header')" (ngModelChange)="toggleHf('header', $event)" /> Personnaliser l'en-tête du modèle</label>
+                @if (hfConfigured('header')) {
+                  <label class="chk"><input type="checkbox" [ngModel]="hfVal('header','enabled')" (ngModelChange)="setHf('header','enabled',$event)" /> En-tête actif</label>
+                  @if (hfVal('header','enabled')) {
+                    <label class="chk"><input type="checkbox" [ngModel]="hfVal('header','show_logo')" (ngModelChange)="setHf('header','show_logo',$event)" /> Afficher le logo de l'entreprise</label>
+                    <div class="field"><label>Texte de l'en-tête (variables {{ '{{' }}…{{ '}}' }})</label>
+                      <textarea rows="2" [ngModel]="hfVal('header','text')" (ngModelChange)="setHf('header','text',$event)"></textarea></div>
+                    <div class="field" style="max-width:220px"><label>Alignement</label>
+                      <select [ngModel]="hfVal('header','align')" (ngModelChange)="setHf('header','align',$event)">
+                        <option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option>
+                      </select></div>
+                  } @else { <p class="muted" style="margin:0">L'en-tête sera vide (aucun en-tête sur le document).</p> }
+                } @else { <p class="muted" style="margin:0">L'en-tête du modèle de base est utilisé.</p> }
+              </div>
+
+              <div class="card stack">
+                <h3>Pied de page</h3>
+                <label class="chk"><input type="checkbox" [ngModel]="hfConfigured('footer')" (ngModelChange)="toggleHf('footer', $event)" /> Personnaliser le pied de page du modèle</label>
+                @if (hfConfigured('footer')) {
+                  <label class="chk"><input type="checkbox" [ngModel]="hfVal('footer','enabled')" (ngModelChange)="setHf('footer','enabled',$event)" /> Pied de page actif</label>
+                  @if (hfVal('footer','enabled')) {
+                    <div class="field"><label>Texte du pied de page (une ligne par retour à la ligne, variables {{ '{{' }}…{{ '}}' }})</label>
+                      <textarea rows="2" [ngModel]="hfVal('footer','text')" (ngModelChange)="setHf('footer','text',$event)"></textarea></div>
+                    <div class="field" style="max-width:220px"><label>Alignement</label>
+                      <select [ngModel]="hfVal('footer','align')" (ngModelChange)="setHf('footer','align',$event)">
+                        <option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option>
+                      </select></div>
+                  } @else { <p class="muted" style="margin:0">Le pied de page sera vide (aucun pied sur le document).</p> }
+                } @else { <p class="muted" style="margin:0">Le pied de page du modèle de base est utilisé.</p> }
+              </div>
+            </div>
+          </mat-tab>
+        }
+
         <!-- ===================== STRUCTURE & STYLES (Word / PDF) ===================== -->
         @if (hasStructure()) {
           <mat-tab label="Structure & styles">
@@ -631,6 +671,8 @@ export class TemplateBuilder {
   /** Onglet Structure & styles (mise en page libre + styles). */
   hasStructure = computed(() => this.isWord() || this.isPdf());
   hasTableColor = computed(() => this.isWord() || this.isPdf() || this.isExcel());
+  /** En-tête / pied de page configurables : Word, PDF et Lettre. */
+  hasHeaderFooter = computed(() => this.isWord() || this.isPdf() || this.model()?.doc_type === 'lettre');
   /** Onglet « Éléments dynamiques » : calques libres PDF / PPTX. */
   hasOverlays = computed(() => this.isPdf() || this.isPptx());
   overlayNoun = computed(() => (this.isPptx() ? 'diapositives' : 'pages'));
@@ -696,6 +738,32 @@ export class TemplateBuilder {
     }
     m.languages = list;
   }
+  // --- En-tête / pied de page configurables (Word, PDF, Lettre) ---
+  hfConfigured(kind: 'header' | 'footer'): boolean {
+    return !!(this.settings() as TemplateSettings)[kind];
+  }
+  toggleHf(kind: 'header' | 'footer', on: boolean) {
+    const m = this.model(); if (!m) return;
+    if (!m.settings) m.settings = {};
+    if (on) {
+      m.settings[kind] = { enabled: true, text: '', align: kind === 'footer' ? 'center' : 'left',
+        show_logo: kind === 'header' };
+    } else {
+      delete m.settings[kind];
+    }
+  }
+  hfVal(kind: 'header' | 'footer', key: 'enabled' | 'text' | 'align' | 'show_logo') {
+    const o = (this.settings() as TemplateSettings)[kind] as Record<string, unknown> | undefined;
+    if (!o) return key === 'enabled' ? true : (key === 'align' ? (kind === 'footer' ? 'center' : 'left') : '');
+    return key === 'enabled' ? o['enabled'] !== false : (o[key] ?? '');
+  }
+  setHf(kind: 'header' | 'footer', key: string, val: unknown) {
+    const m = this.model(); if (!m) return;
+    if (!m.settings) m.settings = {};
+    if (!m.settings[kind]) m.settings[kind] = { enabled: true };
+    (m.settings[kind] as Record<string, unknown>)[key] = val;
+  }
+
   nameFor(m: DocumentTemplate, code: string) { return (m.names ?? {})[code] ?? ''; }
   setName(m: DocumentTemplate, code: string, value: string) {
     m.names = { ...(m.names ?? {}) };

@@ -11,7 +11,7 @@ from reportlab.platypus import (
     Spacer, Table, TableStyle,
 )
 
-from .base import GenerationContext, resolve_value
+from .base import GenerationContext, placeholder_context, interpolate, resolve_value
 
 PRIMARY = colors.HexColor("#2563EB")
 DARK = colors.HexColor("#1E293B")
@@ -63,24 +63,34 @@ class _DocTemplate(BaseDocTemplate):
     def _decorate(self, canvas, doc):
         ctx = self.ctx
         w, h = A4
+        cfg = (ctx.document.template.settings or {})
+        header_cfg = cfg.get("header")
+        footer_cfg = cfg.get("footer")
+        pctx = placeholder_context(ctx)
         canvas.saveState()
 
         # --- En-tête ---
-        canvas.setFillColor(PRIMARY)
-        canvas.rect(0, h - 1.4 * cm, w, 1.4 * cm, fill=1, stroke=0)
-        canvas.setFillColor(colors.white)
-        canvas.setFont("Helvetica-Bold", 12)
-        canvas.drawString(2 * cm, h - 0.95 * cm, ctx.company.name or "Entreprise")
+        header_on = header_cfg is None or header_cfg.get("enabled", True)
+        if header_on:
+            canvas.setFillColor(PRIMARY)
+            canvas.rect(0, h - 1.4 * cm, w, 1.4 * cm, fill=1, stroke=0)
+            canvas.setFillColor(colors.white)
+            canvas.setFont("Helvetica-Bold", 12)
+            htext = (interpolate(header_cfg.get("text", "") or "", pctx)
+                     if header_cfg else "") or (ctx.company.name or "Entreprise")
+            canvas.drawString(2 * cm, h - 0.95 * cm, htext.split("\n")[0])
 
+        # Badge de confidentialité (indépendant de l'en-tête)
         conf_color = CONF_COLORS.get(ctx.confidentiality, MUTED)
         label = ctx.confidentiality_label.upper()
-        canvas.setFillColor(conf_color)
-        badge_w = 3.8 * cm
-        canvas.roundRect(w - 2 * cm - badge_w, h - 1.15 * cm, badge_w,
-                         0.65 * cm, 3, fill=1, stroke=0)
-        canvas.setFillColor(colors.white)
-        canvas.setFont("Helvetica-Bold", 7)
-        canvas.drawCentredString(w - 2 * cm - badge_w / 2, h - 0.72 * cm, label)
+        if header_on:
+            canvas.setFillColor(conf_color)
+            badge_w = 3.8 * cm
+            canvas.roundRect(w - 2 * cm - badge_w, h - 1.15 * cm, badge_w,
+                             0.65 * cm, 3, fill=1, stroke=0)
+            canvas.setFillColor(colors.white)
+            canvas.setFont("Helvetica-Bold", 7)
+            canvas.drawCentredString(w - 2 * cm - badge_w / 2, h - 0.72 * cm, label)
 
         # --- Filigrane pour les niveaux élevés ---
         if ctx.confidentiality in ("confidential", "restricted"):
@@ -93,21 +103,39 @@ class _DocTemplate(BaseDocTemplate):
             canvas.restoreState()
 
         # --- Pied de page ---
-        canvas.setStrokeColor(LIGHT)
-        canvas.line(2 * cm, 1.6 * cm, w - 2 * cm, 1.6 * cm)
-        canvas.setFont("Helvetica", 7)
-        canvas.setFillColor(MUTED)
-        footer = []
-        if ctx.company.website_url:
-            footer.append(ctx.company.website_url)
-        if ctx.company.email:
-            footer.append(ctx.company.email)
-        if ctx.company.phone:
-            footer.append(ctx.company.phone)
-        canvas.drawString(2 * cm, 1.1 * cm, "  |  ".join(footer))
-        canvas.drawRightString(
-            w - 2 * cm, 1.1 * cm,
-            f"v{ctx.version_number}  ·  Page {doc.page}")
+        if footer_cfg is None:
+            canvas.setStrokeColor(LIGHT)
+            canvas.line(2 * cm, 1.6 * cm, w - 2 * cm, 1.6 * cm)
+            canvas.setFont("Helvetica", 7)
+            canvas.setFillColor(MUTED)
+            footer = []
+            if ctx.company.website_url:
+                footer.append(ctx.company.website_url)
+            if ctx.company.email:
+                footer.append(ctx.company.email)
+            if ctx.company.phone:
+                footer.append(ctx.company.phone)
+            canvas.drawString(2 * cm, 1.1 * cm, "  |  ".join(footer))
+            canvas.drawRightString(
+                w - 2 * cm, 1.1 * cm,
+                f"v{ctx.version_number}  ·  Page {doc.page}")
+        elif footer_cfg.get("enabled", True):
+            canvas.setStrokeColor(LIGHT)
+            canvas.line(2 * cm, 1.6 * cm, w - 2 * cm, 1.6 * cm)
+            canvas.setFont("Helvetica", 7)
+            canvas.setFillColor(MUTED)
+            text = interpolate(footer_cfg.get("text", "") or "", pctx)
+            lines = [l for l in text.split("\n") if l.strip()]
+            align = footer_cfg.get("align", "center")
+            y = 1.1 * cm
+            for line in reversed(lines):
+                if align == "left":
+                    canvas.drawString(2 * cm, y, line)
+                elif align == "right":
+                    canvas.drawRightString(w - 2 * cm, y, line)
+                else:
+                    canvas.drawCentredString(w / 2, y, line)
+                y += 0.34 * cm
         canvas.restoreState()
 
 
