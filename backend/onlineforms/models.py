@@ -61,6 +61,9 @@ class FormTemplate(models.Model):
 
     name = models.CharField("Nom du modèle", max_length=255)
     description = models.TextField("Description", blank=True)
+    language = models.CharField("Langue", max_length=5, default="fr",
+                                choices=[("fr", "Français"), ("en", "English"),
+                                         ("de", "Deutsch"), ("it", "Italiano")])
     schema = models.JSONField("Champs", default=list, blank=True)
     diagrams = models.JSONField("Diagrammes", default=list, blank=True)
     confidentiality = models.CharField(

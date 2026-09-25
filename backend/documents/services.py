@@ -21,9 +21,13 @@ def a3_export_format(document) -> str:
 
 
 def output_meta(document):
-    """(ext, mime) du fichier produit, en tenant compte de l'export A3 PNG/PDF."""
-    if document.doc_type == "a3" and a3_export_format(document) == "png":
-        return file_meta("a3_png")
+    """(ext, mime) du fichier produit, en tenant compte de l'export A3 PDF/PNG/SVG."""
+    if document.doc_type == "a3":
+        fmt = a3_export_format(document)
+        if fmt == "png":
+            return file_meta("a3_png")
+        if fmt == "svg":
+            return file_meta("a3_svg")
     return file_meta(document.doc_type)
 
 
@@ -35,8 +39,11 @@ def render_content(document: Document, ctx) -> bytes:
     generator = None
     if document.doc_type == "a3":
         from .generators import a3_gen
-        if a3_export_format(document) == "png":
+        fmt = a3_export_format(document)
+        if fmt == "png":
             return a3_gen.render_png(ctx)
+        if fmt == "svg":
+            return a3_gen.render_svg(ctx)
         return a3_gen.render(ctx)
     if document.doc_type == "xlsx" and excel_cfg.get("sheets"):
         from .generators import excel_workbook
@@ -100,6 +107,11 @@ def preview_inline(document: Document):
     doc_type = document.doc_type
     if doc_type == "a3":
         from .generators import a3_gen
+        fmt = a3_export_format(document)
+        if fmt == "pdf":
+            return "pdf", "application/pdf", a3_gen.render(ctx)
+        if fmt == "svg":
+            return "image", "image/svg+xml", a3_gen.render_svg(ctx)
         return "image", "image/png", a3_gen.render_png(ctx)
     from .generators import html_preview
     html = html_preview.render(document, ctx)

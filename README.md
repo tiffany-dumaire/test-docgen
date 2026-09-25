@@ -340,6 +340,27 @@ docugen/
 
 ---
 
+## Outils d'analyse A3 · Export SVG · Multi-langue
+
+**8 outils d'analyse au format Template A3** (planches à positionnement libre,
+facilement modifiables), avec en-tête commun **logo · nom de l'outil · date ·
+projet** : Business Model Canvas, Value Proposition Canvas, Empathy Map, Persona,
+Customer Journey Map (paysage), Problem Statement (portrait, plusieurs par page),
+PESTEL (paysage) et Onion Diagram. Générés par `python manage.py seed_a3_tools`
+(également appelé par `seed_data --demo`).
+
+**Export PDF / PNG / SVG** pour les Template A3 : boutons d'export direct sur
+chaque modèle A3, et choix du format par défaut (PDF toutes pages / PNG / SVG
+vectoriel) dans l'éditeur. Nouvel élément **ellipse** dans l'éditeur de mise en
+page (cercles, diagrammes en oignon, cartes d'empathie…).
+
+**Modèles multi-langues (FR / EN / DE / IT).** Les modèles de documents et de
+formulaires portent une **langue** (sélecteur à la création), affichée en badge
+et **filtrable** dans la liste des modèles — on enregistre ainsi le même outil
+dans plusieurs langues et on le sélectionne par langue.
+
+---
+
 ## Aperçu in-app · Suivi de projet · Nouveaux types · Rapports de formulaire
 
 **Aperçu fiable, sans téléchargement.** L'aperçu des modèles et documents est

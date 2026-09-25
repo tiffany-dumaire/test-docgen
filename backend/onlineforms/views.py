@@ -25,7 +25,7 @@ class FormTemplateViewSet(viewsets.ModelViewSet):
     """Modèles de formulaire réutilisables (avec diagrammes)."""
     queryset = FormTemplate.objects.all().prefetch_related("projects")
     serializer_class = FormTemplateSerializer
-    filterset_fields = ["is_active", "scope"]
+    filterset_fields = ["is_active", "scope", "language"]
     search_fields = ["name", "description"]
 
     def get_queryset(self):

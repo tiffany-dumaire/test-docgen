@@ -651,4 +651,8 @@ class Command(BaseCommand):
             _ft.save(update_fields=["report_template"])
         self.stdout.write("Modèle de rapport statistiques créé et lié.")
 
+        # --- Outils d'analyse au format Template A3 ---
+        from django.core.management import call_command
+        call_command("seed_a3_tools")
+
         self.stdout.write(self.style.SUCCESS("Seed (démo) terminé."))

@@ -12,7 +12,8 @@ class FormTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormTemplate
         fields = [
-            "id", "name", "description", "schema", "diagrams", "report_template",
+            "id", "name", "description", "language", "schema", "diagrams",
+            "report_template",
             "confidentiality", "confidentiality_display", "success_message",
             "is_active", "scope", "projects", "form_count",
             "created_at", "updated_at",

@@ -54,6 +54,10 @@ export class DocumentService {
   previewTemplate(id: number): Observable<PreviewResult> {
     return this.http.get<PreviewResult>(`${this.base}/templates/${id}/preview/`);
   }
+  exportA3(id: number, fmt: 'pdf' | 'png' | 'svg'): Observable<Blob> {
+    return this.http.get(`${this.base}/templates/${id}/export_a3/?fmt=${fmt}&download=1`,
+      { responseType: 'blob' });
+  }
   restoreVersion(id: number, versionId: number, authorInitials: string): Observable<DocumentVersion> {
     return this.http.post<DocumentVersion>(`${this.base}/${id}/restore/`,
       { version: versionId, author_initials: authorInitials });

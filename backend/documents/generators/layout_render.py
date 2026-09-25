@@ -157,6 +157,18 @@ def draw_on_canvas(c, layout, ctx, page_w=A4_W, page_h=A4_H):
                 c.rect(x, ry, w, h, fill=fill, stroke=stroke)
             c.restoreState()
 
+        elif etype == "ellipse":
+            c.saveState()
+            fill = 1 if el.get("fill") else 0
+            sw = float(el.get("stroke_width", 0))
+            stroke = 1 if (el.get("stroke") and sw) else 0
+            if el.get("fill"):
+                c.setFillColor(_hex(el["fill"]))
+            if stroke:
+                c.setStrokeColor(_hex(el["stroke"])); c.setLineWidth(sw)
+            c.ellipse(x, ry, x + w, ry + h, fill=fill, stroke=stroke)
+            c.restoreState()
+
         elif etype == "line":
             c.saveState()
             c.setStrokeColor(_hex(el.get("color", "#000000")))
@@ -287,6 +299,13 @@ def render_png(layout, ctx, dpi=150):
             else:
                 d.rectangle(box, fill=fill, outline=outline, width=sw or 1)
 
+        elif etype == "ellipse":
+            fill = _rgb_pil(el["fill"]) if el.get("fill") else None
+            outline = _rgb_pil(el["stroke"]) if el.get("stroke") else None
+            sw = sx(el.get("stroke_width", 0)) or (2 if outline else 0)
+            d.ellipse([x, y, x + w, y + h], fill=fill, outline=outline,
+                      width=sw or 1)
+
         elif etype == "line":
             d.line([(x, y), (x + w, y)], fill=_rgb_pil(el.get("color", "#000000")),
                    width=sx(el.get("width", 1)) or 1)
@@ -326,6 +345,133 @@ def render_png(layout, ctx, dpi=150):
     buf = io.BytesIO()
     img.save(buf, "PNG")
     return buf.getvalue(), img.width, img.height
+
+
+def _svg_color(color, default="#000000"):
+    c = str(color or default)
+    if not c.startswith("#"):
+        c = "#" + c
+    return c
+
+
+def _wrap_text(text, font, max_w):
+    """Découpe le texte en lignes selon la largeur (mesure via PIL)."""
+    from PIL import ImageDraw, Image
+    d = ImageDraw.Draw(Image.new("RGB", (10, 10)))
+    lines = []
+    for raw in str(text).split("\n"):
+        words = raw.split()
+        if not words:
+            lines.append("")
+            continue
+        cur = ""
+        for word in words:
+            trial = (cur + " " + word).strip()
+            if d.textlength(trial, font=font) <= max_w or not cur:
+                cur = trial
+            else:
+                lines.append(cur); cur = word
+        lines.append(cur)
+    return lines
+
+
+def render_svg(layout, ctx) -> bytes:
+    """Rend une mise en page libre en SVG (portable, vectoriel, éditable)."""
+    import base64 as _b64
+    import html as _html
+    pctx = placeholder_context(ctx)
+    pw, ph = page_dims(layout)
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" '
+        f'xmlns:xlink="http://www.w3.org/1999/xlink" '
+        f'width="{pw:.0f}pt" height="{ph:.0f}pt" viewBox="0 0 {pw:.2f} {ph:.2f}" '
+        f'font-family="Inter, Roboto, Segoe UI, sans-serif">'
+    ]
+    bg = layout.get("background") or "#FFFFFF"
+    parts.append(f'<rect x="0" y="0" width="{pw:.2f}" height="{ph:.2f}" '
+                 f'fill="{_svg_color(bg, "#FFFFFF")}"/>')
+
+    fam = {"title": "Montserrat, sans-serif", "heading": "Montserrat, sans-serif",
+           "subtitle": "Montserrat, sans-serif", "body": "Roboto, sans-serif",
+           "light": "Montserrat, sans-serif"}
+
+    for el in layout.get("elements", []):
+        etype = el.get("type", "text")
+        x = float(el.get("x", 0)); y = float(el.get("y", 0))
+        w = float(el.get("w", 100)); h = float(el.get("h", 20))
+        if etype == "rect":
+            rx = float(el.get("radius", 0) or 0)
+            fill = _svg_color(el["fill"]) if el.get("fill") else "none"
+            stroke = _svg_color(el["stroke"]) if el.get("stroke") else "none"
+            sw = float(el.get("stroke_width", 0) or 0)
+            parts.append(f'<rect x="{x:.2f}" y="{y:.2f}" width="{w:.2f}" height="{h:.2f}" '
+                         f'rx="{rx:.2f}" fill="{fill}" stroke="{stroke}" stroke-width="{sw:.2f}"/>')
+        elif etype == "ellipse":
+            fill = _svg_color(el["fill"]) if el.get("fill") else "none"
+            stroke = _svg_color(el["stroke"]) if el.get("stroke") else "none"
+            sw = float(el.get("stroke_width", 0) or 0)
+            parts.append(f'<ellipse cx="{x + w/2:.2f}" cy="{y + h/2:.2f}" '
+                         f'rx="{w/2:.2f}" ry="{h/2:.2f}" fill="{fill}" '
+                         f'stroke="{stroke}" stroke-width="{sw:.2f}"/>')
+        elif etype == "line":
+            parts.append(f'<line x1="{x:.2f}" y1="{y:.2f}" x2="{x + w:.2f}" y2="{y:.2f}" '
+                         f'stroke="{_svg_color(el.get("color", "#000000"))}" '
+                         f'stroke-width="{float(el.get("width", 1)):.2f}"/>')
+        elif etype in ("image", "logo"):
+            data = None
+            if etype == "logo":
+                p = _logo_path(ctx)
+                if p:
+                    try:
+                        with open(p, "rb") as f:
+                            data = ("image/png", f.read())
+                    except Exception:
+                        data = None
+            else:
+                url = el.get("asset_url") or ""
+                if url.startswith("data:"):
+                    try:
+                        head, b64 = url.split(",", 1)
+                        mime = head.split(";")[0].replace("data:", "") or "image/png"
+                        data = (mime, _b64.b64decode(b64))
+                    except Exception:
+                        data = None
+                else:
+                    p = _resolve_asset(url)
+                    if p:
+                        try:
+                            with open(p, "rb") as f:
+                                data = ("image/png", f.read())
+                        except Exception:
+                            data = None
+            if data:
+                mime, raw = data
+                href = f"data:{mime};base64," + _b64.b64encode(raw).decode("ascii")
+                parts.append(f'<image x="{x:.2f}" y="{y:.2f}" width="{w:.2f}" height="{h:.2f}" '
+                             f'preserveAspectRatio="xMidYMid meet" xlink:href="{href}"/>')
+        else:  # text
+            text = interpolate(el.get("text", ""), pctx)
+            size = float(el.get("size", 14))
+            color = _svg_color(el.get("color", "#000000"))
+            align = el.get("align", "left")
+            weight = "700" if el.get("bold") else "400"
+            style = "italic" if el.get("italic") else "normal"
+            font = _lay_font(el.get("font", "body"), el.get("bold"), max(6, int(size)))
+            lines = _wrap_text(text, font, w)
+            anchor = {"center": "middle", "right": "end"}.get(align, "start")
+            tx = x + (w / 2 if align == "center" else (w if align == "right" else 0))
+            lh = size * 1.25
+            ty = y + size
+            spans = []
+            for i, ln in enumerate(lines):
+                spans.append(f'<tspan x="{tx:.2f}" dy="{0 if i == 0 else lh:.2f}">'
+                             f'{_html.escape(ln)}</tspan>')
+            parts.append(f'<text x="{tx:.2f}" y="{ty:.2f}" font-size="{size:.1f}" '
+                         f'fill="{color}" text-anchor="{anchor}" font-weight="{weight}" '
+                         f'font-style="{style}" font-family="{fam.get(el.get("font","body"), "Roboto, sans-serif")}">'
+                         + "".join(spans) + '</text>')
+    parts.append("</svg>")
+    return "\n".join(parts).encode("utf-8")
 
 
 def has_layout(ctx, key):

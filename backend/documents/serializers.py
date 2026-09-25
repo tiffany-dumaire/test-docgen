@@ -13,7 +13,7 @@ class DocumentTemplateSerializer(serializers.ModelSerializer):
         fields = [
             "id", "name", "slug", "description", "doc_type", "doc_type_display",
             "builder_key", "is_block_based", "schema", "settings", "is_active",
-            "is_system", "scope", "projects", "created_at", "updated_at",
+            "is_system", "scope", "projects", "language", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "is_system", "created_at", "updated_at"]
 

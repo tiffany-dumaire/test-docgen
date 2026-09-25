@@ -18,6 +18,7 @@ import {
   DocType,
   DocumentTemplate,
   ExcelSheet,
+  LANGUAGES,
   Project,
   StyleMap,
   TemplateSettings,
@@ -78,9 +79,17 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
                   @if (!isEdit()) { <small class="muted">Le type détermine les onglets de configuration.</small> }
                 </div>
               </div>
-              <div class="field">
-                <label>Description</label>
-                <input [(ngModel)]="m.description" placeholder="À quoi sert ce modèle ?" />
+              <div class="form-grid">
+                <div class="field">
+                  <label>Description</label>
+                  <input [(ngModel)]="m.description" placeholder="À quoi sert ce modèle ?" />
+                </div>
+                <div class="field">
+                  <label>Langue</label>
+                  <select [(ngModel)]="m.language">
+                    @for (l of languages; track l.value) { <option [value]="l.value">{{ l.flag }} {{ l.label }}</option> }
+                  </select>
+                </div>
               </div>
 
               @if (hasTableColor()) {
@@ -357,6 +366,7 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
                 <div class="row" style="gap:1.5rem; align-items:center">
                   <label class="chk"><input type="radio" name="a3exp" value="pdf" [(ngModel)]="settings().a3_export" /> PDF (toutes les pages)</label>
                   <label class="chk"><input type="radio" name="a3exp" value="png" [(ngModel)]="settings().a3_export" /> PNG (image de la 1ʳᵉ page)</label>
+                  <label class="chk"><input type="radio" name="a3exp" value="svg" [(ngModel)]="settings().a3_export" /> SVG (vectoriel, 1ʳᵉ page)</label>
                 </div>
               </div>
 
@@ -485,6 +495,7 @@ export class TemplateBuilder {
 
   model = signal<DocumentTemplate | null>(null);
   docTypes = signal<Choice[]>([]);
+  languages = LANGUAGES;
   saving = signal(false);
   activeA3 = signal<string>('');
   private counter = 0;
@@ -593,7 +604,7 @@ export class TemplateBuilder {
         });
       } else {
         this.model.set({
-          name: '', slug: '', description: '', doc_type: 'docx',
+          name: '', slug: '', description: '', doc_type: 'docx', language: 'fr',
           builder_key: 'custom', is_block_based: true, schema: [],
           settings: this.defaultSettings(), is_active: true,
           scope: 'global', projects: [],

@@ -65,3 +65,11 @@ def render_png(ctx) -> bytes:
     """PNG de la première page (pour l'aperçu)."""
     pngs = render_pngs(ctx)
     return pngs[0][0] if pngs else b""
+
+
+def render_svg(ctx) -> bytes:
+    """SVG de la première page (vectoriel, éditable)."""
+    pages = _pages(ctx)
+    if not pages:
+        return b"<svg xmlns='http://www.w3.org/2000/svg'/>"
+    return LR.render_svg(pages[0]["layout"], ctx)

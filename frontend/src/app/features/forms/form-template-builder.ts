@@ -11,6 +11,7 @@ import {
   FormDiagram,
   FormField,
   FormTemplate,
+  LANGUAGES,
   Project,
 } from '../../core/models';
 
@@ -68,6 +69,12 @@ const VARIANTS: { value: string; label: string }[] = [
               <div class="field">
                 <label>Message de confirmation</label>
                 <input [(ngModel)]="m.success_message" />
+              </div>
+              <div class="field">
+                <label>Langue</label>
+                <select [(ngModel)]="m.language">
+                  @for (l of languages; track l.value) { <option [value]="l.value">{{ l.flag }} {{ l.label }}</option> }
+                </select>
               </div>
               <div class="field">
                 <label>Modèle de rapport (Word / PDF)</label>
@@ -256,6 +263,7 @@ export class FormTemplateBuilder {
   projects = signal<Project[]>([]);
   confidentialityLevels = signal<Choice[]>([]);
   reportTemplates = signal<{ id?: number; name: string; doc_type: string }[]>([]);
+  languages = LANGUAGES;
   saving = signal(false);
   variants = VARIANTS;
 
@@ -275,6 +283,7 @@ export class FormTemplateBuilder {
       } else {
         this.model.set({
           name: '', description: '', schema: [], diagrams: [],
+          language: 'fr',
           confidentiality: 'internal', success_message: 'Merci, votre réponse a bien été enregistrée.',
           is_active: true, scope: 'global', projects: [],
         });

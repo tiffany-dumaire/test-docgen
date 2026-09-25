@@ -22,6 +22,13 @@ class DocumentType(models.TextChoices):
     MAIL = "mail", "Mail"
 
 
+class TemplateLanguage(models.TextChoices):
+    FR = "fr", "Français"
+    EN = "en", "English"
+    DE = "de", "Deutsch"
+    IT = "it", "Italiano"
+
+
 class DocumentTemplate(models.Model):
     """
     Modèle de document. Définit :
@@ -51,6 +58,9 @@ class DocumentTemplate(models.Model):
         "Schéma / Blocs", default=list, blank=True,
         help_text="Liste de blocs (modèle visuel) ou de variables (JSON).",
     )
+    language = models.CharField(
+        "Langue", max_length=5, choices=TemplateLanguage.choices,
+        default=TemplateLanguage.FR)
     is_active = models.BooleanField("Actif", default=True)
     is_system = models.BooleanField(
         "Modèle système", default=False,

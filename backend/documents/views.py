@@ -14,7 +14,7 @@ from .services import generate_version
 class DocumentTemplateViewSet(viewsets.ModelViewSet):
     queryset = DocumentTemplate.objects.all()
     serializer_class = DocumentTemplateSerializer
-    filterset_fields = ["doc_type", "is_active", "is_system"]
+    filterset_fields = ["doc_type", "is_active", "is_system", "language"]
     search_fields = ["name", "slug", "description"]
 
     def get_queryset(self):
@@ -59,6 +59,40 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
         except Exception as exc:
             return Response({"detail": f"Aperçu impossible : {exc}"},
                             status=status.HTTP_400_BAD_REQUEST)
+        finally:
+            tmp.delete()
+
+    @action(detail=True, methods=["get"])
+    def export_a3(self, request, pk=None):
+        """Exporte un Template A3 dans le format demandé (?fmt=pdf|png|svg)."""
+        from django.http import HttpResponse
+        from projects.models import Project
+        from .models import Document, ConfidentialityLevel
+        from .generators import a3_gen
+        from .generators.base import GenerationContext
+        template = self.get_object()
+        if template.doc_type != "a3":
+            return Response({"detail": "Modèle non A3."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        fmt = (request.query_params.get("fmt") or "pdf").lower()
+        project = Project.objects.first()
+        tmp = Document.objects.create(
+            project=project, template=template, title=template.name,
+            confidentiality=ConfidentialityLevel.INTERNAL, data={})
+        try:
+            ctx = GenerationContext.build(
+                tmp, version_number=1, data={}, author_initials="—")
+            if fmt == "png":
+                content, mime, ext = a3_gen.render_png(ctx), "image/png", "png"
+            elif fmt == "svg":
+                content, mime, ext = a3_gen.render_svg(ctx), "image/svg+xml", "svg"
+            else:
+                content, mime, ext = a3_gen.render(ctx), "application/pdf", "pdf"
+            resp = HttpResponse(content, content_type=mime)
+            disp = "attachment" if request.query_params.get("download") else "inline"
+            name = (template.slug or "template") + "." + ext
+            resp["Content-Disposition"] = f'{disp}; filename="{name}"'
+            return resp
         finally:
             tmp.delete()
 

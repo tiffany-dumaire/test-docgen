@@ -2,7 +2,7 @@ import { Component, Input, signal, computed, HostListener } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { TemplateSettings } from '../../core/models';
 
-type LType = 'text' | 'image' | 'logo' | 'rect' | 'line';
+type LType = 'text' | 'image' | 'logo' | 'rect' | 'ellipse' | 'line';
 interface LEl {
   id: string; type: LType; x: number; y: number; w: number; h: number;
   text?: string; font?: string; size?: number; bold?: boolean; italic?: boolean;
@@ -52,6 +52,7 @@ const DISP_W = 460;
               <button (click)="add('image')">Image</button>
               <button (click)="add('logo')">Logo</button>
               <button (click)="add('rect')">Rectangle</button>
+              <button (click)="add('ellipse')">Ellipse</button>
               <button (click)="add('line')">Ligne</button>
             </div>
             <div class="canvas" [style.width.px]="dispW" [style.height.px]="dispH"
@@ -64,6 +65,7 @@ const DISP_W = 460;
                      (pointerdown)="startDrag($event, el)">
                   @switch (el.type) {
                     @case ('rect') { <div class="fillbox" [style.background]="el.fill || '#1F497D'" [style.borderRadius.px]="(el.radius||0)*scale"></div> }
+                    @case ('ellipse') { <div class="fillbox" [style.background]="el.fill || 'transparent'" [style.border]="'2px solid ' + (el.stroke || '#1F497D')" style="border-radius:50%"></div> }
                     @case ('line') { <div class="linebox" [style.background]="el.color || '#1F497D'"></div> }
                     @case ('image') { <div class="ph">🖼️ image</div> }
                     @case ('logo') { <div class="ph">🏢 logo</div> }
@@ -129,6 +131,15 @@ const DISP_W = 460;
                 <div class="g2">
                   <label>Remplissage <input type="color" [ngModel]="el.fill||'#1F497D'" (ngModelChange)="el.fill=$event" /></label>
                   <label>Coins <input type="number" [ngModel]="el.radius||0" (ngModelChange)="el.radius=+$event" /></label>
+                  <label>Bordure <input type="color" [ngModel]="el.stroke||'#1F497D'" (ngModelChange)="el.stroke=$event" /></label>
+                  <label>Épaisseur bord. <input type="number" [ngModel]="el.stroke_width||0" (ngModelChange)="el.stroke_width=+$event" /></label>
+                </div>
+              }
+              @if (el.type === 'ellipse') {
+                <div class="g2">
+                  <label>Remplissage <input type="color" [ngModel]="el.fill||'#ffffff'" (ngModelChange)="el.fill=$event" /></label>
+                  <label>Bordure <input type="color" [ngModel]="el.stroke||'#1F497D'" (ngModelChange)="el.stroke=$event" /></label>
+                  <label>Épaisseur bord. <input type="number" [ngModel]="el.stroke_width||2" (ngModelChange)="el.stroke_width=+$event" /></label>
                 </div>
               }
               @if (el.type === 'line') {
@@ -240,7 +251,7 @@ export class LayoutEditor {
   setBg(c: string) { this.layout().background = c; }
   round(n: number) { return Math.round(n); }
   typeLabel(t: LType) {
-    return { text: 'Texte', image: 'Image', logo: 'Logo', rect: 'Rectangle', line: 'Ligne' }[t];
+    return { text: 'Texte', image: 'Image', logo: 'Logo', rect: 'Rectangle', ellipse: 'Ellipse', line: 'Ligne' }[t];
   }
 
   add(type: LType) {
@@ -248,6 +259,7 @@ export class LayoutEditor {
     const base: LEl = { id, type, x: 60, y: 80, w: type === 'line' ? 200 : 300, h: type === 'line' ? 2 : 40 };
     if (type === 'text') Object.assign(base, { text: 'Nouveau texte', font: 'title', size: 24, color: '#1F497D', align: 'left', h: 40 });
     if (type === 'rect') Object.assign(base, { fill: '#1F497D', h: 120, w: 595, x: 0, y: 0 });
+    if (type === 'ellipse') Object.assign(base, { fill: '#ffffff', stroke: '#1F497D', stroke_width: 2, w: 200, h: 200 });
     if (type === 'line') Object.assign(base, { color: '#1F497D', width: 2 });
     if (type === 'logo') Object.assign(base, { w: 140, h: 70, fit: 'contain' });
     if (type === 'image') Object.assign(base, { w: 200, h: 120, fit: 'contain' });

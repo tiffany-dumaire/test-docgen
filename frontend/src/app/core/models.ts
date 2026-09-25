@@ -206,7 +206,7 @@ export interface Block {
 
 export interface LayoutElement {
   id: string;
-  type: 'text' | 'image' | 'logo' | 'rect' | 'line';
+  type: 'text' | 'image' | 'logo' | 'rect' | 'ellipse' | 'line';
   x: number; y: number; w: number; h: number;
   [k: string]: unknown;
 }
@@ -373,7 +373,16 @@ export interface DocumentTemplate {
   is_system?: boolean;
   scope?: 'global' | 'projects';
   projects?: number[];
+  language?: TemplateLanguage;
 }
+
+export type TemplateLanguage = 'fr' | 'en' | 'de' | 'it';
+export const LANGUAGES: { value: TemplateLanguage; label: string; flag: string }[] = [
+  { value: 'fr', label: 'Français', flag: '🇫🇷' },
+  { value: 'en', label: 'English', flag: '🇬🇧' },
+  { value: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { value: 'it', label: 'Italiano', flag: '🇮🇹' },
+];
 
 export type Confidentiality =
   | 'public'
@@ -467,6 +476,7 @@ export interface FormTemplate {
   schema: FormField[];
   diagrams: FormDiagram[];
   report_template?: number | null;
+  language?: TemplateLanguage;
   confidentiality: Confidentiality;
   confidentiality_display?: string;
   success_message: string;

@@ -6,7 +6,7 @@ import { FormService } from '../../core/services/form.service';
 import { ToastService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PreviewService } from '../../core/services/preview.service';
-import { Block, DocumentTemplate, FormTemplate } from '../../core/models';
+import { Block, DocumentTemplate, FormTemplate, LANGUAGES } from '../../core/models';
 
 interface TypeTab { key: string; label: string; icon: string; }
 
@@ -32,8 +32,15 @@ const TYPE_TABS: TypeTab[] = [
     </div>
     <p class="muted">
       La configuration des modèles est séparée par onglet selon leur type :
-      Word, PDF, Excel, Template A3 (PNG / PDF), Markdown, PowerPoint et Formulaires.
+      Word, PDF, Excel, Template A3 (PDF / PNG / SVG), Markdown, PowerPoint et Formulaires.
     </p>
+    <div class="row" style="gap:.5rem; align-items:center; margin-bottom:.4rem">
+      <span class="tag">Langue :</span>
+      <button class="lang-pill" [class.active]="lang() === 'all'" (click)="lang.set('all')">Toutes</button>
+      @for (l of languages; track l.value) {
+        <button class="lang-pill" [class.active]="lang() === l.value" (click)="lang.set(l.value)">{{ l.flag }} {{ l.label }}</button>
+      }
+    </div>
 
     <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
       @for (tab of typeTabs; track tab.key) {
@@ -45,7 +52,7 @@ const TYPE_TABS: TypeTab[] = [
                   <div class="card">
                     <div class="row between">
                       <strong>{{ t.name }}</strong>
-                      <span class="badge badge-type">{{ tab.label }}</span>
+                      <span class="badge badge-type">{{ langFlag(t.language) }} {{ tab.label }}</span>
                     </div>
                     <p class="muted" style="min-height:2.4em">{{ t.description }}</p>
                     <div class="tag">{{ summary(t) }}</div>
@@ -56,6 +63,11 @@ const TYPE_TABS: TypeTab[] = [
                         <span class="tag">modèle avancé</span>
                       }
                       <button class="btn btn-sm btn-ghost" (click)="preview(t)">👁 Aperçu</button>
+                      @if (t.doc_type === 'a3') {
+                        <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'pdf')">⬇ PDF</button>
+                        <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'png')">⬇ PNG</button>
+                        <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'svg')">⬇ SVG</button>
+                      }
                       <button class="btn btn-sm btn-ghost" (click)="duplicate(t)">⧉ Dupliquer</button>
                       @if (!t.is_system) {
                         @if (canManage()) { <button class="btn btn-sm btn-danger" (click)="remove(t)">Suppr.</button> }
@@ -77,7 +89,7 @@ const TYPE_TABS: TypeTab[] = [
       }
 
       <!-- ============ FORMULAIRES (modèles de formulaire) ============ -->
-      <mat-tab label="📋 Formulaires ({{ formTemplates().length }})">
+      <mat-tab label="📋 Formulaires ({{ filteredForms().length }})">
         <div class="tabpad">
           <div class="row between">
             <p class="muted" style="margin:0">
@@ -86,9 +98,9 @@ const TYPE_TABS: TypeTab[] = [
             </p>
             <a class="btn btn-sm btn-primary" routerLink="/form-templates/new">+ Nouveau modèle de formulaire</a>
           </div>
-          @if (formTemplates().length) {
+          @if (filteredForms().length) {
             <div class="grid-cards" style="margin-top:1rem">
-              @for (ft of formTemplates(); track ft.id) {
+              @for (ft of filteredForms(); track ft.id) {
                 <div class="card">
                   <div class="row between">
                     <strong>{{ ft.name }}</strong>
@@ -116,6 +128,8 @@ const TYPE_TABS: TypeTab[] = [
   styles: [`
     .detail-tabs { margin-top: .5rem; }
     .tabpad { padding-top: 1.2rem; }
+    .lang-pill { border:1px solid var(--border-strong); background:var(--surface); border-radius:999px; padding:.2rem .7rem; cursor:pointer; font-size:.8rem; font-weight:600; }
+    .lang-pill.active { background:var(--primary); color:#fff; border-color:var(--primary); }
   `],
 })
 export class TemplateList {
@@ -130,6 +144,8 @@ export class TemplateList {
   typeTabs = TYPE_TABS;
   templates = signal<DocumentTemplate[]>([]);
   formTemplates = signal<FormTemplate[]>([]);
+  languages = LANGUAGES;
+  lang = signal<string>('all');
 
   constructor() {
     this.reload();
@@ -141,7 +157,16 @@ export class TemplateList {
   }
 
   byType(key: string): DocumentTemplate[] {
-    return this.templates().filter((t) => t.doc_type === key);
+    const l = this.lang();
+    return this.templates().filter((t) => t.doc_type === key &&
+      (l === 'all' || (t.language || 'fr') === l));
+  }
+  langFlag(code?: string): string {
+    return LANGUAGES.find((l) => l.value === code)?.flag ?? '🇫🇷';
+  }
+  filteredForms(): FormTemplate[] {
+    const l = this.lang();
+    return this.formTemplates().filter((t) => l === 'all' || (t.language || 'fr') === l);
   }
 
   summary(t: DocumentTemplate): string {
@@ -155,6 +180,17 @@ export class TemplateList {
     this.service.previewTemplate(t.id!).subscribe({
       next: (r) => this.previewSvc.open(r, t.name),
       error: () => this.toast.error('Aperçu impossible.'),
+    });
+  }
+  exportA3(t: DocumentTemplate, fmt: 'pdf' | 'png' | 'svg') {
+    this.service.exportA3(t.id!, fmt).subscribe({
+      next: (blob) => {
+        const u = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = u; a.download = `${t.slug || 'template'}.${fmt}`;
+        a.click(); URL.revokeObjectURL(u);
+      },
+      error: () => this.toast.error('Export impossible.'),
     });
   }
   duplicate(t: DocumentTemplate) {

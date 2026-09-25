@@ -18,6 +18,7 @@ FILE_META = {
     "md": (".md", "text/markdown"),
     "a3": (".pdf", "application/pdf"),
     "a3_png": (".png", "image/png"),
+    "a3_svg": (".svg", "image/svg+xml"),
     "brochure": (".docx",
                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
     "lettre": (".docx",
