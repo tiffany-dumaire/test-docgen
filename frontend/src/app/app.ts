@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, effect } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -7,9 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslocoModule } from '@jsverse/transloco';
 import { ToastService } from './core/services/api.service';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
+import { LanguageService, Lang } from './core/services/language.service';
 
 interface NavItem { path: string; icon: string; label: string; }
 
@@ -18,7 +20,7 @@ interface NavItem { path: string; icon: string; label: string; }
   imports: [
     RouterOutlet, RouterLink, RouterLinkActive,
     MatSidenavModule, MatToolbarModule, MatListModule, MatIconModule,
-    MatButtonModule, MatMenuModule, MatTooltipModule,
+    MatButtonModule, MatMenuModule, MatTooltipModule, TranslocoModule,
   ],
   template: `
     @if (!showShell()) {
@@ -35,17 +37,17 @@ interface NavItem { path: string; icon: string; label: string; }
           <mat-nav-list>
             @for (n of nav; track n.path) {
               <a mat-list-item [routerLink]="n.path" routerLinkActive="active"
-                 [matTooltip]="collapsed() ? n.label : ''" matTooltipPosition="right">
+                 [matTooltip]="collapsed() ? (n.label | transloco) : ''" matTooltipPosition="right">
                 <mat-icon matListItemIcon>{{ n.icon }}</mat-icon>
-                @if (!collapsed()) { <span matListItemTitle>{{ n.label }}</span> }
+                @if (!collapsed()) { <span matListItemTitle>{{ n.label | transloco }}</span> }
               </a>
             }
             <div class="sep"></div>
             @for (n of navBottom; track n.path) {
               <a mat-list-item [routerLink]="n.path" routerLinkActive="active"
-                 [matTooltip]="collapsed() ? n.label : ''" matTooltipPosition="right">
+                 [matTooltip]="collapsed() ? (n.label | transloco) : ''" matTooltipPosition="right">
                 <mat-icon matListItemIcon>{{ n.icon }}</mat-icon>
-                @if (!collapsed()) { <span matListItemTitle>{{ n.label }}</span> }
+                @if (!collapsed()) { <span matListItemTitle>{{ n.label | transloco }}</span> }
               </a>
             }
           </mat-nav-list>
@@ -53,15 +55,28 @@ interface NavItem { path: string; icon: string; label: string; }
 
         <mat-sidenav-content class="main">
           <mat-toolbar class="topbar">
-            <button mat-icon-button (click)="collapsed.set(!collapsed())" matTooltip="Menu">
+            <button mat-icon-button (click)="collapsed.set(!collapsed())" [matTooltip]="'topbar.menu' | transloco">
               <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
             </button>
             <span class="grow"></span>
-            <button mat-icon-button [matMenuTriggerFor]="themeMenu" matTooltip="Thème">
+            <button mat-icon-button [matMenuTriggerFor]="langMenu" [matTooltip]="'topbar.language' | transloco">
+              <mat-icon>translate</mat-icon>
+            </button>
+            <mat-menu #langMenu="matMenu">
+              <div class="tm-head">{{ 'topbar.language' | transloco }}</div>
+              @for (l of lang.langs; track l.code) {
+                <button mat-menu-item (click)="setLang(l.code)">
+                  <span class="tm-dot" style="box-shadow:none">{{ l.flag }}</span>
+                  <span class="tm-name">{{ l.label }}</span>
+                  @if (lang.active() === l.code) { <mat-icon class="tm-check">check</mat-icon> }
+                </button>
+              }
+            </mat-menu>
+            <button mat-icon-button [matMenuTriggerFor]="themeMenu" [matTooltip]="'topbar.theme' | transloco">
               <mat-icon>palette</mat-icon>
             </button>
             <mat-menu #themeMenu="matMenu" class="theme-menu">
-              <div class="tm-head">Ambiance</div>
+              <div class="tm-head">{{ 'topbar.ambiance' | transloco }}</div>
               @for (p of theme.propositions; track p.id) {
                 <button mat-menu-item (click)="$event.stopPropagation(); theme.setProposition(p.id)">
                   <span class="tm-dot" [style.background]="p.primary"></span>
@@ -70,14 +85,14 @@ interface NavItem { path: string; icon: string; label: string; }
                   @if (theme.proposition() === p.id) { <mat-icon class="tm-check">check</mat-icon> }
                 </button>
               }
-              <div class="tm-head">Luminosité</div>
+              <div class="tm-head">{{ 'topbar.brightness' | transloco }}</div>
               <div class="tm-modes" (click)="$event.stopPropagation()">
-                <button [class.on]="theme.mode() === 'light'" (click)="theme.setMode('light')"><mat-icon>light_mode</mat-icon> Clair</button>
-                <button [class.on]="theme.mode() === 'dark'" (click)="theme.setMode('dark')"><mat-icon>dark_mode</mat-icon> Sombre</button>
-                <button [class.on]="theme.mode() === 'auto'" (click)="theme.setMode('auto')"><mat-icon>brightness_auto</mat-icon> Auto</button>
+                <button [class.on]="theme.mode() === 'light'" (click)="theme.setMode('light')"><mat-icon>light_mode</mat-icon> {{ 'theme.light' | transloco }}</button>
+                <button [class.on]="theme.mode() === 'dark'" (click)="theme.setMode('dark')"><mat-icon>dark_mode</mat-icon> {{ 'theme.dark' | transloco }}</button>
+                <button [class.on]="theme.mode() === 'auto'" (click)="theme.setMode('auto')"><mat-icon>brightness_auto</mat-icon> {{ 'theme.auto' | transloco }}</button>
               </div>
             </mat-menu>
-            <button mat-icon-button (click)="theme.toggleDark()" [matTooltip]="theme.resolvedDark() ? 'Mode clair' : 'Mode sombre'">
+            <button mat-icon-button (click)="theme.toggleDark()" [matTooltip]="(theme.resolvedDark() ? 'theme.light' : 'theme.dark') | transloco">
               <mat-icon>{{ theme.resolvedDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
             </button>
             @if (auth.user(); as u) {
@@ -91,8 +106,8 @@ interface NavItem { path: string; icon: string; label: string; }
                   <div class="mn">{{ u.full_name || u.email }}</div>
                   <div class="mr">{{ u.primary_app_role }}</div>
                 </div>
-                <a mat-menu-item routerLink="/preferences"><mat-icon>palette</mat-icon> Préférences</a>
-                <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> Se déconnecter</button>
+                <a mat-menu-item routerLink="/preferences"><mat-icon>palette</mat-icon> {{ 'user.preferences' | transloco }}</a>
+                <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> {{ 'user.logout' | transloco }}</button>
               </mat-menu>
             }
           </mat-toolbar>
@@ -162,20 +177,36 @@ export class App {
   toast = inject(ToastService);
   auth = inject(AuthService);
   theme = inject(ThemeService);
+  lang = inject(LanguageService);
   private router = inject(Router);
   collapsed = signal(false);
 
-  constructor() { this.theme.init(); }
+  constructor() {
+    this.theme.init();
+    // Applique la langue enregistrée dans le profil dès qu'il est chargé.
+    effect(() => {
+      const prefLang = this.auth.user()?.ui_prefs?.['lang'] as Lang | undefined;
+      if (prefLang && prefLang !== this.lang.active()) this.lang.set(prefLang, false);
+    });
+  }
 
+  setLang(code: Lang) {
+    this.lang.set(code);
+    if (this.auth.isAuthenticated()) {
+      this.auth.updatePrefs({ lang: code }).catch(() => { /* appliqué localement */ });
+    }
+  }
+
+  // Les libellés sont des clés i18n (pipe transloco).
   nav: NavItem[] = [
-    { path: '/dashboard', icon: 'dashboard', label: 'Tableau de bord' },
-    { path: '/projects', icon: 'folder', label: 'Projets' },
-    { path: '/suivi', icon: 'fact_check', label: 'Suivi général' },
-    { path: '/templates', icon: 'grid_view', label: 'Modèles' },
+    { path: '/dashboard', icon: 'dashboard', label: 'nav.dashboard' },
+    { path: '/projects', icon: 'folder', label: 'nav.projects' },
+    { path: '/suivi', icon: 'fact_check', label: 'nav.tracking' },
+    { path: '/templates', icon: 'grid_view', label: 'nav.templates' },
   ];
   navBottom: NavItem[] = [
-    { path: '/clients', icon: 'handshake', label: 'Clients' },
-    { path: '/company', icon: 'business', label: 'Mon entreprise' },
+    { path: '/clients', icon: 'handshake', label: 'nav.clients' },
+    { path: '/company', icon: 'business', label: 'nav.company' },
   ];
 
   isPublic(): boolean {
