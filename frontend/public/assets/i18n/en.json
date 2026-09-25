@@ -14,13 +14,25 @@
     "theme": "Theme",
     "ambiance": "Ambiance",
     "brightness": "Brightness",
-    "language": "Language"
+    "language": "Language",
+    "skip": "Skip to content"
   },
-  "theme": { "light": "Light", "dark": "Dark", "auto": "Auto" },
-  "user": { "preferences": "Preferences", "logout": "Sign out" },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "auto": "Auto"
+  },
+  "user": {
+    "preferences": "Preferences",
+    "logout": "Sign out"
+  },
   "common": {
-    "save": "Save", "cancel": "Cancel", "reset": "Reset",
-    "search": "Search", "edit": "Edit", "delete": "Delete"
+    "save": "Save",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "search": "Search",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "dash": {
     "subtitle": "Create projects, generate documents (PDF, Word, Excel, PowerPoint) and share online forms.",
@@ -38,7 +50,11 @@
     "col_status": "Status",
     "col_docs": "Docs",
     "empty": "No project yet. Create one to get started.",
-    "status": { "active": "Active", "on_hold": "On hold", "archived": "Archived" },
+    "status": {
+      "active": "Active",
+      "on_hold": "On hold",
+      "archived": "Archived"
+    },
     "confirm_delete": "Delete project \"{{name}}\" and its documents?",
     "deleted": "Project deleted."
   },

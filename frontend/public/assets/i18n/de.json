@@ -14,13 +14,25 @@
     "theme": "Design",
     "ambiance": "Stimmung",
     "brightness": "Helligkeit",
-    "language": "Sprache"
+    "language": "Sprache",
+    "skip": "Zum Inhalt springen"
   },
-  "theme": { "light": "Hell", "dark": "Dunkel", "auto": "Auto" },
-  "user": { "preferences": "Einstellungen", "logout": "Abmelden" },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "auto": "Auto"
+  },
+  "user": {
+    "preferences": "Einstellungen",
+    "logout": "Abmelden"
+  },
   "common": {
-    "save": "Speichern", "cancel": "Abbrechen", "reset": "Zurücksetzen",
-    "search": "Suchen", "edit": "Bearbeiten", "delete": "Löschen"
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "reset": "Zurücksetzen",
+    "search": "Suchen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen"
   },
   "dash": {
     "subtitle": "Erstellen Sie Projekte, generieren Sie Dokumente (PDF, Word, Excel, PowerPoint) und teilen Sie Online-Formulare.",
@@ -38,7 +50,11 @@
     "col_status": "Status",
     "col_docs": "Dok.",
     "empty": "Noch kein Projekt. Erstellen Sie eines, um zu beginnen.",
-    "status": { "active": "Aktiv", "on_hold": "Pausiert", "archived": "Archiviert" },
+    "status": {
+      "active": "Aktiv",
+      "on_hold": "Pausiert",
+      "archived": "Archiviert"
+    },
     "confirm_delete": "Projekt „{{name}}\" und seine Dokumente löschen?",
     "deleted": "Projekt gelöscht."
   },

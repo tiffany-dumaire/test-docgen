@@ -14,13 +14,25 @@
     "theme": "Tema",
     "ambiance": "Atmosfera",
     "brightness": "Luminosità",
-    "language": "Lingua"
+    "language": "Lingua",
+    "skip": "Vai al contenuto"
   },
-  "theme": { "light": "Chiaro", "dark": "Scuro", "auto": "Auto" },
-  "user": { "preferences": "Preferenze", "logout": "Esci" },
+  "theme": {
+    "light": "Chiaro",
+    "dark": "Scuro",
+    "auto": "Auto"
+  },
+  "user": {
+    "preferences": "Preferenze",
+    "logout": "Esci"
+  },
   "common": {
-    "save": "Salva", "cancel": "Annulla", "reset": "Reimposta",
-    "search": "Cerca", "edit": "Modifica", "delete": "Elimina"
+    "save": "Salva",
+    "cancel": "Annulla",
+    "reset": "Reimposta",
+    "search": "Cerca",
+    "edit": "Modifica",
+    "delete": "Elimina"
   },
   "dash": {
     "subtitle": "Crea progetti, genera documenti (PDF, Word, Excel, PowerPoint) e condividi moduli online.",
@@ -38,7 +50,11 @@
     "col_status": "Stato",
     "col_docs": "Doc.",
     "empty": "Nessun progetto. Creane uno per iniziare.",
-    "status": { "active": "Attivo", "on_hold": "In pausa", "archived": "Archiviato" },
+    "status": {
+      "active": "Attivo",
+      "on_hold": "In pausa",
+      "archived": "Archiviato"
+    },
     "confirm_delete": "Eliminare il progetto «{{name}}» e i suoi documenti?",
     "deleted": "Progetto eliminato."
   },

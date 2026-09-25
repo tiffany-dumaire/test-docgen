@@ -1,5 +1,7 @@
-import { Component, inject, signal, effect } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
+import { Component, inject, signal, effect, ViewChild, ElementRef } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet, Router,
+  NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -26,37 +28,40 @@ interface NavItem { path: string; icon: string; label: string; }
     @if (!showShell()) {
       <router-outlet />
     } @else {
+      <a class="skip-link" href="#main-content">{{ 'topbar.skip' | transloco }}</a>
       <mat-sidenav-container class="shell" autosize>
-        <mat-sidenav mode="side" opened [class.rail]="collapsed()" class="nav">
-          <div class="brand" [class.center]="collapsed()">
+        <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="isMobile() ? mobileOpen() : true"
+          (closedStart)="mobileOpen.set(false)" [class.rail]="collapsed() && !isMobile()" class="nav">
+          <div class="brand" [class.center]="collapsed() && !isMobile()">
             <span class="logo">📄</span>
-            @if (!collapsed()) {
+            @if (!rail()) {
               <div class="brandtext"><strong>DocuGen</strong><div class="tag">Documents</div></div>
             }
           </div>
           <mat-nav-list>
             @for (n of nav; track n.path) {
-              <a mat-list-item [routerLink]="n.path" routerLinkActive="active"
-                 [matTooltip]="collapsed() ? (n.label | transloco) : ''" matTooltipPosition="right">
+              <a mat-list-item [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()"
+                 [matTooltip]="rail() ? (n.label | transloco) : ''" matTooltipPosition="right">
                 <mat-icon matListItemIcon>{{ n.icon }}</mat-icon>
-                @if (!collapsed()) { <span matListItemTitle>{{ n.label | transloco }}</span> }
+                @if (!rail()) { <span matListItemTitle>{{ n.label | transloco }}</span> }
               </a>
             }
             <div class="sep"></div>
             @for (n of navBottom; track n.path) {
-              <a mat-list-item [routerLink]="n.path" routerLinkActive="active"
-                 [matTooltip]="collapsed() ? (n.label | transloco) : ''" matTooltipPosition="right">
+              <a mat-list-item [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()"
+                 [matTooltip]="rail() ? (n.label | transloco) : ''" matTooltipPosition="right">
                 <mat-icon matListItemIcon>{{ n.icon }}</mat-icon>
-                @if (!collapsed()) { <span matListItemTitle>{{ n.label | transloco }}</span> }
+                @if (!rail()) { <span matListItemTitle>{{ n.label | transloco }}</span> }
               </a>
             }
           </mat-nav-list>
         </mat-sidenav>
 
         <mat-sidenav-content class="main">
+          @if (navLoading()) { <div class="route-progress"><span></span></div> }
           <mat-toolbar class="topbar">
-            <button mat-icon-button (click)="collapsed.set(!collapsed())" [matTooltip]="'topbar.menu' | transloco">
-              <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
+            <button mat-icon-button (click)="toggleNav()" [matTooltip]="'topbar.menu' | transloco">
+              <mat-icon>{{ (isMobile() ? !mobileOpen() : collapsed()) ? 'menu' : 'menu_open' }}</mat-icon>
             </button>
             <span class="grow"></span>
             <button mat-icon-button [matMenuTriggerFor]="langMenu" [matTooltip]="'topbar.language' | transloco">
@@ -112,14 +117,17 @@ interface NavItem { path: string; icon: string; label: string; }
             }
           </mat-toolbar>
 
-          <div class="content"><router-outlet /></div>
+          <div class="content" id="main-content" #scrollContent><router-outlet /></div>
         </mat-sidenav-content>
       </mat-sidenav-container>
     }
 
     @if (toast.message(); as t) {
-      <div class="toast" [class.error]="t.kind === 'error'" [class.success]="t.kind === 'success'">
-        {{ t.text }}
+      <div class="toast" role="status" aria-live="polite"
+           [class.error]="t.kind === 'error'" [class.success]="t.kind === 'success'">
+        <mat-icon class="ti">{{ t.kind === 'error' ? 'error' : t.kind === 'success' ? 'check_circle' : 'info' }}</mat-icon>
+        <span class="tt">{{ t.text }}</span>
+        <button class="tc" (click)="toast.dismiss()" aria-label="Fermer"><mat-icon>close</mat-icon></button>
       </div>
     }
   `,
@@ -169,8 +177,26 @@ interface NavItem { path: string; icon: string; label: string; }
     .content { padding: 1.8rem 2.2rem; max-width: 1280px; }
     @media (max-width: 700px) { .content { padding: 1rem; } }
     .toast { position: fixed; bottom: 1.4rem; right: 1.4rem; z-index: 1000; background: #0f172a; color: #fff;
-      padding: .8rem 1.15rem; border-radius: 12px; box-shadow: 0 18px 44px rgba(0,0,0,.3); }
+      padding: .7rem .8rem .7rem 1rem; border-radius: 12px; box-shadow: 0 18px 44px rgba(0,0,0,.3);
+      display: flex; align-items: center; gap: .6rem; max-width: 420px; }
     .toast.error { background: #dc2626; } .toast.success { background: #16a34a; }
+    .toast .ti { font-size: 20px; width: 20px; height: 20px; flex: none; }
+    .toast .tt { flex: 1; line-height: 1.35; }
+    .toast .tc { background: transparent; border: none; color: inherit; opacity: .8; cursor: pointer;
+      display: grid; place-items: center; padding: 2px; border-radius: 6px; }
+    .toast .tc:hover { opacity: 1; background: rgba(255,255,255,.15); }
+    .toast .tc mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    /* Barre de progression de navigation (chargement de route / chunk) */
+    .route-progress { position: sticky; top: 0; left: 0; right: 0; height: 3px; z-index: 6;
+      background: color-mix(in srgb, var(--mat-sys-primary) 18%, transparent); overflow: hidden; }
+    .route-progress span { position: absolute; height: 100%; width: 40%;
+      background: var(--mat-sys-primary); border-radius: 3px; animation: route-slide 1.1s ease-in-out infinite; }
+    @keyframes route-slide { 0% { left: -40%; } 50% { left: 30%; } 100% { left: 100%; } }
+    /* Lien d'évitement (accessibilité clavier) */
+    .skip-link { position: fixed; left: 12px; top: -60px; z-index: 2000;
+      background: var(--mat-sys-primary); color: var(--mat-sys-on-primary);
+      padding: .55rem 1rem; border-radius: 8px; font-weight: 700; transition: top .18s ease; }
+    .skip-link:focus { top: 12px; text-decoration: none; }
   `],
 })
 export class App {
@@ -179,10 +205,40 @@ export class App {
   theme = inject(ThemeService);
   lang = inject(LanguageService);
   private router = inject(Router);
+  private breakpoints = inject(BreakpointObserver);
   collapsed = signal(false);
+  isMobile = signal(false);
+  mobileOpen = signal(false);
+  navLoading = signal(false);
+
+  @ViewChild('scrollContent') private scrollContent?: ElementRef<HTMLElement>;
+
+  rail() { return this.collapsed() && !this.isMobile(); }
+  toggleNav() {
+    if (this.isMobile()) this.mobileOpen.set(!this.mobileOpen());
+    else this.collapsed.set(!this.collapsed());
+  }
+  onNavClick() { if (this.isMobile()) this.mobileOpen.set(false); }
 
   constructor() {
     this.theme.init();
+    this.breakpoints.observe('(max-width: 768px)').subscribe((r) => this.isMobile.set(r.matches));
+    // Barre de progression + remontée en haut + fermeture du menu mobile à chaque navigation.
+    this.router.events.subscribe((e) => {
+      if (e instanceof NavigationStart) this.navLoading.set(true);
+      else if (e instanceof NavigationEnd || e instanceof NavigationCancel || e instanceof NavigationError) {
+        this.navLoading.set(false);
+        if (e instanceof NavigationEnd) {
+          if (this.isMobile()) this.mobileOpen.set(false);
+          queueMicrotask(() => {
+            // Le conteneur défilant est .mat-drawer-content ; repli sur la fenêtre.
+            const scroller = document.querySelector('.mat-drawer-content') as HTMLElement | null;
+            (scroller ?? this.scrollContent?.nativeElement)?.scrollTo({ top: 0 });
+            window.scrollTo({ top: 0 });
+          });
+        }
+      }
+    });
     // Applique la langue enregistrée dans le profil dès qu'il est chargé.
     effect(() => {
       const prefLang = this.auth.user()?.ui_prefs?.['lang'] as Lang | undefined;

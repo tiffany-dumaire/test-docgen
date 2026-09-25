@@ -14,13 +14,25 @@
     "theme": "Thème",
     "ambiance": "Ambiance",
     "brightness": "Luminosité",
-    "language": "Langue"
+    "language": "Langue",
+    "skip": "Aller au contenu"
   },
-  "theme": { "light": "Clair", "dark": "Sombre", "auto": "Auto" },
-  "user": { "preferences": "Préférences", "logout": "Se déconnecter" },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "auto": "Auto"
+  },
+  "user": {
+    "preferences": "Préférences",
+    "logout": "Se déconnecter"
+  },
   "common": {
-    "save": "Enregistrer", "cancel": "Annuler", "reset": "Réinitialiser",
-    "search": "Rechercher", "edit": "Éditer", "delete": "Supprimer"
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "reset": "Réinitialiser",
+    "search": "Rechercher",
+    "edit": "Éditer",
+    "delete": "Supprimer"
   },
   "dash": {
     "subtitle": "Créez des projets, générez des documents (PDF, Word, Excel, PowerPoint) et partagez des formulaires en ligne.",
@@ -38,7 +50,11 @@
     "col_status": "Statut",
     "col_docs": "Docs",
     "empty": "Aucun projet. Créez-en un pour commencer.",
-    "status": { "active": "Actif", "on_hold": "En pause", "archived": "Archivé" },
+    "status": {
+      "active": "Actif",
+      "on_hold": "En pause",
+      "archived": "Archivé"
+    },
     "confirm_delete": "Supprimer le projet « {{name}} » et ses documents ?",
     "deleted": "Projet supprimé."
   },
