@@ -147,7 +147,7 @@ LETTRE = {
     "name": "Lettre",
     "names": {"fr": "Lettre", "en": "Letter", "de": "Brief", "it": "Lettera"},
     "language": "fr", "languages": ["fr", "en", "de", "it"],
-    "doc_type": "docx", "builder_key": "custom", "is_block_based": True,
+    "doc_type": "lettre", "builder_key": "custom", "is_block_based": True,
     "description": "Courrier standard : lieu et date, objet, corps et signature.",
     "schema": [
         {"id": "le_date", "type": "text", "text": "La Chaux-de-Fonds, le {{today}}"},
@@ -171,7 +171,7 @@ LETTRE_CONTRAT = {
     "names": {"fr": "Lettre — envoi de contrat", "en": "Letter — contract delivery",
               "de": "Brief — Vertragsversand", "it": "Lettera — invio contratto"},
     "language": "fr", "languages": ["fr", "en", "de", "it"],
-    "doc_type": "docx", "builder_key": "custom", "is_block_based": True,
+    "doc_type": "lettre", "builder_key": "custom", "is_block_based": True,
     "description": "Courrier d'accompagnement pour l'envoi d'un contrat : objet, "
                    "corps, liste des documents joints et signature.",
     "schema": [
