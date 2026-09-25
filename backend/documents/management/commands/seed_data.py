@@ -305,6 +305,23 @@ class Command(BaseCommand):
                     defaults={"url": url, "category": cat})
             self.stdout.write("Profil entreprise initialisé.")
 
+        # --- Logo (officiel VNV) : rattaché si absent ---
+        if not company.logo:
+            import shutil
+            from pathlib import Path
+
+            from django.conf import settings as dj_settings
+            src = (Path(dj_settings.BASE_DIR) / "documents" / "assets"
+                   / "brand" / "vnv_logo.png")
+            if src.exists():
+                rel = "company/vnv_logo.png"
+                dest = Path(dj_settings.MEDIA_ROOT) / rel
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(src, dest)
+                company.logo = rel
+                company.save(update_fields=["logo"])
+                self.stdout.write("Logo entreprise initialisé.")
+
         # --- Thèmes globaux par type (charte VNV, déduits des modèles actuels) ---
         # global = base commune ; types = surcharges par type de document (docx,
         # pdf, pptx, xlsx, md, a3), appliquées à tous les modèles de ce type.
