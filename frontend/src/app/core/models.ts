@@ -263,6 +263,8 @@ export interface TemplateSettings {
   // En-tête / pied de page configurables (Word, PDF, Lettre)
   header?: HeaderFooter;
   footer?: HeaderFooter;
+  /** Contenu spécifique par langue (schéma + réglages), pour TOUS les types. */
+  content_i18n?: Record<string, { schema?: Block[] | SchemaField[]; settings?: Partial<TemplateSettings> }>;
 }
 
 export interface HeaderFooter {

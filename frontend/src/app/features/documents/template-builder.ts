@@ -63,6 +63,18 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
         </div>
       </div>
 
+      @if (isBlocks() && availableLangs(m).length > 1) {
+        <div class="content-lang">
+          <span class="tag">Contenu édité en :</span>
+          @for (l of availableLangs(m); track l) {
+            <button class="lang-pill" [class.active]="contentLang() === l" (click)="switchContentLang(l)">
+              {{ flagOf(l) }} {{ labelOf(l) }}@if (l === (m.language || 'fr')) { <em> (base)</em> }
+            </button>
+          }
+          <span class="muted" style="font-size:.78rem">Chaque langue peut avoir son propre contenu (blocs), pas seulement les textes.</span>
+        </div>
+      }
+
       <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
         <!-- ===================== GÉNÉRAL ===================== -->
         <mat-tab label="Général">
@@ -598,6 +610,10 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
       .type-banner { display:flex; gap:.8rem; align-items:center; border:1px solid var(--border); border-radius:12px; padding:.7rem .9rem; margin:.6rem 0; background:var(--primary-light); }
       .type-banner .tb-icon { font-size:1.6rem; }
       .type-banner .muted { font-size:.82rem; }
+      .content-lang { display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; margin:.2rem 0 .6rem; }
+      .content-lang .lang-pill { border:1px solid var(--border-strong); background:var(--surface); border-radius:999px; padding:.2rem .7rem; cursor:pointer; font-size:.8rem; font-weight:600; }
+      .content-lang .lang-pill.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+      .content-lang .lang-pill em { font-style:normal; opacity:.7; font-weight:400; }
       .tabpad { padding-top: 1.2rem; display: flex; flex-direction: column; gap: 1rem; }
       .content-grid { display: grid; grid-template-columns: 190px 1fr 230px; gap: 1rem; align-items: start; }
       @media (max-width: 1100px) { .content-grid { grid-template-columns: 1fr; } }
@@ -636,6 +652,10 @@ export class TemplateBuilder {
   private service = inject(DocumentService);
   private projectService = inject(ProjectService);
   private toast = inject(ToastService);
+  // Contenu par langue : langue de contenu en cours d'édition + base (principale).
+  contentLang = signal<string>('');
+  private baseSchema: unknown = null;
+  private loadedLang = '';
   private router = inject(Router);
   allProjects = signal<Project[]>([]);
 
@@ -784,6 +804,47 @@ export class TemplateBuilder {
     if (value) m.names[code] = value; else delete m.names[code];
   }
 
+  // --- Contenu par langue (blocs) : édition d'un contenu spécifique par langue ---
+  private i18nBucket(m: DocumentTemplate): Record<string, { schema?: unknown }> {
+    m.settings = m.settings || {};
+    const s = m.settings as unknown as { content_i18n?: Record<string, { schema?: unknown }> };
+    s.content_i18n = s.content_i18n || {};
+    return s.content_i18n;
+  }
+  switchContentLang(to: string) {
+    const m = this.model(); if (!m) return;
+    const primary = m.language || 'fr';
+    const from = this.loadedLang;
+    if (to === from) return;
+    // Range le contenu en cours dans sa langue.
+    if (from === primary) { this.baseSchema = m.schema; }
+    else { this.i18nBucket(m)[from] = { schema: m.schema }; }
+    // Charge le contenu de la langue cible (copie du contenu de base si absent).
+    if (to === primary) {
+      m.schema = (this.baseSchema as Block[]) ?? m.schema;
+    } else {
+      const bucket = this.i18nBucket(m)[to];
+      const src = bucket?.schema ?? this.baseSchema ?? m.schema;
+      m.schema = JSON.parse(JSON.stringify(src));
+    }
+    this.loadedLang = to;
+    this.contentLang.set(to);
+    this.model.set({ ...m });
+  }
+  /** Avant sauvegarde : renvoie le contenu de base dans schema, les langues dans content_i18n. */
+  private syncContentForSave() {
+    const m = this.model(); if (!m) return;
+    const primary = m.language || 'fr';
+    if (this.loadedLang !== primary) {
+      this.i18nBucket(m)[this.loadedLang] = { schema: m.schema };
+      m.schema = (this.baseSchema as Block[]) ?? [];
+      this.loadedLang = primary;
+      this.contentLang.set(primary);
+    } else {
+      this.baseSchema = m.schema;
+    }
+  }
+
   /** Génère et télécharge la planche A3 dans la langue demandée. */
   exportA3Lang(fmt: 'pdf' | 'png' | 'svg', lang: string) {
     const m = this.model();
@@ -873,6 +934,8 @@ export class TemplateBuilder {
         this.service.template(+this.id).subscribe((t) => {
           if (!t.settings) t.settings = this.defaultSettings();
           this.model.set(t);
+          this.baseSchema = t.schema; this.loadedLang = t.language || 'fr';
+          this.contentLang.set(this.loadedLang);
           if (t.doc_type === 'a3') this.ensureA3(t);
           if (t.settings?.overlays?.length) this.activeOverlay.set(t.settings.overlays[0].id);
         });
@@ -883,6 +946,7 @@ export class TemplateBuilder {
           settings: this.defaultSettings(), is_active: true,
           scope: 'global', projects: [],
         });
+        this.baseSchema = []; this.loadedLang = 'fr'; this.contentLang.set('fr');
       }
     });
   }
@@ -1051,6 +1115,7 @@ export class TemplateBuilder {
   }
 
   save() {
+    this.syncContentForSave();
     const m = this.model(); if (!m) return;
     if (!m.name) { this.toast.error('Le nom est obligatoire.'); return; }
 

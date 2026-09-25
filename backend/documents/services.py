@@ -15,6 +15,38 @@ def _slugify(value):
     return re.sub(r"[-\s]+", "-", value) or "document"
 
 
+def requested_language(document) -> str:
+    """Langue demandée pour un document : data['_lang'] sinon langue du modèle."""
+    data = getattr(document, "data", None) or {}
+    return data.get("_lang") or getattr(document.template, "language", None) or "fr"
+
+
+def apply_language_content(document) -> None:
+    """Applique le contenu spécifique à la langue demandée, s'il existe.
+
+    settings.content_i18n = { "<lang>": { "schema": [...], "settings": {..} } }.
+    Le schéma et/ou les réglages du modèle sont remplacés EN MÉMOIRE (jamais
+    sauvegardés) par ceux de la langue, avec repli sur le contenu de base.
+    Fonctionne pour TOUS les types (blocs, Excel, A3, en-tête/pied, etc.).
+    """
+    tpl = document.template
+    settings = tpl.settings or {}
+    i18n = settings.get("content_i18n") or {}
+    if not isinstance(i18n, dict) or not i18n:
+        return
+    override = i18n.get(requested_language(document))
+    if not isinstance(override, dict):
+        return
+    if override.get("schema") is not None:
+        tpl.schema = override["schema"]
+    ov_settings = override.get("settings")
+    if isinstance(ov_settings, dict) and ov_settings:
+        merged = dict(settings)
+        merged.update(ov_settings)
+        merged.pop("content_i18n", None)  # évite toute récursion
+        tpl.settings = merged
+
+
 def a3_export_format(document) -> str:
     """Format d'export d'un template A3 : 'pdf' (défaut) ou 'png'."""
     return ((document.template.settings or {}).get("a3_export") or "pdf")
@@ -34,6 +66,7 @@ def output_meta(document):
 @transaction.atomic
 def render_content(document: Document, ctx) -> bytes:
     """Sélectionne le bon générateur et renvoie les octets du document produit."""
+    apply_language_content(document)
     excel_cfg = (document.template.settings or {}).get("excel", {})
     content = None
     generator = None
@@ -106,6 +139,7 @@ def preview_inline(document: Document):
     Renvoie (kind, mime, content_bytes) avec kind ∈ {'html', 'image', 'pdf'}.
     Aucune dépendance Word/LibreOffice, aucun fichier média intermédiaire.
     """
+    apply_language_content(document)
     ctx = GenerationContext.build(
         document,
         version_number=max(document.current_version, 1),
