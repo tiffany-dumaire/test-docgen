@@ -10,7 +10,7 @@ import { ProjectService } from '@core/services/project.service';
 import { CompanyService } from '@core/services/company.service';
 import { ToastService } from '@core/services/api.service';
 import { PreviewService } from '@core/services/preview.service';
-import { DataGrid } from '@shared/data-grid';
+import { DataGrid } from '@shared/data-grid/data-grid';
 import {
   Block,
   CellType,

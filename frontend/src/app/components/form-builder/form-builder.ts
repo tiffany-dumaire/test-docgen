@@ -7,9 +7,9 @@ import { FormService } from '@core/services/form.service';
 import { ProjectService } from '@core/services/project.service';
 import { DocumentService } from '@core/services/document.service';
 import { ToastService } from '@core/services/api.service';
-import { FormSchemaEditor } from '@shared/fields/form-schema-editor';
-import { FormAppearanceEditor } from '@shared/fields/form-appearance-editor';
-import { FormPreview } from '@shared/fields/form-preview';
+import { FormSchemaEditor } from '@shared/fields/form-schema-editor/form-schema-editor';
+import { FormAppearanceEditor } from '@shared/fields/form-appearance-editor/form-appearance-editor';
+import { FormPreview } from '@shared/fields/form-preview/form-preview';
 import { CompanyService } from '@core/services/company.service';
 import { Choice, Confidentiality, FormField, FormSection, FormSubmission, OnlineForm, Project } from '@core/models';
 

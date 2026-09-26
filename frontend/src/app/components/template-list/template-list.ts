@@ -9,7 +9,7 @@ import { ToastService } from '@core/services/api.service';
 import { AuthService } from '@core/auth/auth.service';
 import { PreviewService } from '@core/services/preview.service';
 import { Block, DocumentTemplate, FormTemplate, LANGUAGES } from '@core/models';
-import { FormSchemaEditor } from '@shared/fields/form-schema-editor';
+import { FormSchemaEditor } from '@shared/fields/form-schema-editor/form-schema-editor';
 
 interface TypeTab { key: string; label: string; icon: string; }
 

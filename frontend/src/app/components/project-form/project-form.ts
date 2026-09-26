@@ -7,7 +7,7 @@ import { BackDirective } from '@shared/back.directive';
 import { ProjectService } from '@core/services/project.service';
 import { ClientService } from '@core/services/client.service';
 import { TeamService } from '@core/services/company.service';
-import { StyleEditor } from '@shared/content/style-editor';
+import { StyleEditor } from '@shared/content/style-editor/style-editor';
 import { ToastService } from '@core/services/api.service';
 import { Client, Contact, ContactKind, Project, ProjectRepo, ProjectStatus, Team, TeamMember } from '@core/models';
 

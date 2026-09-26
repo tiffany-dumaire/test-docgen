@@ -6,11 +6,11 @@ import { Router } from '@angular/router';
 import { BackDirective } from '@shared/back.directive';
 import { DocumentService } from '@core/services/document.service';
 import { ToastService } from '@core/services/api.service';
-import { RichTextEditor } from '@shared/rich-text-editor';
-import { ExcelBuilder } from '@shared/content/excel-builder';
-import { LayoutEditor } from '@shared/content/layout-editor';
+import { RichTextEditor } from '@shared/rich-text-editor/rich-text-editor';
+import { ExcelBuilder } from '@shared/content/excel-builder/excel-builder';
+import { LayoutEditor } from '@shared/content/layout-editor/layout-editor';
 import { MatTabsModule } from '@angular/material/tabs';
-import { StyleEditor } from '@shared/content/style-editor';
+import { StyleEditor } from '@shared/content/style-editor/style-editor';
 import { ProjectService } from '@core/services/project.service';
 import {
   A3Page,
