@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="PolyDocs">
+  <defs>
+    <linearGradient id="b_face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4C670"/><stop offset="1" stop-color="#C97A22"/></linearGradient>
+    <linearGradient id="b_back" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9B3A16"/><stop offset="1" stop-color="#5E2410"/></linearGradient>
+  </defs>
+  <g stroke-linecap="round" fill="none">
+    <path d="M2 22c10-4 17-2 22 2" stroke="#E7A038" stroke-width="1.5" opacity=".85"/>
+    <path d="M3 33c9-2 15 0 19 3" stroke="#C97A22" stroke-width="1.1" opacity=".8"/>
+    <path d="M1 44c11-3 18 0 22 4" stroke="#A23C16" stroke-width="1.2" opacity=".8"/>
+  </g>
+  <path d="M55 14l4 1-2 3z" fill="#D8781F" opacity=".9"/>
+  <g transform="rotate(-13 34 33)">
+    <polygon points="20,12 46,16 42,52 16,48" fill="url(#b_face)"/>
+    <polygon points="33,14 42,52 16,48" fill="url(#b_back)" opacity=".92"/>
+    <polygon points="46,16 37,17 45,25" fill="url(#b_back)"/>
+    <g stroke="#FBEAC8" stroke-width="1.4" stroke-linecap="round" opacity=".55">
+      <path d="M23 24l14 2"/><path d="M22 30l15 2"/><path d="M21 36l11 1.5"/>
+    </g>
+    <path d="M33 14L27 50" stroke="#FBEAC8" stroke-width=".6" opacity=".5" fill="none"/>
+  </g>
+</svg>

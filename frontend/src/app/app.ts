@@ -34,7 +34,7 @@ interface NavItem { path: string; icon: string; label: string; }
         <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="isMobile() ? mobileOpen() : true"
           (closedStart)="mobileOpen.set(false)" [class.rail]="collapsed() && !isMobile()" class="nav">
           <div class="brand" [class.center]="collapsed() && !isMobile()">
-            <span class="logo">📄</span>
+            <span class="logo"><img src="/images/logo/polydocs-6b.svg" alt="PolyDocs" /></span>
             @if (!rail()) {
               <div class="brandtext"><strong>PolyDocs</strong><div class="tag">Documents</div></div>
             }
@@ -141,8 +141,8 @@ interface NavItem { path: string; icon: string; label: string; }
     .nav.rail { width: 72px; }
     .brand { display: flex; align-items: center; gap: .6rem; padding: 1rem 1.1rem; }
     .brand.center { justify-content: center; padding: 1rem .5rem; }
-    .brand .logo { font-size: 1.2rem; width: 40px; height: 40px; border-radius: var(--pd-r-s); flex: none;
-      display: grid; place-items: center; background: var(--brand, var(--mat-sys-primary)); color: var(--mat-sys-on-primary); }
+    .brand .logo { width: 40px; height: 40px; flex: none; display: grid; place-items: center; }
+    .brand .logo img { width: 100%; height: 100%; display: block; }
     .brand strong { color: var(--mat-sys-on-surface); font-family: var(--pd-display); letter-spacing: var(--pd-display-track); font-size: 1.1rem; }
     .brand .tag { color: var(--mat-sys-on-surface-variant); font-size: .7rem; }
     /* Navigation rail / drawer (Material 3) */
