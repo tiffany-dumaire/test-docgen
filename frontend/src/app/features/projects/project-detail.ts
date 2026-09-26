@@ -72,6 +72,50 @@ import { Router } from '@angular/router';
           </div>
         </mat-tab>
 
+        <mat-tab label="Client">
+          <div class="tabpad">
+            @if (p.clients_detail?.length) {
+              @for (cl of p.clients_detail; track cl.id) {
+                <div class="card">
+                  <div class="row between" style="align-items:flex-start">
+                    <div class="row" style="gap:.9rem;align-items:center">
+                      @if (cl.logo_url) { <img class="client-logo" [src]="cl.logo_url" alt="logo client" /> }
+                      <div>
+                        <h3 style="margin:0">{{ cl.name }}</h3>
+                        @if (cl.contact_name) { <div class="muted">Contact principal : {{ cl.contact_name }}</div> }
+                        @if (cl.project_count) { <div class="tag">{{ cl.project_count }} projet(s)</div> }
+                      </div>
+                    </div>
+                    <a class="btn btn-sm btn-ghost" [routerLink]="['/clients', cl.id]">Fiche client</a>
+                  </div>
+                  <div class="infogrid" style="margin-top:.8rem">
+                    <div><span class="k">Email</span><span class="v">@if (cl.email) { <a [href]="'mailto:' + cl.email">{{ cl.email }}</a> } @else { — }</span></div>
+                    <div><span class="k">Téléphone</span><span class="v">@if (cl.phone) { <a [href]="'tel:' + cl.phone">{{ cl.phone }}</a> } @else { — }</span></div>
+                    <div style="grid-column:1/-1"><span class="k">Adresse</span><span class="v" style="white-space:pre-line">{{ cl.address || '—' }}</span></div>
+                    @if (cl.notes) { <div style="grid-column:1/-1"><span class="k">Notes</span><span class="v" style="white-space:pre-line">{{ cl.notes }}</span></div> }
+                  </div>
+                </div>
+              }
+            } @else if (p.client_name) {
+              <div class="card"><h3 style="margin:0">{{ p.client_name }}</h3>
+                <p class="muted" style="margin:.4rem 0 0">Aucune fiche client détaillée n'est associée à ce projet.</p></div>
+            } @else {
+              <div class="card"><p class="muted" style="margin:0">Aucun client associé à ce projet.</p></div>
+            }
+
+            <div class="card"><h3>👤 Contacts associés au projet</h3>
+              @if (clientContacts(p).length) {
+                <table><thead><tr><th>Nom</th><th>Rôle</th><th>Email</th><th>Téléphone</th></tr></thead>
+                  <tbody>@for (c of clientContacts(p); track c.id) {
+                    <tr><td><b>{{ c.full_name }}</b></td><td>{{ c.role || '—' }}</td>
+                      <td>@if (c.email) { <a [href]="'mailto:' + c.email">{{ c.email }}</a> } @else { — }</td>
+                      <td>{{ c.phone || '—' }}</td></tr>
+                  }</tbody></table>
+              } @else { <div class="muted">Aucun contact client pour ce projet.</div> }
+            </div>
+          </div>
+        </mat-tab>
+
         <mat-tab label="Informations complémentaires">
           <div class="tabpad">
             <div class="card"><h3>🧩 Champs personnalisés</h3>
@@ -359,6 +403,7 @@ import { Router } from '@angular/router';
       .rich p{ margin:.25em 0; }
       .chip-cancel { font-size: .62rem; text-transform: uppercase; background: #fee2e2; color: #b91c1c; border-radius: 6px; padding: .05rem .35rem; font-weight: 700; margin-left: .3rem; }
       .proj-logo { width: 3.2rem; height: 3.2rem; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid var(--border); padding: 3px; }
+      .client-logo { width: 3rem; height: 3rem; border-radius: 10px; object-fit: contain; background: #fff; border: 1px solid var(--border); padding: 3px; flex: none; }
       .inst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .8rem; }
       .inst-card { display: flex; flex-direction: column; gap: .3rem; padding: .8rem .9rem; border: 1px solid var(--border);
         border-left: 4px solid var(--mat-sys-primary); border-radius: 12px; background: var(--surface); text-decoration: none !important;
