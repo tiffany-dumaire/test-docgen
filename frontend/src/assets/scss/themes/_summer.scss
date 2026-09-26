@@ -1,0 +1,39 @@
+/* ---------- ÉTÉ · grand soleil (azur + accent solaire) ---------- */
+@mixin summer-light {
+  --mat-sys-primary:#1C7FB8; --mat-sys-on-primary:#FFFFFF;
+  --mat-sys-primary-container:#CBE6FF; --mat-sys-on-primary-container:#001E30;
+  --mat-sys-secondary:#4F616E; --mat-sys-on-secondary:#FFFFFF;
+  --mat-sys-secondary-container:#D2E5F4; --mat-sys-on-secondary-container:#0A1D28;
+  --mat-sys-tertiary:#E29100; --mat-sys-on-tertiary:#FFFFFF;
+  --mat-sys-tertiary-container:#FFDEA6; --mat-sys-on-tertiary-container:#2A1800;
+  --mat-sys-surface:#F6FAFD; --mat-sys-on-surface:#181C20; --mat-sys-on-surface-variant:#41484D;
+  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#F0F4F8;
+  --mat-sys-surface-container:#EAEEF3; --mat-sys-surface-container-high:#E4E9EE;
+  --mat-sys-surface-container-highest:#DEE3E9;
+  --mat-sys-outline:#71787E; --mat-sys-outline-variant:#C1C8CE;
+  --mat-sys-inverse-surface:#2D3135; --mat-sys-inverse-on-surface:#EEF1F5; --mat-sys-inverse-primary:#96CCF8;
+  --mat-sys-error:#B3261E; --mat-sys-on-error:#FFFFFF;
+  --mat-sys-error-container:#F9DEDC; --mat-sys-on-error-container:#410E0B;
+}
+@mixin summer-dark {
+  --mat-sys-primary:#96CCF8; --mat-sys-on-primary:#003350;
+  --mat-sys-primary-container:#004B71; --mat-sys-on-primary-container:#CBE6FF;
+  --mat-sys-secondary:#B6C9D8; --mat-sys-on-secondary:#21333F;
+  --mat-sys-secondary-container:#384956; --mat-sys-on-secondary-container:#D2E5F4;
+  --mat-sys-tertiary:#FFC24D; --mat-sys-on-tertiary:#3F2E00;
+  --mat-sys-tertiary-container:#6A4A00; --mat-sys-on-tertiary-container:#FFDEA6;
+  --mat-sys-surface:#0F1417; --mat-sys-on-surface:#DFE3E7; --mat-sys-on-surface-variant:#C1C8CE;
+  --mat-sys-surface-container-lowest:#0A0E11; --mat-sys-surface-container-low:#171C1F;
+  --mat-sys-surface-container:#1B2023; --mat-sys-surface-container-high:#262A2E;
+  --mat-sys-surface-container-highest:#303539;
+  --mat-sys-outline:#8B9298; --mat-sys-outline-variant:#41484D;
+  --mat-sys-inverse-surface:#DFE3E7; --mat-sys-inverse-on-surface:#2D3135; --mat-sys-inverse-primary:#1C7FB8;
+  --mat-sys-error:#F2B8B5; --mat-sys-on-error:#601410;
+  --mat-sys-error-container:#8C1D18; --mat-sys-on-error-container:#F9DEDC;
+  color-scheme: dark;
+}
+:root[data-p="summer"]{ @include summer-light; }
+@media (prefers-color-scheme: dark){
+  :root[data-p="summer"]:not([data-theme="light"]){ @include summer-dark; }
+}
+:root[data-p="summer"][data-theme="dark"]{ @include summer-dark; }

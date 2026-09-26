@@ -1,0 +1,39 @@
+/* ---------- AUTOMNE · feuilles mortes (orange brûlé + rouille) ---------- */
+@mixin autumn-light {
+  --mat-sys-primary:#B4571B; --mat-sys-on-primary:#FFFFFF;
+  --mat-sys-primary-container:#FFDBC7; --mat-sys-on-primary-container:#341100;
+  --mat-sys-secondary:#74594A; --mat-sys-on-secondary:#FFFFFF;
+  --mat-sys-secondary-container:#FFDBC7; --mat-sys-on-secondary-container:#2A160A;
+  --mat-sys-tertiary:#9B2D24; --mat-sys-on-tertiary:#FFFFFF;
+  --mat-sys-tertiary-container:#FFDAD4; --mat-sys-on-tertiary-container:#410001;
+  --mat-sys-surface:#FBF7F3; --mat-sys-on-surface:#201A16; --mat-sys-on-surface-variant:#52443B;
+  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#F6EFE8;
+  --mat-sys-surface-container:#F0E9E1; --mat-sys-surface-container-high:#EAE2DA;
+  --mat-sys-surface-container-highest:#E4DDD4;
+  --mat-sys-outline:#857468; --mat-sys-outline-variant:#D7C3B5;
+  --mat-sys-inverse-surface:#362F2A; --mat-sys-inverse-on-surface:#FBEEE5; --mat-sys-inverse-primary:#FFB68A;
+  --mat-sys-error:#B3261E; --mat-sys-on-error:#FFFFFF;
+  --mat-sys-error-container:#F9DEDC; --mat-sys-on-error-container:#410E0B;
+}
+@mixin autumn-dark {
+  --mat-sys-primary:#FFB68A; --mat-sys-on-primary:#542100;
+  --mat-sys-primary-container:#713300; --mat-sys-on-primary-container:#FFDBC7;
+  --mat-sys-secondary:#E4BFA9; --mat-sys-on-secondary:#422A1C;
+  --mat-sys-secondary-container:#5B4131; --mat-sys-on-secondary-container:#FFDBC7;
+  --mat-sys-tertiary:#FFB4A8; --mat-sys-on-tertiary:#5F1410;
+  --mat-sys-tertiary-container:#7E2A22; --mat-sys-on-tertiary-container:#FFDAD4;
+  --mat-sys-surface:#17120E; --mat-sys-on-surface:#ECE0D8; --mat-sys-on-surface-variant:#D7C3B5;
+  --mat-sys-surface-container-lowest:#110D0A; --mat-sys-surface-container-low:#201A16;
+  --mat-sys-surface-container:#241E19; --mat-sys-surface-container-high:#2F2823;
+  --mat-sys-surface-container-highest:#3A332D;
+  --mat-sys-outline:#A08D80; --mat-sys-outline-variant:#52443B;
+  --mat-sys-inverse-surface:#ECE0D8; --mat-sys-inverse-on-surface:#362F2A; --mat-sys-inverse-primary:#B4571B;
+  --mat-sys-error:#F2B8B5; --mat-sys-on-error:#601410;
+  --mat-sys-error-container:#8C1D18; --mat-sys-on-error-container:#F9DEDC;
+  color-scheme: dark;
+}
+:root[data-p="autumn"]{ @include autumn-light; }
+@media (prefers-color-scheme: dark){
+  :root[data-p="autumn"]:not([data-theme="light"]){ @include autumn-dark; }
+}
+:root[data-p="autumn"][data-theme="dark"]{ @include autumn-dark; }

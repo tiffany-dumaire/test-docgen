@@ -1,0 +1,39 @@
+/* ---------- HIVER · givre (bleu glacier + accent indigo froid) ---------- */
+@mixin winter-light {
+  --mat-sys-primary:#3E6D8E; --mat-sys-on-primary:#FFFFFF;
+  --mat-sys-primary-container:#CBE6FF; --mat-sys-on-primary-container:#001E30;
+  --mat-sys-secondary:#4E616F; --mat-sys-on-secondary:#FFFFFF;
+  --mat-sys-secondary-container:#D5E4F5; --mat-sys-on-secondary-container:#0A1D28;
+  --mat-sys-tertiary:#5A6C9A; --mat-sys-on-tertiary:#FFFFFF;
+  --mat-sys-tertiary-container:#DEE1FF; --mat-sys-on-tertiary-container:#131A3B;
+  --mat-sys-surface:#F7F9FC; --mat-sys-on-surface:#191C1F; --mat-sys-on-surface-variant:#43474E;
+  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#F1F4F7;
+  --mat-sys-surface-container:#EBEEF2; --mat-sys-surface-container-high:#E5E9ED;
+  --mat-sys-surface-container-highest:#DFE3E8;
+  --mat-sys-outline:#73777E; --mat-sys-outline-variant:#C3C7CE;
+  --mat-sys-inverse-surface:#2E3134; --mat-sys-inverse-on-surface:#EFF1F5; --mat-sys-inverse-primary:#A6CAEC;
+  --mat-sys-error:#B3261E; --mat-sys-on-error:#FFFFFF;
+  --mat-sys-error-container:#F9DEDC; --mat-sys-on-error-container:#410E0B;
+}
+@mixin winter-dark {
+  --mat-sys-primary:#A6CAEC; --mat-sys-on-primary:#073450;
+  --mat-sys-primary-container:#244B67; --mat-sys-on-primary-container:#CBE6FF;
+  --mat-sys-secondary:#B6C9DA; --mat-sys-on-secondary:#213340;
+  --mat-sys-secondary-container:#384956; --mat-sys-on-secondary-container:#D5E4F5;
+  --mat-sys-tertiary:#BBC4F5; --mat-sys-on-tertiary:#263162;
+  --mat-sys-tertiary-container:#42497B; --mat-sys-on-tertiary-container:#DEE1FF;
+  --mat-sys-surface:#101416; --mat-sys-on-surface:#E0E3E6; --mat-sys-on-surface-variant:#C3C7CE;
+  --mat-sys-surface-container-lowest:#0B0E10; --mat-sys-surface-container-low:#181C1F;
+  --mat-sys-surface-container:#1C2023; --mat-sys-surface-container-high:#262A2D;
+  --mat-sys-surface-container-highest:#313538;
+  --mat-sys-outline:#8D9198; --mat-sys-outline-variant:#43474E;
+  --mat-sys-inverse-surface:#E0E3E6; --mat-sys-inverse-on-surface:#2E3134; --mat-sys-inverse-primary:#3E6D8E;
+  --mat-sys-error:#F2B8B5; --mat-sys-on-error:#601410;
+  --mat-sys-error-container:#8C1D18; --mat-sys-on-error-container:#F9DEDC;
+  color-scheme: dark;
+}
+:root[data-p="winter"]{ @include winter-light; }
+@media (prefers-color-scheme: dark){
+  :root[data-p="winter"]:not([data-theme="light"]){ @include winter-dark; }
+}
+:root[data-p="winter"][data-theme="dark"]{ @include winter-dark; }

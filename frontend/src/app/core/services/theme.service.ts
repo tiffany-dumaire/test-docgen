@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export type Proposition = 'vnv' | 'bise' | 'noire' | 'joran';
+export type Proposition = 'vnv' | 'spring' | 'summer' | 'autumn' | 'winter';
 export type ThemeMode = 'light' | 'dark' | 'auto';
 
 export interface PropositionDef {
@@ -8,16 +8,20 @@ export interface PropositionDef {
 }
 
 /**
- * Thèmes de base. « VNV » (défaut) reprend la charte du document
+ * Thèmes. « VNV » (défaut, jeu de jetons de base :root) reprend la charte
  * Corporate Identity : orange #ec6608, gris charcoal, typographie Montserrat.
+ * Les quatre saisons ne changent que les couleurs : la typographie VNV
+ * (Montserrat / Oswald) est partagée par tous les thèmes.
  */
+const VNV_FONT = '"Montserrat", sans-serif';
 export const PROPOSITIONS: PropositionDef[] = [
-  { id: 'vnv', name: 'VNV', sub: 'Charte entreprise', primary: '#ec6608', font: '"Montserrat", sans-serif' },
-  { id: 'bise', name: 'Bise', sub: 'Givre', primary: '#1D5F8C', font: '"Bricolage Grotesque", sans-serif' },
-  { id: 'noire', name: 'Bise Noire', sub: 'Acier', primary: '#34546A', font: '"Red Hat Display", sans-serif' },
-  { id: 'joran', name: 'Joran', sub: 'Nuit polaire', primary: '#3F51A3', font: '"Young Serif", serif' },
+  { id: 'vnv', name: 'VNV', sub: 'Charte entreprise', primary: '#EC6608', font: VNV_FONT },
+  { id: 'spring', name: 'Printemps', sub: 'Renouveau', primary: '#3F8F4F', font: VNV_FONT },
+  { id: 'summer', name: 'Été', sub: 'Grand soleil', primary: '#1C7FB8', font: VNV_FONT },
+  { id: 'autumn', name: 'Automne', sub: 'Feuilles mortes', primary: '#B4571B', font: VNV_FONT },
+  { id: 'winter', name: 'Hiver', sub: 'Givre', primary: '#3E6D8E', font: VNV_FONT },
 ];
-export const PROPOSITION_IDS: Proposition[] = ['vnv', 'bise', 'noire', 'joran'];
+export const PROPOSITION_IDS: Proposition[] = ['vnv', 'spring', 'summer', 'autumn', 'winter'];
 export const DEFAULT_PROPOSITION: Proposition = 'vnv';
 
 /** Valeurs par défaut issues de la charte VNV (Corporate Identity). */
@@ -44,7 +48,7 @@ const M_KEY = 'pd-mode';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  proposition = signal<Proposition>('bise');
+  proposition = signal<Proposition>('vnv');
   mode = signal<ThemeMode>('auto');
   propositions = PROPOSITIONS;
   private mq?: MediaQueryList;
@@ -90,8 +94,8 @@ export class ThemeService {
   private apply() {
     const root = document.documentElement;
     const p = this.proposition();
-    // « bise » = jeu de jetons de base (:root sans data-p) ; les autres ont un bloc dédié.
-    if (p === 'bise') root.removeAttribute('data-p'); else root.setAttribute('data-p', p);
+    // « vnv » = jeu de jetons de base (:root sans data-p) ; les saisons ont un bloc dédié.
+    if (p === 'vnv') root.removeAttribute('data-p'); else root.setAttribute('data-p', p);
     const m = this.mode();
     if (m === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', m);
     root.classList.toggle('dark', this.resolvedDark());
