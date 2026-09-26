@@ -15,10 +15,10 @@ import { MeetingCalendar } from '../../shared/meeting-calendar';
 import { RichTextEditor } from '../../shared/rich-text-editor';
 import { ClientService } from '../../core/services/client.service';
 import { ToastService } from '../../core/services/api.service';
-import { Client, JournalEntry } from '../../core/models';
+import { Client, ClientSerializer, JournalEntry, JournalEntrySerializer } from '../../core/models';
 
 interface Bundle {
-  client: any; projects: any[]; contacts: any[]; meetings: any[]; journal?: JournalEntry[];
+  client: Client; projects: any[]; contacts: any[]; meetings: any[]; journal?: JournalEntry[];
 }
 
 @Component({
@@ -48,7 +48,7 @@ interface Bundle {
                 <h3>Informations du client</h3>
                 <div class="logo-row">
                   <div class="logo-slot" (click)="ci.click()">
-                    @if (m.logo_url) { <img [src]="m.logo_url" alt="logo" /> } @else { <mat-icon>add_photo_alternate</mat-icon> }
+                    @if (m.logoUrl) { <img [src]="m.logoUrl" alt="logo" /> } @else { <mat-icon>add_photo_alternate</mat-icon> }
                   </div>
                   <div><div class="k">Logo du client</div>
                     <button mat-stroked-button type="button" (click)="ci.click()"><mat-icon>upload</mat-icon> Choisir une image</button></div>
@@ -56,7 +56,7 @@ interface Bundle {
                 </div>
                 <div class="formgrid">
                   <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput [(ngModel)]="m.name" required /></mat-form-field>
-                  <mat-form-field appearance="outline"><mat-label>Contact principal</mat-label><input matInput [(ngModel)]="m.contact_name" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Contact principal</mat-label><input matInput [(ngModel)]="m.contactName" /></mat-form-field>
                   <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput type="email" [(ngModel)]="m.email" /></mat-form-field>
                   <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput [(ngModel)]="m.phone" /></mat-form-field>
                   <mat-form-field appearance="outline" class="full"><mat-label>Adresse</mat-label><textarea matInput [(ngModel)]="m.address" rows="2"></textarea></mat-form-field>
@@ -75,11 +75,11 @@ interface Bundle {
     } @else if (data(); as b) {
       <div class="row between">
         <div class="row" style="gap:.8rem;align-items:center">
-          @if (b.client.logo_url) { <img class="avatar-img" [src]="b.client.logo_url" alt="logo" /> }
+          @if (b.client.logoUrl) { <img class="avatar-img" [src]="b.client.logoUrl" alt="logo" /> }
           @else { <div class="avatar">{{ initials(b.client.name) }}</div> }
           <div>
             <h1 style="margin:0">{{ b.client.name }}</h1>
-            <div class="muted">{{ b.client.contact_name || 'Client' }} · {{ b.projects.length }} projet(s)
+            <div class="muted">{{ b.client.contactName || 'Client' }} · {{ b.projects.length }} projet(s)
               · {{ b.contacts.length }} contact(s) · {{ b.meetings.length }} réunion(s)</div>
           </div>
         </div>
@@ -98,7 +98,7 @@ interface Bundle {
                 <h3>Modifier la fiche client</h3>
                 <div class="logo-row">
                   <div class="logo-slot" (click)="ce.click()">
-                    @if (m.logo_url) { <img [src]="m.logo_url" alt="logo" /> } @else { <mat-icon>add_photo_alternate</mat-icon> }
+                    @if (m.logoUrl) { <img [src]="m.logoUrl" alt="logo" /> } @else { <mat-icon>add_photo_alternate</mat-icon> }
                   </div>
                   <div><div class="k">Logo du client</div>
                     <button mat-stroked-button type="button" (click)="ce.click()"><mat-icon>upload</mat-icon> Choisir une image</button></div>
@@ -106,7 +106,7 @@ interface Bundle {
                 </div>
                 <div class="formgrid">
                   <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput [(ngModel)]="m.name" /></mat-form-field>
-                  <mat-form-field appearance="outline"><mat-label>Contact principal</mat-label><input matInput [(ngModel)]="m.contact_name" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Contact principal</mat-label><input matInput [(ngModel)]="m.contactName" /></mat-form-field>
                   <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput type="email" [(ngModel)]="m.email" /></mat-form-field>
                   <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput [(ngModel)]="m.phone" /></mat-form-field>
                   <mat-form-field appearance="outline" class="full"><mat-label>Adresse</mat-label><textarea matInput [(ngModel)]="m.address" rows="2"></textarea></mat-form-field>
@@ -120,13 +120,13 @@ interface Bundle {
             } @else {
               <div class="card infogrid">
                 <div><span class="k">Nom</span><span class="v">{{ b.client.name }}</span></div>
-                <div><span class="k">Contact principal</span><span class="v">{{ b.client.contact_name || '—' }}</span></div>
+                <div><span class="k">Contact principal</span><span class="v">{{ b.client.contactName || '—' }}</span></div>
                 <div><span class="k">Email</span><span class="v">@if (b.client.email) { <a [href]="'mailto:' + b.client.email">{{ b.client.email }}</a> } @else { — }</span></div>
                 <div><span class="k">Téléphone</span><span class="v">{{ b.client.phone || '—' }}</span></div>
                 <div class="full"><span class="k">Adresse</span><span class="v" style="white-space:pre-line">{{ b.client.address || '—' }}</span></div>
                 <div class="full"><span class="k">Notes</span><span class="v" style="white-space:pre-line">{{ b.client.notes || '—' }}</span></div>
-                <div><span class="k">Créé le</span><span class="v">{{ b.client.created_at ? (b.client.created_at | date:'dd/MM/yyyy') : '—' }}</span></div>
-                <div><span class="k">Modifié le</span><span class="v">{{ b.client.updated_at ? (b.client.updated_at | date:'dd/MM/yyyy HH:mm') : '—' }}</span></div>
+                <div><span class="k">Créé le</span><span class="v">{{ b.client.createdAt ? (b.client.createdAt | date:'dd/MM/yyyy') : '—' }}</span></div>
+                <div><span class="k">Modifié le</span><span class="v">{{ b.client.updatedAt ? (b.client.updatedAt | date:'dd/MM/yyyy HH:mm') : '—' }}</span></div>
               </div>
             }
           </div>
@@ -235,16 +235,16 @@ interface Bundle {
               </label>
               <div class="timeline">
               @for (j of visibleJournal(); track j.id) {
-                <div class="jentry" [class.auto]="j.is_automatic" [style.--jc]="catColor(j)">
+                <div class="jentry" [class.auto]="j.isAutomatic" [style.--jc]="catColor(j)">
                   <div class="jicon">{{ eventIcon(j) }}</div>
                   <div class="jbody">
                     <div class="jmeta">
-                      <span class="badge">{{ j.category_label || j.category }}</span>
-                      @if (j.is_automatic) { <span class="chip-auto">auto</span> }
-                      @if (j.project_name) { <span class="chip-proj">{{ j.project_name }}</span> }
-                      <span class="muted jdate">{{ j.author || '—' }} · {{ j.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                      <span class="badge">{{ j.categoryLabel || j.category }}</span>
+                      @if (j.isAutomatic) { <span class="chip-auto">auto</span> }
+                      @if (j.projectName) { <span class="chip-proj">{{ j.projectName }}</span> }
+                      <span class="muted jdate">{{ j.author || '—' }} · {{ j.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
-                    @if (j.body_html) { <div class="rich" [innerHTML]="j.body_html"></div> } @else { <div>{{ j.body }}</div> }
+                    @if (j.bodyHtml) { <div class="rich" [innerHTML]="j.bodyHtml"></div> } @else { <div>{{ j.body }}</div> }
                   </div>
                 </div>
               } @empty { <div class="muted">Aucune entrée.</div> }
@@ -323,7 +323,7 @@ export class ClientDetail {
   constructor() {
     setTimeout(() => {
       if (this.creating()) {
-        this.editing.set({ name: '', contact_name: '', email: '', phone: '', address: '', notes: '' } as Client);
+        this.editing.set({ name: '', contactName: '', email: '', phone: '', address: '', notes: '' } as Client);
       } else {
         this.reload();
       }
@@ -332,8 +332,13 @@ export class ClientDetail {
 
   reload() {
     this.service.detailBundle(+this.id!).subscribe((b) => {
-      this.data.set(b);
-      this.journal.set(b.journal || []);
+      const bundle: Bundle = {
+        ...b,
+        client: ClientSerializer.fromApi(b.client),
+        journal: (b.journal || []).map(JournalEntrySerializer.fromApi),
+      };
+      this.data.set(bundle);
+      this.journal.set(bundle.journal ?? []);
     });
   }
 
@@ -346,7 +351,7 @@ export class ClientDetail {
     const f = (ev.target as HTMLInputElement).files?.[0] ?? null;
     this.logoFile = f;
     const m = this.editing();
-    if (f && m) m.logo_url = URL.createObjectURL(f);
+    if (f && m) m.logoUrl = URL.createObjectURL(f);
   }
   startEdit(c: any) { this.logoFile = null; this.editing.set({ ...c }); }
   saveEdit() {
@@ -375,7 +380,7 @@ export class ClientDetail {
   }
 
   eventIcon(j: JournalEntry): string {
-    if (j.is_automatic && j.event) return ClientDetail.EVENT_ICONS[j.event] || 'ℹ️';
+    if (j.isAutomatic && j.event) return ClientDetail.EVENT_ICONS[j.event] || 'ℹ️';
     return ({ note: '🗒️', decision: '✅', risk: '⚠️', action: '⚡',
               incident: '🔥', info: 'ℹ️', event: '•' } as Record<string, string>)[j.category] || '🗒️';
   }
@@ -386,17 +391,17 @@ export class ClientDetail {
       contact_added: '#2F6B45', contact_removed: '#A32638', project_added: '#5B4F8A',
       team_updated: '#A34E2A', contact_changed: '#806A2E',
     };
-    if (j.is_automatic && j.event && byEvent[j.event]) return byEvent[j.event];
+    if (j.isAutomatic && j.event && byEvent[j.event]) return byEvent[j.event];
     return ({ note: '#5B5A55', decision: '#2F6B45', risk: '#B04A12', action: '#2E5E8E',
               incident: '#A1202A', info: '#2D6E7E', event: '#5B4F8A' } as Record<string, string>)[j.category] || '#5B5A55';
   }
   hasContent(html: string) { return !!html && html.replace(/<[^>]*>/g, '').trim().length > 0; }
   visibleJournal() {
-    return this.showAuto ? this.journal() : this.journal().filter((j) => !j.is_automatic);
+    return this.showAuto ? this.journal() : this.journal().filter((j) => !j.isAutomatic);
   }
   addJournal() {
     if (!this.hasContent(this.njHtml)) return;
-    this.service.addJournal(+this.id!, { category: this.njCat, confidentiality: this.njConf, body_html: this.njHtml })
+    this.service.addJournal(+this.id!, { category: this.njCat, confidentiality: this.njConf, bodyHtml: this.njHtml })
       .subscribe(() => { this.njHtml = ''; this.reload(); });
   }
 

@@ -27,8 +27,8 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
   template: `
     @if (model(); as m) {
       <div class="company-head">
-        <label class="logo-slot" [class.empty]="!m.logo_url">
-          @if (m.logo_url) { <img [src]="m.logo_url" alt="logo" /> }
+        <label class="logo-slot" [class.empty]="!m.logoUrl">
+          @if (m.logoUrl) { <img [src]="m.logoUrl" alt="logo" /> }
           @else { <span class="material-icons">add_photo_alternate</span> }
           <input type="file" accept="image/*" (change)="onLogo($event)" hidden />
           <span class="logo-edit"><span class="material-icons">edit</span></span>
@@ -73,8 +73,8 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
             <div class="card stack">
               <h3>Ajouter un collaborateur</h3>
               <div class="row wrap" style="gap:.5rem; align-items:end">
-                <div class="field" style="margin:0"><label>Prénom</label><input [(ngModel)]="nc.first_name" /></div>
-                <div class="field" style="margin:0"><label>Nom</label><input [(ngModel)]="nc.last_name" /></div>
+                <div class="field" style="margin:0"><label>Prénom</label><input [(ngModel)]="nc.firstName" /></div>
+                <div class="field" style="margin:0"><label>Nom</label><input [(ngModel)]="nc.lastName" /></div>
                 <div class="field" style="margin:0"><label>Fonction</label><input [(ngModel)]="nc.role" /></div>
                 <div class="field" style="margin:0"><label>Email</label><input [(ngModel)]="nc.email" /></div>
                 <button class="btn btn-primary" (click)="addCollaborator()">+ Ajouter</button>
@@ -87,12 +87,12 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
                   <tbody>
                     @for (c of collaborators(); track c.id) {
                       <tr>
-                        <td><span class="ava" [title]="c.full_name">{{ c.initials }}</span> <b>{{ c.full_name }}</b></td>
+                        <td><span class="ava" [title]="c.fullName">{{ c.initials }}</span> <b>{{ c.fullName }}</b></td>
                         <td>{{ c.role || '—' }}</td>
                         <td>{{ c.email || '—' }}</td>
                         <td>
-                          @for (t of c.team_names || []; track t) { <span class="chip">{{ t }}</span> }
-                          @if (!(c.team_names || []).length) { <span class="muted">—</span> }
+                          @for (t of c.teamNames || []; track t) { <span class="chip">{{ t }}</span> }
+                          @if (!(c.teamNames || []).length) { <span class="muted">—</span> }
                         </td>
                         <td><button class="btn btn-sm btn-danger" (click)="removeCollaborator(c)">✕</button></td>
                       </tr>
@@ -129,11 +129,11 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
                     <strong><span class="tdot"></span> {{ t.name }}</strong>
                     <a class="btn btn-sm btn-ghost" [routerLink]="['/teams', t.id]">Gérer →</a>
                   </div>
-                  @if (t.parent_name) { <div class="tag">↳ sous-équipe de {{ t.parent_name }}</div> }
+                  @if (t.parentName) { <div class="tag">↳ sous-équipe de {{ t.parentName }}</div> }
                   <p class="muted" style="min-height:2em; margin:.4rem 0">{{ t.description || 'Aucune description.' }}</p>
                   <div class="row" style="gap:.4rem; flex-wrap:wrap">
-                    <span class="chip">{{ t.member_count }} collaborateur(s)</span>
-                    <span class="chip">{{ t.project_count }} projet(s)</span>
+                    <span class="chip">{{ t.memberCount }} collaborateur(s)</span>
+                    <span class="chip">{{ t.projectCount }} projet(s)</span>
                   </div>
                   <div class="row" style="margin-top:.6rem">
                     <button class="btn btn-sm btn-danger" (click)="removeTeam(t)">Supprimer</button>
@@ -150,7 +150,7 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
             <div class="card stack">
               <div class="row between"><h3>Liens utiles</h3><button class="btn btn-sm btn-primary" (click)="addLink(m)">+ Ajouter un lien</button></div>
               <p class="muted" style="margin:0">Catégories : Conditions générales, Site web, Support, ou une catégorie personnalisée.</p>
-              @for (link of m.useful_links; track $index) {
+              @for (link of m.usefulLinks; track $index) {
                 <div class="link-row">
                   <select [ngModel]="catValue(link)" (ngModelChange)="onCat(link, $event)" style="width:170px">
                     @for (c of linkCategories; track c) { <option [value]="c">{{ c }}</option> }
@@ -164,7 +164,7 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
                   <button class="btn btn-sm btn-danger" (click)="removeLink(m, $index)">✕</button>
                 </div>
               }
-              @if (!m.useful_links.length) { <small>Aucun lien. Cliquez sur « Ajouter un lien ».</small> }
+              @if (!m.usefulLinks.length) { <small>Aucun lien. Cliquez sur « Ajouter un lien ».</small> }
             </div>
           </div>
         </mat-tab>
@@ -268,27 +268,27 @@ export class CompanySettings {
     return s.types![type];
   }
 
-  addLink(m: CompanyProfile) { m.useful_links.push({ category: 'Site web', label: '', url: '', order: m.useful_links.length }); }
-  removeLink(m: CompanyProfile, i: number) { m.useful_links.splice(i, 1); }
+  addLink(m: CompanyProfile) { m.usefulLinks.push({ category: 'Site web', label: '', url: '', order: m.usefulLinks.length }); }
+  removeLink(m: CompanyProfile, i: number) { m.usefulLinks.splice(i, 1); }
   catValue(l: UsefulLink) { return this.linkCategories.includes(l.category || '') ? l.category : '__custom'; }
   isCustom(l: UsefulLink) { return !this.linkCategories.includes(l.category || ''); }
   onCat(l: UsefulLink, v: string) { l.category = v === '__custom' ? '' : v; }
   onLogo(event: Event) {
     const f = (event.target as HTMLInputElement).files?.[0] ?? null;
     this.logoFile = f;
-    if (f) { const m = this.model(); if (m) m.logo_url = URL.createObjectURL(f); }
+    if (f) { const m = this.model(); if (m) m.logoUrl = URL.createObjectURL(f); }
   }
 
   // ---- Collaborateurs ----
   addCollaborator() {
-    if (!this.nc.first_name && !this.nc.last_name) { this.toast.error('Renseignez au moins le nom.'); return; }
+    if (!this.nc.firstName && !this.nc.lastName) { this.toast.error('Renseignez au moins le nom.'); return; }
     this.teamSvc.addMember({ ...this.nc }).subscribe({
       next: () => { this.nc = {}; this.toast.success('Collaborateur ajouté.'); this.reloadCollaborators(); },
       error: () => this.toast.error('Ajout impossible.'),
     });
   }
   removeCollaborator(c: TeamMember) {
-    if (!confirm(`Retirer ${c.full_name} de l'entreprise ?`)) return;
+    if (!confirm(`Retirer ${c.fullName} de l'entreprise ?`)) return;
     this.teamSvc.removeMember(c.id!).subscribe({
       next: () => { this.toast.success('Collaborateur retiré.'); this.reloadCollaborators(); this.reloadTeams(); },
       error: () => this.toast.error('Suppression impossible.'),
@@ -313,10 +313,10 @@ export class CompanySettings {
 
   private syncUrls(m: CompanyProfile) {
     // Les liens catégorisés alimentent les champs utilisés dans les documents.
-    const site = m.useful_links.find((l) => l.category === 'Site web');
-    const cgv = m.useful_links.find((l) => l.category === 'Conditions générales');
-    if (site) m.website_url = site.url;
-    if (cgv) m.terms_url = cgv.url;
+    const site = m.usefulLinks.find((l) => l.category === 'Site web');
+    const cgv = m.usefulLinks.find((l) => l.category === 'Conditions générales');
+    if (site) m.websiteUrl = site.url;
+    if (cgv) m.termsUrl = cgv.url;
   }
 
   save() {
@@ -331,7 +331,7 @@ export class CompanySettings {
       fd.append('logo', this.logoFile);
       this.service.updateWithLogo(fd).subscribe({
         next: (c) => {
-          m.logo_url = c.logo_url;
+          m.logoUrl = c.logoUrl;
           this.logoFile = null;
           this.service.update(m).subscribe({ next: (c2) => this.done(c2), error: () => this.fail() });
         },

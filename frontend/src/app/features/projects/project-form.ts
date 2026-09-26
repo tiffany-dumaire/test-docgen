@@ -9,7 +9,7 @@ import { ClientService } from '../../core/services/client.service';
 import { TeamService } from '../../core/services/company.service';
 import { StyleEditor } from '../documents/style-editor';
 import { ToastService } from '../../core/services/api.service';
-import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } from '../../core/models';
+import { Client, Contact, ContactKind, Project, ProjectRepo, ProjectStatus, Team, TeamMember } from '../../core/models';
 
 @Component({
   selector: 'app-project-form',
@@ -27,7 +27,7 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
           <div class="tabpad card stack">
             <div class="form-grid">
               <div class="field"><label>Nom du projet *</label><input [(ngModel)]="m.name" /></div>
-              <div class="field"><label>Nom du client *</label><input [(ngModel)]="m.client_name" /></div>
+              <div class="field"><label>Nom du client *</label><input [(ngModel)]="m.clientName" /></div>
             </div>
             <div class="form-grid">
               <div class="field">
@@ -56,8 +56,8 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
               <div class="field"></div>
             </div>
             <div class="form-grid">
-              <div class="field"><label>Date de début</label><input type="date" [ngModel]="m.start_date" (ngModelChange)="m.start_date = $event || null" /></div>
-              <div class="field"><label>Date de fin prévue</label><input type="date" [ngModel]="m.end_date" (ngModelChange)="m.end_date = $event || null" /></div>
+              <div class="field"><label>Date de début</label><input type="date" [ngModel]="m.startDate" (ngModelChange)="m.startDate = $event || null" /></div>
+              <div class="field"><label>Date de fin prévue</label><input type="date" [ngModel]="m.endDate" (ngModelChange)="m.endDate = $event || null" /></div>
             </div>
             <div class="field">
               <label>Description</label>
@@ -68,11 +68,11 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
               <label>🖼️ Logo du projet <span class="muted" style="font-weight:400">(facultatif)</span></label>
               <div class="logo-row">
                 <div class="logo-slot" (click)="pl.click()">
-                  @if (m.logo_url) { <img [src]="m.logo_url" alt="logo" /> } @else { <span class="material-icons">add_photo_alternate</span> }
+                  @if (m.logoUrl) { <img [src]="m.logoUrl" alt="logo" /> } @else { <span class="material-icons">add_photo_alternate</span> }
                 </div>
                 <div class="row" style="gap:.4rem">
                   <button class="btn btn-sm btn-ghost" type="button" (click)="pl.click()">Choisir…</button>
-                  @if (m.logo_url) { <button class="btn btn-sm btn-ghost" type="button" (click)="clearLogo(m)">Retirer</button> }
+                  @if (m.logoUrl) { <button class="btn btn-sm btn-ghost" type="button" (click)="clearLogo(m)">Retirer</button> }
                 </div>
                 <input #pl type="file" accept="image/*" hidden (change)="onLogo($event)" />
               </div>
@@ -108,7 +108,7 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
             <div class="field">
               <div class="row between">
                 <label>👤 Contacts client</label>
-                <button class="btn btn-sm btn-ghost" (click)="addContact('client')">+ Ajouter</button>
+                <button class="btn btn-sm btn-ghost" (click)="addContact(ContactKind.Client)">+ Ajouter</button>
               </div>
               @for (c of clientContacts(); track c) {
                 <ng-container *ngTemplateOutlet="contactRow; context: { $implicit: c }"></ng-container>
@@ -118,7 +118,7 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
             <div class="field">
               <div class="row between">
                 <label>🧑‍💼 Contacts internes</label>
-                <button class="btn btn-sm btn-ghost" (click)="addContact('internal')">+ Ajouter</button>
+                <button class="btn btn-sm btn-ghost" (click)="addContact(ContactKind.Internal)">+ Ajouter</button>
               </div>
               @for (c of internalContacts(); track c) {
                 <ng-container *ngTemplateOutlet="contactRow; context: { $implicit: c }"></ng-container>
@@ -135,7 +135,7 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
                 <label>🧩 Champs personnalisés</label>
                 <button class="btn btn-sm btn-ghost" (click)="addFieldDef(m)">+ Définir un champ</button>
               </div>
-              @for (def of m.custom_field_defs ?? []; track $index) {
+              @for (def of m.customFieldDefs ?? []; track $index) {
                 <div class="row" style="gap:.4rem; margin-bottom:.3rem; align-items:end">
                   <input [(ngModel)]="def.label" placeholder="Libellé" style="flex:1" (ngModelChange)="syncFieldKey(def)" />
                   <select [(ngModel)]="def.type" style="width:150px">
@@ -154,7 +154,7 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
                       @default { <input [type]="def.type === 'number' ? 'number' : def.type === 'date' ? 'date' : 'text'" [ngModel]="cfVal(m, def.key)" (ngModelChange)="setCf(m, def.key, $event)" placeholder="Valeur" /> }
                     }
                   </span>
-                  <button class="btn btn-sm btn-danger" (click)="m.custom_field_defs!.splice($index, 1)">✕</button>
+                  <button class="btn btn-sm btn-danger" (click)="m.customFieldDefs!.splice($index, 1)">✕</button>
                 </div>
               } @empty { <p class="hint">Aucun champ personnalisé. Ajoutez-en pour compléter la fiche du projet.</p> }
             </div>
@@ -221,7 +221,7 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
                 <div class="row" style="gap:.4rem; margin-bottom:.3rem">
                   <select [(ngModel)]="a.member" style="flex:2">
                     @for (mem of allMembers(); track mem.id) {
-                      <option [ngValue]="mem.id">{{ mem.full_name }} @if (mem.teamName) { — {{ mem.teamName }} }</option>
+                      <option [ngValue]="mem.id">{{ mem.fullName }} @if (mem.teamName) { — {{ mem.teamName }} }</option>
                     }
                   </select>
                   <input [(ngModel)]="a.role" placeholder="Rôle sur le projet" style="flex:1" />
@@ -250,8 +250,8 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
 
     <ng-template #contactRow let-c>
       <div class="contact-row">
-        <input [(ngModel)]="c.first_name" placeholder="Prénom" />
-        <input [(ngModel)]="c.last_name" placeholder="Nom" />
+        <input [(ngModel)]="c.firstName" placeholder="Prénom" />
+        <input [(ngModel)]="c.lastName" placeholder="Nom" />
         <input [(ngModel)]="c.role" placeholder="Fonction" />
         <input [(ngModel)]="c.email" placeholder="Email" />
         <input [(ngModel)]="c.phone" placeholder="Téléphone" />
@@ -288,6 +288,8 @@ export class ProjectForm {
   private toast = inject(ToastService);
   private router = inject(Router);
 
+  protected readonly ContactKind = ContactKind;
+
   @Input() id?: string;
   model = signal<Project | null>(null);
   saving = signal(false);
@@ -300,7 +302,7 @@ export class ProjectForm {
     this.service.list().subscribe((r) => this.allProjects.set(r.results));
     this.teamService.members().subscribe((r) => {
       this.allMembers.set(r.results.map((mem) => ({
-        ...mem, teamName: (mem.team_names || []).join(', '),
+        ...mem, teamName: (mem.teamNames || []).join(', '),
       })));
     });
     setTimeout(() => {
@@ -308,23 +310,23 @@ export class ProjectForm {
         this.service.get(+this.id).subscribe((p) => {
           if (!p.assignments) p.assignments = [];
           if (!p.clients) p.clients = [];
-          if (!p.custom_field_defs) p.custom_field_defs = [];
-          if (!p.custom_fields) p.custom_fields = {};
+          if (!p.customFieldDefs) p.customFieldDefs = [];
+          if (!p.customFields) p.customFields = {};
           this.model.set(p);
         });
       } else {
         this.model.set({
           name: '',
-          client_name: '',
+          clientName: '',
           description: '',
           reference: '',
-          status: 'active',
+          status: ProjectStatus.Active,
           contacts: [],
           assignments: [],
           clients: [],
           parent: null,
-          custom_field_defs: [],
-          custom_fields: {},
+          customFieldDefs: [],
+          customFields: {},
         });
       }
     });
@@ -340,7 +342,7 @@ export class ProjectForm {
     m.client = clientId;
     if (clientId) {
       const cl = this.clients().find((c) => c.id === clientId);
-      if (cl && !m.client_name) m.client_name = cl.name;
+      if (cl && !m.clientName) m.clientName = cl.name;
     }
   }
 
@@ -351,8 +353,8 @@ export class ProjectForm {
     if (i >= 0) m.clients.splice(i, 1); else m.clients.push(id);
   }
   addFieldDef(m: Project) {
-    m.custom_field_defs = m.custom_field_defs ?? [];
-    m.custom_field_defs.push({ key: '', label: '', type: 'text' });
+    m.customFieldDefs = m.customFieldDefs ?? [];
+    m.customFieldDefs.push({ key: '', label: '', type: 'text' });
   }
   syncFieldKey(def: { key: string; label: string }) {
     if (!def.key) {
@@ -360,10 +362,10 @@ export class ProjectForm {
         .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'champ';
     }
   }
-  cfVal(m: Project, key: string) { return (m.custom_fields ?? {})[key]; }
+  cfVal(m: Project, key: string) { return (m.customFields ?? {})[key]; }
   setCf(m: Project, key: string, v: unknown) {
-    m.custom_fields = m.custom_fields ?? {};
-    (m.custom_fields as Record<string, unknown>)[key] = v;
+    m.customFields = m.customFields ?? {};
+    (m.customFields as Record<string, unknown>)[key] = v;
   }
   splitList(raw: string): string[] { return raw.split(',').map((s) => s.trim()).filter(Boolean); }
 
@@ -377,10 +379,10 @@ export class ProjectForm {
   }
 
   clientContacts() {
-    return this.model()?.contacts.filter((c) => c.kind === 'client') ?? [];
+    return this.model()?.contacts.filter((c) => c.kind === ContactKind.Client) ?? [];
   }
   internalContacts() {
-    return this.model()?.contacts.filter((c) => c.kind === 'internal') ?? [];
+    return this.model()?.contacts.filter((c) => c.kind === ContactKind.Internal) ?? [];
   }
 
   addContact(kind: ContactKind) {
@@ -388,8 +390,8 @@ export class ProjectForm {
     if (!m) return;
     m.contacts.push({
       kind,
-      first_name: '',
-      last_name: '',
+      firstName: '',
+      lastName: '',
       role: '',
       email: '',
       phone: '',
@@ -409,9 +411,9 @@ export class ProjectForm {
     const f = (ev.target as HTMLInputElement).files?.[0] ?? null;
     this.logoFile = f;
     const m = this.model();
-    if (f && m) { m.logo_url = URL.createObjectURL(f); this.model.set({ ...m }); }
+    if (f && m) { m.logoUrl = URL.createObjectURL(f); this.model.set({ ...m }); }
   }
-  clearLogo(m: Project) { this.logoFile = null; m.logo_url = null; m.logo = null; this.model.set({ ...m }); }
+  clearLogo(m: Project) { this.logoFile = null; m.logoUrl = null; m.logo = null; this.model.set({ ...m }); }
 
   addInstance(m: Project) { m.instances = m.instances ?? []; m.instances.push({ name: '', ip: '', domain: '', url: '' }); this.model.set({ ...m }); }
   removeInstance(m: Project, i: number) { m.instances?.splice(i, 1); this.model.set({ ...m }); }
@@ -438,12 +440,12 @@ export class ProjectForm {
   save() {
     const m = this.model();
     if (!m) return;
-    if (!m.name || !m.client_name) {
+    if (!m.name || !m.clientName) {
       this.toast.error('Nom du projet et du client obligatoires.');
       return;
     }
     this.saving.set(true);
-    const payload = { ...m }; delete (payload as Partial<Project>).logo_url;
+    const payload = { ...m }; delete (payload as Partial<Project>).logoUrl;
     const req = this.isEdit()
       ? this.service.update(+this.id!, payload)
       : this.service.create(payload);

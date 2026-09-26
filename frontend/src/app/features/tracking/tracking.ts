@@ -44,11 +44,11 @@ import { OnlineForm, ProjectDocument } from '../../core/models';
                   @for (d of filteredDocs(); track d.id) {
                     <tr>
                       <td><a [routerLink]="['/documents', d.id]">{{ d.title }}</a></td>
-                      <td><a [routerLink]="['/projects', d.project]">{{ d.project_name }}</a></td>
-                      <td><span class="badge badge-type">{{ d.doc_type }}</span></td>
-                      <td><span class="badge" [class]="'badge-' + d.confidentiality">{{ d.confidentiality_display }}</span></td>
-                      <td>v{{ d.current_version }}</td>
-                      <td class="muted">{{ d.updated_at | date:'dd/MM/yy' }}</td>
+                      <td><a [routerLink]="['/projects', d.project]">{{ d.projectName }}</a></td>
+                      <td><span class="badge badge-type">{{ d.docType }}</span></td>
+                      <td><span class="badge" [class]="'badge-' + d.confidentiality">{{ d.confidentialityDisplay }}</span></td>
+                      <td>v{{ d.currentVersion }}</td>
+                      <td class="muted">{{ d.updatedAt | date:'dd/MM/yy' }}</td>
                       <td><button class="btn btn-sm btn-ghost" (click)="previewDoc(d)">👁</button></td>
                     </tr>
                   }
@@ -75,10 +75,10 @@ import { OnlineForm, ProjectDocument } from '../../core/models';
                     <tr>
                       <td><a [routerLink]="['/forms', f.id]">{{ f.title }}</a></td>
                       <td>{{ projectName(f) }}</td>
-                      <td>{{ f.template_name || '—' }}</td>
-                      <td><span class="badge" [class]="f.is_open ? 'badge-public' : 'badge-restricted'">{{ f.is_open ? 'Ouvert' : 'Fermé' }}</span></td>
-                      <td>{{ f.submission_count }}</td>
-                      <td>@if (f.short_url) { <a [href]="f.short_url" target="_blank">lien</a> } @else { — }</td>
+                      <td>{{ f.templateName || '—' }}</td>
+                      <td><span class="badge" [class]="f.isOpen ? 'badge-public' : 'badge-restricted'">{{ f.isOpen ? 'Ouvert' : 'Fermé' }}</span></td>
+                      <td>{{ f.submissionCount }}</td>
+                      <td>@if (f.shortUrl) { <a [href]="f.shortUrl" target="_blank">lien</a> } @else { — }</td>
                     </tr>
                   }
                 </tbody>
@@ -116,22 +116,22 @@ export class Tracking {
   }
 
   totalSubmissions = computed(() =>
-    this.forms().reduce((s, f) => s + (f.submission_count || 0), 0));
+    this.forms().reduce((s, f) => s + (f.submissionCount || 0), 0));
 
   filteredDocs() {
     const q = this.docSearch.toLowerCase().trim();
     if (!q) return this.documents();
     return this.documents().filter((d) =>
-      (d.title + ' ' + (d.project_name || '')).toLowerCase().includes(q));
+      (d.title + ' ' + (d.projectName || '')).toLowerCase().includes(q));
   }
   filteredForms() {
     const q = this.formSearch.toLowerCase().trim();
     if (!q) return this.forms();
     return this.forms().filter((f) =>
-      (f.title + ' ' + (f.template_name || '')).toLowerCase().includes(q));
+      (f.title + ' ' + (f.templateName || '')).toLowerCase().includes(q));
   }
   projectName(f: OnlineForm): string {
-    return (f as { project_name?: string }).project_name || '—';
+    return f.projectName || '—';
   }
 
   previewDoc(d: ProjectDocument) {

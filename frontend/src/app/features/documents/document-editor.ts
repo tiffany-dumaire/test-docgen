@@ -15,6 +15,7 @@ import {
   Block,
   CellType,
   Choice,
+  Confidentiality,
   DocumentTemplate,
   DocumentVersion,
   ExcelSheet,
@@ -48,7 +49,7 @@ import {
                 <select [(ngModel)]="d.project" [disabled]="isEdit()" (ngModelChange)="onProjectChange($event)">
                   <option [ngValue]="null" disabled>— choisir —</option>
                   @for (p of projects(); track p.id) {
-                    <option [ngValue]="p.id">{{ p.name }} ({{ p.client_name }})</option>
+                    <option [ngValue]="p.id">{{ p.name }} ({{ p.clientName }})</option>
                   }
                 </select>
               </div>
@@ -72,7 +73,7 @@ import {
             </div>
             <div class="field">
               <label>Date du document</label>
-              <input type="date" [ngModel]="d.doc_date" (ngModelChange)="d.doc_date = $event || null" />
+              <input type="date" [ngModel]="d.docDate" (ngModelChange)="d.docDate = $event || null" />
               <small class="muted">Utilisable dans les textes via {{ '{{' }}doc_date{{ '}}' }}.</small>
             </div>
           </div>
@@ -257,7 +258,7 @@ import {
                 <textarea [(ngModel)]="gen.comment" rows="2" placeholder="Ce qui a changé…"></textarea>
               </div>
               <button class="btn btn-primary" (click)="generate()" [disabled]="generating()">
-                🖨️ {{ (doc()?.current_version ?? 0) > 0 ? 'Régénérer (nouvelle version)' : 'Générer la version 1' }}
+                🖨️ {{ (doc()?.currentVersion ?? 0) > 0 ? 'Régénérer (nouvelle version)' : 'Générer la version 1' }}
               </button>
               <button class="btn btn-ghost" (click)="preview()" [disabled]="previewing()">
                 👁 {{ previewing() ? 'Aperçu…' : 'Aperçu' }}
@@ -274,13 +275,13 @@ import {
                 <tbody>
                   @for (v of versions(); track v.id) {
                     <tr>
-                      <td>v{{ v.version_number }}</td>
-                      <td>{{ v.created_at | date: 'dd/MM/yy HH:mm' }}</td>
-                      <td>{{ v.author_initials }}</td>
-                      <td><span class="badge" [class]="'badge-' + v.confidentiality">{{ v.confidentiality_display }}</span></td>
+                      <td>v{{ v.versionNumber }}</td>
+                      <td>{{ v.createdAt | date: 'dd/MM/yy HH:mm' }}</td>
+                      <td>{{ v.authorInitials }}</td>
+                      <td><span class="badge" [class]="'badge-' + v.confidentiality">{{ v.confidentialityDisplay }}</span></td>
                       <td class="cmt">{{ v.comment || '—' }}</td>
                       <td>
-                        @if (v.file_url) { <a class="btn btn-sm btn-ghost" [href]="v.file_url" target="_blank">⬇</a> }
+                        @if (v.fileUrl) { <a class="btn btn-sm btn-ghost" [href]="v.fileUrl" target="_blank">⬇</a> }
                         <button class="btn btn-sm btn-ghost" (click)="restore(v)" title="Restaurer cette version">↺</button>
                       </td>
                     </tr>
@@ -382,7 +383,7 @@ export class DocumentEditor {
           project: pid as unknown as number,
           template: null as unknown as number,
           title: '',
-          confidentiality: 'internal',
+          confidentiality: Confidentiality.Internal,
           data: {},
         });
         if (pid) this.loadProject(pid);
@@ -498,13 +499,13 @@ export class DocumentEditor {
     const p = this.selectedProject();
     const ctx: Record<string, unknown> = {
       project_name: p?.name ?? '',
-      client_name: p?.client_name ?? '',
+      client_name: p?.clientName ?? '',
       project_reference: p?.reference ?? '',
       project_description: p?.description ?? '',
       company_name: this.companyName(),
       document_title: d?.title ?? '',
       today: new Date().toLocaleDateString('fr-FR'),
-      version: `v${d?.current_version ?? 0}`,
+      version: `v${d?.currentVersion ?? 0}`,
     };
     for (const [k, v] of Object.entries(d?.data ?? {})) {
       if (typeof v === 'string' || typeof v === 'number') ctx[k] = v;
@@ -638,11 +639,11 @@ export class DocumentEditor {
   restore(v: DocumentVersion) {
     const d = this.doc();
     if (!d?.id || !v.id) return;
-    if (!confirm(`Restaurer la version v${v.version_number} ? Une nouvelle version en sera créée.`)) return;
+    if (!confirm(`Restaurer la version v${v.versionNumber} ? Une nouvelle version en sera créée.`)) return;
     const initials = this.gen.author_initials.trim() || '—';
     this.service.restoreVersion(d.id, v.id, initials).subscribe({
       next: () => {
-        this.toast.success(`Version v${v.version_number} restaurée.`);
+        this.toast.success(`Version v${v.versionNumber} restaurée.`);
         this.service.get(d.id!).subscribe((fresh) => this.doc.set(fresh));
       },
       error: () => this.toast.error('Restauration impossible.'),

@@ -112,7 +112,7 @@ const TYPE_TABS: TypeTab[] = [
                     <span class="tpl-ico">📋</span>
                     <div class="tpl-title">
                       <strong>{{ ft.name }}</strong>
-                      <span class="tpl-sub">{{ 'templates.form_summary' | transloco: { q: qCount(ft), d: ft.diagrams.length, f: ft.form_count } }}</span>
+                      <span class="tpl-sub">{{ 'templates.form_summary' | transloco: { q: qCount(ft), d: ft.diagrams.length, f: ft.formCount } }}</span>
                     </div>
                   </div>
                   <p class="tpl-desc">{{ ft.description || '—' }}</p>

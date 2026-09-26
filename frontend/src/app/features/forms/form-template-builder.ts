@@ -13,6 +13,7 @@ import { FormPreview } from './form-preview';
 import { CompanyService } from '../../core/services/company.service';
 import {
   Choice,
+  Confidentiality,
   FormDiagram,
   FormField,
   FormSection,
@@ -77,7 +78,7 @@ const VARIANTS: { value: string; label: string }[] = [
               </div>
               <div class="field">
                 <label>Message de confirmation</label>
-                <input [(ngModel)]="m.success_message" />
+                <input [(ngModel)]="m.successMessage" />
               </div>
               <div class="field">
                 <label>Langue</label>
@@ -87,7 +88,7 @@ const VARIANTS: { value: string; label: string }[] = [
               </div>
               <div class="field">
                 <label>Modèle de rapport (Word / PDF)</label>
-                <select [(ngModel)]="m.report_template">
+                <select [(ngModel)]="m.reportTemplate">
                   <option [ngValue]="null">— aucun —</option>
                   @for (t of reportTemplates(); track t.id) { <option [ngValue]="t.id">{{ t.name }} ({{ t.doc_type }})</option> }
                 </select>
@@ -113,7 +114,7 @@ const VARIANTS: { value: string; label: string }[] = [
         <!-- ============ QUESTIONS & APPARENCE ============ -->
         <mat-tab label="Questions ({{ qCount(m) }})">
           <div class="tabpad">
-            <app-form-appearance-editor [theme]="theme(m)" [(showProgress)]="m.show_progress!" (changed)="touch()" />
+            <app-form-appearance-editor [theme]="theme(m)" [(showProgress)]="m.showProgress!" (changed)="touch()" />
             <app-form-schema-editor [sections]="sections(m)" (changed)="touch()" />
           </div>
         </mat-tab>
@@ -224,7 +225,7 @@ const VARIANTS: { value: string; label: string }[] = [
               <button class="btn btn-sm btn-ghost" (click)="showPreview.set(false)">✕ Fermer</button>
             </div>
             <app-form-preview [title]="m.name" [description]="m.description"
-              [sections]="sections(m)" [theme]="theme(m)" [showProgress]="m.show_progress !== false"
+              [sections]="sections(m)" [theme]="theme(m)" [showProgress]="m.showProgress !== false"
               [logoUrl]="logoUrl()" [companyName]="companyName()" />
           </div>
         </div>
@@ -276,7 +277,7 @@ export class FormTemplateBuilder {
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
     this.docSvc.choices().subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
-    this.companySvc.get().subscribe((c) => { this.logoUrl.set(c.logo_url || null); this.companyName.set(c.name || null); });
+    this.companySvc.get().subscribe((c) => { this.logoUrl.set(c.logoUrl || null); this.companyName.set(c.name || null); });
     this.docSvc.templates({ page_size: 1000 }).subscribe((r) => this.reportTemplates.set(
       r.results.filter((t) => t.doc_type === 'docx' || t.doc_type === 'pdf')
         .map((t) => ({ id: t.id, name: t.name, doc_type: t.doc_type }))));
@@ -290,8 +291,8 @@ export class FormTemplateBuilder {
         this.model.set(this.normalize({
           name: '', description: '', schema: [], diagrams: [],
           language: 'fr',
-          confidentiality: 'internal', success_message: 'Merci, votre réponse a bien été enregistrée.',
-          is_active: true, scope: 'global', projects: [],
+          confidentiality: Confidentiality.Internal, successMessage: 'Merci, votre réponse a bien été enregistrée.',
+          isActive: true, scope: 'global', projects: [],
         } as FormTemplate));
       }
     });
@@ -303,7 +304,7 @@ export class FormTemplateBuilder {
   private normalize(t: FormTemplate): FormTemplate {
     t.schema = FormSchemaEditor.toSections((t.schema || []) as any[]);
     if (!t.theme) t.theme = { layout: 'card', accent: '#ec6608', background: '#f4f5f7' };
-    if (t.show_progress === undefined) t.show_progress = true;
+    if (t.showProgress === undefined) t.showProgress = true;
     return t;
   }
   sections(m: FormTemplate): FormSection[] { return m.schema as FormSection[]; }

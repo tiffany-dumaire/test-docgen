@@ -11,7 +11,7 @@ import { FormSchemaEditor } from './form-schema-editor';
 import { FormAppearanceEditor } from './form-appearance-editor';
 import { FormPreview } from './form-preview';
 import { CompanyService } from '../../core/services/company.service';
-import { Choice, FormField, FormSection, FormSubmission, OnlineForm, Project } from '../../core/models';
+import { Choice, Confidentiality, FormField, FormSection, FormSubmission, OnlineForm, Project } from '../../core/models';
 
 @Component({
   selector: 'app-form-builder',
@@ -54,16 +54,16 @@ import { Choice, FormField, FormSection, FormSubmission, OnlineForm, Project } f
             </div>
             <div class="field">
               <label>Message de confirmation</label>
-              <input [(ngModel)]="m.success_message" />
+              <input [(ngModel)]="m.successMessage" />
             </div>
             <div class="field">
               <label>Date limite de réponse</label>
               <input type="date" [ngModel]="m.deadline" (ngModelChange)="m.deadline = $event || null" />
             </div>
-            <label class="chk"><input type="checkbox" [(ngModel)]="m.is_open" /> Ouvert aux réponses</label>
+            <label class="chk"><input type="checkbox" [(ngModel)]="m.isOpen" /> Ouvert aux réponses</label>
           </div>
 
-          <app-form-appearance-editor [theme]="theme(m)" [(showProgress)]="m.show_progress!" (changed)="touch()" />
+          <app-form-appearance-editor [theme]="theme(m)" [(showProgress)]="m.showProgress!" (changed)="touch()" />
 
           <app-form-schema-editor [sections]="sections(m)" (changed)="touch()" />
 
@@ -73,18 +73,18 @@ import { Choice, FormField, FormSection, FormSubmission, OnlineForm, Project } f
         </div>
 
         <div class="stack">
-          @if (isEdit() && m.short_url) {
+          @if (isEdit() && m.shortUrl) {
             <div class="card">
               <h3>Lien de partage</h3>
               <div class="linkbox">
-                <input readonly [value]="m.short_url" />
-                <button class="btn btn-sm btn-ghost" (click)="copy(m.short_url!)">Copier</button>
+                <input readonly [value]="m.shortUrl" />
+                <button class="btn btn-sm btn-ghost" (click)="copy(m.shortUrl!)">Copier</button>
               </div>
-              <small class="muted">Le lien ouvre la page publique de remplissage. Clics : {{ m.short_link?.click_count }}</small>
+              <small class="muted">Le lien ouvre la page publique de remplissage. Clics : {{ m.shortLink?.clickCount }}</small>
             </div>
           }
 
-          @if (isEdit() && m.report_template) {
+          @if (isEdit() && m.reportTemplate) {
             <div class="card">
               <div class="row between">
                 <h3>Rapport statistiques</h3>
@@ -120,7 +120,7 @@ import { Choice, FormField, FormSection, FormSubmission, OnlineForm, Project } f
               @if (submissions().length) {
                 @for (s of submissions(); track s.id) {
                   <div class="sub">
-                    <div class="tag">{{ s.submitted_at | date: 'dd/MM/yy HH:mm' }}</div>
+                    <div class="tag">{{ s.submittedAt | date: 'dd/MM/yy HH:mm' }}</div>
                     @for (entry of entries(s); track entry[0]) {
                       <div><strong>{{ entry[0] }} :</strong> {{ entry[1] }}</div>
                     }
@@ -140,7 +140,7 @@ import { Choice, FormField, FormSection, FormSubmission, OnlineForm, Project } f
               <button class="btn btn-sm btn-ghost" (click)="showPreview.set(false)">✕ Fermer</button>
             </div>
             <app-form-preview [title]="m.title" [description]="m.description"
-              [sections]="sections(m)" [theme]="theme(m)" [showProgress]="m.show_progress !== false"
+              [sections]="sections(m)" [theme]="theme(m)" [showProgress]="m.showProgress !== false"
               [logoUrl]="logoUrl()" [companyName]="companyName()" />
           </div>
         </div>
@@ -193,7 +193,7 @@ export class FormBuilder {
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
     this.docSvc.choices().subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
-    this.companySvc.get().subscribe((c) => { this.logoUrl.set(c.logo_url || null); this.companyName.set(c.name || null); });
+    this.companySvc.get().subscribe((c) => { this.logoUrl.set(c.logoUrl || null); this.companyName.set(c.name || null); });
     setTimeout(() => {
       if (this.id) {
         this.service.get(+this.id).subscribe((f) => { this.model.set(this.normalize(f)); this.loadDiagrams(); });
@@ -201,8 +201,8 @@ export class FormBuilder {
       } else {
         this.model.set(this.normalize({
           title: '', description: '', project: null, schema: [], diagrams: [],
-          confidentiality: 'internal', is_open: true, show_progress: true,
-          success_message: 'Merci, votre réponse a bien été enregistrée.',
+          confidentiality: Confidentiality.Internal, isOpen: true, showProgress: true,
+          successMessage: 'Merci, votre réponse a bien été enregistrée.',
         } as OnlineForm));
       }
     });
@@ -213,7 +213,7 @@ export class FormBuilder {
   private normalize(f: OnlineForm): OnlineForm {
     f.schema = FormSchemaEditor.toSections((f.schema || []) as any[]);
     if (!f.theme) f.theme = { layout: 'card', accent: '#ec6608', background: '#f4f5f7' };
-    if (f.show_progress === undefined) f.show_progress = true;
+    if (f.showProgress === undefined) f.showProgress = true;
     return f;
   }
   sections(m: OnlineForm): FormSection[] { return m.schema as FormSection[]; }

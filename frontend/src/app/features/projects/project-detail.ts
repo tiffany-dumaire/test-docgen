@@ -23,10 +23,10 @@ import { Router } from '@angular/router';
     @if (project(); as p) {
       <div class="row between">
         <div class="row" style="gap:.9rem;align-items:center">
-          @if (p.logo_url) { <img class="proj-logo" [src]="p.logo_url" alt="logo projet" /> }
+          @if (p.logoUrl) { <img class="proj-logo" [src]="p.logoUrl" alt="logo projet" /> }
           <div>
             <h1 style="margin:0">{{ p.name }}</h1>
-            <div class="muted">{{ p.client_name }} · {{ p.reference || 'sans référence' }}
+            <div class="muted">{{ p.clientName }} · {{ p.reference || 'sans référence' }}
               @if (p.parent) { · sous-projet }
             </div>
           </div>
@@ -52,20 +52,20 @@ import { Router } from '@angular/router';
                 }
               </div>
             }
-            @if (p.clients_detail?.length) {
+            @if (p.clientsDetail?.length) {
               <div class="card"><h3>🤝 Clients associés</h3>
-                <div class="row wrap" style="gap:.4rem">@for (cl of p.clients_detail; track cl.id) { <span class="badge badge-type">{{ cl.name }}</span> }</div>
+                <div class="row wrap" style="gap:.4rem">@for (cl of p.clientsDetail; track cl.id) { <span class="badge badge-type">{{ cl.name }}</span> }</div>
               </div>
             }
             <div class="grid-cards">
               <div class="card"><h3>👤 Contacts client</h3>
                 @for (c of clientContacts(p); track c.id) {
-                  <div class="contact"><strong>{{ c.full_name }}</strong><div class="muted">{{ c.role }}</div><div class="tag">{{ c.email }} · {{ c.phone }}</div></div>
+                  <div class="contact"><strong>{{ c.fullName }}</strong><div class="muted">{{ c.role }}</div><div class="tag">{{ c.email }} · {{ c.phone }}</div></div>
                 } @empty { <div class="muted">Aucun contact client.</div> }
               </div>
               <div class="card"><h3>🧑‍💼 Contacts internes</h3>
                 @for (c of internalContacts(p); track c.id) {
-                  <div class="contact"><strong>{{ c.full_name }}</strong><div class="muted">{{ c.role }}</div><div class="tag">{{ c.email }} · {{ c.phone }}</div></div>
+                  <div class="contact"><strong>{{ c.fullName }}</strong><div class="muted">{{ c.role }}</div><div class="tag">{{ c.email }} · {{ c.phone }}</div></div>
                 } @empty { <div class="muted">Aucun contact interne.</div> }
               </div>
             </div>
@@ -74,16 +74,16 @@ import { Router } from '@angular/router';
 
         <mat-tab label="Client">
           <div class="tabpad">
-            @if (p.clients_detail?.length) {
-              @for (cl of p.clients_detail; track cl.id) {
+            @if (p.clientsDetail?.length) {
+              @for (cl of p.clientsDetail; track cl.id) {
                 <div class="card">
                   <div class="row between" style="align-items:flex-start">
                     <div class="row" style="gap:.9rem;align-items:center">
-                      @if (cl.logo_url) { <img class="client-logo" [src]="cl.logo_url" alt="logo client" /> }
+                      @if (cl.logoUrl) { <img class="client-logo" [src]="cl.logoUrl" alt="logo client" /> }
                       <div>
                         <h3 style="margin:0">{{ cl.name }}</h3>
-                        @if (cl.contact_name) { <div class="muted">Contact principal : {{ cl.contact_name }}</div> }
-                        @if (cl.project_count) { <div class="tag">{{ cl.project_count }} projet(s)</div> }
+                        @if (cl.contactName) { <div class="muted">Contact principal : {{ cl.contactName }}</div> }
+                        @if (cl.projectCount) { <div class="tag">{{ cl.projectCount }} projet(s)</div> }
                       </div>
                     </div>
                     <a class="btn btn-sm btn-ghost" [routerLink]="['/clients', cl.id]">Fiche client</a>
@@ -96,8 +96,8 @@ import { Router } from '@angular/router';
                   </div>
                 </div>
               }
-            } @else if (p.client_name) {
-              <div class="card"><h3 style="margin:0">{{ p.client_name }}</h3>
+            } @else if (p.clientName) {
+              <div class="card"><h3 style="margin:0">{{ p.clientName }}</h3>
                 <p class="muted" style="margin:.4rem 0 0">Aucune fiche client détaillée n'est associée à ce projet.</p></div>
             } @else {
               <div class="card"><p class="muted" style="margin:0">Aucun client associé à ce projet.</p></div>
@@ -107,7 +107,7 @@ import { Router } from '@angular/router';
               @if (clientContacts(p).length) {
                 <table><thead><tr><th>Nom</th><th>Rôle</th><th>Email</th><th>Téléphone</th></tr></thead>
                   <tbody>@for (c of clientContacts(p); track c.id) {
-                    <tr><td><b>{{ c.full_name }}</b></td><td>{{ c.role || '—' }}</td>
+                    <tr><td><b>{{ c.fullName }}</b></td><td>{{ c.role || '—' }}</td>
                       <td>@if (c.email) { <a [href]="'mailto:' + c.email">{{ c.email }}</a> } @else { — }</td>
                       <td>{{ c.phone || '—' }}</td></tr>
                   }</tbody></table>
@@ -118,7 +118,7 @@ import { Router } from '@angular/router';
               @if (internalContacts(p).length) {
                 <table><thead><tr><th>Nom</th><th>Rôle</th><th>Email</th><th>Téléphone</th></tr></thead>
                   <tbody>@for (c of internalContacts(p); track c.id) {
-                    <tr><td><b>{{ c.full_name }}</b></td><td>{{ c.role || '—' }}</td>
+                    <tr><td><b>{{ c.fullName }}</b></td><td>{{ c.role || '—' }}</td>
                       <td>@if (c.email) { <a [href]="'mailto:' + c.email">{{ c.email }}</a> } @else { — }</td>
                       <td>{{ c.phone || '—' }}</td></tr>
                   }</tbody></table>
@@ -130,9 +130,9 @@ import { Router } from '@angular/router';
         <mat-tab label="Informations complémentaires">
           <div class="tabpad">
             <div class="card"><h3>🧩 Champs personnalisés</h3>
-              @if (p.custom_field_defs?.length) {
+              @if (p.customFieldDefs?.length) {
                 <div class="infogrid">
-                  @for (def of p.custom_field_defs; track def.key) {
+                  @for (def of p.customFieldDefs; track def.key) {
                     <div><span class="k">{{ def.label }}</span><span class="v">{{ cfDisplay(p, def) }}</span></div>
                   }
                 </div>
@@ -191,7 +191,7 @@ import { Router } from '@angular/router';
               @if (p.assignments?.length) {
                 <table><thead><tr><th>Membre</th><th>Rôle</th><th>Équipe</th><th>Email</th></tr></thead>
                   <tbody>@for (a of p.assignments; track a.id) {
-                    <tr><td><b>{{ a.member_name }}</b></td><td>{{ a.role || '—' }}</td><td>{{ a.team_name }}</td><td>{{ a.member_email || '—' }}</td></tr>
+                    <tr><td><b>{{ a.memberName }}</b></td><td>{{ a.role || '—' }}</td><td>{{ a.teamName }}</td><td>{{ a.memberEmail || '—' }}</td></tr>
                   }</tbody></table>
               } @else { <div class="muted">Aucun membre affecté.</div> }
             </div>
@@ -199,7 +199,7 @@ import { Router } from '@angular/router';
               @if (members().length) {
                 <table><thead><tr><th>Utilisateur</th><th>Email</th><th>Rôles</th><th></th></tr></thead>
                   <tbody>@for (m of members(); track m.id) {
-                    <tr><td><b>{{ m.user_name || '—' }}</b></td><td>{{ m.user_email }}</td><td>{{ (m.roles || []).join(', ') || '—' }}</td>
+                    <tr><td><b>{{ m.userName || '—' }}</b></td><td>{{ m.userEmail }}</td><td>{{ (m.roles || []).join(', ') || '—' }}</td>
                       <td><button class="btn btn-sm btn-danger" (click)="removeMember(m)">✕</button></td></tr>
                   }</tbody></table>
               } @else { <div class="muted">Aucun utilisateur rattaché.</div> }
@@ -222,9 +222,9 @@ import { Router } from '@angular/router';
                 <table><thead><tr><th>Titre</th><th>Type</th><th>Confidentialité</th><th>Version</th><th></th></tr></thead>
                   <tbody>@for (d of documents(); track d.id) {
                     <tr><td><a [routerLink]="['/documents', d.id]">{{ d.title }}</a></td>
-                      <td><span class="badge badge-type">{{ d.doc_type }}</span></td>
-                      <td><span class="badge" [class]="'badge-' + d.confidentiality">{{ d.confidentiality_display }}</span></td>
-                      <td>v{{ d.current_version }}</td>
+                      <td><span class="badge badge-type">{{ d.docType }}</span></td>
+                      <td><span class="badge" [class]="'badge-' + d.confidentiality">{{ d.confidentialityDisplay }}</span></td>
+                      <td>v{{ d.currentVersion }}</td>
                       <td><a class="btn btn-sm btn-ghost" [routerLink]="['/documents', d.id]">Ouvrir</a></td></tr>
                   }</tbody></table>
               } @else { <div class="muted">Aucun document.</div> }
@@ -245,8 +245,8 @@ import { Router } from '@angular/router';
                 <table><thead><tr><th>Titre</th><th>Modèle</th><th>Lien réduit</th><th>Réponses</th></tr></thead>
                   <tbody>@for (f of forms(); track f.id) {
                     <tr><td><a [routerLink]="['/forms', f.id]">{{ f.title }}</a></td>
-                      <td>{{ f.template_name || '—' }}</td>
-                      <td><a [href]="f.short_url" target="_blank">{{ f.short_url }}</a></td><td>{{ f.submission_count }}</td></tr>
+                      <td>{{ f.templateName || '—' }}</td>
+                      <td><a [href]="f.shortUrl" target="_blank">{{ f.shortUrl }}</a></td><td>{{ f.submissionCount }}</td></tr>
                   }</tbody></table>
               } @else { <div class="muted">Aucun formulaire lié.</div> }
             </div>
@@ -340,21 +340,21 @@ import { Router } from '@angular/router';
 
               <div class="timeline">
               @for (j of visibleJournal(); track j.id) {
-                <div class="jentry" [class.auto]="j.is_automatic" [style.--jc]="catColor(j)">
+                <div class="jentry" [class.auto]="j.isAutomatic" [style.--jc]="catColor(j)">
                   <div class="jicon">{{ eventIcon(j) }}</div>
                   <div class="jbody">
                     <div class="jmeta">
-                      <span class="badge" [class.badge-internal]="j.confidentiality==='internal'" [class.badge-confidential]="j.confidentiality==='confidential'" [class.badge-restricted]="j.confidentiality==='restricted'" [class.badge-public]="j.confidentiality==='public'">{{ j.category_label || j.category }}</span>
-                      @if (j.is_automatic) { <span class="chip-auto">auto</span> }
-                      <span class="muted jdate">{{ j.author || '—' }} · {{ j.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                      <span class="badge" [class.badge-internal]="j.confidentiality==='internal'" [class.badge-confidential]="j.confidentiality==='confidential'" [class.badge-restricted]="j.confidentiality==='restricted'" [class.badge-public]="j.confidentiality==='public'">{{ j.categoryLabel || j.category }}</span>
+                      @if (j.isAutomatic) { <span class="chip-auto">auto</span> }
+                      <span class="muted jdate">{{ j.author || '—' }} · {{ j.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
-                    @if (j.body_html) {
-                      <div class="rich" [innerHTML]="j.body_html"></div>
+                    @if (j.bodyHtml) {
+                      <div class="rich" [innerHTML]="j.bodyHtml"></div>
                     } @else {
                       <div>{{ j.body }}</div>
                     }
                   </div>
-                  @if (!j.is_automatic) {
+                  @if (!j.isAutomatic) {
                     <button class="btn btn-sm btn-danger jdel" (click)="delJournal(j)">✕</button>
                   }
                 </div>
@@ -479,12 +479,12 @@ export class ProjectDetail {
     team_updated: '🛠️', contact_changed: '✏️',
   };
   eventIcon(j: JournalEntry): string {
-    if (j.is_automatic && j.event) return ProjectDetail.EVENT_ICONS[j.event] || 'ℹ️';
+    if (j.isAutomatic && j.event) return ProjectDetail.EVENT_ICONS[j.event] || 'ℹ️';
     return ({ note: '🗒️', decision: '✅', risk: '⚠️', action: '⚡',
               incident: '🔥', info: 'ℹ️', event: '•' } as Record<string, string>)[j.category] || '🗒️';
   }
   cfDisplay(p: any, def: { key: string; type?: string }): string {
-    const v = (p.custom_fields || {})[def.key];
+    const v = (p.customFields || {})[def.key];
     if (v === undefined || v === null || v === '') return '—';
     if (def.type === 'boolean') return v ? 'Oui' : 'Non';
     return String(v);
@@ -539,7 +539,7 @@ export class ProjectDetail {
       contact_added: '#2F6B45', contact_removed: '#A32638', project_added: '#5B4F8A',
       team_updated: '#A34E2A', contact_changed: '#806A2E',
     };
-    if (j.is_automatic && j.event && byEvent[j.event]) return byEvent[j.event];
+    if (j.isAutomatic && j.event && byEvent[j.event]) return byEvent[j.event];
     return ({ note: '#5B5A55', decision: '#2F6B45', risk: '#B04A12', action: '#2E5E8E',
               incident: '#A1202A', info: '#2D6E7E', event: '#5B4F8A' } as Record<string, string>)[j.category] || '#5B5A55';
   }
@@ -548,7 +548,7 @@ export class ProjectDetail {
   }
   visibleJournal(): JournalEntry[] {
     const all = this.journal();
-    return this.showAuto ? all : all.filter((j) => !j.is_automatic);
+    return this.showAuto ? all : all.filter((j) => !j.isAutomatic);
   }
 
   constructor() {
@@ -598,7 +598,7 @@ export class ProjectDetail {
   }
   addJournal(pid: number) {
     if (!this.hasContent(this.njHtml)) return;
-    this.extras.addJournal({ project: pid, category: this.njCat, confidentiality: this.njConf, body_html: this.njHtml }).subscribe(() => {
+    this.extras.addJournal({ project: pid, category: this.njCat, confidentiality: this.njConf, bodyHtml: this.njHtml }).subscribe(() => {
       this.njHtml=''; this.reloadExtras(pid); });
   }
   delJournal(j: JournalEntry) { if (j.id) this.extras.removeJournal(j.id).subscribe(() => this.reloadExtras(+this.id)); }

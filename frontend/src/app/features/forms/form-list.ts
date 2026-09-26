@@ -21,16 +21,16 @@ import { OnlineForm } from '../../core/models';
           <div class="card">
             <div class="row between">
               <strong>{{ f.title }}</strong>
-              <span class="badge" [class]="'badge-' + f.confidentiality">{{ f.confidentiality_display }}</span>
+              <span class="badge" [class]="'badge-' + f.confidentiality">{{ f.confidentialityDisplay }}</span>
             </div>
             <p class="muted" style="min-height:2.4em">{{ f.description }}</p>
             <div class="linkbox">
-              <input readonly [value]="f.short_url" #urlInput />
-              <button class="btn btn-sm btn-ghost" (click)="copy(f.short_url!)">{{ 'forms.copy' | transloco }}</button>
+              <input readonly [value]="f.shortUrl" #urlInput />
+              <button class="btn btn-sm btn-ghost" (click)="copy(f.shortUrl!)">{{ 'forms.copy' | transloco }}</button>
             </div>
             <div class="row between" style="margin-top:.6rem">
               <span class="tag">
-                {{ (f.is_open ? 'forms.open' : 'forms.closed') | transloco }} · {{ 'forms.responses' | transloco: { count: f.submission_count } }}
+                {{ (f.isOpen ? 'forms.open' : 'forms.closed') | transloco }} · {{ 'forms.responses' | transloco: { count: f.submissionCount } }}
               </span>
               <a class="btn btn-sm btn-ghost" [routerLink]="['/forms', f.id]">{{ 'forms.manage' | transloco }}</a>
             </div>

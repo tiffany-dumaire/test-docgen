@@ -237,7 +237,7 @@ export class LayoutEditor implements OnInit {
     this.companySvc.get().subscribe({
       next: (c) => {
         if (c?.name) this.companyName.set(c.name);
-        this.companyLogo.set(c?.logo_url || c?.logo || null);
+        this.companyLogo.set(c?.logoUrl || c?.logo || null);
       },
       error: () => { /* aperçu avec valeurs d'exemple */ },
     });

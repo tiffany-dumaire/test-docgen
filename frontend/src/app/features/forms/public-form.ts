@@ -38,7 +38,7 @@ import { OnlineForm, FormSection, FormField, FormContent } from '../../core/mode
 
           @if (f.description) { <p class="pf-desc">{{ f.description }}</p> }
 
-          @if (!f.is_open) {
+          @if (!f.isOpen) {
             <p class="closed">Ce formulaire n'accepte plus de réponses.</p>
           } @else {
             @if (showProgress()) {
@@ -215,9 +215,9 @@ export class PublicForm {
 
   private data: Record<string, any> = {};
 
-  logo = computed(() => this.form()?.logo_url || null);
-  companyName = computed(() => this.form()?.company_name || null);
-  showProgress = computed(() => this.form()?.show_progress !== false);
+  logo = computed(() => this.form()?.logoUrl || null);
+  companyName = computed(() => this.form()?.companyName || null);
+  showProgress = computed(() => this.form()?.showProgress !== false);
   layout = computed(() => this.form()?.theme?.layout || 'card');
   cover = computed(() => this.form()?.theme?.cover_image || null);
   bg = computed(() => this.form()?.theme?.background || '#f4f5f7');
@@ -246,7 +246,7 @@ export class PublicForm {
       this.service.publicForm(this.code).subscribe({
         next: (f) => {
           this.form.set(f);
-          this.successMessage.set(f.success_message);
+          this.successMessage.set(f.successMessage);
           document.documentElement.style.setProperty('--pf-accent', f.theme?.accent || '#ec6608');
           (document.querySelector('app-public-form') as HTMLElement)?.style.setProperty('--pf-accent', f.theme?.accent || '#ec6608');
           this.loading.set(false);

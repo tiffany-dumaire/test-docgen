@@ -63,7 +63,7 @@ export class OrgChart {
     return this.teams.filter((t) => t.parent === team.id);
   }
   relatedNames(team: Team): string {
-    const ids = team.related_teams ?? [];
+    const ids = team.relatedTeams ?? [];
     if (!ids.length) return '';
     return this.teams.filter((t) => ids.includes(t.id!)).map((t) => t.name).join(', ');
   }

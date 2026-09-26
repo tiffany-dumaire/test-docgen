@@ -16,8 +16,8 @@ import { Project, Team, TeamMember } from '../../core/models';
         <div>
           <h1><span class="tdot" [style.background]="t.color || '#38BDF8'"></span> {{ t.name }}</h1>
           <div class="muted">
-            {{ t.member_count }} collaborateur(s) · {{ t.project_count }} projet(s)
-            @if (t.parent_name) { · sous-équipe de {{ t.parent_name }} }
+            {{ t.memberCount }} collaborateur(s) · {{ t.projectCount }} projet(s)
+            @if (t.parentName) { · sous-équipe de {{ t.parentName }} }
           </div>
         </div>
         <a class="btn btn-ghost" routerLink="/company">← Mon entreprise</a>
@@ -56,7 +56,7 @@ import { Project, Team, TeamMember } from '../../core/models';
                   <label class="pick" [class.on]="memberIds().includes(c.id!)">
                     <input type="checkbox" [checked]="memberIds().includes(c.id!)" (change)="toggleMember(c.id!)" />
                     <span class="ava">{{ c.initials }}</span>
-                    <span><b>{{ c.full_name }}</b><br><span class="muted">{{ c.role || '—' }}</span></span>
+                    <span><b>{{ c.fullName }}</b><br><span class="muted">{{ c.role || '—' }}</span></span>
                   </label>
                 }
                 @if (!allCollaborators().length) { <div class="muted">Aucun collaborateur. Ajoutez-en depuis « Mon entreprise → Collaborateurs ».</div> }
@@ -76,7 +76,7 @@ import { Project, Team, TeamMember } from '../../core/models';
                 @for (p of allProjects(); track p.id) {
                   <label class="pick" [class.on]="projectIds().includes(p.id!)">
                     <input type="checkbox" [checked]="projectIds().includes(p.id!)" (change)="toggleProject(p.id!)" />
-                    <span><b>{{ p.name }}</b><br><span class="muted">{{ p.client_name }} · {{ statusLabel(p.status) }}</span></span>
+                    <span><b>{{ p.name }}</b><br><span class="muted">{{ p.clientName }} · {{ statusLabel(p.status) }}</span></span>
                   </label>
                 }
                 @if (!allProjects().length) { <div class="muted">Aucun projet.</div> }
@@ -84,15 +84,15 @@ import { Project, Team, TeamMember } from '../../core/models';
               <button class="btn btn-primary" (click)="saveProjects()" [disabled]="saving()">Enregistrer les projets</button>
             </div>
 
-            @if (t.projects_detail?.length) {
+            @if (t.projectsDetail?.length) {
               <div class="card">
                 <h3>Projets actuels</h3>
                 <table>
                   <thead><tr><th>Projet</th><th>Client</th><th>Statut</th><th></th></tr></thead>
                   <tbody>
-                    @for (p of t.projects_detail!; track p.id) {
+                    @for (p of t.projectsDetail!; track p.id) {
                       <tr><td><a [routerLink]="['/projects', p.id]">{{ p.name }}</a></td>
-                        <td>{{ p.client_name }}</td>
+                        <td>{{ p.clientName }}</td>
                         <td><span class="badge badge-type">{{ statusLabel(p.status) }}</span></td>
                         <td><a class="btn btn-sm btn-ghost" [routerLink]="['/projects', p.id]">Ouvrir</a></td></tr>
                     }
@@ -168,8 +168,8 @@ export class TeamDetail {
       this.teamSvc.team(+this.id).subscribe((t) => {
         this.team.set(t);
         this._memberIds.set((t.members || []).map((m) => m.id!));
-        this._projectIds.set((t.projects_detail || []).map((p) => p.id));
-        this._relatedIds.set(t.related_teams || []);
+        this._projectIds.set((t.projectsDetail || []).map((p) => p.id));
+        this._relatedIds.set(t.relatedTeams || []);
       });
       this.teamSvc.teams().subscribe((r) => this.allTeams.set(r.results));
       this.teamSvc.members().subscribe((r) => this.allCollaborators.set(r.results));
@@ -195,9 +195,9 @@ export class TeamDetail {
     const t = this.team()!;
     this.patch({ name: t.name, description: t.description, color: t.color, parent: t.parent ?? null });
   }
-  saveMembers() { this.patch({ member_ids: this._memberIds() }); }
-  saveProjects() { this.patch({ project_ids: this._projectIds() }); }
-  saveRelated() { this.patch({ related_team_ids: this._relatedIds() }); }
+  saveMembers() { this.patch({ memberIds: this._memberIds() }); }
+  saveProjects() { this.patch({ projectIds: this._projectIds() }); }
+  saveRelated() { this.patch({ relatedTeamIds: this._relatedIds() }); }
 
   private patch(data: Partial<Team>) {
     this.saving.set(true);
@@ -205,8 +205,8 @@ export class TeamDetail {
       next: (t) => {
         this.team.set(t);
         this._memberIds.set((t.members || []).map((m) => m.id!));
-        this._projectIds.set((t.projects_detail || []).map((p) => p.id));
-        this._relatedIds.set(t.related_teams || []);
+        this._projectIds.set((t.projectsDetail || []).map((p) => p.id));
+        this._relatedIds.set(t.relatedTeams || []);
         this.saving.set(false);
         this.toast.success('Équipe mise à jour.');
       },
