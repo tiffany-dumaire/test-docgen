@@ -524,6 +524,30 @@
             </div>
           </mat-tab>
         }
+
+        <!-- ===================== APERÇU ===================== -->
+        <mat-tab label="Aperçu">
+          <div class="tabpad">
+            <div class="card stack">
+              <div class="row between">
+                <h3>Aperçu du modèle</h3>
+                <button class="btn btn-sm btn-primary" (click)="refreshPreview()" [disabled]="previewing() || !isEdit()">
+                  {{ previewing() ? 'Génération…' : '↻ Rafraîchir l\'aperçu' }}
+                </button>
+              </div>
+              <p class="muted" style="margin:0">Aperçu fidèle avec la page de garde, les styles (police, taille, couleur, alignement) et l'en-tête / pied de page du modèle, alimenté par des données d'exemple.</p>
+              @if (!isEdit()) {
+                <p class="muted" style="margin:0">Enregistrez d'abord le modèle pour afficher son aperçu.</p>
+              } @else if (previewKind() === 'image' && previewImg()) {
+                <img [src]="previewImg()" class="pv-inline-img" alt="aperçu" />
+              } @else if (previewFrame()) {
+                <iframe class="pv-inline" [src]="previewFrame()" title="Aperçu"></iframe>
+              } @else {
+                <p class="muted" style="margin:0">Cliquez sur « Rafraîchir l'aperçu » pour générer un aperçu à jour du modèle.</p>
+              }
+            </div>
+          </div>
+        </mat-tab>
       </mat-tab-group>
 
       <div class="row" style="margin-top:1rem">

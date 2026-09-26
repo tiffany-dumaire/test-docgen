@@ -32,6 +32,100 @@ def _resolved_color(resolved, element, default):
     return props.get("color") or default
 
 
+_ALIGN_CSS = {"left", "center", "right", "justify"}
+
+
+def _style_css(props):
+    """Traduit un style résolu (font/size/bold/italic/color/align/space_after) en CSS."""
+    if not props:
+        return ""
+    st = []
+    if props.get("font"):
+        st.append(f"font-family:'{_esc(props['font'])}','Segoe UI',sans-serif")
+    if props.get("size") not in (None, ""):
+        try:
+            st.append(f"font-size:{float(props['size']):g}pt")
+        except (TypeError, ValueError):
+            pass
+    if "bold" in props:
+        st.append("font-weight:" + ("700" if props["bold"] else "400"))
+    if "italic" in props:
+        st.append("font-style:" + ("italic" if props["italic"] else "normal"))
+    if props.get("color"):
+        st.append(f"color:{_esc(props['color'])}")
+    if props.get("align") in _ALIGN_CSS:
+        st.append(f"text-align:{props['align']}")
+    if props.get("space_after") not in (None, ""):
+        try:
+            st.append(f"margin-bottom:{float(props['space_after']):g}pt")
+        except (TypeError, ValueError):
+            pass
+    return ";".join(st)
+
+
+def _base_and_override(base_css, resolved, element):
+    """Style de base (défaut charte) + surcharge résolue (qui l'emporte)."""
+    ov = _style_css((resolved or {}).get(element))
+    return base_css + (";" + ov if ov else "")
+
+
+def _heading_css(lvl, resolved):
+    """Style d'un titre h1..h5 : défauts de la charte (HEADINGS) + surcharge résolue."""
+    from . import housestyle as HS
+    fname, size, color = HS.HEADINGS.get(lvl, ("Montserrat", 12, HS.COLORS["heading"]))
+    weight = (600 if "SemiBold" in fname else 700 if "Bold" in fname
+              else 300 if "Light" in fname else 500)
+    base = (f"font-family:'Montserrat','Segoe UI',sans-serif;font-size:{size}pt;"
+            f"font-weight:{weight};color:{color}")
+    return _base_and_override(base, resolved, f"h{lvl}")
+
+
+def _cover_title_css(resolved):
+    from . import housestyle as HS
+    base = ("font-family:'Montserrat','Segoe UI',sans-serif;font-size:30pt;"
+            f"font-weight:700;color:{HS.COLORS['heading']};text-align:center;margin:0 0 .35em")
+    return _base_and_override(base, resolved, "title")
+
+
+def _cover_subtitle_css(resolved):
+    from . import housestyle as HS
+    base = ("font-family:'Montserrat','Segoe UI',sans-serif;font-size:15pt;"
+            f"font-weight:400;color:{HS.COLORS['muted']};text-align:center;margin:0")
+    return _base_and_override(base, resolved, "subtitle")
+
+
+def _cover_html(ctx, resolved):
+    """Page de garde structurée (titre / sous-titre / logo / méta), façon Word.
+
+    Mirroir de la page de garde du .docx quand aucun calque libre « cover »
+    n'est défini (dans ce cas l'image du calque est rendue par `_blocks_html`).
+    """
+    from . import layout_render as LR
+    if LR.has_layout(ctx, "cover"):
+        return ""
+    settings = ctx.document.template.settings or {}
+    if not settings.get("include_cover", True):
+        return ""
+    pctx = placeholder_context(ctx)
+    title = _esc(interpolate(settings.get("cover_title", "{{document_title}}"), pctx))
+    subtitle = _esc(interpolate(
+        settings.get("cover_subtitle", "{{client_name}} — {{project_name}}"), pctx))
+    logo = _logo_data_uri(ctx)
+    logo_html = f'<img class="cover-logo" src="{logo}"/>' if logo else ""
+    meta = " · ".join(x for x in (
+        _esc(pctx.get("doc_date", "")), _esc(pctx.get("version", "")),
+        _esc(pctx.get("confidentiality", ""))) if x)
+    return (
+        '<div class="page page--doc cover-page">'
+        f'<div class="cover-top">{logo_html}</div>'
+        '<div class="cover-mid">'
+        f'<div class="cover-title" style="{_cover_title_css(resolved)}">{title}</div>'
+        f'<div class="cover-sub" style="{_cover_subtitle_css(resolved)}">{subtitle}</div>'
+        '</div>'
+        f'<div class="cover-bottom">{meta}</div>'
+        '</div>')
+
+
 def _logo_data_uri(ctx):
     import os
     logo = getattr(ctx.company, "logo", None)
@@ -97,6 +191,8 @@ def _blocks_html(ctx, resolved):
     tpl = ctx.document.template
     settings = tpl.settings or {}
     table_hex = "#" + (settings.get("table_color") or "1F497D").lstrip("#")
+    para_css = _style_css((resolved or {}).get("paragraph"))
+    pstyle = f' style="{para_css}"' if para_css else ""
     out = []
 
     # Page de garde / suivi (mise en page libre) intégrées en image
@@ -114,12 +210,11 @@ def _blocks_html(ctx, resolved):
         t = b.get("type")
         if t == "heading":
             lvl = min(max(int(b.get("level", 2)), 1), 5)
-            col = _resolved_color(resolved, f"h{lvl}", table_hex)
-            out.append(f'<h{lvl} style="color:{_esc(col)}">{_esc(interpolate(b.get("text",""), pctx))}</h{lvl}>')
+            out.append(f'<h{lvl} style="{_heading_css(lvl, resolved)}">{_esc(interpolate(b.get("text",""), pctx))}</h{lvl}>')
         elif t == "text":
-            out.append(f'<p>{_esc(interpolate(b.get("text",""), pctx)).replace(chr(10), "<br/>")}</p>')
+            out.append(f'<p{pstyle}>{_esc(interpolate(b.get("text",""), pctx)).replace(chr(10), "<br/>")}</p>')
         elif t == "richtext":
-            out.append(f'<div class="rich">{interpolate(b.get("text",""), pctx)}</div>')
+            out.append(f'<div class="rich"{pstyle}>{interpolate(b.get("text",""), pctx)}</div>')
         elif t in ("bullet_list", "numbered_list"):
             tag = "ol" if t == "numbered_list" else "ul"
             items = "".join(f"<li>{_esc(interpolate(x, pctx))}</li>" for x in (b.get("items") or []) if x)
@@ -468,7 +563,15 @@ table.doc-tbl tbody th{{background:#f1f5f9;color:var(--ink)}}
 .doc-header .rich{{display:inline-block;vertical-align:middle}}
 .doc-footer{{border-top:1px solid #e2e8f0;padding-top:12px;margin-top:36px;color:#64748b;font-size:.78rem}}
 .page--doc .doc-body p{{margin:.5em 0;text-align:justify}}
-.page--doc .doc-body h1{{font-size:1.6rem}} .page--doc .doc-body h2{{font-size:1.3rem}}
+/* Page de garde (aperçu Word) : titre/sous-titre centrés, logo, méta en pied */
+.cover-page{{min-height:1058px;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;text-align:center}}
+.cover-top{{min-height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:8%}}
+.cover-logo{{max-height:96px;max-width:60%;object-fit:contain}}
+.cover-mid{{flex:0 0 auto;margin-top:14%;max-width:90%}}
+.cover-bottom{{margin-top:auto;color:#64748b;font-size:.85rem;letter-spacing:.03em;
+  border-top:1px solid #e2e8f0;padding-top:14px;width:60%}}
+@media(prefers-color-scheme:dark){{.cover-bottom{{color:#94a3b8;border-color:#334155}}}}
 @media(prefers-color-scheme:dark){{.doc-header{{color:#cbd5e1}} .doc-footer{{color:#94a3b8;border-color:#334155}}}}
 .xl-wrap{{overflow-x:auto;margin:.4em 0 1.2em;border:1px solid #e2e8f0;border-radius:6px}}
 table.xl-grid{{border-collapse:collapse;table-layout:fixed;font-size:.82rem;background:#fff}}
@@ -542,9 +645,10 @@ def render(document, ctx):
         from . import md_gen
         return markdown_to_html_page(md_gen.render(ctx).decode("utf-8"))
     else:  # docx, pdf, lettre, mail, brochure (par blocs)
+        cover = _cover_html(ctx, resolved)
         inner = _blocks_html(ctx, resolved)
         header = _doc_hf_html(ctx, False)
         footer = _doc_hf_html(ctx, True)
-        body = (f'<div class="page page--doc">{header}'
+        body = (f'{cover}<div class="page page--doc">{header}'
                 f'<div class="doc-body">{inner}</div>{footer}</div>')
     return _SHELL.format(acc=acc, body=body).encode("utf-8")

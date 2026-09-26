@@ -1,6 +1,7 @@
 import { Component, inject, signal, Input, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { BackDirective } from '@shared/back.directive';
 import { DocumentService } from '@core/services/document.service';
@@ -56,6 +57,14 @@ export class TemplateBuilder {
   private service = inject(DocumentService);
   private projectService = inject(ProjectService);
   private toast = inject(ToastService);
+  private san = inject(DomSanitizer);
+
+  // Aperçu inline (onglet « Aperçu »)
+  previewFrame = signal<SafeResourceUrl | null>(null);
+  previewImg = signal<string | null>(null);
+  previewKind = signal<string | null>(null);
+  previewing = signal(false);
+  private previewUrl: string | null = null;
   // Contenu par langue : langue de contenu en cours d'édition + base (principale).
   contentLang = signal<string>('');
   private baseSchema: unknown = null;
@@ -401,7 +410,37 @@ export class TemplateBuilder {
       setTimeout(() => (this.applyingHistory = false), 0);
     } catch { /* ignore */ }
   }
-  ngOnDestroy() { if (this.histTimer) clearInterval(this.histTimer); }
+  ngOnDestroy() {
+    if (this.histTimer) clearInterval(this.histTimer);
+    if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
+  }
+
+  /** Aperçu du modèle affiché en ligne dans l'onglet « Aperçu ». */
+  refreshPreview() {
+    if (!this.isEdit()) { this.toast.error("Enregistrez d'abord le modèle."); return; }
+    this.syncContentForSave();
+    const m = this.model(); if (!m) return;
+    this.previewing.set(true);
+    this.service.updateTemplate(+this.id!, m).subscribe({
+      next: () => {
+        this.service.previewTemplate(+this.id!).subscribe({
+          next: (r) => {
+            this.previewing.set(false);
+            const bytes = Uint8Array.from(atob(r.b64 || ''), (c) => c.charCodeAt(0));
+            const blob = new Blob([bytes], { type: r.mime || 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
+            this.previewUrl = url;
+            this.previewKind.set(r.kind);
+            if (r.kind === 'image') { this.previewImg.set(url); this.previewFrame.set(null); }
+            else { this.previewFrame.set(this.san.bypassSecurityTrustResourceUrl(url)); this.previewImg.set(null); }
+          },
+          error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+        });
+      },
+      error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+    });
+  }
 
   private defaultSettings(): TemplateSettings {
     return {
