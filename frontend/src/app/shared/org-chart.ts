@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Team } from '../core/models';
+import { Team } from '@core/models';
 
 /**
  * Organigramme reconstruit automatiquement à partir des équipes (lien `parent`).

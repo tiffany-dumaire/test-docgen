@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TableData } from '../core/models';
+import { TableData } from '@core/models';
 
 /**
  * Éditeur de tableau façon tableur : ajout / suppression de lignes et de

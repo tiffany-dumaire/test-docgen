@@ -4,10 +4,10 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideTransloco } from '@jsverse/transloco';
 import { routes } from './app.routes';
-import { authInterceptor } from './core/auth.interceptor';
-import { AuthService } from './core/services/auth.service';
-import { LanguageService } from './core/services/language.service';
-import { TranslocoHttpLoader } from './core/transloco-loader';
+import { authInterceptor } from '@core/interceptors/auth.interceptor';
+import { AuthService } from '@core/auth/auth.service';
+import { LanguageService } from '@core/services/language.service';
+import { TranslocoHttpLoader } from '@core/services/transloco-loader';
 
 export const appConfig: ApplicationConfig = {
   providers: [

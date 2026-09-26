@@ -1,0 +1,39 @@
+/* ---------- Organigramme (arbre CSS) ---------- */
+.orgtree { overflow-x: auto; padding: 1rem 0.2rem 0.4rem; }
+.orgtree ul { position: relative; padding-top: 22px; display: flex; justify-content: center; gap: 0; margin: 0; list-style: none; }
+.orgtree li { list-style: none; position: relative; padding: 22px 10px 0; text-align: center; }
+.orgtree li::before, .orgtree li::after {
+  content: ''; position: absolute; top: 0; right: 50%;
+  border-top: 2px solid var(--border-strong); width: 50%; height: 22px;
+}
+.orgtree li::after { right: auto; left: 50%; border-left: 2px solid var(--border-strong); }
+.orgtree li:only-child::after, .orgtree li:only-child::before { display: none; }
+.orgtree li:only-child { padding-top: 0; }
+.orgtree li:first-child::before, .orgtree li:last-child::after { border: 0 none; }
+.orgtree li:last-child::before { border-right: 2px solid var(--border-strong); border-radius: 0 6px 0 0; }
+.orgtree li:first-child::after { border-radius: 6px 0 0 0; }
+.orgtree ul ul::before {
+  content: ''; position: absolute; top: 0; left: 50%;
+  border-left: 2px solid var(--border-strong); width: 0; height: 22px;
+}
+.org-node {
+  display: inline-flex; flex-direction: column; align-items: center; gap: .18rem;
+  min-width: 150px; padding: .7rem .9rem; border-radius: var(--pd-r-m);
+  background: var(--mat-sys-surface-container-low); color: var(--text) !important;
+  border: 1px solid var(--border-strong);
+  border-top: 4px solid var(--team, var(--mat-sys-primary));
+  box-shadow: var(--shadow); text-decoration: none !important;
+  transition: transform .14s ease, box-shadow .18s ease;
+}
+.org-node:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.org-node .org-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--team, var(--mat-sys-primary)); }
+.org-node .org-name { font-weight: 700; }
+.org-node .org-meta { font-size: .72rem; color: var(--muted); }
+.org-node .org-rel { font-size: .68rem; color: var(--mat-sys-tertiary); font-weight: 600; }
+.org-avatars { display: inline-flex; margin-top: .2rem; }
+.org-av { width: 24px; height: 24px; border-radius: 50%; margin-left: -6px; border: 2px solid var(--mat-sys-surface-container-low);
+  display: inline-grid; place-items: center; font-size: .6rem; font-weight: 700;
+  background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); }
+.org-av.more { background: var(--mat-sys-surface-container-highest); color: var(--muted); }
+.org-av:first-child { margin-left: 0; }
+

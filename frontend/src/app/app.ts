@@ -10,11 +10,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslocoModule } from '@jsverse/transloco';
-import { ToastService } from './core/services/api.service';
-import { AuthService } from './core/services/auth.service';
-import { ThemeService } from './core/services/theme.service';
-import { LanguageService, Lang } from './core/services/language.service';
-import { NavHistoryService } from './shared/back.directive';
+import { ToastService } from '@core/services/api.service';
+import { AuthService } from '@core/auth/auth.service';
+import { ThemeService } from '@core/services/theme.service';
+import { LanguageService, Lang } from '@core/services/language.service';
+import { NavHistoryService } from '@shared/back.directive';
 
 interface NavItem { path: string; icon: string; label: string; }
 

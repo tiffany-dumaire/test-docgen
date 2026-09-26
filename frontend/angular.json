@@ -20,7 +20,7 @@
             "assets": [
               { "glob": "**/*", "input": "public" }
             ],
-            "styles": ["src/styles.scss"],
+            "styles": ["src/assets/scss/styles.scss"],
             "scripts": []
           },
           "configurations": {

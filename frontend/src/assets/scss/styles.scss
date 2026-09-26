@@ -1,0 +1,30 @@
+/* =========================================================
+   Point d'entrée des styles globaux PolyDocs.
+   L'ancien fichier monolithique src/styles.scss a été éclaté :
+     - _fonts / _material : polices auto-hébergées + thème Material
+     - themes/  : palettes (bise, vnv, noire, joran), accent de marque,
+                  jetons dérivés et typographie (_text)
+     - components/ : styles globaux par famille de composants
+   ========================================================= */
+@use 'fonts';
+@use 'material';
+
+// --- Thèmes (palettes + typographie) ---
+@use 'themes/bise';
+@use 'themes/vnv';
+@use 'themes/noire';
+@use 'themes/joran';
+@use 'themes/brand';
+@use 'themes/tokens';
+@use 'themes/text';
+
+// --- Composants globaux ---
+@use 'components/buttons';
+@use 'components/cards';
+@use 'components/forms';
+@use 'components/tables';
+@use 'components/badges';
+@use 'components/utilities';
+@use 'components/toast';
+@use 'components/org-chart';
+@use 'components/misc';
