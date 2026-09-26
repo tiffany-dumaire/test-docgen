@@ -61,6 +61,26 @@ import { Router } from '@angular/router';
               }
             </div>
 
+            <div class="card"><h3>🌳 Dépôts Git</h3>
+              @if (p.repos?.length) {
+                <div class="repotree">
+                  @for (node of repoTree(p.repos!); track node.repo.id) {
+                    <div class="repo-node" [style.padding-left.px]="node.depth * 22">
+                      <span class="repo-branch">{{ node.depth > 0 ? '└' : '' }}</span>
+                      <span class="material-icons repo-ic">folder_open</span>
+                      @if (node.repo.url) {
+                        <a class="repo-name" [href]="repoUrl(node.repo.url)" target="_blank" rel="noopener">{{ node.repo.name || 'Dépôt' }}</a>
+                      } @else { <span class="repo-name">{{ node.repo.name || 'Dépôt' }}</span> }
+                      @if (node.repo.component) { <span class="badge badge-type">{{ node.repo.component }}</span> }
+                      @if (node.repo.instance) { <span class="repo-inst"><span class="material-icons">dns</span> {{ node.repo.instance }}</span> }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="muted" style="margin:0">Aucun dépôt. Ajoutez-en dans <a [routerLink]="['/projects', p.id, 'edit']">l'édition du projet</a> (onglet « Dépôts Git »).</p>
+              }
+            </div>
+
             @if (p.children?.length) {
               <div class="card"><h3>🌳 Sous-projets</h3>
                 @for (ch of p.children; track ch.id) {
@@ -306,6 +326,13 @@ import { Router } from '@angular/router';
       .inst-name .material-icons { font-size: 15px; color: var(--muted); }
       .inst-line { display: flex; align-items: center; gap: .4rem; font-size: .84rem; color: var(--muted); font-family: ui-monospace, monospace; }
       .inst-line .material-icons { font-size: 15px; }
+      .repotree { display: flex; flex-direction: column; gap: .25rem; }
+      .repo-node { display: flex; align-items: center; gap: .45rem; padding: .3rem 0; }
+      .repo-branch { color: var(--muted); font-family: ui-monospace, monospace; }
+      .repo-ic { font-size: 18px; color: var(--mat-sys-primary); }
+      .repo-name { font-weight: 600; }
+      .repo-inst { display: inline-flex; align-items: center; gap: .25rem; font-size: .78rem; color: var(--muted); font-family: ui-monospace, monospace; }
+      .repo-inst .material-icons { font-size: 14px; }
     `,
   ],
 })
@@ -348,6 +375,32 @@ export class ProjectDetail {
     if (j.is_automatic && j.event) return ProjectDetail.EVENT_ICONS[j.event] || 'ℹ️';
     return ({ note: '🗒️', decision: '✅', risk: '⚠️', action: '⚡',
               incident: '🔥', info: 'ℹ️', event: '•' } as Record<string, string>)[j.category] || '🗒️';
+  }
+  repoUrl(url?: string): string {
+    if (!url) return '#';
+    return /^https?:\/\//.test(url) ? url : 'https://' + url;
+  }
+  /** Aplati l'arborescence des dépôts en une liste ordonnée {repo, depth}. */
+  repoTree(repos: import('../../core/models').ProjectRepo[]): { repo: import('../../core/models').ProjectRepo; depth: number }[] {
+    const byParent = new Map<string, import('../../core/models').ProjectRepo[]>();
+    const ids = new Set(repos.map((r) => r.id));
+    for (const r of repos) {
+      const key = r.parent && ids.has(r.parent) ? r.parent : '__root__';
+      (byParent.get(key) ?? byParent.set(key, []).get(key)!).push(r);
+    }
+    const out: { repo: import('../../core/models').ProjectRepo; depth: number }[] = [];
+    const seen = new Set<string>();
+    const walk = (key: string, depth: number) => {
+      for (const r of byParent.get(key) ?? []) {
+        if (seen.has(r.id)) continue;
+        seen.add(r.id);
+        out.push({ repo: r, depth });
+        walk(r.id, depth + 1);
+      }
+    };
+    walk('__root__', 0);
+    for (const r of repos) if (!seen.has(r.id)) out.push({ repo: r, depth: 0 });  // sécurité
+    return out;
   }
   instUrl(inst: { url?: string; domain?: string; ip?: string }): string {
     if (inst.url) return /^https?:\/\//.test(inst.url) ? inst.url : 'https://' + inst.url;

@@ -58,6 +58,11 @@ class Project(models.Model):
         "Instances / machines", default=list, blank=True,
         help_text="[{name, ip, domain, url}] — serveurs / instances du projet.",
     )
+    repos = models.JSONField(
+        "Dépôts Git", default=list, blank=True,
+        help_text="[{id, parent, name, url, component, instance}] — arborescence "
+                  "des dépôts Git : composante du projet et instance associée.",
+    )
     client_logo = models.ImageField(
         "Logo du client", upload_to="projects/", blank=True, null=True
     )

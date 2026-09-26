@@ -112,6 +112,15 @@ export interface ProjectInstance {
   url?: string;
 }
 
+export interface ProjectRepo {
+  id: string;
+  parent?: string | null;   // id du dépôt parent (arborescence)
+  name: string;
+  url?: string;
+  component?: string;        // composante du projet
+  instance?: string;         // nom de l'instance associée
+}
+
 export interface Project {
   id?: number;
   name: string;
@@ -121,6 +130,7 @@ export interface Project {
   logo?: string | null;
   logo_url?: string | null;
   instances?: ProjectInstance[];
+  repos?: ProjectRepo[];
   description: string;
   reference: string;
   status: 'active' | 'on_hold' | 'archived';
