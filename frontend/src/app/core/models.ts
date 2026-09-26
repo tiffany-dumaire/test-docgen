@@ -45,6 +45,8 @@ export interface Contact {
 export interface Client {
   id?: number;
   name: string;
+  logo?: string | null;
+  logo_url?: string | null;
   contact_name?: string;
   email?: string;
   phone?: string;
@@ -109,6 +111,8 @@ export interface Project {
   client_name: string;
   client_logo?: string | null;
   client_logo_url?: string | null;
+  logo?: string | null;
+  logo_url?: string | null;
   description: string;
   reference: string;
   status: 'active' | 'on_hold' | 'archived';

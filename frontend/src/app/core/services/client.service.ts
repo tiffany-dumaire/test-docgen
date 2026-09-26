@@ -19,6 +19,10 @@ export class ClientService {
     return this.http.put<Client>(`${this.url}${id}/`, data);
   }
   remove(id: number): Observable<void> { return this.http.delete<void>(`${this.url}${id}/`); }
+  uploadLogo(id: number, file: File): Observable<Client> {
+    const fd = new FormData(); fd.append('logo', file);
+    return this.http.patch<Client>(`${this.url}${id}/`, fd);
+  }
   detailBundle(id: number): Observable<any> { return this.http.get<any>(`${this.url}${id}/detail_bundle/`); }
   journal(id: number): Observable<JournalEntry[]> {
     return this.http.get<JournalEntry[]>(`${this.url}${id}/journal/`);

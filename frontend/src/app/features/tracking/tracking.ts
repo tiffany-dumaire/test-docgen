@@ -15,6 +15,10 @@ import { OnlineForm, ProjectDocument } from '../../core/models';
   template: `
     <div class="row between">
       <h1>Suivi général</h1>
+      <div class="row" style="gap:.5rem">
+        <a class="btn btn-ghost" routerLink="/documents/new"><span class="material-icons">note_add</span> Nouveau document</a>
+        <a class="btn btn-primary" routerLink="/forms/new"><span class="material-icons">post_add</span> Nouveau formulaire</a>
+      </div>
     </div>
     <p class="muted">Tous les documents générés et formulaires de l'ensemble des projets, regroupés pour un suivi transversal.</p>
 
@@ -31,6 +35,7 @@ import { OnlineForm, ProjectDocument } from '../../core/models';
           <div class="card">
             <div class="row between" style="margin-bottom:.6rem">
               <input [(ngModel)]="docSearch" placeholder="Rechercher un document…" style="max-width:320px" />
+              <a class="btn btn-sm btn-primary" routerLink="/documents/new"><span class="material-icons">note_add</span> Créer</a>
             </div>
             @if (filteredDocs().length) {
               <table>
@@ -60,6 +65,7 @@ import { OnlineForm, ProjectDocument } from '../../core/models';
           <div class="card">
             <div class="row between" style="margin-bottom:.6rem">
               <input [(ngModel)]="formSearch" placeholder="Rechercher un formulaire…" style="max-width:320px" />
+              <a class="btn btn-sm btn-primary" routerLink="/forms/new"><span class="material-icons">post_add</span> Créer</a>
             </div>
             @if (filteredForms().length) {
               <table>

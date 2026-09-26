@@ -121,6 +121,20 @@ import { Client, Contact, ContactKind, Project, Team, TeamMember } from '../../c
         </div>
 
         <div class="field">
+          <label>🖼️ Logo du projet <span class="muted" style="font-weight:400">(facultatif)</span></label>
+          <div class="logo-row">
+            <div class="logo-slot" (click)="pl.click()">
+              @if (m.logo_url) { <img [src]="m.logo_url" alt="logo" /> } @else { <span class="material-icons">add_photo_alternate</span> }
+            </div>
+            <div class="row" style="gap:.4rem">
+              <button class="btn btn-sm btn-ghost" type="button" (click)="pl.click()">Choisir…</button>
+              @if (m.logo_url) { <button class="btn btn-sm btn-ghost" type="button" (click)="clearLogo(m)">Retirer</button> }
+            </div>
+            <input #pl type="file" accept="image/*" hidden (change)="onLogo($event)" />
+          </div>
+        </div>
+
+        <div class="field">
           <div class="row between">
             <label>👤 Contacts client</label>
             <button class="btn btn-sm btn-ghost" (click)="addContact('client')">+ Ajouter</button>
@@ -188,6 +202,9 @@ import { Client, Contact, ContactKind, Project, Team, TeamMember } from '../../c
   styles: [
     `
       .proj-pick { display: flex; flex-wrap: wrap; gap: .4rem; }
+      .logo-row { display: flex; align-items: center; gap: 1rem; }
+      .logo-slot { width: 72px; height: 72px; border-radius: 14px; border: 1px dashed var(--border-strong); display: grid; place-items: center; cursor: pointer; overflow: hidden; background: var(--surface); flex: none; color: var(--muted); }
+      .logo-slot img { width: 100%; height: 100%; object-fit: contain; }
       .chip-check { display: flex; align-items: center; gap: .3rem; border: 1px solid var(--border); border-radius: 999px; padding: .15rem .55rem; font-size: .8rem; }
       .chip-check input { width: auto; }
       .contact-row {
@@ -322,6 +339,15 @@ export class ProjectForm {
     this.model.set({ ...m });
   }
 
+  private logoFile: File | null = null;
+  onLogo(ev: Event) {
+    const f = (ev.target as HTMLInputElement).files?.[0] ?? null;
+    this.logoFile = f;
+    const m = this.model();
+    if (f && m) { m.logo_url = URL.createObjectURL(f); this.model.set({ ...m }); }
+  }
+  clearLogo(m: Project) { this.logoFile = null; m.logo_url = null; m.logo = null; this.model.set({ ...m }); }
+
   save() {
     const m = this.model();
     if (!m) return;
@@ -330,13 +356,15 @@ export class ProjectForm {
       return;
     }
     this.saving.set(true);
+    const payload = { ...m }; delete (payload as Partial<Project>).logo_url;
     const req = this.isEdit()
-      ? this.service.update(+this.id!, m)
-      : this.service.create(m);
+      ? this.service.update(+this.id!, payload)
+      : this.service.create(payload);
     req.subscribe({
       next: (p) => {
-        this.toast.success('Projet enregistré.');
-        this.router.navigate(['/projects', p.id]);
+        const done = () => { this.toast.success('Projet enregistré.'); this.router.navigate(['/projects', p.id]); };
+        if (this.logoFile) this.service.uploadLogo(p.id!, this.logoFile).subscribe({ next: done, error: done });
+        else done();
       },
       error: () => {
         this.saving.set(false);

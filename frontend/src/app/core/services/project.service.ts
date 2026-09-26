@@ -30,6 +30,10 @@ export class ProjectService {
   patch(id: number, data: Partial<Project>): Observable<Project> {
     return this.http.patch<Project>(`${this.url}${id}/`, data);
   }
+  uploadLogo(id: number, file: File): Observable<Project> {
+    const fd = new FormData(); fd.append('logo', file);
+    return this.http.patch<Project>(`${this.url}${id}/`, fd);
+  }
   trackingDiagramUrl(id: number, type: string, primary?: string): string {
     let u = `${this.url}${id}/tracking_diagram/?type=${encodeURIComponent(type)}`;
     if (primary) u += `&primary=${encodeURIComponent(primary)}`;

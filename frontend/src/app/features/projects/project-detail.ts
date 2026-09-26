@@ -218,8 +218,9 @@ import { Router } from '@angular/router';
                 </label>
               </div>
 
+              <div class="timeline">
               @for (j of visibleJournal(); track j.id) {
-                <div class="jentry" [class.auto]="j.is_automatic">
+                <div class="jentry" [class.auto]="j.is_automatic" [style.--jc]="catColor(j)">
                   <div class="jicon">{{ eventIcon(j) }}</div>
                   <div class="jbody">
                     <div class="jmeta">
@@ -234,10 +235,11 @@ import { Router } from '@angular/router';
                     }
                   </div>
                   @if (!j.is_automatic) {
-                    <button class="btn btn-sm btn-danger" (click)="delJournal(j)">✕</button>
+                    <button class="btn btn-sm btn-danger jdel" (click)="delJournal(j)">✕</button>
                   }
                 </div>
               } @empty { <div class="muted">Aucune entrée.</div> }
+              </div>
             </div>
           </div>
         </mat-tab>
@@ -256,12 +258,14 @@ import { Router } from '@angular/router';
         border-bottom: none;
       }
       .jform { border: 1px solid var(--border); border-radius: 10px; padding: .6rem; background: var(--bg); margin-bottom: .8rem; }
-      .jentry { display: flex; gap: .6rem; align-items: flex-start; padding: .55rem 0; border-bottom: 1px solid var(--border); }
-      .jentry:last-child { border-bottom: none; }
-      .jentry.auto { opacity: .95; }
+      .timeline { position: relative; margin-top: .4rem; }
+      .timeline::before { content: ''; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+      .jentry { display: flex; gap: .7rem; align-items: flex-start; padding: .5rem 0; position: relative; }
       .jentry.auto .jbody { color: var(--muted); }
-      .jicon { width: 1.7rem; height: 1.7rem; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary-light, #fdece0); font-size: .95rem; }
-      .jbody { flex: 1; min-width: 0; }
+      .jicon { width: 32px; height: 32px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: .95rem;
+        background: color-mix(in srgb, var(--jc, var(--mat-sys-primary)) 18%, var(--surface)); box-shadow: 0 0 0 4px var(--surface); position: relative; z-index: 1; }
+      .jbody { flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--jc, var(--border)); border-radius: 10px; padding: .5rem .7rem; }
+      .jdel { align-self: center; }
       .jmeta { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; margin-bottom: .15rem; }
       .jdate { font-size: .72rem; }
       .chip-auto { font-size: .62rem; text-transform: uppercase; letter-spacing: .04em; background: var(--border); color: var(--muted); border-radius: 6px; padding: .05rem .35rem; font-weight: 700; }
@@ -311,6 +315,17 @@ export class ProjectDetail {
     if (j.is_automatic && j.event) return ProjectDetail.EVENT_ICONS[j.event] || 'ℹ️';
     return ({ note: '🗒️', decision: '✅', risk: '⚠️', action: '⚡',
               incident: '🔥', info: 'ℹ️', event: '•' } as Record<string, string>)[j.category] || '🗒️';
+  }
+  catColor(j: JournalEntry): string {
+    const byEvent: Record<string, string> = {
+      document_created: '#2E5E8E', version_created: '#2E6B55', form_added: '#6B3F6E',
+      form_response: '#2D6E7E', meeting_added: '#806A2E', meeting_cancelled: '#A32638',
+      contact_added: '#2F6B45', contact_removed: '#A32638', project_added: '#5B4F8A',
+      team_updated: '#A34E2A', contact_changed: '#806A2E',
+    };
+    if (j.is_automatic && j.event && byEvent[j.event]) return byEvent[j.event];
+    return ({ note: '#5B5A55', decision: '#2F6B45', risk: '#B04A12', action: '#2E5E8E',
+              incident: '#A1202A', info: '#2D6E7E', event: '#5B4F8A' } as Record<string, string>)[j.category] || '#5B5A55';
   }
   hasContent(html: string): boolean {
     return !!html && html.replace(/<[^>]*>/g, '').trim().length > 0;

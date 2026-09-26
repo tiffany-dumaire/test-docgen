@@ -45,6 +45,14 @@ interface Bundle {
             @if (editing(); as m) {
               <div class="card stack">
                 <h3>Informations du client</h3>
+                <div class="logo-row">
+                  <div class="logo-slot" (click)="ci.click()">
+                    @if (m.logo_url) { <img [src]="m.logo_url" alt="logo" /> } @else { <mat-icon>add_photo_alternate</mat-icon> }
+                  </div>
+                  <div><div class="k">Logo du client</div>
+                    <button mat-stroked-button type="button" (click)="ci.click()"><mat-icon>upload</mat-icon> Choisir une image</button></div>
+                  <input #ci type="file" accept="image/*" hidden (change)="onLogo($event)" />
+                </div>
                 <div class="formgrid">
                   <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput [(ngModel)]="m.name" required /></mat-form-field>
                   <mat-form-field appearance="outline"><mat-label>Contact principal</mat-label><input matInput [(ngModel)]="m.contact_name" /></mat-form-field>
@@ -66,7 +74,8 @@ interface Bundle {
     } @else if (data(); as b) {
       <div class="row between">
         <div class="row" style="gap:.8rem;align-items:center">
-          <div class="avatar">{{ initials(b.client.name) }}</div>
+          @if (b.client.logo_url) { <img class="avatar-img" [src]="b.client.logo_url" alt="logo" /> }
+          @else { <div class="avatar">{{ initials(b.client.name) }}</div> }
           <div>
             <h1 style="margin:0">{{ b.client.name }}</h1>
             <div class="muted">{{ b.client.contact_name || 'Client' }} · {{ b.projects.length }} projet(s)
@@ -86,6 +95,14 @@ interface Bundle {
             @if (editing(); as m) {
               <div class="card stack">
                 <h3>Modifier la fiche client</h3>
+                <div class="logo-row">
+                  <div class="logo-slot" (click)="ce.click()">
+                    @if (m.logo_url) { <img [src]="m.logo_url" alt="logo" /> } @else { <mat-icon>add_photo_alternate</mat-icon> }
+                  </div>
+                  <div><div class="k">Logo du client</div>
+                    <button mat-stroked-button type="button" (click)="ce.click()"><mat-icon>upload</mat-icon> Choisir une image</button></div>
+                  <input #ce type="file" accept="image/*" hidden (change)="onLogo($event)" />
+                </div>
                 <div class="formgrid">
                   <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput [(ngModel)]="m.name" /></mat-form-field>
                   <mat-form-field appearance="outline"><mat-label>Contact principal</mat-label><input matInput [(ngModel)]="m.contact_name" /></mat-form-field>
@@ -215,8 +232,9 @@ interface Bundle {
               <label class="muted" style="font-size:.8rem;display:flex;gap:.3rem;align-items:center;margin:.5rem 0">
                 <input type="checkbox" [(ngModel)]="showAuto" /> Afficher les entrées automatiques
               </label>
+              <div class="timeline">
               @for (j of visibleJournal(); track j.id) {
-                <div class="jentry" [class.auto]="j.is_automatic">
+                <div class="jentry" [class.auto]="j.is_automatic" [style.--jc]="catColor(j)">
                   <div class="jicon">{{ eventIcon(j) }}</div>
                   <div class="jbody">
                     <div class="jmeta">
@@ -229,6 +247,7 @@ interface Bundle {
                   </div>
                 </div>
               } @empty { <div class="muted">Aucune entrée.</div> }
+              </div>
             </div>
           </div>
         </mat-tab>
@@ -253,16 +272,24 @@ interface Bundle {
     .mini { font-size: .8rem; }
     .avatar { width: 3rem; height: 3rem; border-radius: 50%; background: var(--primary, #ec6608); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; }
     .avatar.new { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); }
+    .avatar-img { width: 3rem; height: 3rem; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid var(--mat-sys-outline-variant); }
+    .logo-row { display: flex; align-items: center; gap: 1rem; margin-bottom: .3rem; }
+    .logo-slot { width: 72px; height: 72px; border-radius: 14px; border: 1px dashed var(--mat-sys-outline); display: grid; place-items: center; cursor: pointer; overflow: hidden; background: var(--mat-sys-surface-container-low); flex: none; }
+    .logo-slot img { width: 100%; height: 100%; object-fit: contain; }
+    .logo-row .k { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--mat-sys-outline); font-weight: 700; margin-bottom: .3rem; }
     .formgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
     .formgrid .full { grid-column: 1 / -1; } .formgrid mat-form-field { width: 100%; }
     @media (max-width: 760px) { .formgrid { grid-template-columns: 1fr; } }
     .stack { display: flex; flex-direction: column; gap: .3rem; }
     .jform { border: 1px solid var(--mat-sys-outline-variant); border-radius: 10px; padding: .6rem; margin-bottom: .6rem; }
-    .jentry { display: flex; gap: .6rem; align-items: flex-start; padding: .55rem 0; border-bottom: 1px solid var(--mat-sys-outline-variant); }
-    .jentry:last-child { border-bottom: none; }
+    .timeline { position: relative; margin-top: .4rem; }
+    .timeline::before { content: ''; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 2px; background: var(--mat-sys-outline-variant); }
+    .jentry { display: flex; gap: .7rem; align-items: flex-start; padding: .5rem 0; position: relative; }
     .jentry.auto .jbody { color: var(--mat-sys-outline); }
-    .jicon { width: 1.7rem; height: 1.7rem; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--mat-sys-surface-variant, #eee); font-size: .95rem; }
-    .jbody { flex: 1; min-width: 0; } .jmeta { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; margin-bottom: .15rem; }
+    .jicon { width: 32px; height: 32px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: .95rem;
+      background: color-mix(in srgb, var(--jc, var(--mat-sys-primary)) 18%, var(--mat-sys-surface)); box-shadow: 0 0 0 4px var(--mat-sys-surface); position: relative; z-index: 1; }
+    .jbody { flex: 1; min-width: 0; background: var(--mat-sys-surface); border: 1px solid var(--mat-sys-outline-variant); border-left: 3px solid var(--jc, var(--mat-sys-outline-variant)); border-radius: 10px; padding: .5rem .7rem; }
+    .jmeta { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; margin-bottom: .15rem; }
     .jdate { font-size: .72rem; }
     .badge { font-size: .68rem; text-transform: uppercase; letter-spacing: .03em; background: var(--mat-sys-surface-variant, #eee); border-radius: 6px; padding: .05rem .4rem; font-weight: 700; }
     .chip-auto { font-size: .62rem; text-transform: uppercase; background: var(--mat-sys-outline-variant); color: var(--mat-sys-outline); border-radius: 6px; padding: .05rem .35rem; font-weight: 700; }
@@ -313,27 +340,54 @@ export class ClientDetail {
     return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2)
       .map((w) => w[0].toUpperCase()).join('');
   }
-  startEdit(c: any) { this.editing.set({ ...c }); }
+  private logoFile: File | null = null;
+  onLogo(ev: Event) {
+    const f = (ev.target as HTMLInputElement).files?.[0] ?? null;
+    this.logoFile = f;
+    const m = this.editing();
+    if (f && m) m.logo_url = URL.createObjectURL(f);
+  }
+  startEdit(c: any) { this.logoFile = null; this.editing.set({ ...c }); }
   saveEdit() {
     const m = this.editing();
     if (!m || !m.name?.trim()) { this.toast.error('Le nom est requis.'); return; }
     if (this.creating()) {
       this.service.create(m).subscribe({
-        next: (c) => { this.toast.success('Client créé.'); this.router.navigate(['/clients', c.id]); },
+        next: (c) => this.afterSave(c.id!, 'Client créé.', true),
         error: () => this.toast.error('Création impossible.'),
       });
       return;
     }
     this.service.update(m.id!, m).subscribe({
-      next: () => { this.toast.success('Fiche client mise à jour.'); this.editing.set(null); this.reload(); },
+      next: () => this.afterSave(m.id!, 'Fiche client mise à jour.', false),
       error: () => this.toast.error('Enregistrement impossible.'),
     });
+  }
+  private afterSave(id: number, msg: string, navigate: boolean) {
+    const finish = () => {
+      this.toast.success(msg); this.logoFile = null;
+      if (navigate) this.router.navigate(['/clients', id]);
+      else { this.editing.set(null); this.reload(); }
+    };
+    if (this.logoFile) this.service.uploadLogo(id, this.logoFile).subscribe({ next: finish, error: finish });
+    else finish();
   }
 
   eventIcon(j: JournalEntry): string {
     if (j.is_automatic && j.event) return ClientDetail.EVENT_ICONS[j.event] || 'ℹ️';
     return ({ note: '🗒️', decision: '✅', risk: '⚠️', action: '⚡',
               incident: '🔥', info: 'ℹ️', event: '•' } as Record<string, string>)[j.category] || '🗒️';
+  }
+  catColor(j: JournalEntry): string {
+    const byEvent: Record<string, string> = {
+      document_created: '#2E5E8E', version_created: '#2E6B55', form_added: '#6B3F6E',
+      form_response: '#2D6E7E', meeting_added: '#806A2E', meeting_cancelled: '#A32638',
+      contact_added: '#2F6B45', contact_removed: '#A32638', project_added: '#5B4F8A',
+      team_updated: '#A34E2A', contact_changed: '#806A2E',
+    };
+    if (j.is_automatic && j.event && byEvent[j.event]) return byEvent[j.event];
+    return ({ note: '#5B5A55', decision: '#2F6B45', risk: '#B04A12', action: '#2E5E8E',
+              incident: '#A1202A', info: '#2D6E7E', event: '#5B4F8A' } as Record<string, string>)[j.category] || '#5B5A55';
   }
   hasContent(html: string) { return !!html && html.replace(/<[^>]*>/g, '').trim().length > 0; }
   visibleJournal() {

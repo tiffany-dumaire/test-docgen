@@ -51,7 +51,11 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? 'Modifier le modèle' : 'Nouveau modèle' }}</h1>
-      <a class="btn btn-ghost" routerLink="/templates">Retour</a>
+      <div class="row" style="gap:.4rem">
+        <button class="btn btn-ghost btn-sm" (click)="undo()" [disabled]="!canUndo()" title="Retirer le dernier changement">↶ Annuler</button>
+        <button class="btn btn-ghost btn-sm" (click)="reset()" [disabled]="!canReset()" title="Revenir à l'état initial">⟲ Réinitialiser</button>
+        <a class="btn btn-ghost" routerLink="/templates">Retour</a>
+      </div>
     </div>
 
     @if (model(); as m) {
@@ -938,6 +942,7 @@ export class TemplateBuilder {
           this.contentLang.set(this.loadedLang);
           if (t.doc_type === 'a3') this.ensureA3(t);
           if (t.settings?.overlays?.length) this.activeOverlay.set(t.settings.overlays[0].id);
+          this.startHistory();
         });
       } else {
         this.model.set({
@@ -947,9 +952,56 @@ export class TemplateBuilder {
           scope: 'global', projects: [],
         });
         this.baseSchema = []; this.loadedLang = 'fr'; this.contentLang.set('fr');
+        this.startHistory();
       }
     });
   }
+
+  // ------- Historique d'annulation (Annuler / Réinitialiser, jusqu'à 10) -------
+  private history: string[] = [];
+  private initialSnapshot = '';
+  private histTimer: ReturnType<typeof setInterval> | null = null;
+  private applyingHistory = false;
+
+  private serialize(): string { const m = this.model(); return m ? JSON.stringify(m) : ''; }
+  private startHistory() {
+    this.initialSnapshot = this.serialize();
+    this.history = this.initialSnapshot ? [this.initialSnapshot] : [];
+    if (this.histTimer) clearInterval(this.histTimer);
+    this.histTimer = setInterval(() => this.snapshot(), 1200);
+  }
+  private snapshot() {
+    if (this.applyingHistory) return;
+    const cur = this.serialize();
+    if (!cur) return;
+    if (this.history.length === 0 || this.history[this.history.length - 1] !== cur) {
+      this.history.push(cur);
+      if (this.history.length > 11) this.history.shift();  // 1 initial + 10 changements
+    }
+  }
+  canUndo() { return this.history.length > 1; }
+  canReset() { return !!this.initialSnapshot && this.serialize() !== this.initialSnapshot; }
+  undo() {
+    this.snapshot();
+    if (this.history.length <= 1) return;
+    this.history.pop();                                   // retire l'état courant
+    this.applyState(this.history[this.history.length - 1]);
+  }
+  reset() {
+    if (!this.initialSnapshot) return;
+    this.applyState(this.initialSnapshot);
+    this.history = [this.initialSnapshot];
+  }
+  private applyState(json: string) {
+    try {
+      const obj = JSON.parse(json);
+      this.applyingHistory = true;
+      this.model.set(obj);
+      this.baseSchema = obj.schema;
+      setTimeout(() => (this.applyingHistory = false), 0);
+    } catch { /* ignore */ }
+  }
+  ngOnDestroy() { if (this.histTimer) clearInterval(this.histTimer); }
 
   private defaultSettings(): TemplateSettings {
     return {
