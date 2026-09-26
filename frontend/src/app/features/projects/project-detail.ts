@@ -103,7 +103,7 @@ import { Router } from '@angular/router';
               <div class="card"><p class="muted" style="margin:0">Aucun client associé à ce projet.</p></div>
             }
 
-            <div class="card"><h3>👤 Contacts associés au projet</h3>
+            <div class="card"><h3>👤 Contacts client</h3>
               @if (clientContacts(p).length) {
                 <table><thead><tr><th>Nom</th><th>Rôle</th><th>Email</th><th>Téléphone</th></tr></thead>
                   <tbody>@for (c of clientContacts(p); track c.id) {
@@ -112,6 +112,17 @@ import { Router } from '@angular/router';
                       <td>{{ c.phone || '—' }}</td></tr>
                   }</tbody></table>
               } @else { <div class="muted">Aucun contact client pour ce projet.</div> }
+            </div>
+
+            <div class="card"><h3>🧑‍💼 Contacts internes</h3>
+              @if (internalContacts(p).length) {
+                <table><thead><tr><th>Nom</th><th>Rôle</th><th>Email</th><th>Téléphone</th></tr></thead>
+                  <tbody>@for (c of internalContacts(p); track c.id) {
+                    <tr><td><b>{{ c.full_name }}</b></td><td>{{ c.role || '—' }}</td>
+                      <td>@if (c.email) { <a [href]="'mailto:' + c.email">{{ c.email }}</a> } @else { — }</td>
+                      <td>{{ c.phone || '—' }}</td></tr>
+                  }</tbody></table>
+              } @else { <div class="muted">Aucun contact interne pour ce projet.</div> }
             </div>
           </div>
         </mat-tab>
