@@ -1,0 +1,52 @@
+      .detail-tabs { margin-top: 1rem; }
+      .tabpad { padding-top: 1.2rem; display: flex; flex-direction: column; gap: 1rem; }
+      .contact {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .contact:last-child {
+        border-bottom: none;
+      }
+      .jform { border: 1px solid var(--border); border-radius: 10px; padding: .6rem; background: var(--bg); margin-bottom: .8rem; }
+      .timeline { position: relative; margin-top: .4rem; }
+      .timeline::before { content: ''; position: absolute; left: 15px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+      .jentry { display: flex; gap: .7rem; align-items: flex-start; padding: .5rem 0; position: relative; }
+      .jentry.auto .jbody { color: var(--muted); }
+      .jicon { width: 32px; height: 32px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: .95rem;
+        background: color-mix(in srgb, var(--jc, var(--mat-sys-primary)) 18%, var(--surface)); box-shadow: 0 0 0 4px var(--surface); position: relative; z-index: 1; }
+      .jbody { flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--jc, var(--border)); border-radius: 10px; padding: .5rem .7rem; }
+      .jdel { align-self: center; }
+      .jmeta { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; margin-bottom: .15rem; }
+      .jdate { font-size: .72rem; }
+      .chip-auto { font-size: .62rem; text-transform: uppercase; letter-spacing: .04em; background: var(--border); color: var(--muted); border-radius: 6px; padding: .05rem .35rem; font-weight: 700; }
+      .rich :is(h1,h2,h3){ margin:.3em 0; font-size:1rem; }
+      .rich ul,.rich ol{ margin:.2em 0 .2em 1.1em; }
+      .rich p{ margin:.25em 0; }
+      .chip-cancel { font-size: .62rem; text-transform: uppercase; background: #fee2e2; color: #b91c1c; border-radius: 6px; padding: .05rem .35rem; font-weight: 700; margin-left: .3rem; }
+      .proj-logo { width: 3.2rem; height: 3.2rem; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid var(--border); padding: 3px; }
+      .client-logo { width: 3rem; height: 3rem; border-radius: 10px; object-fit: contain; background: #fff; border: 1px solid var(--border); padding: 3px; flex: none; }
+      .inst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .8rem; }
+      .inst-card { display: flex; flex-direction: column; gap: .3rem; padding: .8rem .9rem; border: 1px solid var(--border);
+        border-left: 4px solid var(--mat-sys-primary); border-radius: 12px; background: var(--surface); text-decoration: none !important;
+        color: var(--text); transition: transform .14s ease, box-shadow .16s ease, border-color .14s ease; }
+      .inst-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+      .inst-name { font-weight: 700; display: flex; align-items: center; gap: .3rem; }
+      .inst-name .material-icons { font-size: 15px; color: var(--muted); }
+      .inst-line { display: flex; align-items: center; gap: .4rem; font-size: .84rem; color: var(--muted); font-family: ui-monospace, monospace; }
+      .inst-line .material-icons { font-size: 15px; }
+      .repotree { display: flex; flex-direction: column; gap: .25rem; }
+      .repo-node { display: flex; align-items: center; gap: .45rem; padding: .3rem 0; }
+      .repo-branch { color: var(--muted); font-family: ui-monospace, monospace; }
+      .repo-ic { font-size: 18px; color: var(--mat-sys-primary); }
+      .repo-name { font-weight: 600; }
+      .repo-inst { display: inline-flex; align-items: center; gap: .25rem; font-size: .78rem; color: var(--muted); font-family: ui-monospace, monospace; }
+      .repo-inst .material-icons { font-size: 14px; }
+      .infogrid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 2rem; }
+      @media (max-width: 700px) { .infogrid { grid-template-columns: 1fr; } }
+      .infogrid .k { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 700; }
+      .infogrid .v { font-size: 1rem; }
+      .styles-grid { display: flex; flex-direction: column; gap: .5rem; }
+      .style-row { display: flex; align-items: center; gap: .5rem; padding: .3rem 0; border-bottom: 1px solid var(--border); }
+      .style-row:last-child { border-bottom: none; }
+      .style-key { font-weight: 600; min-width: 120px; text-transform: capitalize; }
+      .style-sw { width: 18px; height: 18px; border-radius: 5px; border: 1px solid var(--border); }

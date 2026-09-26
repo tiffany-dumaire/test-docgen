@@ -1,0 +1,268 @@
+    <div class="row between">
+      <h1>{{ isEdit() ? doc()?.title : 'Nouveau document' }}</h1>
+      <button type="button" class="btn btn-ghost" appBack="/documents">Retour</button>
+    </div>
+
+    @if (doc(); as d) {
+      <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+        <mat-tab label="Informations de base (Paramètres)">
+        <div class="stack tabpad">
+          <div class="card stack">
+            <h3>Paramètres</h3>
+            <div class="field">
+              <label>Titre du document *</label>
+              <input [(ngModel)]="d.title" />
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Projet *</label>
+                <select [(ngModel)]="d.project" [disabled]="isEdit()" (ngModelChange)="onProjectChange($event)">
+                  <option [ngValue]="null" disabled>— choisir —</option>
+                  @for (p of projects(); track p.id) {
+                    <option [ngValue]="p.id">{{ p.name }} ({{ p.clientName }})</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label>Modèle *</label>
+                <select [(ngModel)]="d.template" [disabled]="isEdit()" (ngModelChange)="onTemplateChange()">
+                  <option [ngValue]="null" disabled>— choisir —</option>
+                  @for (t of templates(); track t.id) {
+                    <option [ngValue]="t.id">{{ t.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Niveau de confidentialité</label>
+              <select [(ngModel)]="d.confidentiality">
+                @for (c of confidentialityLevels(); track c.value) {
+                  <option [value]="c.value">{{ c.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="field">
+              <label>Date du document</label>
+              <input type="date" [ngModel]="d.docDate" (ngModelChange)="d.docDate = $event || null" />
+              <small class="muted">Utilisable dans les textes via {{ '{{' }}doc_date{{ '}}' }}.</small>
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+              {{ isEdit() ? 'Enregistrer' : 'Créer le document' }}
+            </button>
+          </div>
+        </div>
+        </mat-tab>
+
+        <mat-tab label="Contenu">
+        <div class="stack tabpad">
+          <!-- Saisie assistée depuis les blocs -->
+          @if (activeTemplate(); as tpl) {
+            @if (isExcelWorkbook(tpl)) {
+              <div class="card stack">
+                <h3>Données du classeur</h3>
+                <div class="sheet-tabs">
+                  @for (sh of wbSheets(tpl); track sh.id; let i = $index) {
+                    <button class="stab" [class.active]="activeSheet() === i" (click)="activeSheet.set(i)">
+                      {{ sheetIcon(sh.type) }} {{ sh.name }}
+                    </button>
+                  }
+                </div>
+                @if (wbSheets(tpl)[activeSheet()]; as sh) {
+                  @if (sh.type === 'table') {
+                    <p class="muted" style="margin:.2rem 0">Saisissez les lignes. Colonnes typées : les formats (monnaie, date…) sont appliqués à la génération.</p>
+                    <div class="col-hints">
+                      @for (c of sh.columns ?? []; track c.key) {
+                        <span class="chip">{{ c.label }} <em>· {{ typeShort(c.type) }}</em></span>
+                      }
+                    </div>
+                    <app-data-grid [model]="sheetGrid(d, sh)" [allowColumns]="!!sh.allow_add_columns" />
+                  } @else if (sh.type === 'pivot') {
+                    <div class="info-block">⊞ Tableau croisé généré automatiquement à partir de l'onglet
+                      « {{ sourceName(tpl, sh) }} » (agrégation : {{ sh.pivot?.agg }}).</div>
+                  } @else {
+                    <div class="info-block">ℹ️ Informations fixes définies dans le modèle
+                      ({{ (sh.items ?? []).length }} élément(s)). Elles seront insérées telles quelles.</div>
+                  }
+                }
+              </div>
+            } @else if (tpl.is_block_based) {
+              <div class="card stack">
+                <h3>Contenu à remplir</h3>
+                @for (block of asBlocks(tpl); track block.id) {
+                  @switch (block.type) {
+                    @case ('heading') {
+                      <div class="preview-heading" [style.fontSize.rem]="block.level === 1 ? 1.3 : 1.05">
+                        {{ interpolate(block.text || '') }}
+                      </div>
+                    }
+                    @case ('text') {
+                      <div class="preview-text">{{ interpolate(block.text || '') }}</div>
+                    }
+                    @case ('richtext') {
+                      <div class="preview-rich" [innerHTML]="block.text"></div>
+                    }
+                    @case ('bullet_list') {
+                      <ul class="preview-list">@for (it of block.items ?? []; track $index) { <li>{{ interpolate(it) }}</li> }</ul>
+                    }
+                    @case ('numbered_list') {
+                      <ol class="preview-list">@for (it of block.items ?? []; track $index) { <li>{{ interpolate(it) }}</li> }</ol>
+                    }
+                    @case ('image') {
+                      @if (block.asset_url) { <img [src]="block.asset_url" class="preview-thumb" [style.width.%]="block.width_pct" /> }
+                    }
+                    @case ('logo') {
+                      <div class="info-block">🏢 Logo de l'entreprise (position : {{ block.align }}).</div>
+                    }
+                    @case ('code') {
+                      <pre class="preview-code">{{ interpolate(block.text || '') }}</pre>
+                    }
+                    @case ('link') {
+                      <div class="preview-text">🔗 {{ block.label || block.url }}</div>
+                    }
+                    @case ('field') {
+                      <div class="field">
+                        <label>{{ block.label || 'Champ' }} @if (block.required) { <span class="req">*</span> }</label>
+                        @switch (block.field_type) {
+                          @case ('textarea') {
+                            <textarea [ngModel]="fieldVal(d, block.key!)" (ngModelChange)="setField(d, block.key!, $event)" rows="3"></textarea>
+                          }
+                          @case ('select') {
+                            <select [ngModel]="fieldVal(d, block.key!)" (ngModelChange)="setField(d, block.key!, $event)">
+                              <option value="">—</option>
+                              @for (opt of block.options ?? []; track opt) { <option [value]="opt">{{ opt }}</option> }
+                            </select>
+                          }
+                          @default {
+                            <input
+                              [type]="inputType(block.field_type)"
+                              [ngModel]="fieldVal(d, block.key!)"
+                              (ngModelChange)="setField(d, block.key!, $event)"
+                            />
+                          }
+                        }
+                      </div>
+                    }
+                    @case ('table') {
+                      <div class="field">
+                        <label>{{ block.label || 'Tableau' }}</label>
+                        <app-data-grid
+                          [model]="tableModel(d, block)"
+                          [allowColumns]="!!block.allow_edit_columns"
+                        />
+                      </div>
+                    }
+                    @case ('contacts') {
+                      <div class="info-block">
+                        📇 Les contacts du projet ({{ scopeLabel(block.scope) }}) seront insérés automatiquement ici.
+                      </div>
+                    }
+                    @case ('spacer') {
+                      <div style="height:8px"></div>
+                    }
+                  }
+                }
+              </div>
+            } @else {
+              <!-- Modèle avancé (non visuel) : saisie JSON de repli -->
+              <div class="card stack">
+                <h3>Variables (modèle avancé)</h3>
+                <p class="muted">Ce modèle n'utilise pas l'éditeur visuel. Saisie JSON :</p>
+                <textarea class="mono" [ngModel]="jsonData(d)" (ngModelChange)="setJsonData(d, $event)" rows="8"></textarea>
+                @if (jsonError()) { <small class="req">JSON invalide</small> }
+              </div>
+            }
+          }
+
+          <div class="row">
+            <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+              {{ isEdit() ? 'Enregistrer' : 'Créer le document' }}
+            </button>
+          </div>
+        </div>
+        </mat-tab>
+
+        <mat-tab label="Aperçu">
+        <div class="stack tabpad">
+          <div class="card stack">
+            <div class="row between">
+              <h3>Aperçu du document</h3>
+              <button class="btn btn-sm btn-primary" (click)="refreshPreview()" [disabled]="previewing() || !isEdit()">
+                {{ previewing() ? 'Génération…' : '↻ Rafraîchir l\\'aperçu' }}
+              </button>
+            </div>
+            @if (!isEdit()) {
+              <p class="muted" style="margin:0">Enregistrez d'abord le document pour afficher son aperçu.</p>
+            } @else if (previewKind() === 'image' && previewImg()) {
+              <img [src]="previewImg()" class="pv-inline-img" alt="aperçu" />
+            } @else if (previewFrame()) {
+              <iframe class="pv-inline" [src]="previewFrame()" title="Aperçu"></iframe>
+            } @else {
+              <p class="muted" style="margin:0">Cliquez sur « Rafraîchir l'aperçu » pour générer un aperçu à jour du document.</p>
+            }
+          </div>
+        </div>
+        </mat-tab>
+
+        <mat-tab label="Générations et versions">
+        <div class="stack tabpad">
+          <div class="card stack">
+            <h3>Générer une version</h3>
+            @if (!isEdit()) {
+              <p class="muted">Enregistrez d'abord le document, puis générez sa première version.</p>
+            } @else {
+              <div class="form-grid">
+                <div class="field">
+                  <label>Vos initiales *</label>
+                  <input [(ngModel)]="gen.author_initials" maxlength="10" placeholder="ex : PM" />
+                </div>
+                <div class="field">
+                  <label>Votre nom</label>
+                  <input [(ngModel)]="gen.author_name" placeholder="Paul Martin" />
+                </div>
+              </div>
+              <div class="field">
+                <label>Commentaire de modification</label>
+                <textarea [(ngModel)]="gen.comment" rows="2" placeholder="Ce qui a changé…"></textarea>
+              </div>
+              <button class="btn btn-primary" (click)="generate()" [disabled]="generating()">
+                🖨️ {{ (doc()?.currentVersion ?? 0) > 0 ? 'Régénérer (nouvelle version)' : 'Générer la version 1' }}
+              </button>
+              <button class="btn btn-ghost" (click)="preview()" [disabled]="previewing()">
+                👁 {{ previewing() ? 'Aperçu…' : 'Aperçu' }}
+              </button>
+              <small class="muted">Pensez à <b>Enregistrer</b> vos modifications avant de générer.</small>
+            }
+          </div>
+
+          <div class="card">
+            <h3>Historique des versions</h3>
+            @if (versions().length) {
+              <table>
+                <thead><tr><th>Ver.</th><th>Date</th><th>Auteur</th><th>Confid.</th><th>Commentaire</th><th></th></tr></thead>
+                <tbody>
+                  @for (v of versions(); track v.id) {
+                    <tr>
+                      <td>v{{ v.versionNumber }}</td>
+                      <td>{{ v.createdAt | date: 'dd/MM/yy HH:mm' }}</td>
+                      <td>{{ v.authorInitials }}</td>
+                      <td><span class="badge" [class]="'badge-' + v.confidentiality">{{ v.confidentialityDisplay }}</span></td>
+                      <td class="cmt">{{ v.comment || '—' }}</td>
+                      <td>
+                        @if (v.fileUrl) { <a class="btn btn-sm btn-ghost" [href]="v.fileUrl" target="_blank">⬇</a> }
+                        <button class="btn btn-sm btn-ghost" (click)="restore(v)" title="Restaurer cette version">↺</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <div class="muted">Aucune version générée.</div>
+            }
+          </div>
+        </div>
+        </mat-tab>
+      </mat-tab-group>
+    }

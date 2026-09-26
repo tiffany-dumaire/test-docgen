@@ -1,0 +1,110 @@
+    <div class="card stack">
+      <div class="row between">
+        <h3>Sections & questions</h3>
+        <button class="btn btn-sm btn-primary" (click)="addSection()">+ Section</button>
+      </div>
+
+      @for (sec of sections; track sec.id; let si = $index) {
+        <div class="section-card">
+          <div class="section-head">
+            <input class="sec-title" [(ngModel)]="sec.title" (ngModelChange)="emit()" placeholder="Titre de la section" />
+            <div class="row" style="gap:.2rem">
+              <button class="btn btn-xs btn-ghost" (click)="moveSection(si, -1)" [disabled]="si===0">↑</button>
+              <button class="btn btn-xs btn-ghost" (click)="moveSection(si, 1)" [disabled]="si===sections.length-1">↓</button>
+              <button class="btn btn-xs btn-danger" (click)="removeSection(si)">✕</button>
+            </div>
+          </div>
+          <textarea class="sec-desc" [(ngModel)]="sec.description" (ngModelChange)="emit()" rows="1" placeholder="Description de la section (facultatif)"></textarea>
+
+          @for (el of sec.elements; track $index; let ei = $index) {
+            <div class="element" [class.content]="el.kind==='content'">
+              @if (el.kind === 'content') {
+                <div class="el-head">
+                  <span class="tag">Info · {{ contentLabel(asC(el).content_type) }}</span>
+                  <div class="row" style="gap:.2rem">
+                    <button class="btn btn-xs btn-ghost" (click)="moveEl(sec, ei, -1)" [disabled]="ei===0">↑</button>
+                    <button class="btn btn-xs btn-ghost" (click)="moveEl(sec, ei, 1)" [disabled]="ei===sec.elements.length-1">↓</button>
+                    <button class="btn btn-xs btn-danger" (click)="removeEl(sec, ei)">✕</button>
+                  </div>
+                </div>
+                <div class="row" style="gap:.4rem;flex-wrap:wrap">
+                  <select [(ngModel)]="asC(el).content_type" (ngModelChange)="emit()" style="width:150px">
+                    <option value="text">Texte</option>
+                    <option value="image">Image</option>
+                    <option value="file">Fichier</option>
+                  </select>
+                  <input [(ngModel)]="asC(el).title" (ngModelChange)="emit()" placeholder="Titre (facultatif)" style="flex:1;min-width:140px" />
+                </div>
+                @if (asC(el).content_type === 'text') {
+                  <textarea [(ngModel)]="asC(el).text" (ngModelChange)="emit()" rows="2" placeholder="Texte affiché entre les questions"></textarea>
+                } @else {
+                  <div class="upload-row">
+                    @if (asC(el).url) {
+                      @if (asC(el).content_type === 'image') { <img class="thumb" [src]="asC(el).url" alt="" /> }
+                      @else { <span class="fname">📎 {{ asC(el).name }}</span> }
+                    }
+                    <input type="file" [accept]="asC(el).content_type === 'image' ? 'image/*' : '*'" (change)="uploadContent(asC(el), $event)" />
+                  </div>
+                }
+              } @else {
+                <div class="el-head">
+                  <input class="q-label" [ngModel]="asQ(el).label" (ngModelChange)="asQ(el).label = $event; syncKey(asQ(el)); emit()" placeholder="Intitulé de la question" />
+                  <div class="row" style="gap:.2rem">
+                    <button class="btn btn-xs btn-ghost" (click)="moveEl(sec, ei, -1)" [disabled]="ei===0">↑</button>
+                    <button class="btn btn-xs btn-ghost" (click)="moveEl(sec, ei, 1)" [disabled]="ei===sec.elements.length-1">↓</button>
+                    <button class="btn btn-xs btn-danger" (click)="removeEl(sec, ei)">✕</button>
+                  </div>
+                </div>
+                <input class="q-hint" [(ngModel)]="asQ(el).hint" (ngModelChange)="emit()" placeholder="Aide / précision (hint)" />
+                <div class="row" style="gap:.4rem;flex-wrap:wrap;align-items:center">
+                  <select [(ngModel)]="asQ(el).type" (ngModelChange)="emit()" style="width:210px">
+                    @for (t of questionTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                  </select>
+                  <label class="chk"><input type="checkbox" [(ngModel)]="asQ(el).required" (ngModelChange)="emit()" /> Requis</label>
+                </div>
+
+                @if (hasOptions(asQ(el).type)) {
+                  <input [ngModel]="(asQ(el).options ?? []).join(', ')" (ngModelChange)="setOptions(asQ(el), $event)" placeholder="Options séparées par des virgules" />
+                }
+                @if (asQ(el).type === 'scale') {
+                  <div class="row" style="gap:.4rem;flex-wrap:wrap">
+                    <span class="mini">Min</span><input type="number" [(ngModel)]="asQ(el).scale_min" (ngModelChange)="emit()" style="width:64px" />
+                    <span class="mini">Max</span><input type="number" [(ngModel)]="asQ(el).scale_max" (ngModelChange)="emit()" style="width:64px" />
+                    <input [(ngModel)]="asQ(el).scale_min_label" (ngModelChange)="emit()" placeholder="Étiquette min" style="flex:1;min-width:120px" />
+                    <input [(ngModel)]="asQ(el).scale_max_label" (ngModelChange)="emit()" placeholder="Étiquette max" style="flex:1;min-width:120px" />
+                  </div>
+                }
+                @if (asQ(el).type === 'rating') {
+                  <div class="row" style="gap:.4rem"><span class="mini">Nombre d'étoiles</span>
+                    <input type="number" min="3" max="10" [(ngModel)]="asQ(el).rating_max" (ngModelChange)="emit()" style="width:70px" /></div>
+                }
+                @if (asQ(el).type === 'slot') {
+                  <input [ngModel]="(asQ(el).slots ?? []).join(', ')" (ngModelChange)="setSlots(asQ(el), $event)" placeholder="Créneaux proposés (ex : Lun 9h, Lun 14h…) — vide = choix libre" />
+                }
+
+                <div class="q-extras">
+                  <div class="upload-row">
+                    <span class="mini">Image d'illustration</span>
+                    @if (asQ(el).image) { <img class="thumb" [src]="asQ(el).image" alt="" /> }
+                    <input type="file" accept="image/*" (change)="uploadQ(asQ(el), 'image', $event)" />
+                    @if (asQ(el).image) { <button class="btn btn-xs btn-ghost" (click)="asQ(el).image = ''; emit()">✕</button> }
+                  </div>
+                  <div class="upload-row">
+                    <span class="mini">Fichier modèle</span>
+                    @if (asQ(el).template_file) { <span class="fname">📎 {{ asQ(el).template_file_name || 'modèle' }}</span> }
+                    <input type="file" (change)="uploadQ(asQ(el), 'template_file', $event)" />
+                    @if (asQ(el).template_file) { <button class="btn btn-xs btn-ghost" (click)="asQ(el).template_file = ''; asQ(el).template_file_name = ''; emit()">✕</button> }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="row" style="gap:.4rem;margin-top:.4rem">
+            <button class="btn btn-sm btn-ghost" (click)="addQuestion(sec)">+ Question</button>
+            <button class="btn btn-sm btn-ghost" (click)="addContent(sec)">+ Information fixe</button>
+          </div>
+        </div>
+      }
+      @if (!sections.length) { <small>Aucune section. Ajoutez-en une.</small> }
+    </div>

@@ -1,0 +1,558 @@
+    <div class="row between">
+      <h1>{{ isEdit() ? 'Modifier le modèle' : 'Nouveau modèle' }}</h1>
+      <div class="row" style="gap:.4rem">
+        <button class="btn btn-ghost btn-sm" (click)="undo()" [disabled]="!canUndo()" title="Retirer le dernier changement">↶ Annuler</button>
+        <button class="btn btn-ghost btn-sm" (click)="reset()" [disabled]="!canReset()" title="Revenir à l'état initial">⟲ Réinitialiser</button>
+        <button type="button" class="btn btn-ghost" appBack="/templates">Retour</button>
+      </div>
+    </div>
+
+    @if (model(); as m) {
+      <div class="type-banner">
+        <span class="tb-icon">{{ typeMeta().icon }}</span>
+        <div>
+          <strong>Modèle {{ typeMeta().label }}</strong>
+          <div class="muted">{{ typeMeta().hint }}</div>
+        </div>
+      </div>
+
+      @if (isBlocks() && availableLangs(m).length > 1) {
+        <div class="content-lang">
+          <span class="tag">Contenu édité en :</span>
+          @for (l of availableLangs(m); track l) {
+            <button class="lang-pill" [class.active]="contentLang() === l" (click)="switchContentLang(l)">
+              {{ flagOf(l) }} {{ labelOf(l) }}@if (l === (m.language || 'fr')) { <em> (base)</em> }
+            </button>
+          }
+          <span class="muted" style="font-size:.78rem">Chaque langue peut avoir son propre contenu (blocs), pas seulement les textes.</span>
+        </div>
+      }
+
+      <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+        <!-- ===================== GÉNÉRAL ===================== -->
+        <mat-tab label="Général">
+          <div class="tabpad">
+            <div class="card stack">
+              <div class="form-grid">
+                <div class="field">
+                  <label>Nom du modèle *</label>
+                  <input [(ngModel)]="m.name" (ngModelChange)="onName($event, m)" />
+                </div>
+                <div class="field">
+                  <label>Type de modèle *</label>
+                  <select [(ngModel)]="m.doc_type" (ngModelChange)="onFormatChange(m)" [disabled]="isEdit()">
+                    @for (dt of typeOptions(); track dt.value) { <option [value]="dt.value">{{ dt.label }}</option> }
+                  </select>
+                  @if (!isEdit()) { <small class="muted">Le type détermine les onglets de configuration.</small> }
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label>Description</label>
+                  <input [(ngModel)]="m.description" placeholder="À quoi sert ce modèle ?" />
+                </div>
+                <div class="field">
+                  <label>Langue principale</label>
+                  <select [(ngModel)]="m.language">
+                    @for (l of availableLangs(m); track l) {
+                      <option [value]="l">{{ flagOf(l) }} {{ labelOf(l) }}</option>
+                    }
+                  </select>
+                  <small class="muted">Repli si une langue demandée n'est pas disponible.</small>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Langues disponibles</label>
+                <div class="row" style="gap:.8rem; flex-wrap:wrap">
+                  @for (l of languages; track l.value) {
+                    <label class="chk">
+                      <input type="checkbox" [checked]="hasLang(m, l.value)"
+                             (change)="toggleLang(m, l.value)" /> {{ l.flag }} {{ l.label }}
+                    </label>
+                  }
+                </div>
+                <small class="muted">Un modèle peut proposer une ou plusieurs langues.</small>
+              </div>
+
+              <div class="field">
+                <label>Nom du modèle par langue</label>
+                @for (l of availableLangs(m); track l) {
+                  <div class="row" style="gap:.6rem; align-items:center; margin-bottom:.35rem">
+                    <span style="width:2.2rem">{{ flagOf(l) }}</span>
+                    <input style="flex:1" [ngModel]="nameFor(m, l)"
+                           (ngModelChange)="setName(m, l, $event)"
+                           [placeholder]="labelOf(l)" />
+                  </div>
+                }
+                <small class="muted">Laissez vide pour utiliser le nom principal ci-dessus.</small>
+              </div>
+
+              @if (hasTableColor()) {
+                <div class="field">
+                  <label>Couleur principale des tableaux</label>
+                  <div class="row" style="gap:.6rem; align-items:center">
+                    <input type="color" [ngModel]="'#' + (settings().table_color || '1F497D')" (ngModelChange)="settings().table_color = $event.slice(1)" style="width:52px; height:36px; padding:2px" />
+                    <span class="muted">Appliquée aux en-têtes de tableaux (Word, PDF et Excel).</span>
+                  </div>
+                </div>
+              }
+
+              @if (isPdf()) {
+                <div class="field">
+                  <label class="chk"><input type="checkbox" [(ngModel)]="settings().pdf_from_docx" /> PDF généré depuis Word (rendu identique)</label>
+                  <small class="muted">Recommandé : le PDF est produit par export du document Word (Microsoft Word). Décochez pour un rendu PDF natif de secours.</small>
+                </div>
+              }
+
+              <div class="field">
+                <label>Portée du modèle</label>
+                <select [(ngModel)]="m.scope">
+                  <option value="global">Ouvert à tous les projets</option>
+                  <option value="projects">Spécifique à certains projets</option>
+                </select>
+              </div>
+              @if (m.scope === 'projects') {
+                <div class="field">
+                  <label>Projets autorisés</label>
+                  <div class="proj-pick">
+                    @for (pr of allProjects(); track pr.id) {
+                      <label class="chip-check">
+                        <input type="checkbox" [checked]="isProjSel(m, pr.id!)" (change)="toggleProj(m, pr.id!)" />
+                        {{ pr.name }}
+                      </label>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- ===================== CONTENU (Word / PDF / Markdown / PowerPoint) ===================== -->
+        @if (isBlocks()) {
+          <mat-tab label="Contenu">
+            <div class="tabpad content-grid">
+              <div class="palette card">
+                <h3>Éléments</h3>
+                @for (item of palette(); track item.type) {
+                  <div class="palette-item" draggable="true" (dragstart)="onPaletteDrag(item.type)" (click)="add(item.type)">
+                    <span class="pi-icon">{{ item.icon }}</span> {{ item.label }}
+                  </div>
+                }
+              </div>
+
+              <div class="canvas card" (dragover)="$event.preventDefault()" (drop)="onCanvasDrop()">
+                <h3>{{ isPptx() ? 'Diapositives (un titre = une diapo)' : 'Contenu du document' }}</h3>
+                @for (block of blocks(); track block.id; let i = $index) {
+                  <div class="block" draggable="true" (dragstart)="onBlockDrag(i)" (dragover)="$event.preventDefault()" (drop)="onDropAt(i); $event.stopPropagation()">
+                    <div class="block-head">
+                      <span class="drag">⠿</span>
+                      <span class="block-type">{{ blockLabel(block.type) }}</span>
+                      <span class="spacer"></span>
+                      <button class="mini" (click)="move(i, -1)" [disabled]="i === 0">▲</button>
+                      <button class="mini" (click)="move(i, 1)" [disabled]="i === blocks().length - 1">▼</button>
+                      <button class="mini del" (click)="removeBlock(i)">✕</button>
+                    </div>
+
+                    @switch (block.type) {
+                      @case ('heading') {
+                        <div class="row" style="gap:.5rem">
+                          <select [(ngModel)]="block.level" style="width:110px">
+                            @for (l of [1,2,3,4,5]; track l) { <option [ngValue]="l">Titre {{ l }}</option> }
+                          </select>
+                          <input [(ngModel)]="block.text" placeholder="Texte du titre" />
+                        </div>
+                      }
+                      @case ('text') {
+                        <textarea [(ngModel)]="block.text" rows="3" placeholder="Texte. Variables {{ '{{' }}…{{ '}}' }} autorisées."></textarea>
+                      }
+                      @case ('richtext') {
+                        <app-rich-text-editor [value]="block.text || ''" (valueChange)="block.text = $event" />
+                      }
+                      @case ('bullet_list') { <ng-container *ngTemplateOutlet="listEditor; context:{ $implicit: block }" /> }
+                      @case ('numbered_list') { <ng-container *ngTemplateOutlet="listEditor; context:{ $implicit: block }" /> }
+                      @case ('image') {
+                        <div class="stack">
+                          @if (block.asset_url) { <img [src]="block.asset_url" class="preview-img" [style.width.%]="block.width_pct" /> }
+                          <input type="file" accept="image/*" (change)="uploadImage($event, block)" />
+                          <ng-container *ngTemplateOutlet="sizePos; context:{ $implicit: block }" />
+                        </div>
+                      }
+                      @case ('logo') {
+                        <div class="stack">
+                          <div class="muted">Le logo de l'entreprise sera inséré ici.</div>
+                          <ng-container *ngTemplateOutlet="sizePos; context:{ $implicit: block }" />
+                        </div>
+                      }
+                      @case ('table') {
+                        <div class="field">
+                          <label>Titre du tableau (facultatif)</label>
+                          <input [(ngModel)]="block.label" />
+                        </div>
+                        <label>Colonnes</label>
+                        @for (col of block.columns ?? []; track $index) {
+                          <div class="row" style="gap:.4rem; margin-bottom:.3rem">
+                            <input [(ngModel)]="col.label" placeholder="Nom de colonne" />
+                            <button class="mini del" (click)="removeCol(block, $index)">✕</button>
+                          </div>
+                        }
+                        <button class="btn btn-sm btn-ghost" (click)="addCol(block)">+ Colonne</button>
+                        <label class="chk" style="margin-top:.5rem"><input type="checkbox" [(ngModel)]="block.allow_edit_columns" /> Colonnes modifiables au remplissage</label>
+                      }
+                      @case ('field') {
+                        <div class="form-grid">
+                          <div class="field"><label>Libellé</label><input [(ngModel)]="block.label" (ngModelChange)="syncKey(block)" /></div>
+                          <div class="field"><label>Type</label>
+                            <select [(ngModel)]="block.field_type">
+                              <option value="text">Texte court</option><option value="textarea">Texte long</option>
+                              <option value="number">Nombre</option><option value="date">Date</option><option value="select">Liste</option>
+                            </select>
+                          </div>
+                        </div>
+                        @if (block.field_type === 'select') {
+                          <div class="field"><label>Options (virgules)</label><input [ngModel]="(block.options ?? []).join(', ')" (ngModelChange)="setOptions(block, $event)" /></div>
+                        }
+                        <div class="row" style="gap:1.2rem">
+                          <label class="chk"><input type="checkbox" [(ngModel)]="block.required" /> Obligatoire</label>
+                          <label class="chk"><input type="checkbox" [(ngModel)]="block.show_label" /> Afficher le libellé</label>
+                        </div>
+                      }
+                      @case ('code') {
+                        <textarea class="mono" [(ngModel)]="block.text" rows="3" placeholder="Bloc de code"></textarea>
+                      }
+                      @case ('link') {
+                        <div class="form-grid">
+                          <div class="field"><label>Texte du lien</label><input [(ngModel)]="block.label" placeholder="Voir le site" /></div>
+                          <div class="field"><label>URL</label><input [(ngModel)]="block.url" placeholder="https://…" /></div>
+                        </div>
+                      }
+                      @case ('diagram') {
+                        <div class="form-grid">
+                          <div class="field"><label>Type de diagramme</label>
+                            <select [(ngModel)]="block.variant">
+                              <option value="process">Processus (flèches)</option>
+                              <option value="list">Liste</option>
+                              <option value="cycle">Cycle</option>
+                              <option value="hierarchy">Hiérarchie</option>
+                              <option value="pyramid">Pyramide</option>
+                            </select>
+                          </div>
+                          <div class="field"><label>Largeur : {{ block.width_pct || 100 }}%</label>
+                            <input type="range" min="40" max="100" [ngModel]="block.width_pct || 100" (ngModelChange)="block.width_pct = +$event" />
+                          </div>
+                        </div>
+                        <label>Éléments</label>
+                        @for (it of block.diagram_items ?? []; track $index) {
+                          <div class="row" style="gap:.4rem; margin-bottom:.3rem">
+                            <input [(ngModel)]="it.title" placeholder="Titre" style="flex:1" />
+                            <input [(ngModel)]="it.text" placeholder="Description (facultatif)" style="flex:2" />
+                            <button class="mini del" (click)="block.diagram_items!.splice($index, 1)">✕</button>
+                          </div>
+                        }
+                        <button class="btn btn-sm btn-ghost" (click)="addDiagramItem(block)">+ Élément</button>
+                      }
+                      @case ('contacts') {
+                        <div class="form-grid">
+                          <div class="field"><label>Titre</label><input [(ngModel)]="block.label" /></div>
+                          <div class="field"><label>Portée</label>
+                            <select [(ngModel)]="block.scope">
+                              <option value="both">Client + interne</option><option value="client">Client</option><option value="internal">Interne</option>
+                            </select>
+                          </div>
+                        </div>
+                      }
+                      @case ('form_diagram') {
+                        <div class="form-grid">
+                          <div class="field"><label>Identifiant du diagramme (formulaire)</label>
+                            <input [(ngModel)]="block.diagram_key" placeholder="ex : d1" />
+                          </div>
+                          <div class="field"><label>Largeur : {{ block.width_pct || 90 }}%</label>
+                            <input type="range" min="40" max="100" [ngModel]="block.width_pct || 90" (ngModelChange)="block.width_pct = +$event" />
+                          </div>
+                        </div>
+                        <p class="muted" style="font-size:.78rem;margin:0">Insère, lors de la génération d'un rapport lié à un formulaire, le diagramme correspondant (calculé sur les réponses).</p>
+                      }
+                      @case ('spacer') { <div class="muted">Espace vertical.</div> }
+                    }
+                  </div>
+                }
+                @if (!blocks().length) {
+                  <div class="empty drop-hint">Glissez des éléments ici depuis la palette →</div>
+                }
+              </div>
+
+              <div class="side card">
+                <h3>Variables</h3>
+                <p class="muted" style="font-size:.78rem">Cliquez pour copier.</p>
+                @for (v of allVariables(); track v) {
+                  <button class="var" (click)="copyVar(v)">{{ '{{' }}{{ v }}{{ '}}' }}</button>
+                }
+              </div>
+            </div>
+          </mat-tab>
+        }
+
+        <!-- ===================== EN-TÊTE & PIED (Word / PDF / Lettre) ===================== -->
+        @if (hasHeaderFooter()) {
+          <mat-tab label="En-tête & pied">
+            <div class="tabpad">
+              <div class="card stack">
+                <h3>En-tête</h3>
+                <label class="chk"><input type="checkbox" [ngModel]="hfConfigured('header')" (ngModelChange)="toggleHf('header', $event)" /> Personnaliser l'en-tête du modèle</label>
+                @if (hfConfigured('header')) {
+                  <label class="chk"><input type="checkbox" [ngModel]="hfVal('header','enabled')" (ngModelChange)="setHf('header','enabled',$event)" /> En-tête actif</label>
+                  @if (hfVal('header','enabled')) {
+                    <label class="chk"><input type="checkbox" [ngModel]="hfVal('header','show_logo')" (ngModelChange)="setHf('header','show_logo',$event)" /> Afficher le logo de l'entreprise</label>
+                    <div class="field"><label>Contenu de l'en-tête (texte enrichi : couleur, gras, listes… — variables {{ '{{' }}…{{ '}}' }})</label>
+                      <app-rich-text-editor [value]="$any(hfVal('header','html'))" (valueChange)="setHf('header','html',$event)" /></div>
+                    <div class="field" style="max-width:220px"><label>Alignement</label>
+                      <select [ngModel]="hfVal('header','align')" (ngModelChange)="setHf('header','align',$event)">
+                        <option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option>
+                      </select></div>
+                  } @else { <p class="muted" style="margin:0">L'en-tête sera vide (aucun en-tête sur le document).</p> }
+                } @else { <p class="muted" style="margin:0">L'en-tête du modèle de base est utilisé.</p> }
+              </div>
+
+              <div class="card stack">
+                <h3>Pied de page</h3>
+                <label class="chk"><input type="checkbox" [ngModel]="hfConfigured('footer')" (ngModelChange)="toggleHf('footer', $event)" /> Personnaliser le pied de page du modèle</label>
+                @if (hfConfigured('footer')) {
+                  <label class="chk"><input type="checkbox" [ngModel]="hfVal('footer','enabled')" (ngModelChange)="setHf('footer','enabled',$event)" /> Pied de page actif</label>
+                  @if (hfVal('footer','enabled')) {
+                    <div class="field"><label>Contenu du pied de page (texte enrichi : couleur, gras, listes… — variables {{ '{{' }}…{{ '}}' }})</label>
+                      <app-rich-text-editor [value]="$any(hfVal('footer','html'))" (valueChange)="setHf('footer','html',$event)" /></div>
+                    <div class="field" style="max-width:220px"><label>Alignement</label>
+                      <select [ngModel]="hfVal('footer','align')" (ngModelChange)="setHf('footer','align',$event)">
+                        <option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option>
+                      </select></div>
+                  } @else { <p class="muted" style="margin:0">Le pied de page sera vide (aucun pied sur le document).</p> }
+                } @else { <p class="muted" style="margin:0">Le pied de page du modèle de base est utilisé.</p> }
+              </div>
+            </div>
+          </mat-tab>
+        }
+
+        <!-- ===================== STRUCTURE & STYLES (Word / PDF) ===================== -->
+        @if (hasStructure()) {
+          <mat-tab label="Structure & styles">
+            <div class="tabpad">
+              <div class="card stack">
+                <h3>Structure du document</h3>
+                <div class="form-grid">
+                  <label class="chk"><input type="checkbox" [(ngModel)]="settings().include_cover" /> Page de garde</label>
+                  <label class="chk"><input type="checkbox" [(ngModel)]="settings().include_suivi" /> Page de suivi (identification + révisions)</label>
+                  <label class="chk"><input type="checkbox" [(ngModel)]="settings().include_toc" /> Table des matières auto</label>
+                </div>
+                @if (settings().include_cover) {
+                  <div class="form-grid">
+                    <div class="field">
+                      <label>Titre de couverture</label>
+                      <input [(ngModel)]="settings().cover_title" placeholder="{{ '{{' }}document_title{{ '}}' }}" />
+                    </div>
+                    <div class="field">
+                      <label>Sous-titre</label>
+                      <input [(ngModel)]="settings().cover_subtitle" />
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="card stack">
+                <h3>Mise en page libre des pages de garde / suivi</h3>
+                <p class="muted" style="margin:0 0 .4rem">Positionnez librement titres, images (redimensionnables), logo, formes et variables. Le PDF sera identique au Word.</p>
+                <app-layout-editor [settings]="settings()" />
+              </div>
+              <div class="card stack">
+                <h3>Styles du modèle</h3>
+                <p class="muted" style="margin:0 0 .2rem">Héritage : <b>Entreprise → Projet → Modèle</b>. Ce modèle peut ré-utiliser les styles hérités, les surcharger par élément, ou définir des styles 100 % personnalisés.</p>
+                <app-style-editor [styles]="templateStyles()" />
+              </div>
+            </div>
+          </mat-tab>
+        }
+
+        <!-- ===================== POWERPOINT ===================== -->
+        @if (isPptx()) {
+          <mat-tab label="PowerPoint">
+            <div class="tabpad">
+              <div class="card stack">
+                <h3>Thème de la présentation</h3>
+                <p class="muted" style="margin:0 0 .4rem">Rendu fidèle au thème fourni. Personnalisation : logo de la diapositive de titre et couleur principale.</p>
+                <div class="field">
+                  <label>Couleur principale</label>
+                  <div class="row" style="gap:.6rem; align-items:center">
+                    <input type="color" [ngModel]="pptx().main_color || '#1F497D'" (ngModelChange)="pptx().main_color = $event" style="width:52px; height:36px; padding:2px" />
+                    <span class="muted">Titres et accents des diapositives.</span>
+                  </div>
+                </div>
+                <label class="chk"><input type="checkbox" [(ngModel)]="pptx().include_logo" /> Insérer le logo sur la diapositive de titre</label>
+              </div>
+            </div>
+          </mat-tab>
+        }
+
+        <!-- ===================== ÉLÉMENTS DYNAMIQUES (calques PDF / PPTX) ===================== -->
+        @if (hasOverlays()) {
+          <mat-tab label="Éléments dynamiques">
+            <div class="tabpad">
+              <div class="card stack">
+                <h3>Calques dynamiques</h3>
+                <p class="muted" style="margin:0">
+                  Placez librement des éléments (texte, image, logo, formes) estampillés
+                  @if (isPptx()) { sur les diapositives choisies, en conservant le template titre / contenu. }
+                  @else { sur les pages choisies du document PDF (page de garde comprise). }
+                  Chaque calque cible un ensemble de {{ overlayNoun() }}.
+                </p>
+              </div>
+
+              <div class="card stack">
+                <div class="row between">
+                  <h3>Calques</h3>
+                  <button class="btn btn-sm btn-primary" (click)="addOverlay()">+ Calque</button>
+                </div>
+                <div class="a3-tabs">
+                  @for (ov of overlays(); track ov.id) {
+                    <button class="a3-tab" [class.active]="activeOverlay() === ov.id" (click)="activeOverlay.set(ov.id)">
+                      {{ ov.name }}
+                      <span class="x" (click)="removeOverlay(ov.id); $event.stopPropagation()">✕</span>
+                    </button>
+                  }
+                  @if (!overlays().length) { <span class="muted">Aucun calque. Ajoutez-en un.</span> }
+                </div>
+
+                @for (ov of overlays(); track ov.id) {
+                  @if (activeOverlay() === ov.id) {
+                    <div class="form-grid">
+                      <div class="field">
+                        <label>Nom du calque</label>
+                        <input [(ngModel)]="ov.name" />
+                      </div>
+                      <div class="field">
+                        <label>{{ isPptx() ? 'Diapositives ciblées' : 'Pages ciblées' }}</label>
+                        <select [ngModel]="pagePreset(ov)" (ngModelChange)="setPagePreset(ov, $event)">
+                          <option value="all">Toutes</option>
+                          <option value="first">{{ isPptx() ? 'Première diapo' : 'Première page' }}</option>
+                          <option value="last">{{ isPptx() ? 'Dernière diapo' : 'Dernière page' }}</option>
+                          <option value="odd">{{ isPptx() ? 'Diapos impaires' : 'Pages impaires' }}</option>
+                          <option value="even">{{ isPptx() ? 'Diapos paires' : 'Pages paires' }}</option>
+                          <option value="custom">Personnalisé…</option>
+                        </select>
+                      </div>
+                    </div>
+                    @if (pagePreset(ov) === 'custom') {
+                      <div class="field" style="max-width:360px">
+                        <label>{{ isPptx() ? 'N° de diapositives' : 'N° de pages' }} (ex : 1,3-5)</label>
+                        <input [(ngModel)]="ov.target.pages" placeholder="1,3-5" />
+                        <small class="muted">Numéros séparés par des virgules ; plages avec un tiret. Mots-clés : first, last.</small>
+                      </div>
+                    }
+                    <label class="chk"><input type="checkbox" [ngModel]="ov.enabled !== false" (ngModelChange)="ov.enabled = $event" /> Calque actif</label>
+                    <app-layout-editor [single]="ov.layout" [sizeMode]="isPptx() ? 'slide' : 'page'" />
+                  }
+                }
+              </div>
+            </div>
+          </mat-tab>
+        }
+
+        <!-- ===================== PAGES A3 / A4 ===================== -->
+        @if (isA3()) {
+          <mat-tab label="Pages (A3 / A4)">
+            <div class="tabpad">
+              <div class="card stack">
+                <div class="row between">
+                  <h3>Format d'export</h3>
+                </div>
+                <div class="row" style="gap:1.5rem; align-items:center">
+                  <label class="chk"><input type="radio" name="a3exp" value="pdf" [(ngModel)]="settings().a3_export" /> PDF (toutes les pages)</label>
+                  <label class="chk"><input type="radio" name="a3exp" value="png" [(ngModel)]="settings().a3_export" /> PNG (image de la 1ʳᵉ page)</label>
+                  <label class="chk"><input type="radio" name="a3exp" value="svg" [(ngModel)]="settings().a3_export" /> SVG (vectoriel, 1ʳᵉ page)</label>
+                </div>
+              </div>
+
+              <div class="card stack">
+                <h3>Générer un rendu par langue</h3>
+                <p class="muted" style="margin:0">Chaque langue disponible du modèle produit sa propre planche. Enregistrez le modèle avant de générer.</p>
+                @for (l of availableLangs(m); track l) {
+                  <div class="row" style="gap:.6rem; align-items:center; flex-wrap:wrap">
+                    <span style="min-width:9rem">{{ flagOf(l) }} {{ labelOf(l) }}</span>
+                    <button class="btn btn-sm btn-ghost" [disabled]="!isEdit()" (click)="exportA3Lang('pdf', l)">⬇ PDF</button>
+                    <button class="btn btn-sm btn-ghost" [disabled]="!isEdit()" (click)="exportA3Lang('png', l)">⬇ PNG</button>
+                    <button class="btn btn-sm btn-ghost" [disabled]="!isEdit()" (click)="exportA3Lang('svg', l)">⬇ SVG</button>
+                  </div>
+                }
+              </div>
+
+              <div class="card stack">
+                <div class="row between">
+                  <h3>Pages du modèle</h3>
+                  <button class="btn btn-sm btn-primary" (click)="addA3Page()">+ Page</button>
+                </div>
+                <div class="a3-tabs">
+                  @for (pg of a3Pages(); track pg.id) {
+                    <button class="a3-tab" [class.active]="activeA3() === pg.id" (click)="activeA3.set(pg.id)">
+                      {{ pg.name }}
+                      <span class="x" (click)="removeA3Page(pg.id); $event.stopPropagation()">✕</span>
+                    </button>
+                  }
+                  @if (!a3Pages().length) { <span class="muted">Aucune page. Ajoutez-en une.</span> }
+                </div>
+
+                @for (pg of a3Pages(); track pg.id) {
+                  @if (activeA3() === pg.id) {
+                    <div class="field" style="max-width:320px">
+                      <label>Nom de la page</label>
+                      <input [(ngModel)]="pg.name" />
+                    </div>
+                    <app-layout-editor [single]="pg.layout" />
+                  }
+                }
+              </div>
+            </div>
+          </mat-tab>
+        }
+
+        <!-- ===================== CLASSEUR EXCEL ===================== -->
+        @if (isExcel()) {
+          <mat-tab label="Classeur Excel">
+            <div class="tabpad">
+              <div class="card stack">
+                <h3>Onglets du classeur Excel</h3>
+                <p class="muted" style="margin:0 0 .4rem">Ajoutez des onglets : tableaux à colonnes typées et regroupées, tableaux croisés, informations fixes.</p>
+                <app-excel-builder [sheets]="excelSheets()" />
+              </div>
+            </div>
+          </mat-tab>
+        }
+      </mat-tab-group>
+
+      <div class="row" style="margin-top:1rem">
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+          {{ isEdit() ? 'Enregistrer le modèle' : 'Créer le modèle' }}
+        </button>
+      </div>
+    }
+
+    <ng-template #listEditor let-block>
+      @for (it of block.items ?? []; track $index) {
+        <div class="row" style="gap:.4rem; margin-bottom:.3rem">
+          <input [ngModel]="block.items[$index]" (ngModelChange)="block.items[$index] = $event" placeholder="Élément" />
+          <button class="mini del" (click)="block.items.splice($index, 1)">✕</button>
+        </div>
+      }
+      <button class="btn btn-sm btn-ghost" (click)="addItem(block)">+ Élément</button>
+    </ng-template>
+
+    <ng-template #sizePos let-block>
+      <div class="row" style="gap:1rem; align-items:center">
+        <label style="flex:1">Largeur : {{ block.width_pct || 40 }}%
+          <input type="range" min="10" max="100" [ngModel]="block.width_pct || 40" (ngModelChange)="block.width_pct = +$event" />
+        </label>
+        <div class="field" style="margin:0">
+          <label>Position</label>
+          <select [(ngModel)]="block.align">
+            <option value="left">Gauche</option><option value="center">Centré</option><option value="right">Droite</option>
+          </select>
+        </div>
+      </div>
+    </ng-template>

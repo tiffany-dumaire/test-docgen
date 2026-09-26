@@ -4,8 +4,7 @@ import { AuthService } from '@core/auth/auth.service';
 
 @Component({
   selector: 'app-auth-callback',
-  template: `<div style="min-height:100vh;display:grid;place-items:center">
-    <div class="card">{{ status() }}</div></div>`,
+  templateUrl: './callback.html',
 })
 export class AuthCallback implements OnInit {
   private auth = inject(AuthService);

@@ -1,0 +1,120 @@
+    @if (team(); as t) {
+      <div class="row between">
+        <div>
+          <h1><span class="tdot" [style.background]="t.color || '#38BDF8'"></span> {{ t.name }}</h1>
+          <div class="muted">
+            {{ t.memberCount }} collaborateur(s) · {{ t.projectCount }} projet(s)
+            @if (t.parentName) { · sous-équipe de {{ t.parentName }} }
+          </div>
+        </div>
+        <a class="btn btn-ghost" routerLink="/company">← Mon entreprise</a>
+      </div>
+
+      <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+        <!-- Vue d'ensemble -->
+        <mat-tab label="Vue d'ensemble">
+          <div class="tabpad">
+            <div class="card stack">
+              <div class="form-grid">
+                <div class="field"><label>Nom</label><input [(ngModel)]="t.name" /></div>
+                <div class="field"><label>Couleur</label><input type="color" [(ngModel)]="t.color" style="width:52px;height:36px;padding:2px" /></div>
+              </div>
+              <div class="field"><label>Description</label><textarea [(ngModel)]="t.description" rows="3"></textarea></div>
+              <div class="field">
+                <label>Équipe parente</label>
+                <select [(ngModel)]="t.parent">
+                  <option [ngValue]="null">— aucune (racine) —</option>
+                  @for (o of otherTeams(); track o.id) { <option [ngValue]="o.id">{{ o.name }}</option> }
+                </select>
+              </div>
+              <button class="btn btn-primary" (click)="saveInfo()" [disabled]="saving()">Enregistrer</button>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Collaborateurs -->
+        <mat-tab label="Collaborateurs ({{ memberIds().length }})">
+          <div class="tabpad">
+            <div class="card stack">
+              <h3>Collaborateurs de l'équipe</h3>
+              <p class="muted" style="margin:0">Sélectionnez les collaborateurs à associer à cette équipe. Un collaborateur peut appartenir à plusieurs équipes.</p>
+              <div class="pick-grid">
+                @for (c of allCollaborators(); track c.id) {
+                  <label class="pick" [class.on]="memberIds().includes(c.id!)">
+                    <input type="checkbox" [checked]="memberIds().includes(c.id!)" (change)="toggleMember(c.id!)" />
+                    <span class="ava">{{ c.initials }}</span>
+                    <span><b>{{ c.fullName }}</b><br><span class="muted">{{ c.role || '—' }}</span></span>
+                  </label>
+                }
+                @if (!allCollaborators().length) { <div class="muted">Aucun collaborateur. Ajoutez-en depuis « Mon entreprise → Collaborateurs ».</div> }
+              </div>
+              <button class="btn btn-primary" (click)="saveMembers()" [disabled]="saving()">Enregistrer les collaborateurs</button>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Projets -->
+        <mat-tab label="Projets ({{ projectIds().length }})">
+          <div class="tabpad">
+            <div class="card stack">
+              <h3>Projets gérés par l'équipe</h3>
+              <p class="muted" style="margin:0">Les projets sélectionnés sont pilotés par cette équipe.</p>
+              <div class="pick-grid">
+                @for (p of allProjects(); track p.id) {
+                  <label class="pick" [class.on]="projectIds().includes(p.id!)">
+                    <input type="checkbox" [checked]="projectIds().includes(p.id!)" (change)="toggleProject(p.id!)" />
+                    <span><b>{{ p.name }}</b><br><span class="muted">{{ p.clientName }} · {{ statusLabel(p.status) }}</span></span>
+                  </label>
+                }
+                @if (!allProjects().length) { <div class="muted">Aucun projet.</div> }
+              </div>
+              <button class="btn btn-primary" (click)="saveProjects()" [disabled]="saving()">Enregistrer les projets</button>
+            </div>
+
+            @if (t.projectsDetail?.length) {
+              <div class="card">
+                <h3>Projets actuels</h3>
+                <table>
+                  <thead><tr><th>Projet</th><th>Client</th><th>Statut</th><th></th></tr></thead>
+                  <tbody>
+                    @for (p of t.projectsDetail!; track p.id) {
+                      <tr><td><a [routerLink]="['/projects', p.id]">{{ p.name }}</a></td>
+                        <td>{{ p.clientName }}</td>
+                        <td><span class="badge badge-type">{{ statusLabel(p.status) }}</span></td>
+                        <td><a class="btn btn-sm btn-ghost" [routerLink]="['/projects', p.id]">Ouvrir</a></td></tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Hiérarchie & liens -->
+        <mat-tab label="Hiérarchie & liens">
+          <div class="tabpad">
+            <div class="card stack">
+              <h3>Sous-équipes</h3>
+              @if (subteams().length) {
+                <div class="row wrap" style="gap:.4rem">
+                  @for (s of subteams(); track s.id) { <a class="chip-link" [routerLink]="['/teams', s.id]">{{ s.name }}</a> }
+                </div>
+              } @else { <div class="muted">Aucune sous-équipe. Définissez cette équipe comme « parente » d'une autre.</div> }
+            </div>
+            <div class="card stack">
+              <h3>Équipes liées</h3>
+              <p class="muted" style="margin:0">Liens hiérarchiques transverses avec d'autres équipes.</p>
+              <div class="pick-grid">
+                @for (o of otherTeams(); track o.id) {
+                  <label class="pick" [class.on]="relatedIds().includes(o.id!)">
+                    <input type="checkbox" [checked]="relatedIds().includes(o.id!)" (change)="toggleRelated(o.id!)" />
+                    <span><b>{{ o.name }}</b></span>
+                  </label>
+                }
+              </div>
+              <button class="btn btn-primary" (click)="saveRelated()" [disabled]="saving()">Enregistrer les liens</button>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    }

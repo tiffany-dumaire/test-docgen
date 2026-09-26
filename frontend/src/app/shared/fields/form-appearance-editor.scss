@@ -1,0 +1,5 @@
+    .chk { display:flex; align-items:center; gap:.4rem; font-weight:600; }
+    .chk input { width:auto; }
+    .upload-row { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+    .upload-row input[type=file] { width:auto; }
+    .thumb { height:40px; border-radius:6px; border:1px solid var(--border); }

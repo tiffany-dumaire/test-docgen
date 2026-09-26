@@ -1,0 +1,92 @@
+    <h1>{{ 'prefs.title' | transloco }}</h1>
+    <p class="muted">{{ 'prefs.subtitle' | transloco }}</p>
+
+    <div class="card stack" style="max-width:620px">
+      <h3>{{ 'prefs.language' | transloco }}</h3>
+      <p class="muted" style="margin:0">{{ 'prefs.language_hint' | transloco }}</p>
+      <div class="langs">
+        @for (l of lang.langs; track l.code) {
+          <button class="langb" [class.active]="lang.active() === l.code" (click)="pickLang(l.code)">
+            <span class="flag">{{ l.flag }}</span> {{ l.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="card stack" style="max-width:620px">
+      <h3>{{ 'prefs.base_theme' | transloco }}</h3>
+      <p class="muted" style="margin:0">{{ 'prefs.base_theme_hint' | transloco }}</p>
+      <div class="props">
+        @for (p of theme.propositions; track p.id) {
+          <button class="prop" [class.active]="proposition() === p.id" (click)="pickProp(p.id)">
+            <span class="dot" [style.background]="p.primary"></span>
+            <span class="pn">{{ p.name }}</span>
+            <span class="ps">{{ p.sub }}</span>
+          </button>
+        }
+      </div>
+      <div class="row" style="gap:.5rem;align-items:center;margin-top:.3rem">
+        <label style="margin:0">{{ 'prefs.brightness' | transloco }}</label>
+        <div class="seg">
+          @for (m of modes; track m.v) {
+            <button class="segb" [class.active]="mode() === m.v" (click)="pickMode(m.v)">{{ m.l | transloco }}</button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="card stack" style="max-width:620px">
+      <h3>{{ 'prefs.primary' | transloco }}</h3>
+      <p class="muted" style="margin:0">{{ 'prefs.primary_hint' | transloco }}</p>
+      <div class="swatches">
+        @for (c of presets; track c) {
+          <button class="sw" [style.background]="c" [class.active]="accent() === c" (click)="pick(c)" [title]="c"></button>
+        }
+      </div>
+      <div class="row" style="gap:.8rem;align-items:center;margin-top:.6rem">
+        <label style="margin:0">{{ 'prefs.custom' | transloco }}</label>
+        <input type="color" [ngModel]="accent() || vnvPrimary" (ngModelChange)="pick($event)" style="width:56px;height:38px;padding:2px" />
+        <button class="btn btn-ghost btn-sm" (click)="resetColor()">{{ 'prefs.theme_color' | transloco }}</button>
+      </div>
+    </div>
+
+    <div class="card stack" style="max-width:620px">
+      <h3>{{ 'prefs.typography' | transloco }}</h3>
+      <p class="muted" style="margin:0">{{ 'prefs.typo_hint' | transloco }}</p>
+      <div class="form-grid">
+        <div class="field">
+          <label>{{ 'prefs.title_font' | transloco }}</label>
+          <select [ngModel]="fontTitle()" (ngModelChange)="pickFont('title', $event)">
+            <option value="">{{ 'prefs.theme_font' | transloco }}</option>
+            @for (f of fonts; track f.value) { <option [value]="f.value">{{ f.label }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>{{ 'prefs.body_font' | transloco }}</label>
+          <select [ngModel]="fontBody()" (ngModelChange)="pickFont('body', $event)">
+            <option value="">{{ 'prefs.theme_font' | transloco }}</option>
+            @for (f of fonts; track f.value) { <option [value]="f.value">{{ f.label }}</option> }
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" (click)="resetFonts()" style="align-self:flex-start">{{ 'prefs.theme_fonts' | transloco }}</button>
+    </div>
+
+    <div class="card stack" style="max-width:620px">
+      <h3>{{ 'prefs.preview' | transloco }}</h3>
+      <div class="preview">
+        <div style="font-family:var(--pd-display);font-weight:700;font-size:1.3rem">{{ 'prefs.sample_title' | transloco }}</div>
+        <p style="font-family:var(--pd-body);margin:.2rem 0">{{ 'prefs.sample_body' | transloco }}</p>
+        <div class="row" style="gap:1rem;align-items:center">
+          <span class="btn btn-primary">{{ 'prefs.sample_button' | transloco }}</span>
+          <span class="badge badge-internal">{{ 'prefs.sample_badge' | transloco }}</span>
+          <a href="javascript:void(0)">{{ 'prefs.sample_link' | transloco }}</a>
+        </div>
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <button class="btn btn-ghost" (click)="resetAll()">{{ 'prefs.reset_all' | transloco }}</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+          {{ (saving() ? 'prefs.saving' : 'prefs.save') | transloco }}
+        </button>
+      </div>
+    </div>

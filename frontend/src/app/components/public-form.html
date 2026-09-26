@@ -1,0 +1,142 @@
+    <div class="pf-wrap" [style.background]="bg()">
+      @if (loading()) {
+        <div class="pf-card"><p class="muted">Chargement…</p></div>
+      } @else if (notFound()) {
+        <div class="pf-card"><h2>Formulaire introuvable</h2><p class="muted">Ce lien n'est pas valide ou a expiré.</p></div>
+      } @else if (submitted()) {
+        <div class="pf-card center">
+          @if (logo()) { <img class="pf-logo" [src]="logo()" alt="logo" /> }
+          <div class="check">✓</div>
+          <h2>Merci !</h2>
+          <p>{{ successMessage() }}</p>
+        </div>
+      } @else if (form(); as f) {
+        <div class="pf-doc" [class.cover]="layout()==='cover'" [class.plain]="layout()==='plain'">
+          <!-- En-tête / bannière -->
+          @if (layout()==='cover' && cover()) {
+            <div class="pf-cover" [style.background-image]="'url(' + cover() + ')'">
+              <div class="pf-cover-veil">
+                @if (logo()) { <img class="pf-logo lg" [src]="logo()" alt="logo" /> }
+                <h1>{{ f.title }}</h1>
+              </div>
+            </div>
+          } @else {
+            <div class="pf-header">
+              @if (logo()) { <img class="pf-logo" [src]="logo()" alt="logo" /> }
+              <h1>{{ f.title }}</h1>
+            </div>
+          }
+
+          @if (f.description) { <p class="pf-desc">{{ f.description }}</p> }
+
+          @if (!f.isOpen) {
+            <p class="closed">Ce formulaire n'accepte plus de réponses.</p>
+          } @else {
+            @if (showProgress()) {
+              <div class="pf-progress"><div class="bar" [style.width.%]="progress()"></div></div>
+              <div class="pf-progress-label muted">{{ answeredCount() }} / {{ totalCount() }} répondu(s)</div>
+            }
+
+            @for (sec of sections(); track sec.id) {
+              <section class="pf-section">
+                @if (sec.title) { <h2>{{ sec.title }}</h2> }
+                @if (sec.description) { <p class="pf-sec-desc">{{ sec.description }}</p> }
+
+                @for (el of sec.elements; track $index) {
+                  @if (isContent(el)) {
+                    <div class="pf-content">
+                      @if (asC(el).title) { <h3>{{ asC(el).title }}</h3> }
+                      @switch (asC(el).content_type) {
+                        @case ('image') { @if (asC(el).url) { <img class="pf-cimg" [src]="asC(el).url" [alt]="asC(el).title || ''" /> } }
+                        @case ('file') { @if (asC(el).url) { <a class="pf-file" [href]="asC(el).url" target="_blank" rel="noopener">📎 {{ asC(el).name || 'Télécharger le fichier' }}</a> } }
+                        @default { @if (asC(el).text) { <p class="pf-ctext">{{ asC(el).text }}</p> } }
+                      }
+                    </div>
+                  } @else {
+                    <div class="pf-field">
+                      <label class="pf-q">{{ asQ(el).label }} @if (asQ(el).required) { <span class="req">*</span> }</label>
+                      @if (asQ(el).hint) { <div class="pf-hint">{{ asQ(el).hint }}</div> }
+                      @if (asQ(el).image) { <img class="pf-qimg" [src]="asQ(el).image" alt="" /> }
+                      @if (asQ(el).template_file) {
+                        <a class="pf-file sm" [href]="asQ(el).template_file" target="_blank" rel="noopener">📎 Fichier modèle : {{ asQ(el).template_file_name || 'télécharger' }}</a>
+                      }
+
+                      @switch (asQ(el).type) {
+                        @case ('textarea') {
+                          <textarea rows="3" [ngModel]="value(asQ(el).key)" (ngModelChange)="setValue(asQ(el).key, $event)"></textarea>
+                        }
+                        @case ('select') {
+                          <select [ngModel]="value(asQ(el).key)" (ngModelChange)="setValue(asQ(el).key, $event)">
+                            <option value="">—</option>
+                            @for (opt of asQ(el).options ?? []; track opt) { <option [value]="opt">{{ opt }}</option> }
+                          </select>
+                        }
+                        @case ('radio') {
+                          <div class="pf-choices">
+                            @for (opt of asQ(el).options ?? []; track opt) {
+                              <label class="opt"><input type="radio" [name]="asQ(el).key" [value]="opt" [ngModel]="value(asQ(el).key)" (ngModelChange)="setValue(asQ(el).key, $event)" /> <span>{{ opt }}</span></label>
+                            }
+                          </div>
+                        }
+                        @case ('checkboxes') {
+                          <div class="pf-choices">
+                            @for (opt of asQ(el).options ?? []; track opt) {
+                              <label class="opt"><input type="checkbox" [checked]="isChecked(asQ(el).key, opt)" (change)="toggle(asQ(el).key, opt)" /> <span>{{ opt }}</span></label>
+                            }
+                          </div>
+                        }
+                        @case ('checkbox') {
+                          <label class="opt"><input type="checkbox" [ngModel]="value(asQ(el).key)===true" (ngModelChange)="setValue(asQ(el).key, $event)" /> <span>Oui</span></label>
+                        }
+                        @case ('scale') {
+                          <div class="pf-scale">
+                            <span class="lbl">{{ asQ(el).scale_min_label }}</span>
+                            @for (n of scaleRange(asQ(el)); track n) {
+                              <button type="button" class="dot" [class.on]="value(asQ(el).key)===n" (click)="setValue(asQ(el).key, n)">{{ n }}</button>
+                            }
+                            <span class="lbl">{{ asQ(el).scale_max_label }}</span>
+                          </div>
+                        }
+                        @case ('rating') {
+                          <div class="pf-stars">
+                            @for (n of starRange(asQ(el)); track n) {
+                              <button type="button" class="star" [class.on]="(value(asQ(el).key)||0) >= n" (click)="setValue(asQ(el).key, n)">★</button>
+                            }
+                          </div>
+                        }
+                        @case ('slot') {
+                          @if ((asQ(el).slots ?? []).length) {
+                            <div class="pf-choices">
+                              @for (opt of asQ(el).slots ?? []; track opt) {
+                                <label class="opt"><input type="radio" [name]="asQ(el).key" [value]="opt" [ngModel]="value(asQ(el).key)" (ngModelChange)="setValue(asQ(el).key, $event)" /> <span>{{ opt }}</span></label>
+                              }
+                            </div>
+                          } @else {
+                            <input type="datetime-local" [ngModel]="value(asQ(el).key)" (ngModelChange)="setValue(asQ(el).key, $event)" />
+                          }
+                        }
+                        @case ('file') {
+                          <div class="pf-upload">
+                            <input type="file" (change)="onFile(asQ(el).key, $event)" />
+                            @if (fileName(asQ(el).key)) { <span class="fname">📎 {{ fileName(asQ(el).key) }}</span> }
+                            @if (uploading()===asQ(el).key) { <span class="muted">Envoi…</span> }
+                          </div>
+                        }
+                        @default {
+                          <input [type]="inputType(asQ(el).type)" [ngModel]="value(asQ(el).key)" (ngModelChange)="setValue(asQ(el).key, $event)" />
+                        }
+                      }
+                    </div>
+                  }
+                }
+              </section>
+            }
+
+            @if (error()) { <p class="err">{{ error() }}</p> }
+            <button class="pf-submit" (click)="submit()" [disabled]="sending()">{{ buttonLabel() }}</button>
+          }
+
+          <div class="pf-foot muted">{{ companyName() || 'PolyDocs' }}</div>
+        </div>
+      }
+    </div>

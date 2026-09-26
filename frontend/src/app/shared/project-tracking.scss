@@ -1,0 +1,7 @@
+    :host { display:block; }
+    .stack > * + * { margin-top: 1rem; }
+    .diag-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:1rem; }
+    .diag { border:1px solid var(--border); border-radius:12px; padding:.7rem; background:var(--surface); }
+    .svgbox { margin-top:.5rem; overflow:auto; }
+    .svgbox ::ng-deep svg { width:100%; height:auto; }
+    table input, table select { padding:.3rem .4rem; }

@@ -1,0 +1,7 @@
+    .detail-tabs { margin-top: 1rem; }
+    .tabpad { padding-top: 1.2rem; }
+    .stats-row { display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0; }
+    .mini-stat { flex:1; min-width:150px; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1rem 1.2rem; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+    .mini-stat::before { content:''; position:absolute; inset:0 auto 0 0; width:5px; background:linear-gradient(180deg,#38BDF8,#6366F1); }
+    .ms-num { display:block; font-size:1.8rem; font-weight:800; color:var(--dark); letter-spacing:-.02em; }
+    .ms-lbl { color:var(--muted); font-size:.82rem; }

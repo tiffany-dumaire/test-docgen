@@ -15,38 +15,8 @@ import { Client } from '@core/models';
 @Component({
   selector: 'app-client-list',
   imports: [FormsModule, RouterLink, MatTableModule, MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatTooltipModule, TranslocoModule],
-  template: `
-    <div class="row between">
-      <h1>{{ 'nav.clients' | transloco }}</h1>
-      <a mat-flat-button color="primary" routerLink="/clients/new"><mat-icon>add</mat-icon> {{ 'clients.new' | transloco }}</a>
-    </div>
-    <p class="muted">{{ 'clients.subtitle' | transloco }}</p>
-
-    <div class="tablecard">
-      <table mat-table [dataSource]="clients()">
-        <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>{{ 'clients.col_name' | transloco }}</th><td mat-cell *matCellDef="let c"><a [routerLink]="['/clients', c.id]" class="strong">{{ c.name }}</a></td></ng-container>
-        <ng-container matColumnDef="contact"><th mat-header-cell *matHeaderCellDef>{{ 'clients.col_contact' | transloco }}</th><td mat-cell *matCellDef="let c">{{ c.contact_name || '—' }}</td></ng-container>
-        <ng-container matColumnDef="email"><th mat-header-cell *matHeaderCellDef>{{ 'clients.col_email' | transloco }}</th><td mat-cell *matCellDef="let c">{{ c.email || '—' }}</td></ng-container>
-        <ng-container matColumnDef="projects"><th mat-header-cell *matHeaderCellDef>{{ 'nav.projects' | transloco }}</th><td mat-cell *matCellDef="let c">{{ c.project_count }}</td></ng-container>
-        <ng-container matColumnDef="actions"><th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let c" style="text-align:right;white-space:nowrap">
-            <a mat-icon-button [routerLink]="['/clients', c.id]" [matTooltip]="'clients.detail' | transloco"><mat-icon>visibility</mat-icon></a>
-            <a mat-icon-button [routerLink]="['/clients', c.id]" [matTooltip]="'common.edit' | transloco"><mat-icon>edit</mat-icon></a>
-            <button mat-icon-button (click)="remove(c)" [matTooltip]="'common.delete' | transloco"><mat-icon>delete</mat-icon></button>
-          </td></ng-container>
-        <tr mat-header-row *matHeaderRowDef="cols"></tr>
-        <tr mat-row *matRowDef="let row; columns: cols"></tr>
-      </table>
-      @if (!clients().length) {
-        <div class="empty" style="padding:2.5rem 1rem">
-          <mat-icon>handshake</mat-icon>
-          <div>{{ 'clients.empty' | transloco }}</div>
-          <a mat-flat-button color="primary" routerLink="/clients/new"><mat-icon>add</mat-icon> {{ 'clients.new' | transloco }}</a>
-        </div>
-      }
-    </div>
-  `,
-  styles: [`.tablecard{background:var(--mat-sys-surface);border:1px solid var(--mat-sys-outline-variant);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)} table{width:100%;background:transparent} .strong{font-weight:600}`],
+  templateUrl: './client-list.html',
+  styleUrl: './client-list.scss',
 })
 export class ClientList {
   private service = inject(ClientService);

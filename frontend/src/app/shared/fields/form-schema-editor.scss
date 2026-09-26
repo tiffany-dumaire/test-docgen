@@ -1,0 +1,18 @@
+    .chk { display:flex; align-items:center; gap:.3rem; font-size:.85rem; font-weight:600; white-space:nowrap; }
+    .chk input, .upload-row input[type=file] { width:auto; }
+    .section-card { border:1px solid var(--border); border-radius:12px; padding:.7rem; margin-bottom:.8rem; background:var(--bg); }
+    .section-head { display:flex; gap:.5rem; align-items:center; }
+    .sec-title { font-weight:700; flex:1; }
+    .sec-desc { width:100%; margin:.3rem 0 .5rem; }
+    .element { border:1px solid var(--border); border-radius:10px; padding:.55rem; margin:.45rem 0; background:#fff; display:flex; flex-direction:column; gap:.35rem; }
+    .element.content { background:#fafbfc; border-style:dashed; }
+    .el-head { display:flex; gap:.5rem; align-items:center; }
+    .q-label { flex:1; font-weight:600; }
+    .q-hint { font-size:.85rem; }
+    .q-extras { display:flex; flex-direction:column; gap:.3rem; border-top:1px dashed var(--border); padding-top:.4rem; }
+    .upload-row { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; font-size:.82rem; }
+    .thumb { height:40px; border-radius:6px; border:1px solid var(--border); }
+    .fname { font-size:.8rem; color:var(--muted); }
+    .mini { font-size:.74rem; color:var(--muted); }
+    .tag { display:inline-block; font-size:.7rem; font-weight:700; color:var(--muted); }
+    .btn-xs { padding:.1rem .4rem; font-size:.72rem; }

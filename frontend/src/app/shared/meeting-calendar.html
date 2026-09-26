@@ -1,0 +1,26 @@
+    <div class="cal">
+      <div class="cal-head">
+        <button mat-icon-button (click)="prev()"><mat-icon>chevron_left</mat-icon></button>
+        <div class="month">{{ label() }}</div>
+        <button mat-icon-button (click)="next()"><mat-icon>chevron_right</mat-icon></button>
+        <span class="grow"></span>
+        <button mat-stroked-button (click)="goToday()"><mat-icon>today</mat-icon> Aujourd'hui</button>
+      </div>
+      <div class="dow">
+        @for (d of dows; track d) { <div>{{ d }}</div> }
+      </div>
+      <div class="grid">
+        @for (c of cells(); track $index) {
+          <div class="cell" [class.empty]="!c.date" [class.today]="c.today">
+            @if (c.date) {
+              <div class="num">{{ c.date.getDate() }}</div>
+              @for (m of c.items; track m.id) {
+                <div class="ev" [title]="m.title + (m.project_name ? ' · ' + m.project_name : '')">
+                  <span class="dot"></span>{{ m.date ? (m.date | date:'HH:mm') : '' }} {{ m.title }}
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
+    </div>

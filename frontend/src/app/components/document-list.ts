@@ -23,68 +23,8 @@ import { ProjectDocument } from '@core/models';
     MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatTooltipModule,
     TranslocoModule,
   ],
-  template: `
-    <div class="row between">
-      <h1>{{ 'nav.documents' | transloco }}</h1>
-      <a mat-flat-button color="primary" routerLink="/documents/new"><mat-icon>add</mat-icon> {{ 'documents.new' | transloco }}</a>
-    </div>
-
-    <mat-form-field appearance="outline" class="search">
-      <mat-label>{{ 'common.search' | transloco }}</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput [(ngModel)]="search" (ngModelChange)="reload()" [placeholder]="'documents.search_ph' | transloco" />
-    </mat-form-field>
-
-    <div class="tablecard">
-      <table mat-table [dataSource]="ds" matSort>
-        <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'documents.col_title' | transloco }}</th>
-          <td mat-cell *matCellDef="let d"><a [routerLink]="['/documents', d.id]" class="strong">{{ d.title }}</a></td>
-        </ng-container>
-        <ng-container matColumnDef="project_name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'projects.col_project' | transloco }}</th>
-          <td mat-cell *matCellDef="let d">{{ d.project_name }}</td>
-        </ng-container>
-        <ng-container matColumnDef="doc_type">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'documents.col_type' | transloco }}</th>
-          <td mat-cell *matCellDef="let d"><span class="ty">{{ d.doc_type }}</span></td>
-        </ng-container>
-        <ng-container matColumnDef="confidentiality">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'documents.col_confidentiality' | transloco }}</th>
-          <td mat-cell *matCellDef="let d"><span class="chip" [class]="'cf-' + d.confidentiality">{{ d.confidentiality_display }}</span></td>
-        </ng-container>
-        <ng-container matColumnDef="current_version">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'documents.col_version' | transloco }}</th>
-          <td mat-cell *matCellDef="let d">v{{ d.current_version }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let d" class="actions">
-            <button mat-icon-button (click)="preview(d)" [matTooltip]="'documents.preview' | transloco"><mat-icon>visibility</mat-icon></button>
-            <a mat-icon-button [routerLink]="['/documents', d.id]" [matTooltip]="'documents.open' | transloco"><mat-icon>open_in_new</mat-icon></a>
-            <button mat-icon-button (click)="duplicate(d)" [matTooltip]="'documents.duplicate' | transloco"><mat-icon>content_copy</mat-icon></button>
-            @if (canManage()) { <button mat-icon-button (click)="remove(d)" [matTooltip]="'common.delete' | transloco"><mat-icon>delete</mat-icon></button> }
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="cols"></tr>
-        <tr mat-row *matRowDef="let row; columns: cols"></tr>
-      </table>
-      @if (!ds.data.length) { <div class="empty">{{ 'documents.empty' | transloco }}</div> }
-      <mat-paginator [pageSizeOptions]="[10, 25, 50]" pageSize="10" showFirstLastButtons />
-    </div>
-  `,
-  styles: [`
-    .search { width: 340px; max-width: 100%; margin: .5rem 0 1rem; }
-    .tablecard { background: var(--mat-sys-surface); border: 1px solid var(--mat-sys-outline-variant); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
-    table { width: 100%; background: transparent; }
-    .strong { font-weight: 600; }
-    .actions { text-align: right; white-space: nowrap; }
-    .ty { text-transform: uppercase; font-size: .7rem; font-weight: 700; background: var(--mat-sys-surface-container-high); padding: .12rem .5rem; border-radius: 6px; }
-    .chip { display: inline-block; padding: .15rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 700; }
-    .cf-public { background: #dcfce7; color: #15803d; } .cf-internal { background: #dbeafe; color: #1d4ed8; }
-    .cf-confidential { background: #ffedd5; color: #c2410c; } .cf-restricted { background: #fee2e2; color: #b91c1c; }
-    .empty { padding: 2.5rem; text-align: center; color: var(--mat-sys-outline); }
-  `],
+  templateUrl: './document-list.html',
+  styleUrl: './document-list.scss',
 })
 export class DocumentList implements AfterViewInit {
   private service = inject(DocumentService);
