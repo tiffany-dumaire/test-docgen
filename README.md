@@ -1,6 +1,6 @@
-# DocuGen — Plateforme de génération de documents
+# PolyDocs — Plateforme de génération de documents
 
-DocuGen est une application web permettant de **générer et personnaliser des documents**
+PolyDocs est une application web permettant de **générer et personnaliser des documents**
 (PDF de suivi de projet, fichiers Excel génériques, rapports Word d'analyse) et de
 **créer des formulaires en ligne partageables via un lien réduit**, le tout à partir de
 projets et de variables paramétrables.
@@ -251,7 +251,7 @@ docker compose -f .devcontainer/docker-compose.yml down -v       # arrêt + supp
 
 ## 1. Lancement du backend (Django)
 
-> ℹ️ **Base de données :** DocuGen utilise **PostgreSQL** par défaut. Assurez-vous
+> ℹ️ **Base de données :** PolyDocs utilise **PostgreSQL** par défaut. Assurez-vous
 > qu'une instance est accessible et que les variables `DB_*` de `.env` pointent
 > dessus (voir `backend/.env.example`). Le plus simple est d'utiliser le
 > [dev container](#0-lancement-via-dev-container-recommandé), qui fournit PostgreSQL.
@@ -354,7 +354,7 @@ Un guide illustré est fourni dans **`Documentation_DocuGen.pdf`** (à la racine
 ## Structure du projet
 
 ```
-docugen/
+polydocs/
 ├── README.md
 ├── Documentation_DocuGen.pdf        # Documentation d'utilisation (PDF)
 ├── backend/                         # API Django

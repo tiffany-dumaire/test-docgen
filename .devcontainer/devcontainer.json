@@ -1,5 +1,5 @@
 {
-  "name": "DocuGen (Django + Angular + PostgreSQL)",
+  "name": "PolyDocs (Django + Angular + PostgreSQL)",
   "dockerComposeFile": "docker-compose.yml",
   "service": "backend",
   "workspaceFolder": "/app",

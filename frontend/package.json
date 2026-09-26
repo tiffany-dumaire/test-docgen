@@ -1,7 +1,7 @@
 {
   "name": "docugen-frontend",
   "version": "1.0.0",
-  "description": "Interface Angular 21 pour la génération de documents DocuGen",
+  "description": "Interface Angular 21 pour la génération de documents PolyDocs",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

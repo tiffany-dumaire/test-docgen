@@ -1,8 +1,9 @@
 import { Component, inject, signal, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
+import { BackDirective } from '../../shared/back.directive';
 import { ProjectService } from '../../core/services/project.service';
 import { ClientService } from '../../core/services/client.service';
 import { TeamService } from '../../core/services/company.service';
@@ -12,11 +13,11 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
 
 @Component({
   selector: 'app-project-form',
-  imports: [FormsModule, RouterLink, NgTemplateOutlet, StyleEditor, MatTabsModule],
+  imports: [FormsModule, NgTemplateOutlet, StyleEditor, MatTabsModule, BackDirective],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? 'Modifier le projet' : 'Nouveau projet' }}</h1>
-      <a class="btn btn-ghost" routerLink="/projects">Retour</a>
+      <button type="button" class="btn btn-ghost" appBack="/projects">Retour</button>
     </div>
 
     @if (model(); as m) {

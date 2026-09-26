@@ -1,7 +1,8 @@
 import { Component, inject, signal, Input, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { BackDirective } from '../../shared/back.directive';
 import { DocumentService } from '../../core/services/document.service';
 import { ToastService } from '../../core/services/api.service';
 import { RichTextEditor } from '../../shared/rich-text-editor';
@@ -47,14 +48,14 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
 
 @Component({
   selector: 'app-template-builder',
-  imports: [FormsModule, RouterLink, RichTextEditor, NgTemplateOutlet, ExcelBuilder, LayoutEditor, StyleEditor, MatTabsModule],
+  imports: [BackDirective, FormsModule, RichTextEditor, NgTemplateOutlet, ExcelBuilder, LayoutEditor, StyleEditor, MatTabsModule],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? 'Modifier le modèle' : 'Nouveau modèle' }}</h1>
       <div class="row" style="gap:.4rem">
         <button class="btn btn-ghost btn-sm" (click)="undo()" [disabled]="!canUndo()" title="Retirer le dernier changement">↶ Annuler</button>
         <button class="btn btn-ghost btn-sm" (click)="reset()" [disabled]="!canReset()" title="Revenir à l'état initial">⟲ Réinitialiser</button>
-        <a class="btn btn-ghost" routerLink="/templates">Retour</a>
+        <button type="button" class="btn btn-ghost" appBack="/templates">Retour</button>
       </div>
     </div>
 

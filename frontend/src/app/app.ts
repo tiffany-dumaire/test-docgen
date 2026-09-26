@@ -14,6 +14,7 @@ import { ToastService } from './core/services/api.service';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 import { LanguageService, Lang } from './core/services/language.service';
+import { NavHistoryService } from './shared/back.directive';
 
 interface NavItem { path: string; icon: string; label: string; }
 
@@ -35,7 +36,7 @@ interface NavItem { path: string; icon: string; label: string; }
           <div class="brand" [class.center]="collapsed() && !isMobile()">
             <span class="logo">📄</span>
             @if (!rail()) {
-              <div class="brandtext"><strong>DocuGen</strong><div class="tag">Documents</div></div>
+              <div class="brandtext"><strong>PolyDocs</strong><div class="tag">Documents</div></div>
             }
           </div>
           <nav class="railnav" [class.israil]="rail()">
@@ -215,6 +216,7 @@ export class App {
   lang = inject(LanguageService);
   private router = inject(Router);
   private breakpoints = inject(BreakpointObserver);
+  private navHistory = inject(NavHistoryService);  // démarre le suivi d'historique tôt
   collapsed = signal(false);
   isMobile = signal(false);
   mobileOpen = signal(false);

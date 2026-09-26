@@ -108,7 +108,7 @@ import { FormContent, FormField, FormSection, FormTheme } from '../../core/model
         @if (!sections.length) { <div class="pf-section muted">Ajoutez des sections et des questions pour voir l'aperçu.</div> }
 
         <button class="pf-submit" type="button" disabled>{{ theme?.button_label || 'Envoyer' }}</button>
-        <div class="pf-foot muted">{{ companyName || 'DocuGen' }}</div>
+        <div class="pf-foot muted">{{ companyName || 'PolyDocs' }}</div>
       </div>
     </div>
   `,

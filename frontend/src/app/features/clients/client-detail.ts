@@ -1,5 +1,6 @@
 import { Component, inject, signal, Input } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
+import { BackDirective } from '../../shared/back.directive';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -24,7 +25,7 @@ interface Bundle {
   selector: 'app-client-detail',
   imports: [
     RouterLink, FormsModule, DatePipe, MatTabsModule, MatTableModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, MatTooltipModule, MeetingCalendar, RichTextEditor,
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, MatTooltipModule, MeetingCalendar, RichTextEditor, BackDirective,
   ],
   template: `
     @if (creating()) {
@@ -36,7 +37,7 @@ interface Bundle {
             <div class="muted">Renseignez les informations, puis créez la fiche.</div>
           </div>
         </div>
-        <a mat-stroked-button routerLink="/clients"><mat-icon>arrow_back</mat-icon> Clients</a>
+        <button mat-stroked-button appBack="/clients"><mat-icon>arrow_back</mat-icon> Clients</button>
       </div>
 
       <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
@@ -84,7 +85,7 @@ interface Bundle {
         </div>
         <div class="row" style="gap:.5rem">
           <button mat-flat-button color="primary" (click)="startEdit(b.client)"><mat-icon>edit</mat-icon> Modifier</button>
-          <a mat-stroked-button routerLink="/clients"><mat-icon>arrow_back</mat-icon> Clients</a>
+          <button mat-stroked-button appBack="/clients"><mat-icon>arrow_back</mat-icon> Clients</button>
         </div>
       </div>
 

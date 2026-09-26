@@ -11,7 +11,7 @@ import { ToastService } from '../../core/services/api.service';
   template: `
     <div class="auth-wrap">
       <div class="auth-card card">
-        <div class="brand"><span class="logo">📄</span><div><b>DocuGen</b><div class="tag">{{ 'login.tagline' | transloco }}</div></div></div>
+        <div class="brand"><span class="logo">📄</span><div><b>PolyDocs</b><div class="tag">{{ 'login.tagline' | transloco }}</div></div></div>
         <h2>{{ 'login.title' | transloco }}</h2>
 
         @if (auth.isDev()) {

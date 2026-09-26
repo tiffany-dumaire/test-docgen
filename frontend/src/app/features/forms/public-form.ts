@@ -145,7 +145,7 @@ import { OnlineForm, FormSection, FormField, FormContent } from '../../core/mode
             <button class="pf-submit" (click)="submit()" [disabled]="sending()">{{ buttonLabel() }}</button>
           }
 
-          <div class="pf-foot muted">{{ companyName() || 'DocuGen' }}</div>
+          <div class="pf-foot muted">{{ companyName() || 'PolyDocs' }}</div>
         </div>
       }
     </div>

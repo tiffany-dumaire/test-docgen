@@ -3,7 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BackDirective } from '../../shared/back.directive';
 import { DocumentService } from '../../core/services/document.service';
 import { ProjectService } from '../../core/services/project.service';
 import { CompanyService } from '../../core/services/company.service';
@@ -24,11 +25,11 @@ import {
 
 @Component({
   selector: 'app-document-editor',
-  imports: [FormsModule, RouterLink, DatePipe, DataGrid, MatTabsModule],
+  imports: [BackDirective, FormsModule, DatePipe, DataGrid, MatTabsModule],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? doc()?.title : 'Nouveau document' }}</h1>
-      <a class="btn btn-ghost" routerLink="/documents">Retour</a>
+      <button type="button" class="btn btn-ghost" appBack="/documents">Retour</button>
     </div>
 
     @if (doc(); as d) {

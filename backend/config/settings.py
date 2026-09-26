@@ -1,5 +1,5 @@
 """
-Configuration Django pour le projet DocuGen.
+Configuration Django pour le projet PolyDocs.
 Génération de documents génériques et personnalisés à partir de projets.
 """
 import os

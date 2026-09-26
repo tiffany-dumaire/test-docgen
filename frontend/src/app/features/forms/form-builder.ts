@@ -1,7 +1,8 @@
 import { Component, inject, signal, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { BackDirective } from '../../shared/back.directive';
 import { FormService } from '../../core/services/form.service';
 import { ProjectService } from '../../core/services/project.service';
 import { DocumentService } from '../../core/services/document.service';
@@ -14,13 +15,13 @@ import { Choice, FormField, FormSection, FormSubmission, OnlineForm, Project } f
 
 @Component({
   selector: 'app-form-builder',
-  imports: [FormsModule, RouterLink, DatePipe, FormSchemaEditor, FormAppearanceEditor, FormPreview],
+  imports: [BackDirective, FormsModule, DatePipe, FormSchemaEditor, FormAppearanceEditor, FormPreview],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? 'Gérer le formulaire' : 'Nouveau formulaire' }}</h1>
       <div class="row" style="gap:.5rem">
         <button class="btn btn-ghost" (click)="showPreview.set(true)" [disabled]="!model()">👁 Aperçu</button>
-        <a class="btn btn-ghost" routerLink="/forms">Retour</a>
+        <button type="button" class="btn btn-ghost" appBack="/forms">Retour</button>
       </div>
     </div>
 

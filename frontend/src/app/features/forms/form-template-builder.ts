@@ -1,6 +1,7 @@
 import { Component, inject, signal, Input, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { BackDirective } from '../../shared/back.directive';
 import { MatTabsModule } from '@angular/material/tabs';
 import { FormService } from '../../core/services/form.service';
 import { ProjectService } from '../../core/services/project.service';
@@ -30,13 +31,13 @@ const VARIANTS: { value: string; label: string }[] = [
 
 @Component({
   selector: 'app-form-template-builder',
-  imports: [FormsModule, RouterLink, MatTabsModule, FormSchemaEditor, FormAppearanceEditor, FormPreview],
+  imports: [BackDirective, FormsModule, MatTabsModule, FormSchemaEditor, FormAppearanceEditor, FormPreview],
   template: `
     <div class="row between">
       <h1>{{ isEdit() ? 'Modifier le modèle de formulaire' : 'Nouveau modèle de formulaire' }}</h1>
       <div class="row" style="gap:.5rem">
         <button class="btn btn-ghost" (click)="showPreview.set(true)" [disabled]="!model()">👁 Aperçu</button>
-        <a class="btn btn-ghost" routerLink="/templates">Retour aux modèles</a>
+        <button type="button" class="btn btn-ghost" appBack="/templates">Retour aux modèles</button>
       </div>
     </div>
     <p class="muted">

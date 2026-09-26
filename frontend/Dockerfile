@@ -1,4 +1,4 @@
-# Image de développement pour le frontend Angular (DocuGen)
+# Image de développement pour le frontend Angular (PolyDocs)
 FROM node:24-slim
 
 ENV NODE_ENV=development
