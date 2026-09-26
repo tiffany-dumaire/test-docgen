@@ -30,97 +30,110 @@ interface NavItem { path: string; icon: string; label: string; }
       <router-outlet />
     } @else {
       <a class="skip-link" href="#main-content">{{ 'topbar.skip' | transloco }}</a>
-      <mat-sidenav-container class="shell" autosize>
-        <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="isMobile() ? mobileOpen() : true"
-          (closedStart)="mobileOpen.set(false)" [class.rail]="collapsed() && !isMobile()" class="nav">
-          <div class="brand" [class.center]="collapsed() && !isMobile()">
+      <div class="app-shell">
+        <!-- ===== Barre supérieure : pleine largeur de l'application ===== -->
+        <mat-toolbar class="topbar">
+          <button mat-icon-button (click)="toggleNav()" [matTooltip]="'topbar.menu' | transloco">
+            <mat-icon>{{ (isMobile() ? !mobileOpen() : collapsed()) ? 'menu' : 'menu_open' }}</mat-icon>
+          </button>
+          <a class="brand" routerLink="/dashboard">
             <span class="logo"><img src="/images/logo/polydocs-6b.svg" alt="PolyDocs" /></span>
-            @if (!rail()) {
-              <div class="brandtext"><strong>PolyDocs</strong><div class="tag">Documents</div></div>
-            }
-          </div>
-          <nav class="railnav" [class.israil]="rail()">
-            @for (n of nav; track n.path) {
-              <a [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()" class="railitem"
-                 [matTooltip]="rail() ? (n.label | transloco) : ''" matTooltipPosition="right">
-                <span class="ico"><mat-icon>{{ n.icon }}</mat-icon></span>
-                <span class="lbl">{{ n.label | transloco }}</span>
-              </a>
-            }
-            <div class="sep"></div>
-            @for (n of navBottom; track n.path) {
-              <a [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()" class="railitem"
-                 [matTooltip]="rail() ? (n.label | transloco) : ''" matTooltipPosition="right">
-                <span class="ico"><mat-icon>{{ n.icon }}</mat-icon></span>
-                <span class="lbl">{{ n.label | transloco }}</span>
-              </a>
-            }
-          </nav>
-        </mat-sidenav>
-
-        <mat-sidenav-content class="main">
-          @if (navLoading()) { <div class="route-progress"><span></span></div> }
-          <mat-toolbar class="topbar">
-            <button mat-icon-button (click)="toggleNav()" [matTooltip]="'topbar.menu' | transloco">
-              <mat-icon>{{ (isMobile() ? !mobileOpen() : collapsed()) ? 'menu' : 'menu_open' }}</mat-icon>
-            </button>
-            <span class="grow"></span>
-            <button mat-icon-button [matMenuTriggerFor]="langMenu" [matTooltip]="'topbar.language' | transloco">
-              <mat-icon>translate</mat-icon>
-            </button>
-            <mat-menu #langMenu="matMenu">
-              <div class="tm-head">{{ 'topbar.language' | transloco }}</div>
-              @for (l of lang.langs; track l.code) {
-                <button mat-menu-item (click)="setLang(l.code)">
-                  <span class="tm-dot" style="box-shadow:none">{{ l.flag }}</span>
-                  <span class="tm-name">{{ l.label }}</span>
-                  @if (lang.active() === l.code) { <mat-icon class="tm-check">check</mat-icon> }
-                </button>
-              }
-            </mat-menu>
-            <button mat-icon-button [matMenuTriggerFor]="themeMenu" [matTooltip]="'topbar.theme' | transloco">
-              <mat-icon>palette</mat-icon>
-            </button>
-            <mat-menu #themeMenu="matMenu" class="theme-menu">
-              <div class="tm-head">{{ 'topbar.ambiance' | transloco }}</div>
-              @for (p of theme.propositions; track p.id) {
-                <button mat-menu-item (click)="$event.stopPropagation(); theme.setProposition(p.id)">
-                  <span class="tm-dot" [style.background]="p.primary"></span>
-                  <span class="tm-name" [style.font-family]="p.font">{{ p.name }}</span>
-                  <span class="tm-sub">{{ p.sub }}</span>
-                  @if (theme.proposition() === p.id) { <mat-icon class="tm-check">check</mat-icon> }
-                </button>
-              }
-              <div class="tm-head">{{ 'topbar.brightness' | transloco }}</div>
-              <div class="tm-modes" (click)="$event.stopPropagation()">
-                <button [class.on]="theme.mode() === 'light'" (click)="theme.setMode('light')"><mat-icon>light_mode</mat-icon> {{ 'theme.light' | transloco }}</button>
-                <button [class.on]="theme.mode() === 'dark'" (click)="theme.setMode('dark')"><mat-icon>dark_mode</mat-icon> {{ 'theme.dark' | transloco }}</button>
-                <button [class.on]="theme.mode() === 'auto'" (click)="theme.setMode('auto')"><mat-icon>brightness_auto</mat-icon> {{ 'theme.auto' | transloco }}</button>
-              </div>
-            </mat-menu>
-            <button mat-icon-button (click)="theme.toggleDark()" [matTooltip]="(theme.resolvedDark() ? 'theme.light' : 'theme.dark') | transloco">
-              <mat-icon>{{ theme.resolvedDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-            </button>
-            @if (auth.user(); as u) {
-              <button mat-button [matMenuTriggerFor]="menu" class="userbtn">
-                <span class="avatar">{{ initials(u) }}</span>
-                <span class="uname">{{ u.full_name || u.email }}</span>
-                <mat-icon>arrow_drop_down</mat-icon>
+            <span class="brandtext"><strong>PolyDocs</strong><span class="tag">Documents</span></span>
+          </a>
+          <span class="grow"></span>
+          <button mat-icon-button [matMenuTriggerFor]="langMenu" [matTooltip]="'topbar.language' | transloco">
+            <mat-icon>translate</mat-icon>
+          </button>
+          <mat-menu #langMenu="matMenu">
+            <div class="tm-head">{{ 'topbar.language' | transloco }}</div>
+            @for (l of lang.langs; track l.code) {
+              <button mat-menu-item (click)="setLang(l.code)">
+                <span class="tm-dot" style="box-shadow:none">{{ l.flag }}</span>
+                <span class="tm-name">{{ l.label }}</span>
+                @if (lang.active() === l.code) { <mat-icon class="tm-check">check</mat-icon> }
               </button>
-              <mat-menu #menu="matMenu">
-                <div class="menuhead">
-                  <div class="mn">{{ u.full_name || u.email }}</div>
-                  <div class="mr">{{ u.primary_app_role }}</div>
-                </div>
-                <a mat-menu-item routerLink="/preferences"><mat-icon>palette</mat-icon> {{ 'user.preferences' | transloco }}</a>
-                <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> {{ 'user.logout' | transloco }}</button>
-              </mat-menu>
             }
-          </mat-toolbar>
+          </mat-menu>
+          <button mat-icon-button [matMenuTriggerFor]="themeMenu" [matTooltip]="'topbar.theme' | transloco">
+            <mat-icon>palette</mat-icon>
+          </button>
+          <mat-menu #themeMenu="matMenu" class="theme-menu">
+            <div class="tm-head">{{ 'topbar.ambiance' | transloco }}</div>
+            @for (p of theme.propositions; track p.id) {
+              <button mat-menu-item (click)="$event.stopPropagation(); theme.setProposition(p.id)">
+                <span class="tm-dot" [style.background]="p.primary"></span>
+                <span class="tm-name" [style.font-family]="p.font">{{ p.name }}</span>
+                <span class="tm-sub">{{ p.sub }}</span>
+                @if (theme.proposition() === p.id) { <mat-icon class="tm-check">check</mat-icon> }
+              </button>
+            }
+            <div class="tm-head">{{ 'topbar.brightness' | transloco }}</div>
+            <div class="tm-modes" (click)="$event.stopPropagation()">
+              <button [class.on]="theme.mode() === 'light'" (click)="theme.setMode('light')"><mat-icon>light_mode</mat-icon> {{ 'theme.light' | transloco }}</button>
+              <button [class.on]="theme.mode() === 'dark'" (click)="theme.setMode('dark')"><mat-icon>dark_mode</mat-icon> {{ 'theme.dark' | transloco }}</button>
+              <button [class.on]="theme.mode() === 'auto'" (click)="theme.setMode('auto')"><mat-icon>brightness_auto</mat-icon> {{ 'theme.auto' | transloco }}</button>
+            </div>
+          </mat-menu>
+          <button mat-icon-button (click)="theme.toggleDark()" [matTooltip]="(theme.resolvedDark() ? 'theme.light' : 'theme.dark') | transloco">
+            <mat-icon>{{ theme.resolvedDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+          </button>
+          @if (auth.user(); as u) {
+            <button mat-button [matMenuTriggerFor]="menu" class="userbtn">
+              <span class="avatar">{{ initials(u) }}</span>
+              <span class="uname">{{ u.full_name || u.email }}</span>
+              <mat-icon>arrow_drop_down</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <div class="menuhead">
+                <div class="mn">{{ u.full_name || u.email }}</div>
+                <div class="mr">{{ u.primary_app_role }}</div>
+              </div>
+              <a mat-menu-item routerLink="/preferences"><mat-icon>palette</mat-icon> {{ 'user.preferences' | transloco }}</a>
+              <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> {{ 'user.logout' | transloco }}</button>
+            </mat-menu>
+          }
+        </mat-toolbar>
 
-          <div class="content" id="main-content" #scrollContent><router-outlet /></div>
-        </mat-sidenav-content>
-      </mat-sidenav-container>
+        @if (navLoading()) { <div class="route-progress"><span></span></div> }
+
+        <!-- ===== Conteneur sidenav + contenu, SOUS la barre ===== -->
+        <mat-sidenav-container class="shell" autosize>
+          <mat-sidenav [mode]="isMobile() ? 'over' : 'side'" [opened]="isMobile() ? mobileOpen() : true"
+            (closedStart)="mobileOpen.set(false)" [class.rail]="collapsed() && !isMobile()" class="nav">
+            <!-- Motif décoratif « papier plié » (rappel du logo), collé au thème -->
+            <svg class="nav-motif" viewBox="0 0 244 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+              <polygon points="-8,260 58,116 120,260" fill="currentColor" opacity=".55"/>
+              <polygon points="58,116 120,260 152,178" fill="currentColor" opacity=".33"/>
+              <polygon points="120,260 152,178 212,120 252,260" fill="currentColor" opacity=".5"/>
+              <polygon points="152,178 212,120 204,260" fill="currentColor" opacity=".26"/>
+              <polygon points="42,54 60,46 55,74 37,80" fill="currentColor" opacity=".5"/>
+              <polygon points="55,74 37,80 49,60" fill="currentColor" opacity=".3"/>
+              <polygon points="192,40 210,47 203,72 185,65" fill="currentColor" opacity=".4"/>
+            </svg>
+            <nav class="railnav" [class.israil]="rail()">
+              @for (n of nav; track n.path) {
+                <a [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()" class="railitem"
+                   [matTooltip]="rail() ? (n.label | transloco) : ''" matTooltipPosition="right">
+                  <span class="ico"><mat-icon>{{ n.icon }}</mat-icon></span>
+                  <span class="lbl">{{ n.label | transloco }}</span>
+                </a>
+              }
+              <div class="sep"></div>
+              @for (n of navBottom; track n.path) {
+                <a [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()" class="railitem"
+                   [matTooltip]="rail() ? (n.label | transloco) : ''" matTooltipPosition="right">
+                  <span class="ico"><mat-icon>{{ n.icon }}</mat-icon></span>
+                  <span class="lbl">{{ n.label | transloco }}</span>
+                </a>
+              }
+            </nav>
+          </mat-sidenav>
+
+          <mat-sidenav-content class="main">
+            <div class="content" id="main-content" #scrollContent><router-outlet /></div>
+          </mat-sidenav-content>
+        </mat-sidenav-container>
+      </div>
     }
 
     @if (toast.message(); as t) {
@@ -133,20 +146,45 @@ interface NavItem { path: string; icon: string; label: string; }
     }
   `,
   styles: [`
-    .shell { height: 100vh; background: var(--mat-sys-surface-container-low, #f4f5fb); }
-    .nav { width: 244px; border: none !important;
-      background: var(--mat-sys-surface-container-low) !important;
-      border-right: 1px solid var(--mat-sys-outline-variant) !important;
-      color: var(--mat-sys-on-surface); transition: width .18s ease; overflow-x: hidden; }
+    /* Coquille : barre en haut (pleine largeur) puis conteneur en dessous */
+    .app-shell { height: 100vh; display: flex; flex-direction: column;
+      background: var(--mat-sys-surface-container-low, #f4f5fb); }
+
+    /* Barre supérieure pleine largeur */
+    .topbar { flex: none; z-index: 20; gap: .1rem; height: 60px;
+      background: color-mix(in srgb, var(--mat-sys-surface) 90%, var(--mat-sys-primary) 4%);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--mat-sys-outline-variant); }
+    .topbar .brand { display: inline-flex; align-items: center; gap: .55rem; margin-left: .25rem;
+      text-decoration: none; }
+    .topbar .brand:hover { text-decoration: none; }
+    .topbar .brand .logo { width: 34px; height: 34px; flex: none; display: grid; place-items: center; }
+    .topbar .brand .logo img { width: 100%; height: 100%; display: block; }
+    .topbar .brand .brandtext { display: flex; flex-direction: column; line-height: 1.05; }
+    .topbar .brand strong { color: var(--mat-sys-on-surface); font-family: var(--pd-display);
+      letter-spacing: var(--pd-display-track); font-size: 1.05rem; }
+    .topbar .brand .tag { color: var(--mat-sys-on-surface-variant); font-size: .6rem;
+      text-transform: uppercase; letter-spacing: .16em; margin-top: .12rem; }
+    @media (max-width: 560px) { .topbar .brand .brandtext { display: none; } }
+    .grow { flex: 1; }
+
+    /* Conteneur (sidenav + contenu) sous la barre, occupe le reste de la hauteur */
+    .shell { flex: 1 1 auto; min-height: 0; background: var(--mat-sys-surface-container-low, #f4f5fb); }
+    .main { background: var(--mat-sys-surface-container-low, #f4f5fb); }
+
+    /* ===== Sidenav original, collé au thème, avec motif « papier plié » ===== */
+    .nav { width: 244px; position: relative; overflow: hidden; color: var(--mat-sys-on-surface);
+      border: none !important; border-right: 1px solid var(--mat-sys-outline-variant) !important;
+      background: linear-gradient(180deg,
+        color-mix(in srgb, var(--mat-sys-primary) 8%, var(--mat-sys-surface-container)) 0%,
+        var(--mat-sys-surface-container-low) 46%) !important;
+      transition: width .18s ease; }
     .nav.rail { width: 72px; }
-    .brand { display: flex; align-items: center; gap: .6rem; padding: 1rem 1.1rem; }
-    .brand.center { justify-content: center; padding: 1rem .5rem; }
-    .brand .logo { width: 40px; height: 40px; flex: none; display: grid; place-items: center; }
-    .brand .logo img { width: 100%; height: 100%; display: block; }
-    .brand strong { color: var(--mat-sys-on-surface); font-family: var(--pd-display); letter-spacing: var(--pd-display-track); font-size: 1.1rem; }
-    .brand .tag { color: var(--mat-sys-on-surface-variant); font-size: .7rem; }
+    .nav-motif { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 58%;
+      color: var(--mat-sys-primary); opacity: .13; pointer-events: none; z-index: 0; }
+
     /* Navigation rail / drawer (Material 3) */
-    .railnav { display: flex; flex-direction: column; gap: .15rem; padding: .5rem; }
+    .railnav { position: relative; z-index: 1; display: flex; flex-direction: column; gap: .15rem; padding: .8rem .5rem; }
     .railitem { display: flex; align-items: center; gap: .85rem; padding: .25rem .55rem; border-radius: var(--pd-r-btn);
       color: var(--mat-sys-on-surface-variant); text-decoration: none; transition: background .14s ease, color .14s ease; }
     .railitem:hover { background: color-mix(in srgb, var(--mat-sys-on-surface) 5%, transparent); text-decoration: none; }
@@ -161,6 +199,7 @@ interface NavItem { path: string; icon: string; label: string; }
     .railnav.israil .railitem { flex-direction: column; gap: .1rem; padding: .35rem 0; }
     .railnav.israil .railitem .lbl { font-size: .6rem; font-weight: 600; opacity: .9; }
     .sep { height: 1px; background: var(--mat-sys-outline-variant); margin: .5rem .8rem; }
+
     /* Menu de thème */
     .tm-head { padding: .4rem 1rem .2rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--mat-sys-on-surface-variant); font-weight: 700; }
     .tm-dot { width: 14px; height: 14px; border-radius: 50%; margin-right: .6rem; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
@@ -171,21 +210,19 @@ interface NavItem { path: string; icon: string; label: string; }
     .tm-modes button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .2rem; border: 1px solid var(--mat-sys-outline-variant); background: transparent; color: var(--mat-sys-on-surface-variant); border-radius: var(--pd-r-s); padding: .4rem; cursor: pointer; font-size: .72rem; }
     .tm-modes button mat-icon { font-size: 20px; width: 20px; height: 20px; }
     .tm-modes button.on { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); border-color: transparent; }
-    .main { background: var(--mat-sys-surface-container-low, #f4f5fb); }
-    .topbar { position: sticky; top: 0; z-index: 5;
-      background: color-mix(in srgb, var(--mat-sys-surface) 88%, transparent);
-      backdrop-filter: blur(10px); border-bottom: 1px solid var(--mat-sys-outline-variant); }
-    .grow { flex: 1; }
+
     .userbtn { display: inline-flex; align-items: center; gap: .5rem; }
     .avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center;
-      color: #fff; font-weight: 700; font-size: .75rem; text-transform: uppercase;
-      background: linear-gradient(135deg, var(--brand,#3b82f6), #22d3ee); }
+      color: var(--mat-sys-on-primary); font-weight: 700; font-size: .75rem; text-transform: uppercase;
+      background: linear-gradient(135deg, var(--brand, var(--mat-sys-primary)), var(--mat-sys-tertiary)); }
     .uname { font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     @media (max-width: 640px) { .uname { display: none; } }
     .menuhead { padding: .6rem 1rem; border-bottom: 1px solid var(--mat-sys-outline-variant); }
     .menuhead .mn { font-weight: 700; } .menuhead .mr { font-size: .75rem; color: var(--mat-sys-outline); text-transform: capitalize; }
+
     .content { padding: 1.8rem 2.2rem; max-width: 1240px; margin: 0 auto; width: 100%; }
     @media (max-width: 700px) { .content { padding: 1rem; } }
+
     .toast { position: fixed; bottom: 1.4rem; right: 1.4rem; z-index: 1000; background: #0f172a; color: #fff;
       padding: .7rem .8rem .7rem 1rem; border-radius: 12px; box-shadow: 0 18px 44px rgba(0,0,0,.3);
       display: flex; align-items: center; gap: .6rem; max-width: 420px; }
@@ -196,12 +233,14 @@ interface NavItem { path: string; icon: string; label: string; }
       display: grid; place-items: center; padding: 2px; border-radius: 6px; }
     .toast .tc:hover { opacity: 1; background: rgba(255,255,255,.15); }
     .toast .tc mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
     /* Barre de progression de navigation (chargement de route / chunk) */
-    .route-progress { position: sticky; top: 0; left: 0; right: 0; height: 3px; z-index: 6;
+    .route-progress { position: relative; flex: none; height: 3px; z-index: 6;
       background: color-mix(in srgb, var(--mat-sys-primary) 18%, transparent); overflow: hidden; }
     .route-progress span { position: absolute; height: 100%; width: 40%;
       background: var(--mat-sys-primary); border-radius: 3px; animation: route-slide 1.1s ease-in-out infinite; }
     @keyframes route-slide { 0% { left: -40%; } 50% { left: 30%; } 100% { left: 100%; } }
+
     /* Lien d'évitement (accessibilité clavier) */
     .skip-link { position: fixed; left: 12px; top: -60px; z-index: 2000;
       background: var(--mat-sys-primary); color: var(--mat-sys-on-primary);
