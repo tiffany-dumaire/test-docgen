@@ -459,6 +459,17 @@ table.doc-tbl th,table.doc-tbl td{{border:1px solid #d9e0ec;padding:.45rem .6rem
 table.doc-tbl th{{color:#fff;font-weight:600}}
 table.doc-tbl tbody th{{background:#f1f5f9;color:var(--ink)}}
 .page--wide{{max-width:1180px;padding:32px 36px}}
+/* Aperçu façon feuille Word/PDF (A4) */
+.page--doc{{max-width:820px;min-height:1058px;padding:70px 78px;position:relative;
+  font-family:'Segoe UI',Calibri,Candara,'Trebuchet MS',sans-serif;line-height:1.5}}
+.page--doc .doc-body :is(h1,h2,h3,h4){{font-family:inherit}}
+.doc-header{{border-bottom:1.5px solid var(--acc);padding-bottom:12px;margin-bottom:30px;color:#334155;font-size:.86rem}}
+.doc-header .hf-logo{{max-height:46px;vertical-align:middle;margin-right:10px}}
+.doc-header .rich{{display:inline-block;vertical-align:middle}}
+.doc-footer{{border-top:1px solid #e2e8f0;padding-top:12px;margin-top:36px;color:#64748b;font-size:.78rem}}
+.page--doc .doc-body p{{margin:.5em 0;text-align:justify}}
+.page--doc .doc-body h1{{font-size:1.6rem}} .page--doc .doc-body h2{{font-size:1.3rem}}
+@media(prefers-color-scheme:dark){{.doc-header{{color:#cbd5e1}} .doc-footer{{color:#94a3b8;border-color:#334155}}}}
 .xl-wrap{{overflow-x:auto;margin:.4em 0 1.2em;border:1px solid #e2e8f0;border-radius:6px}}
 table.xl-grid{{border-collapse:collapse;table-layout:fixed;font-size:.82rem;background:#fff}}
 table.xl-grid td{{border:1px solid #eef1f6;padding:2px 6px;vertical-align:middle;
@@ -481,6 +492,32 @@ pre{{background:#0f172a;color:#e2e8f0;padding:1rem;border-radius:8px;overflow:au
  .xl-wrap{{border-color:#334155}} table.xl-grid{{background:#0f1a2e}}
  table.xl-grid td{{border-color:#22304a;color:#e2e8f0}} table.xl-grid td.xl-e{{color:#475569}}}}
 </style></head><body>{body}</body></html>"""
+
+
+def _doc_hf_html(ctx, is_footer):
+    """En-tête / pied de page du document (aperçu Word/PDF/Lettre)."""
+    settings = ctx.document.template.settings or {}
+    conf = settings.get("footer" if is_footer else "header")
+    if not conf or not conf.get("enabled", True):
+        return ""
+    pctx = placeholder_context(ctx)
+    align = conf.get("align", "center" if is_footer else "left")
+    parts = []
+    if not is_footer and conf.get("show_logo"):
+        uri = _logo_data_uri(ctx)
+        if uri:
+            parts.append(f'<img class="hf-logo" src="{uri}"/>')
+    html = conf.get("html")
+    if html and html.strip():
+        parts.append(f'<div class="rich">{interpolate(html, pctx)}</div>')
+    else:
+        text = interpolate(conf.get("text", "") or "", pctx)
+        if text.strip():
+            parts.append("<div>" + _esc(text).replace(chr(10), "<br/>") + "</div>")
+    if not parts:
+        return ""
+    cls = "doc-footer" if is_footer else "doc-header"
+    return f'<div class="{cls}" style="text-align:{align}">{"".join(parts)}</div>'
 
 
 def render(document, ctx):
@@ -506,5 +543,8 @@ def render(document, ctx):
         return markdown_to_html_page(md_gen.render(ctx).decode("utf-8"))
     else:  # docx, pdf, lettre, mail, brochure (par blocs)
         inner = _blocks_html(ctx, resolved)
-        body = f'<div class="page">{inner}</div>'
+        header = _doc_hf_html(ctx, False)
+        footer = _doc_hf_html(ctx, True)
+        body = (f'<div class="page page--doc">{header}'
+                f'<div class="doc-body">{inner}</div>{footer}</div>')
     return _SHELL.format(acc=acc, body=body).encode("utf-8")

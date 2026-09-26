@@ -14,17 +14,34 @@ class ContactSerializer(serializers.ModelSerializer):
                   "initials", "role", "email", "phone"]
 
 
+def _abs_media_url(serializer, filefield):
+    if not filefield:
+        return None
+    try:
+        url = filefield.url
+    except Exception:
+        return None
+    request = serializer.context.get("request")
+    return request.build_absolute_uri(url) if request else url
+
+
 class ClientSerializer(serializers.ModelSerializer):
     project_count = serializers.SerializerMethodField()
+    logo = serializers.ImageField(required=False, allow_null=True, write_only=True)
+    logo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Client
-        fields = ["id", "name", "contact_name", "email", "phone", "address",
-                  "notes", "project_count", "created_at", "updated_at"]
+        fields = ["id", "name", "logo", "logo_url", "contact_name", "email",
+                  "phone", "address", "notes", "project_count",
+                  "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
 
     def get_project_count(self, obj):
         return obj.projects.count()
+
+    def get_logo_url(self, obj):
+        return _abs_media_url(self, obj.logo)
 
 
 class ProjectAssignmentSerializer(serializers.ModelSerializer):
@@ -95,14 +112,18 @@ class ProjectSerializer(serializers.ModelSerializer):
     clients_detail = ClientSerializer(source="clients", many=True, read_only=True)
     children = serializers.SerializerMethodField()
     links = ProjectLinkSerializer(many=True, read_only=True)
+    client_logo = serializers.ImageField(required=False, allow_null=True, write_only=True)
     client_logo_url = serializers.SerializerMethodField()
+    logo = serializers.ImageField(required=False, allow_null=True, write_only=True)
+    logo_url = serializers.SerializerMethodField()
     document_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
         fields = [
             "id", "name", "client_name", "client", "client_detail",
-            "client_logo", "client_logo_url", "description", "reference",
+            "client_logo", "client_logo_url", "logo", "logo_url", "description",
+            "reference",
             "status", "start_date", "end_date", "styles", "parent", "clients",
             "clients_detail", "children", "custom_field_defs", "custom_fields",
             "tracking", "links", "contacts", "assignments",
@@ -111,11 +132,10 @@ class ProjectSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
     def get_client_logo_url(self, obj):
-        request = self.context.get("request")
-        if obj.client_logo and hasattr(obj.client_logo, "url"):
-            url = obj.client_logo.url
-            return request.build_absolute_uri(url) if request else url
-        return None
+        return _abs_media_url(self, obj.client_logo)
+
+    def get_logo_url(self, obj):
+        return _abs_media_url(self, obj.logo)
 
     def get_document_count(self, obj):
         return obj.documents.count() if hasattr(obj, "documents") else 0

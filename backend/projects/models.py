@@ -5,6 +5,8 @@ class Client(models.Model):
     """Client de l'entreprise, rattachable à plusieurs projets."""
 
     name = models.CharField("Nom du client", max_length=255)
+    logo = models.ImageField("Logo du client", upload_to="clients/",
+                             blank=True, null=True)
     contact_name = models.CharField("Contact principal", max_length=200, blank=True)
     email = models.EmailField("Email", blank=True)
     phone = models.CharField("Téléphone", max_length=50, blank=True)
@@ -54,6 +56,9 @@ class Project(models.Model):
     )
     client_logo = models.ImageField(
         "Logo du client", upload_to="projects/", blank=True, null=True
+    )
+    logo = models.ImageField(
+        "Logo du projet (facultatif)", upload_to="projects/", blank=True, null=True
     )
     description = models.TextField("Description", blank=True)
 
