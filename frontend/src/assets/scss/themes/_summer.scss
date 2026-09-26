@@ -1,33 +1,33 @@
-/* ---------- ÉTÉ · grand soleil (azur + accent solaire) ---------- */
+/* ---------- ÉTÉ · grand soleil (couleurs vives : azur éclatant + corail solaire) ---------- */
 @mixin summer-light {
-  --mat-sys-primary:#1C7FB8; --mat-sys-on-primary:#FFFFFF;
-  --mat-sys-primary-container:#CBE6FF; --mat-sys-on-primary-container:#001E30;
-  --mat-sys-secondary:#4F616E; --mat-sys-on-secondary:#FFFFFF;
-  --mat-sys-secondary-container:#D2E5F4; --mat-sys-on-secondary-container:#0A1D28;
-  --mat-sys-tertiary:#E29100; --mat-sys-on-tertiary:#FFFFFF;
-  --mat-sys-tertiary-container:#FFDEA6; --mat-sys-on-tertiary-container:#2A1800;
-  --mat-sys-surface:#F6FAFD; --mat-sys-on-surface:#181C20; --mat-sys-on-surface-variant:#41484D;
-  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#F0F4F8;
-  --mat-sys-surface-container:#EAEEF3; --mat-sys-surface-container-high:#E4E9EE;
-  --mat-sys-surface-container-highest:#DEE3E9;
-  --mat-sys-outline:#71787E; --mat-sys-outline-variant:#C1C8CE;
-  --mat-sys-inverse-surface:#2D3135; --mat-sys-inverse-on-surface:#EEF1F5; --mat-sys-inverse-primary:#96CCF8;
+  --mat-sys-primary:#0091D5; --mat-sys-on-primary:#FFFFFF;
+  --mat-sys-primary-container:#BEE7FF; --mat-sys-on-primary-container:#001E30;
+  --mat-sys-secondary:#12A594; --mat-sys-on-secondary:#FFFFFF;
+  --mat-sys-secondary-container:#A8F2E4; --mat-sys-on-secondary-container:#00201C;
+  --mat-sys-tertiary:#FF7A18; --mat-sys-on-tertiary:#FFFFFF;
+  --mat-sys-tertiary-container:#FFDCC5; --mat-sys-on-tertiary-container:#331100;
+  --mat-sys-surface:#F4FBFF; --mat-sys-on-surface:#0F1B22; --mat-sys-on-surface-variant:#3E4B54;
+  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#EAF6FE;
+  --mat-sys-surface-container:#E0F0FB; --mat-sys-surface-container-high:#D5E9F6;
+  --mat-sys-surface-container-highest:#CBE2F1;
+  --mat-sys-outline:#6B7A85; --mat-sys-outline-variant:#B7C6D2;
+  --mat-sys-inverse-surface:#21323C; --mat-sys-inverse-on-surface:#ECF6FD; --mat-sys-inverse-primary:#7CD0FF;
   --mat-sys-error:#B3261E; --mat-sys-on-error:#FFFFFF;
   --mat-sys-error-container:#F9DEDC; --mat-sys-on-error-container:#410E0B;
 }
 @mixin summer-dark {
-  --mat-sys-primary:#96CCF8; --mat-sys-on-primary:#003350;
-  --mat-sys-primary-container:#004B71; --mat-sys-on-primary-container:#CBE6FF;
-  --mat-sys-secondary:#B6C9D8; --mat-sys-on-secondary:#21333F;
-  --mat-sys-secondary-container:#384956; --mat-sys-on-secondary-container:#D2E5F4;
-  --mat-sys-tertiary:#FFC24D; --mat-sys-on-tertiary:#3F2E00;
-  --mat-sys-tertiary-container:#6A4A00; --mat-sys-on-tertiary-container:#FFDEA6;
-  --mat-sys-surface:#0F1417; --mat-sys-on-surface:#DFE3E7; --mat-sys-on-surface-variant:#C1C8CE;
-  --mat-sys-surface-container-lowest:#0A0E11; --mat-sys-surface-container-low:#171C1F;
-  --mat-sys-surface-container:#1B2023; --mat-sys-surface-container-high:#262A2E;
-  --mat-sys-surface-container-highest:#303539;
-  --mat-sys-outline:#8B9298; --mat-sys-outline-variant:#41484D;
-  --mat-sys-inverse-surface:#DFE3E7; --mat-sys-inverse-on-surface:#2D3135; --mat-sys-inverse-primary:#1C7FB8;
+  --mat-sys-primary:#52C7FF; --mat-sys-on-primary:#003350;
+  --mat-sys-primary-container:#005C86; --mat-sys-on-primary-container:#BEE7FF;
+  --mat-sys-secondary:#4EDDC8; --mat-sys-on-secondary:#003731;
+  --mat-sys-secondary-container:#00514A; --mat-sys-on-secondary-container:#A8F2E4;
+  --mat-sys-tertiary:#FFB176; --mat-sys-on-tertiary:#4A2100;
+  --mat-sys-tertiary-container:#8A4A16; --mat-sys-on-tertiary-container:#FFDCC5;
+  --mat-sys-surface:#0C1519; --mat-sys-on-surface:#D9E7F0; --mat-sys-on-surface-variant:#B7C6D2;
+  --mat-sys-surface-container-lowest:#070F13; --mat-sys-surface-container-low:#131E26;
+  --mat-sys-surface-container:#182430; --mat-sys-surface-container-high:#22303C;
+  --mat-sys-surface-container-highest:#2D3C48;
+  --mat-sys-outline:#83929E; --mat-sys-outline-variant:#3E4B54;
+  --mat-sys-inverse-surface:#D9E7F0; --mat-sys-inverse-on-surface:#21323C; --mat-sys-inverse-primary:#0091D5;
   --mat-sys-error:#F2B8B5; --mat-sys-on-error:#601410;
   --mat-sys-error-container:#8C1D18; --mat-sys-on-error-container:#F9DEDC;
   color-scheme: dark;

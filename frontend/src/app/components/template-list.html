@@ -27,6 +27,15 @@
                       </div>
                       @if (t.is_system) { <span class="chip-sys">{{ 'templates.system' | transloco }}</span> }
                     </div>
+                    @if (tab.key === 'a3') {
+                      <button type="button" class="tpl-thumb" (click)="preview(t)" [title]="'templates.preview' | transloco">
+                        @if (thumbs()[t.id!]; as thumb) {
+                          <img [src]="thumb" alt="aperçu A3" loading="lazy" />
+                        } @else {
+                          <span class="tpl-thumb-ph"><span class="spin"></span></span>
+                        }
+                      </button>
+                    }
                     <p class="tpl-desc">{{ t.description || '—' }}</p>
                     <div class="tpl-actions">
                       @if (t.is_block_based || t.builder_key === 'excel_workbook' || t.doc_type === 'a3') {

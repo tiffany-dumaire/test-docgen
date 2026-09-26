@@ -1,33 +1,34 @@
-/* ---------- HIVER · givre (bleu glacier + accent indigo froid) ---------- */
+/* ---------- HIVER · glace enchantée (esprit « La Reine des neiges 2 »)
+   Bleu glacier + violet/magenta givré + périvenche, sur des nuits polaires. ---------- */
 @mixin winter-light {
-  --mat-sys-primary:#3E6D8E; --mat-sys-on-primary:#FFFFFF;
-  --mat-sys-primary-container:#CBE6FF; --mat-sys-on-primary-container:#001E30;
-  --mat-sys-secondary:#4E616F; --mat-sys-on-secondary:#FFFFFF;
-  --mat-sys-secondary-container:#D5E4F5; --mat-sys-on-secondary-container:#0A1D28;
-  --mat-sys-tertiary:#5A6C9A; --mat-sys-on-tertiary:#FFFFFF;
-  --mat-sys-tertiary-container:#DEE1FF; --mat-sys-on-tertiary-container:#131A3B;
-  --mat-sys-surface:#F7F9FC; --mat-sys-on-surface:#191C1F; --mat-sys-on-surface-variant:#43474E;
-  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#F1F4F7;
-  --mat-sys-surface-container:#EBEEF2; --mat-sys-surface-container-high:#E5E9ED;
-  --mat-sys-surface-container-highest:#DFE3E8;
-  --mat-sys-outline:#73777E; --mat-sys-outline-variant:#C3C7CE;
-  --mat-sys-inverse-surface:#2E3134; --mat-sys-inverse-on-surface:#EFF1F5; --mat-sys-inverse-primary:#A6CAEC;
+  --mat-sys-primary:#1E93C7; --mat-sys-on-primary:#FFFFFF;
+  --mat-sys-primary-container:#C4E7F8; --mat-sys-on-primary-container:#001E2B;
+  --mat-sys-secondary:#4F6D9E; --mat-sys-on-secondary:#FFFFFF;
+  --mat-sys-secondary-container:#D8E3FB; --mat-sys-on-secondary-container:#0A1B33;
+  --mat-sys-tertiary:#9A3DB0; --mat-sys-on-tertiary:#FFFFFF;
+  --mat-sys-tertiary-container:#F6D9FF; --mat-sys-on-tertiary-container:#34003F;
+  --mat-sys-surface:#F5FAFD; --mat-sys-on-surface:#131A1E; --mat-sys-on-surface-variant:#3F4A50;
+  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#EDF5FA;
+  --mat-sys-surface-container:#E4EFF5; --mat-sys-surface-container-high:#DAE8F0;
+  --mat-sys-surface-container-highest:#D0E1EB;
+  --mat-sys-outline:#6C7A82; --mat-sys-outline-variant:#BAC7CF;
+  --mat-sys-inverse-surface:#26343B; --mat-sys-inverse-on-surface:#ECF4F9; --mat-sys-inverse-primary:#8AD1F0;
   --mat-sys-error:#B3261E; --mat-sys-on-error:#FFFFFF;
   --mat-sys-error-container:#F9DEDC; --mat-sys-on-error-container:#410E0B;
 }
 @mixin winter-dark {
-  --mat-sys-primary:#A6CAEC; --mat-sys-on-primary:#073450;
-  --mat-sys-primary-container:#244B67; --mat-sys-on-primary-container:#CBE6FF;
-  --mat-sys-secondary:#B6C9DA; --mat-sys-on-secondary:#213340;
-  --mat-sys-secondary-container:#384956; --mat-sys-on-secondary-container:#D5E4F5;
-  --mat-sys-tertiary:#BBC4F5; --mat-sys-on-tertiary:#263162;
-  --mat-sys-tertiary-container:#42497B; --mat-sys-on-tertiary-container:#DEE1FF;
-  --mat-sys-surface:#101416; --mat-sys-on-surface:#E0E3E6; --mat-sys-on-surface-variant:#C3C7CE;
-  --mat-sys-surface-container-lowest:#0B0E10; --mat-sys-surface-container-low:#181C1F;
-  --mat-sys-surface-container:#1C2023; --mat-sys-surface-container-high:#262A2D;
-  --mat-sys-surface-container-highest:#313538;
-  --mat-sys-outline:#8D9198; --mat-sys-outline-variant:#43474E;
-  --mat-sys-inverse-surface:#E0E3E6; --mat-sys-inverse-on-surface:#2E3134; --mat-sys-inverse-primary:#3E6D8E;
+  --mat-sys-primary:#8AD1F0; --mat-sys-on-primary:#00344A;
+  --mat-sys-primary-container:#0F4E6B; --mat-sys-on-primary-container:#C4E7F8;
+  --mat-sys-secondary:#B6C6EC; --mat-sys-on-secondary:#1F3355;
+  --mat-sys-secondary-container:#374B73; --mat-sys-on-secondary-container:#D8E3FB;
+  --mat-sys-tertiary:#EAB0FA; --mat-sys-on-tertiary:#521262;
+  --mat-sys-tertiary-container:#6E2483; --mat-sys-on-tertiary-container:#F6D9FF;
+  --mat-sys-surface:#0C161B; --mat-sys-on-surface:#DCE9F0; --mat-sys-on-surface-variant:#BAC7CF;
+  --mat-sys-surface-container-lowest:#070F14; --mat-sys-surface-container-low:#131F26;
+  --mat-sys-surface-container:#17232B; --mat-sys-surface-container-high:#212F38;
+  --mat-sys-surface-container-highest:#2C3B44;
+  --mat-sys-outline:#869399; --mat-sys-outline-variant:#3F4A50;
+  --mat-sys-inverse-surface:#DCE9F0; --mat-sys-inverse-on-surface:#26343B; --mat-sys-inverse-primary:#1E93C7;
   --mat-sys-error:#F2B8B5; --mat-sys-on-error:#601410;
   --mat-sys-error-container:#8C1D18; --mat-sys-on-error-container:#F9DEDC;
   color-scheme: dark;

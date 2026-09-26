@@ -17,9 +17,9 @@ const VNV_FONT = '"Montserrat", sans-serif';
 export const PROPOSITIONS: PropositionDef[] = [
   { id: 'vnv', name: 'VNV', sub: 'Charte entreprise', primary: '#EC6608', font: VNV_FONT },
   { id: 'spring', name: 'Printemps', sub: 'Renouveau', primary: '#3F8F4F', font: VNV_FONT },
-  { id: 'summer', name: 'Été', sub: 'Grand soleil', primary: '#1C7FB8', font: VNV_FONT },
+  { id: 'summer', name: 'Été', sub: 'Grand soleil', primary: '#0091D5', font: VNV_FONT },
   { id: 'autumn', name: 'Automne', sub: 'Feuilles mortes', primary: '#B4571B', font: VNV_FONT },
-  { id: 'winter', name: 'Hiver', sub: 'Givre', primary: '#3E6D8E', font: VNV_FONT },
+  { id: 'winter', name: 'Hiver', sub: 'Glace enchantée', primary: '#1E93C7', font: VNV_FONT },
 ];
 export const PROPOSITION_IDS: Proposition[] = ['vnv', 'spring', 'summer', 'autumn', 'winter'];
 export const DEFAULT_PROPOSITION: Proposition = 'vnv';

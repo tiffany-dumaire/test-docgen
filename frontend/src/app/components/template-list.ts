@@ -1,4 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -45,7 +46,12 @@ export class TemplateList {
   auth = inject(AuthService);
   private router = inject(Router);
   private previewSvc = inject(PreviewService);
+  private san = inject(DomSanitizer);
   private t = inject(TranslocoService);
+
+  /** Vignettes SVG des modèles A3, indexées par id. */
+  thumbs = signal<Record<number, SafeUrl>>({});
+  private thumbUrls: string[] = [];
   canManage = () => this.auth.hasRole('admin') || this.auth.hasRole('manager') || !this.auth.user();
 
   typeTabs = TYPE_TABS;
@@ -59,9 +65,32 @@ export class TemplateList {
   }
 
   reload() {
-    this.service.templates({ page_size: 1000 }).subscribe((r) => this.templates.set(r.results));
+    this.service.templates({ page_size: 1000 }).subscribe((r) => {
+      this.templates.set(r.results);
+      // Vignettes A3 : rendu SVG affiché directement sur les cartes.
+      this.thumbs.set({});
+      this.revokeThumbs();
+      r.results.filter((t) => t.doc_type === 'a3').forEach((t) => this.loadA3Thumb(t));
+    });
     this.formSvc.templates({ page_size: 1000 }).subscribe((r) => this.formTemplates.set(r.results));
   }
+
+  private loadA3Thumb(t: DocumentTemplate) {
+    if (!t.id) return;
+    this.service.exportA3(t.id, 'svg').subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.thumbUrls.push(url);
+        this.thumbs.update((m) => ({ ...m, [t.id!]: this.san.bypassSecurityTrustUrl(url) }));
+      },
+      error: () => { /* pas de vignette : repli sur l'icône */ },
+    });
+  }
+  private revokeThumbs() {
+    this.thumbUrls.forEach((u) => URL.revokeObjectURL(u));
+    this.thumbUrls = [];
+  }
+  ngOnDestroy() { this.revokeThumbs(); }
 
   /** Langues proposées par un modèle (principale + langues additionnelles). */
   private langsOf(t: { language?: string; languages?: string[]; available_languages?: string[] }): string[] {
