@@ -4,9 +4,13 @@ import {
   CellType,
   ExcelColumn,
   ExcelSheet,
+  GridCell,
   SheetImage,
   SheetType,
 } from '../../core/models';
+
+const DEFAULT_COL_W = 12;   // largeur Excel par défaut (~caractères)
+const DEFAULT_ROW_H = 18;   // hauteur par défaut (points)
 
 const CELL_TYPES: { value: CellType; label: string }[] = [
   { value: 'text', label: 'Texte' },
@@ -212,45 +216,79 @@ const CELL_TYPES: { value: CellType; label: string }[] = [
           }
 
           @if (s.type === 'grid') {
-            <h4>Grille libre (style, fusion et taille par cellule)</h4>
-            <p class="hint">Chaque cellule a sa position (ligne/colonne), sa valeur (variables {{ '{{' }}…{{ '}}' }} acceptées), son style et sa fusion.</p>
-            <div class="gridcells">
-              @for (cl of s.cells ?? []; track $index) {
-                <div class="gcell">
-                  <div class="line">
-                    <span class="span">L</span><input type="number" min="1" [ngModel]="cl.row" (ngModelChange)="cl.row = +$event" style="width:52px" />
-                    <span class="span">C</span><input type="number" min="1" [ngModel]="cl.col" (ngModelChange)="cl.col = +$event" style="width:52px" />
-                    <input [(ngModel)]="cl.value" placeholder="Valeur" style="flex:2" />
-                    <button class="mini del" (click)="s.cells!.splice($index, 1)">✕</button>
-                  </div>
-                  <div class="line">
-                    <label class="chk"><input type="checkbox" [(ngModel)]="cl.bold" /> Gras</label>
-                    <label class="chk"><input type="checkbox" [(ngModel)]="cl.italic" /> Italique</label>
-                    <label class="chk"><input type="checkbox" [ngModel]="cl.border !== false" (ngModelChange)="cl.border = $event" /> Bordure</label>
-                    <label class="chk"><input type="checkbox" [(ngModel)]="cl.wrap" /> Retour ligne</label>
-                    <span class="span">Texte</span><input type="color" [ngModel]="cl.color || '#1d1e1b'" (ngModelChange)="cl.color = $event" title="Couleur du texte" />
-                    <span class="span">Fond</span><input type="color" [ngModel]="cl.bg || '#ffffff'" (ngModelChange)="cl.bg = $event" title="Couleur de fond" />
-                  </div>
-                  <div class="line">
-                    <select [ngModel]="cl.align || 'left'" (ngModelChange)="cl.align = $event"><option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option></select>
-                    <span class="span">Fusion L×C</span>
-                    <input type="number" min="1" [ngModel]="cl.row_span || 1" (ngModelChange)="cl.row_span = +$event" style="width:52px" title="Lignes fusionnées" />
-                    <input type="number" min="1" [ngModel]="cl.col_span || 1" (ngModelChange)="cl.col_span = +$event" style="width:52px" title="Colonnes fusionnées" />
-                    <span class="span">Taille</span><input type="number" min="6" max="48" [ngModel]="cl.size || 11" (ngModelChange)="cl.size = +$event" style="width:56px" />
-                    <input [(ngModel)]="cl.number_format" placeholder="Format (#,##0.00)" style="flex:1" />
-                  </div>
-                </div>
-              }
+            <h4>Grille — aperçu et édition en temps réel</h4>
+            <p class="hint">Cliquez une cellule pour la modifier ; la barre d'outils applique le style. Variables {{ '{{' }}…{{ '}}' }} acceptées.</p>
+
+            <!-- Barre d'outils de la cellule sélectionnée -->
+            @if (sel(s); as cl) {
+              <div class="gtoolbar">
+                <span class="gt-ref">{{ colLabel(gsel()!.c) }}{{ gsel()!.r }}</span>
+                <button class="gt" [class.on]="cl.bold" (click)="cl.bold = !cl.bold; touch()" title="Gras"><b>G</b></button>
+                <button class="gt" [class.on]="cl.italic" (click)="cl.italic = !cl.italic; touch()" title="Italique"><i>I</i></button>
+                <button class="gt" [class.on]="cl.underline" (click)="cl.underline = !cl.underline; touch()" title="Souligné"><u>S</u></button>
+                <span class="gt-sep"></span>
+                <button class="gt" [class.on]="(cl.align||'left')==='left'" (click)="cl.align='left'; touch()">⯇</button>
+                <button class="gt" [class.on]="cl.align==='center'" (click)="cl.align='center'; touch()">≡</button>
+                <button class="gt" [class.on]="cl.align==='right'" (click)="cl.align='right'; touch()">⯈</button>
+                <span class="gt-sep"></span>
+                <label class="gt-col" title="Couleur du texte">A<input type="color" [ngModel]="cl.color || '#1d1e1b'" (ngModelChange)="cl.color = $event; touch()" /></label>
+                <label class="gt-col" title="Couleur de fond">▮<input type="color" [ngModel]="cl.bg || '#ffffff'" (ngModelChange)="cl.bg = $event; touch()" /></label>
+                <span class="gt-sep"></span>
+                <label class="chk"><input type="checkbox" [ngModel]="cl.border !== false" (ngModelChange)="cl.border = $event; touch()" /> Bord</label>
+                <label class="chk"><input type="checkbox" [(ngModel)]="cl.wrap" (ngModelChange)="touch()" /> Retour</label>
+                <span class="span">Taille</span><input type="number" min="6" max="48" [ngModel]="cl.size || 11" (ngModelChange)="cl.size = +$event; touch()" style="width:52px" />
+                <span class="span">Fusion</span>
+                <input type="number" min="1" [ngModel]="cl.row_span || 1" (ngModelChange)="setSpan(cl,'row_span',$event)" style="width:44px" title="Lignes" />×<input type="number" min="1" [ngModel]="cl.col_span || 1" (ngModelChange)="setSpan(cl,'col_span',$event)" style="width:44px" title="Colonnes" />
+                <input [ngModel]="cl.number_format" (ngModelChange)="cl.number_format=$event; touch()" placeholder="Format (#,##0.00)" style="width:150px" />
+              </div>
+            } @else { <div class="gtoolbar muted">Sélectionnez une cellule pour la styliser.</div> }
+
+            <div class="gwrap">
+              <table class="gtable">
+                <thead>
+                  <tr>
+                    <th class="ghdr corner"></th>
+                    @for (c of colRange(s); track c) {
+                      <th class="ghdr" [style.width.px]="colW(s,c)">
+                        <div class="ghlbl">{{ colLabel(c) }}<button class="ghx" (click)="delCol(s,c)" title="Supprimer la colonne">✕</button></div>
+                        <input class="ghsize" type="number" min="3" [ngModel]="rawColW(s,c)" (ngModelChange)="setColW(s,c,$event)" title="Largeur" />
+                      </th>
+                    }
+                    <th class="ghdr addcol"><button class="mini" (click)="addCol(s)" title="Ajouter une colonne">＋</button></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of rowRange(s); track r) {
+                    <tr>
+                      <th class="ghdr rownum">
+                        <div>{{ r }}<button class="ghx" (click)="delRow(s,r)" title="Supprimer la ligne">✕</button></div>
+                        <input class="ghsize" type="number" min="8" [ngModel]="rawRowH(s,r)" (ngModelChange)="setRowH(s,r,$event)" title="Hauteur" />
+                      </th>
+                      @for (c of colRange(s); track c) {
+                        @if (!covered(s,r,c)) {
+                          <td class="gcellx" [class.selected]="isSel(r,c)"
+                              [attr.colspan]="spanC(s,r,c)" [attr.rowspan]="spanR(s,r,c)"
+                              [style.background]="bgOf(s,r,c)" [style.border]="borderOf(s,r,c)"
+                              (click)="selectCell(s,r,c)">
+                            <input class="gin"
+                              [style.color]="colorOf(s,r,c)" [style.font-weight]="boldOf(s,r,c)"
+                              [style.font-style]="italicOf(s,r,c)" [style.text-align]="alignOf(s,r,c)"
+                              [style.font-size.px]="sizeOf(s,r,c)"
+                              [ngModel]="valOf(s,r,c)" (ngModelChange)="setVal(s,r,c,$event)"
+                              (focus)="selectCell(s,r,c)" />
+                          </td>
+                        }
+                      }
+                      <td class="gpad"></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
-            <button class="btn-sm" (click)="addCell(s)">+ Cellule</button>
-            <h4>Tailles de colonnes / lignes</h4>
-            <div class="line">
-              <span class="span">Largeurs colonnes (ex : 1:24, 2:30)</span>
-              <input [ngModel]="dimsToStr(s.col_widths)" (ngModelChange)="s.col_widths = strToDims($event)" style="flex:1" />
-            </div>
-            <div class="line">
-              <span class="span">Hauteurs lignes (ex : 1:28, 3:18)</span>
-              <input [ngModel]="dimsToStr(s.row_heights)" (ngModelChange)="s.row_heights = strToDims($event)" style="flex:1" />
+            <div class="line" style="margin-top:.4rem;gap:.5rem">
+              <button class="btn-sm" (click)="addRow(s)">＋ Ligne</button>
+              <button class="btn-sm" (click)="addCol(s)">＋ Colonne</button>
+              <span class="hint">{{ (s.cells?.length || 0) }} cellule(s) définie(s)</span>
             </div>
 
             <h4>Images / logo <span class="hint">(position et taille libres)</span></h4>
@@ -320,6 +358,31 @@ const CELL_TYPES: { value: CellType; label: string }[] = [
     .gcell { border:1px solid var(--border); border-radius:8px; padding:.5rem .6rem; background:var(--surface,#fff); }
     .gcell .line { margin-bottom:.3rem; flex-wrap:wrap; }
     .gcell input[type=color] { width:38px; height:30px; padding:2px; }
+    /* Éditeur tableur */
+    .gtoolbar { display:flex; flex-wrap:wrap; align-items:center; gap:.3rem; padding:.4rem .5rem; border:1px solid var(--border);
+      border-radius:8px; background:var(--surface,#fff); margin-bottom:.4rem; position:sticky; top:0; z-index:2; }
+    .gt-ref { font-weight:700; font-family:ui-monospace,monospace; min-width:38px; color:var(--primary); }
+    .gt { border:1px solid var(--border); background:#fff; border-radius:6px; min-width:28px; height:28px; cursor:pointer; font-size:.85rem; color:var(--text); }
+    .gt.on { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .gt-sep { width:1px; height:20px; background:var(--border); margin:0 .2rem; }
+    .gt-col { display:inline-flex; align-items:center; gap:.15rem; border:1px solid var(--border); border-radius:6px; padding:0 .25rem; height:28px; font-size:.8rem; cursor:pointer; }
+    .gt-col input[type=color] { width:22px; height:20px; padding:0; border:none; background:none; }
+    .gwrap { overflow:auto; border:1px solid var(--border); border-radius:10px; max-height:520px; }
+    table.gtable { border-collapse:separate; border-spacing:0; }
+    .gtable th.ghdr { background:var(--mat-sys-surface-container-high); position:sticky; top:0; z-index:1; padding:2px; text-align:center;
+      font-size:.68rem; color:var(--muted); border:1px solid var(--border); min-width:64px; }
+    .gtable th.rownum { position:sticky; left:0; z-index:1; min-width:40px; }
+    .gtable th.corner { position:sticky; left:0; top:0; z-index:3; min-width:40px; }
+    .ghlbl { display:flex; align-items:center; justify-content:center; gap:.15rem; font-weight:700; color:var(--text); }
+    .ghx { border:none; background:none; color:var(--muted); cursor:pointer; font-size:.6rem; opacity:0; }
+    th.ghdr:hover .ghx { opacity:.7; } .ghx:hover { color:var(--danger); }
+    .ghsize { width:100%; border:none; background:transparent; font-size:.62rem; text-align:center; color:var(--muted); padding:0; }
+    .gtable th.addcol .mini { min-width:24px; }
+    td.gcellx { padding:0; min-width:64px; cursor:cell; }
+    td.gcellx.selected { outline:2px solid var(--primary); outline-offset:-2px; }
+    .gin { width:100%; min-width:64px; height:26px; border:none; background:transparent; padding:2px 5px; font:inherit; color:inherit; }
+    .gin:focus { outline:none; }
+    td.gpad, .gpad { border:none; background:transparent; }
   `],
 })
 export class ExcelBuilder {
@@ -384,6 +447,128 @@ export class ExcelBuilder {
     s.cells = s.cells ?? [];
     const last = s.cells[s.cells.length - 1];
     s.cells.push({ row: last ? last.row + 1 : 1, col: 1, value: '', border: true });
+  }
+
+  // ===== Éditeur « grille » type tableur (aperçu + édition en temps réel) =====
+  gsel = signal<{ r: number; c: number } | null>(null);
+  touch() { /* les objets sont mutés en place ; CD zone déclenche le rendu */ }
+
+  private maxUsed(s: ExcelSheet) {
+    let mr = 0, mc = 0;
+    for (const cl of s.cells ?? []) {
+      mr = Math.max(mr, (cl.row || 1) + (cl.row_span || 1) - 1);
+      mc = Math.max(mc, (cl.col || 1) + (cl.col_span || 1) - 1);
+    }
+    for (const k of Object.keys(s.col_widths ?? {})) mc = Math.max(mc, +k || 0);
+    for (const k of Object.keys(s.row_heights ?? {})) mr = Math.max(mr, +k || 0);
+    return { mr, mc };
+  }
+  gridRows(s: ExcelSheet): number {
+    const { mr } = this.maxUsed(s);
+    return Math.max((s as any).grid_rows || 0, mr, 8);
+  }
+  gridCols(s: ExcelSheet): number {
+    const { mc } = this.maxUsed(s);
+    return Math.max((s as any).grid_cols || 0, mc, 6);
+  }
+  rowRange(s: ExcelSheet): number[] { return Array.from({ length: this.gridRows(s) }, (_, i) => i + 1); }
+  colRange(s: ExcelSheet): number[] { return Array.from({ length: this.gridCols(s) }, (_, i) => i + 1); }
+  addRow(s: ExcelSheet) { (s as any).grid_rows = this.gridRows(s) + 1; this.touch(); }
+  addCol(s: ExcelSheet) { (s as any).grid_cols = this.gridCols(s) + 1; this.touch(); }
+
+  colLabel(c: number): string {
+    let n = c, out = '';
+    while (n > 0) { const m = (n - 1) % 26; out = String.fromCharCode(65 + m) + out; n = Math.floor((n - 1) / 26); }
+    return out || 'A';
+  }
+
+  private find(s: ExcelSheet, r: number, c: number): GridCell | undefined {
+    return (s.cells ?? []).find((x) => x.row === r && x.col === c);
+  }
+  private ensure(s: ExcelSheet, r: number, c: number): GridCell {
+    s.cells = s.cells ?? [];
+    let cl = this.find(s, r, c);
+    if (!cl) { cl = { row: r, col: c, value: '', border: true }; s.cells.push(cl); }
+    return cl;
+  }
+  /** Une cellule est-elle couverte par une fusion (donc non affichée) ? */
+  covered(s: ExcelSheet, r: number, c: number): boolean {
+    for (const cl of s.cells ?? []) {
+      const rs = cl.row_span || 1, cs = cl.col_span || 1;
+      if (rs === 1 && cs === 1) continue;
+      if (r >= cl.row && r < cl.row + rs && c >= cl.col && c < cl.col + cs && !(r === cl.row && c === cl.col)) return true;
+    }
+    return false;
+  }
+  spanR(s: ExcelSheet, r: number, c: number) { return this.find(s, r, c)?.row_span || 1; }
+  spanC(s: ExcelSheet, r: number, c: number) { return this.find(s, r, c)?.col_span || 1; }
+
+  selectCell(s: ExcelSheet, r: number, c: number) { this.gsel.set({ r, c }); }
+  isSel(r: number, c: number) { const g = this.gsel(); return !!g && g.r === r && g.c === c; }
+  sel(s: ExcelSheet): GridCell | null {
+    const g = this.gsel(); if (!g) return null;
+    return this.ensure(s, g.r, g.c);
+  }
+  setSpan(cl: GridCell, key: 'row_span' | 'col_span', v: unknown) {
+    cl[key] = Math.max(1, +(v as number) || 1); this.touch();
+  }
+  setVal(s: ExcelSheet, r: number, c: number, v: string) {
+    const cl = this.find(s, r, c);
+    if (!cl && !v) return;                 // ne crée rien pour une cellule vide
+    this.ensure(s, r, c).value = v; this.touch();
+  }
+  valOf(s: ExcelSheet, r: number, c: number) { return this.find(s, r, c)?.value ?? ''; }
+
+  // Getters de style pour l'aperçu WYSIWYG
+  bgOf(s: ExcelSheet, r: number, c: number) { return this.find(s, r, c)?.bg || 'transparent'; }
+  colorOf(s: ExcelSheet, r: number, c: number) { return this.find(s, r, c)?.color || 'inherit'; }
+  boldOf(s: ExcelSheet, r: number, c: number) { return this.find(s, r, c)?.bold ? '700' : '400'; }
+  italicOf(s: ExcelSheet, r: number, c: number) { return this.find(s, r, c)?.italic ? 'italic' : 'normal'; }
+  alignOf(s: ExcelSheet, r: number, c: number) { return this.find(s, r, c)?.align || 'left'; }
+  sizeOf(s: ExcelSheet, r: number, c: number) { return (this.find(s, r, c)?.size || 11) + 2; }
+  borderOf(s: ExcelSheet, r: number, c: number) {
+    const cl = this.find(s, r, c);
+    return (cl && cl.border !== false) ? '1px solid var(--border-strong)' : '1px solid var(--border)';
+  }
+
+  // Tailles de colonnes / lignes
+  rawColW(s: ExcelSheet, c: number) { return s.col_widths?.[String(c)]; }
+  rawRowH(s: ExcelSheet, r: number) { return s.row_heights?.[String(r)]; }
+  colW(s: ExcelSheet, c: number) { return Math.round((this.rawColW(s, c) || DEFAULT_COL_W) * 7) + 6; }
+  setColW(s: ExcelSheet, c: number, v: unknown) {
+    s.col_widths = s.col_widths ?? {};
+    const n = +(v as number); if (n > 0) s.col_widths[String(c)] = n; else delete s.col_widths[String(c)];
+    this.touch();
+  }
+  setRowH(s: ExcelSheet, r: number, v: unknown) {
+    s.row_heights = s.row_heights ?? {};
+    const n = +(v as number); if (n > 0) s.row_heights[String(r)] = n; else delete s.row_heights[String(r)];
+    this.touch();
+  }
+
+  delRow(s: ExcelSheet, r: number) {
+    s.cells = (s.cells ?? []).filter((x) => x.row !== r);
+    for (const cl of s.cells) if (cl.row > r) cl.row -= 1;
+    s.col_widths = s.col_widths; // inchangé
+    s.row_heights = this.shiftDims(s.row_heights, r);
+    if ((s as any).grid_rows) (s as any).grid_rows = Math.max(1, (s as any).grid_rows - 1);
+    this.gsel.set(null); this.touch();
+  }
+  delCol(s: ExcelSheet, c: number) {
+    s.cells = (s.cells ?? []).filter((x) => x.col !== c);
+    for (const cl of s.cells) if (cl.col > c) cl.col -= 1;
+    s.col_widths = this.shiftDims(s.col_widths, c);
+    if ((s as any).grid_cols) (s as any).grid_cols = Math.max(1, (s as any).grid_cols - 1);
+    this.gsel.set(null); this.touch();
+  }
+  private shiftDims(d: Record<string, number> | undefined, removed: number): Record<string, number> {
+    const out: Record<string, number> = {};
+    for (const [k, v] of Object.entries(d ?? {})) {
+      const n = +k;
+      if (n === removed) continue;
+      out[String(n > removed ? n - 1 : n)] = v;
+    }
+    return out;
   }
   addImage(s: ExcelSheet) {
     s.images = s.images ?? [];

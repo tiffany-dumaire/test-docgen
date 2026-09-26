@@ -22,10 +22,13 @@ import { Router } from '@angular/router';
   template: `
     @if (project(); as p) {
       <div class="row between">
-        <div>
-          <h1>{{ p.name }}</h1>
-          <div class="muted">{{ p.client_name }} · {{ p.reference || 'sans référence' }}
-            @if (p.parent) { · sous-projet }
+        <div class="row" style="gap:.9rem;align-items:center">
+          @if (p.logo_url) { <img class="proj-logo" [src]="p.logo_url" alt="logo projet" /> }
+          <div>
+            <h1 style="margin:0">{{ p.name }}</h1>
+            <div class="muted">{{ p.client_name }} · {{ p.reference || 'sans référence' }}
+              @if (p.parent) { · sous-projet }
+            </div>
           </div>
         </div>
         <div class="row" style="gap:.5rem">
@@ -37,7 +40,27 @@ import { Router } from '@angular/router';
       <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
         <mat-tab label="Vue d'ensemble">
           <div class="tabpad">
-            @if (p.description) { <div class="card"><p>{{ p.description }}</p></div> }
+            <div class="card"><h3>📝 Description</h3>
+              @if (p.description) { <p style="white-space:pre-line;margin:0">{{ p.description }}</p> }
+              @else { <p class="muted" style="margin:0">Aucune description.</p> }
+            </div>
+
+            <div class="card"><h3>🖥️ Instances</h3>
+              @if (p.instances?.length) {
+                <div class="inst-grid">
+                  @for (inst of p.instances; track $index) {
+                    <a class="inst-card" [href]="instUrl(inst)" target="_blank" rel="noopener">
+                      <div class="inst-name">{{ inst.name || 'Instance' }} <span class="material-icons">open_in_new</span></div>
+                      @if (inst.ip) { <div class="inst-line"><span class="material-icons">dns</span> {{ inst.ip }}</div> }
+                      @if (inst.domain) { <div class="inst-line"><span class="material-icons">language</span> {{ inst.domain }}</div> }
+                    </a>
+                  }
+                </div>
+              } @else {
+                <p class="muted" style="margin:0">Aucune instance. Ajoutez-en dans <a [routerLink]="['/projects', p.id, 'edit']">l'édition du projet</a>.</p>
+              }
+            </div>
+
             @if (p.children?.length) {
               <div class="card"><h3>🌳 Sous-projets</h3>
                 @for (ch of p.children; track ch.id) {
@@ -273,6 +296,16 @@ import { Router } from '@angular/router';
       .rich ul,.rich ol{ margin:.2em 0 .2em 1.1em; }
       .rich p{ margin:.25em 0; }
       .chip-cancel { font-size: .62rem; text-transform: uppercase; background: #fee2e2; color: #b91c1c; border-radius: 6px; padding: .05rem .35rem; font-weight: 700; margin-left: .3rem; }
+      .proj-logo { width: 3.2rem; height: 3.2rem; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid var(--border); padding: 3px; }
+      .inst-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .8rem; }
+      .inst-card { display: flex; flex-direction: column; gap: .3rem; padding: .8rem .9rem; border: 1px solid var(--border);
+        border-left: 4px solid var(--mat-sys-primary); border-radius: 12px; background: var(--surface); text-decoration: none !important;
+        color: var(--text); transition: transform .14s ease, box-shadow .16s ease, border-color .14s ease; }
+      .inst-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+      .inst-name { font-weight: 700; display: flex; align-items: center; gap: .3rem; }
+      .inst-name .material-icons { font-size: 15px; color: var(--muted); }
+      .inst-line { display: flex; align-items: center; gap: .4rem; font-size: .84rem; color: var(--muted); font-family: ui-monospace, monospace; }
+      .inst-line .material-icons { font-size: 15px; }
     `,
   ],
 })
@@ -315,6 +348,12 @@ export class ProjectDetail {
     if (j.is_automatic && j.event) return ProjectDetail.EVENT_ICONS[j.event] || 'ℹ️';
     return ({ note: '🗒️', decision: '✅', risk: '⚠️', action: '⚡',
               incident: '🔥', info: 'ℹ️', event: '•' } as Record<string, string>)[j.category] || '🗒️';
+  }
+  instUrl(inst: { url?: string; domain?: string; ip?: string }): string {
+    if (inst.url) return /^https?:\/\//.test(inst.url) ? inst.url : 'https://' + inst.url;
+    if (inst.domain) return /^https?:\/\//.test(inst.domain) ? inst.domain : 'https://' + inst.domain;
+    if (inst.ip) return 'http://' + inst.ip;
+    return '#';
   }
   catColor(j: JournalEntry): string {
     const byEvent: Record<string, string> = {

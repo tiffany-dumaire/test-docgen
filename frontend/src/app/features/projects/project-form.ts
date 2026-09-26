@@ -136,6 +136,22 @@ import { Client, Contact, ContactKind, Project, Team, TeamMember } from '../../c
 
         <div class="field">
           <div class="row between">
+            <label>🖥️ Instances / machines</label>
+            <button class="btn btn-sm btn-ghost" type="button" (click)="addInstance(m)">+ Ajouter</button>
+          </div>
+          @for (inst of m.instances ?? []; track $index) {
+            <div class="inst-row">
+              <input [(ngModel)]="inst.name" placeholder="Nom (ex : Prod web)" />
+              <input [(ngModel)]="inst.ip" placeholder="IP machine (ex : 10.0.0.4)" />
+              <input [(ngModel)]="inst.domain" placeholder="Domaine (ex : app.client.ch)" />
+              <input [(ngModel)]="inst.url" placeholder="URL (facultatif)" />
+              <button class="btn btn-sm btn-danger" type="button" (click)="removeInstance(m, $index)">✕</button>
+            </div>
+          } @empty { <p class="hint" style="margin:.2rem 0">Aucune instance. Elles s'affichent en cartes cliquables dans la vue d'ensemble.</p> }
+        </div>
+
+        <div class="field">
+          <div class="row between">
             <label>👤 Contacts client</label>
             <button class="btn btn-sm btn-ghost" (click)="addContact('client')">+ Ajouter</button>
           </div>
@@ -205,6 +221,8 @@ import { Client, Contact, ContactKind, Project, Team, TeamMember } from '../../c
       .logo-row { display: flex; align-items: center; gap: 1rem; }
       .logo-slot { width: 72px; height: 72px; border-radius: 14px; border: 1px dashed var(--border-strong); display: grid; place-items: center; cursor: pointer; overflow: hidden; background: var(--surface); flex: none; color: var(--muted); }
       .logo-slot img { width: 100%; height: 100%; object-fit: contain; }
+      .inst-row { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr 1fr auto; gap: .4rem; margin-bottom: .4rem; }
+      @media (max-width: 700px) { .inst-row { grid-template-columns: 1fr 1fr; } }
       .chip-check { display: flex; align-items: center; gap: .3rem; border: 1px solid var(--border); border-radius: 999px; padding: .15rem .55rem; font-size: .8rem; }
       .chip-check input { width: auto; }
       .contact-row {
@@ -347,6 +365,9 @@ export class ProjectForm {
     if (f && m) { m.logo_url = URL.createObjectURL(f); this.model.set({ ...m }); }
   }
   clearLogo(m: Project) { this.logoFile = null; m.logo_url = null; m.logo = null; this.model.set({ ...m }); }
+
+  addInstance(m: Project) { m.instances = m.instances ?? []; m.instances.push({ name: '', ip: '', domain: '', url: '' }); this.model.set({ ...m }); }
+  removeInstance(m: Project, i: number) { m.instances?.splice(i, 1); this.model.set({ ...m }); }
 
   save() {
     const m = this.model();

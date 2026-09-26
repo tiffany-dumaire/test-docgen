@@ -54,6 +54,10 @@ class Project(models.Model):
         help_text="{tasks:[], milestones:[], risks:[], snapshots:[]} pour les "
                   "diagrammes de suivi (Gantt, avancement, risques…).",
     )
+    instances = models.JSONField(
+        "Instances / machines", default=list, blank=True,
+        help_text="[{name, ip, domain, url}] — serveurs / instances du projet.",
+    )
     client_logo = models.ImageField(
         "Logo du client", upload_to="projects/", blank=True, null=True
     )

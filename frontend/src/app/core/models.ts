@@ -105,6 +105,13 @@ export interface ProjectAssignment {
   role?: string;
 }
 
+export interface ProjectInstance {
+  name: string;
+  ip?: string;
+  domain?: string;
+  url?: string;
+}
+
 export interface Project {
   id?: number;
   name: string;
@@ -113,6 +120,7 @@ export interface Project {
   client_logo_url?: string | null;
   logo?: string | null;
   logo_url?: string | null;
+  instances?: ProjectInstance[];
   description: string;
   reference: string;
   status: 'active' | 'on_hold' | 'archived';
