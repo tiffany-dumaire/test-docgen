@@ -14,9 +14,18 @@ export class ToastService {
     null,
   );
 
+  private timer: ReturnType<typeof setTimeout> | null = null;
+
   show(text: string, kind: 'success' | 'error' | 'info' = 'info') {
+    if (this.timer) clearTimeout(this.timer);
     this.message.set({ text, kind });
-    setTimeout(() => this.message.set(null), 3500);
+    // Les erreurs restent un peu plus longtemps pour être lues.
+    this.timer = setTimeout(() => this.message.set(null), kind === 'error' ? 5500 : 3500);
+  }
+
+  dismiss() {
+    if (this.timer) clearTimeout(this.timer);
+    this.message.set(null);
   }
 
   success(text: string) {
@@ -24,6 +33,9 @@ export class ToastService {
   }
   error(text: string) {
     this.show(text, 'error');
+  }
+  info(text: string) {
+    this.show(text, 'info');
   }
 }
 

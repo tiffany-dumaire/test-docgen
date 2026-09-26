@@ -1,0 +1,10 @@
+    .search { width: 340px; max-width: 100%; margin: .5rem 0 1rem; }
+    .tablecard { background: var(--mat-sys-surface); border: 1px solid var(--mat-sys-outline-variant); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+    table { width: 100%; background: transparent; }
+    .strong { font-weight: 600; }
+    .actions { text-align: right; white-space: nowrap; }
+    .ty { text-transform: uppercase; font-size: .7rem; font-weight: 700; background: var(--mat-sys-surface-container-high); padding: .12rem .5rem; border-radius: 6px; }
+    .chip { display: inline-block; padding: .15rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+    .cf-public { background: #dcfce7; color: #15803d; } .cf-internal { background: #dbeafe; color: #1d4ed8; }
+    .cf-confidential { background: #ffedd5; color: #c2410c; } .cf-restricted { background: #fee2e2; color: #b91c1c; }
+    .empty { padding: 2.5rem; text-align: center; color: var(--mat-sys-outline); }

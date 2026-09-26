@@ -1,0 +1,301 @@
+    <div class="xls">
+      <!-- Onglets -->
+      <div class="tabs">
+        @for (s of sheets; track s.id; let i = $index) {
+          <button class="tab" [class.active]="active() === i" (click)="active.set(i)">
+            <span class="ico">{{ icon(s.type) }}</span> {{ s.name || 'Onglet' }}
+          </button>
+        }
+        <div class="add">
+          <span class="lbl">+ Onglet :</span>
+          <button class="mini" (click)="addSheet('table')">Table</button>
+          <button class="mini" (click)="addSheet('pivot')">Croisé</button>
+          <button class="mini" (click)="addSheet('info')">Infos</button>
+          <button class="mini" (click)="addSheet('grid')">Grille</button>
+        </div>
+      </div>
+
+      @if (current(); as s) {
+        <div class="sheet card">
+          <!-- Barre d'onglet -->
+          <div class="sheet-head">
+            <div class="field"><label>Nom de l'onglet</label>
+              <input [(ngModel)]="s.name" /></div>
+            <div class="field"><label>Titre affiché (facultatif)</label>
+              <input [(ngModel)]="s.title" placeholder="{{ '{{' }}document_title{{ '}}' }}" /></div>
+            <div class="sheet-actions">
+              <button class="mini" (click)="move(-1)" [disabled]="active() === 0">◀</button>
+              <button class="mini" (click)="move(1)" [disabled]="active() === sheets.length - 1">▶</button>
+              <button class="mini del" (click)="removeSheet()">Supprimer</button>
+            </div>
+          </div>
+          <div class="type-badge">Type : <b>{{ typeLabel(s.type) }}</b></div>
+
+          <!-- ===== TABLE ===== -->
+          @if (s.type === 'table') {
+            <h4>Regroupements d'en-têtes <span class="hint">(ligne 1, fusionnée)</span></h4>
+            @for (g of s.groups ?? []; track $index) {
+              <div class="line">
+                <input [(ngModel)]="g.label" placeholder="Nom du groupe (ex : Entreprise)" style="flex:2" />
+                <label class="span">colonnes
+                  <input type="number" min="1" [ngModel]="g.span" (ngModelChange)="g.span = +$event" style="width:64px" />
+                </label>
+                <button class="mini del" (click)="s.groups!.splice($index, 1)">✕</button>
+              </div>
+            }
+            <button class="btn-sm" (click)="addGroup(s)">+ Groupe</button>
+            <p class="hint">La somme des colonnes des groupes doit couvrir vos colonnes ({{ (s.columns ?? []).length }}).</p>
+
+            <h4>Colonnes <span class="hint">(ligne 2)</span></h4>
+            @for (c of s.columns ?? []; track $index) {
+              <div class="line">
+                <input [(ngModel)]="c.label" (ngModelChange)="syncKey(c)" placeholder="Libellé" style="flex:2" />
+                <select [(ngModel)]="c.type" style="flex:1">
+                  @for (t of cellTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                </select>
+                @if (c.type === 'currency') {
+                  <input [(ngModel)]="c.symbol" placeholder="€" style="width:52px" title="Symbole" />
+                }
+                @if (c.type === 'currency' || c.type === 'decimal') {
+                  <input type="number" min="0" max="6" [ngModel]="c.decimals ?? 2" (ngModelChange)="c.decimals = +$event" style="width:56px" title="Décimales" />
+                }
+                <input [(ngModel)]="c.formula" placeholder="= formule {autre_col}" style="width:150px" title="Formule (ex : ={qte}*{pu})" />
+                <button class="mini" (click)="moveCol(s, $index, -1)" [disabled]="$index === 0">▲</button>
+                <button class="mini" (click)="moveCol(s, $index, 1)" [disabled]="$index === (s.columns!.length - 1)">▼</button>
+                <button class="mini del" (click)="s.columns!.splice($index, 1)">✕</button>
+              </div>
+            }
+            <button class="btn-sm" (click)="addColumn(s)">+ Colonne</button>
+
+            <div class="toggles">
+              <label class="chk"><input type="checkbox" [(ngModel)]="s.show_totals" /> Ligne de totaux</label>
+              <label class="chk"><input type="checkbox" [(ngModel)]="s.allow_add_rows" /> Lignes ajoutables au remplissage</label>
+              <label class="chk"><input type="checkbox" [(ngModel)]="s.allow_add_columns" /> Colonnes ajoutables au remplissage</label>
+            </div>
+
+            <h4>Mises en forme conditionnelles <span class="hint">(colorer selon la valeur)</span></h4>
+            @for (cf of s.conditional_formats ?? []; track $index) {
+              <div class="line">
+                <select [(ngModel)]="cf.column" style="flex:1">
+                  @for (c of s.columns ?? []; track c.key) { <option [value]="c.key">{{ c.label }}</option> }
+                </select>
+                <select [(ngModel)]="cf.kind" style="width:130px">
+                  <option value="cellis">Condition</option>
+                  <option value="color_scale">Échelle couleurs</option>
+                  <option value="data_bar">Barres</option>
+                </select>
+                @if ((cf.kind ?? 'cellis') === 'cellis') {
+                  <select [(ngModel)]="cf.op" style="width:70px">
+                    <option value=">">&gt;</option><option value=">=">&ge;</option>
+                    <option value="<">&lt;</option><option value="<=">&le;</option>
+                    <option value="==">=</option><option value="!=">&ne;</option>
+                    <option value="between">entre</option>
+                  </select>
+                  <input [(ngModel)]="cf.value" placeholder="valeur" style="width:70px" />
+                  @if (cf.op === 'between') { <input [(ngModel)]="cf.value2" placeholder="et" style="width:70px" /> }
+                  <input type="color" [ngModel]="'#' + (cf.fill || 'FFC7CE')" (ngModelChange)="cf.fill = $event.slice(1)" title="Couleur de fond" />
+                }
+                <button class="mini del" (click)="s.conditional_formats!.splice($index, 1)">✕</button>
+              </div>
+            }
+            <button class="btn-sm" (click)="addCF(s)">+ Règle</button>
+
+            <h4>Validations <span class="hint">(liste déroulante, plage)</span></h4>
+            @for (v of s.validations ?? []; track $index) {
+              <div class="line">
+                <select [(ngModel)]="v.column" style="flex:1">
+                  @for (c of s.columns ?? []; track c.key) { <option [value]="c.key">{{ c.label }}</option> }
+                </select>
+                <select [(ngModel)]="v.kind" style="width:120px">
+                  <option value="list">Liste</option><option value="whole">Entier</option>
+                  <option value="decimal">Décimal</option><option value="date">Date</option>
+                </select>
+                @if (v.kind === 'list') {
+                  <input [ngModel]="(v.options ?? []).join(', ')" (ngModelChange)="v.options = splitList($event)" placeholder="Option1, Option2, …" style="flex:2" />
+                } @else {
+                  <select [(ngModel)]="v.op" style="width:80px">
+                    <option value="between">entre</option><option value="greaterThan">&gt;</option><option value="lessThan">&lt;</option>
+                  </select>
+                  <input [(ngModel)]="v.value" placeholder="min" style="width:70px" />
+                  <input [(ngModel)]="v.value2" placeholder="max" style="width:70px" />
+                }
+                <button class="mini del" (click)="s.validations!.splice($index, 1)">✕</button>
+              </div>
+            }
+            <button class="btn-sm" (click)="addValidation(s)">+ Validation</button>
+          }
+
+          <!-- ===== PIVOT ===== -->
+          @if (s.type === 'pivot') {
+            @if (tableSheets().length === 0) {
+              <p class="warn">Créez d'abord un onglet « Table » pour l'utiliser comme source.</p>
+            } @else {
+              <div class="grid2">
+                <div class="field"><label>Onglet source</label>
+                  <select [(ngModel)]="s.pivot!.source">
+                    @for (t of tableSheets(); track t.id) { <option [value]="t.id">{{ t.name }}</option> }
+                  </select>
+                </div>
+                <div class="field"><label>Agrégation</label>
+                  <select [(ngModel)]="s.pivot!.agg">
+                    <option value="sum">Somme</option><option value="count">Nombre</option>
+                    <option value="avg">Moyenne</option><option value="min">Minimum</option><option value="max">Maximum</option>
+                  </select>
+                </div>
+                <div class="field"><label>Lignes (regroupement)</label>
+                  <select [(ngModel)]="s.pivot!.row_field">
+                    @for (c of sourceCols(s); track c.key) { <option [value]="c.key">{{ c.label }}</option> }
+                  </select>
+                </div>
+                <div class="field"><label>Colonnes (facultatif)</label>
+                  <select [(ngModel)]="s.pivot!.col_field">
+                    <option value="">— aucune —</option>
+                    @for (c of sourceCols(s); track c.key) { <option [value]="c.key">{{ c.label }}</option> }
+                  </select>
+                </div>
+                <div class="field"><label>Valeur à agréger</label>
+                  <select [(ngModel)]="s.pivot!.value_field">
+                    @for (c of sourceCols(s); track c.key) { <option [value]="c.key">{{ c.label }}</option> }
+                  </select>
+                </div>
+                <div class="field"><label>Format des valeurs</label>
+                  <select [(ngModel)]="s.pivot!.value_type">
+                    @for (t of cellTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                  </select>
+                </div>
+              </div>
+              @if (s.pivot!.value_type === 'currency') {
+                <div class="field" style="max-width:120px"><label>Symbole</label><input [(ngModel)]="s.pivot!.symbol" placeholder="€" /></div>
+              }
+            }
+          }
+
+          <!-- ===== INFO ===== -->
+          @if (s.type === 'info') {
+            <h4>Informations fixes</h4>
+            @for (it of s.items ?? []; track $index) {
+              <div class="line">
+                <input [(ngModel)]="it.label" placeholder="Libellé (ex : Date d'édition)" style="flex:2" />
+                <select [(ngModel)]="it.type" style="flex:1">
+                  @for (t of cellTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                </select>
+                <input [(ngModel)]="it.value" placeholder="Valeur" style="flex:2" />
+                @if (it.type === 'currency') { <input [(ngModel)]="it.symbol" placeholder="€" style="width:52px" /> }
+                <button class="mini del" (click)="s.items!.splice($index, 1)">✕</button>
+              </div>
+            }
+            <button class="btn-sm" (click)="addItem(s)">+ Information</button>
+            <p class="hint">Astuce : utilisez des variables comme <code>{{ '{{' }}today{{ '}}' }}</code>, <code>{{ '{{' }}client_name{{ '}}' }}</code>.</p>
+          }
+
+          @if (s.type === 'grid') {
+            <h4>Grille — aperçu et édition en temps réel</h4>
+            <p class="hint">Cliquez une cellule pour la modifier ; la barre d'outils applique le style. Variables {{ '{{' }}…{{ '}}' }} acceptées.</p>
+
+            <!-- Barre d'outils de la cellule sélectionnée -->
+            @if (sel(s); as cl) {
+              <div class="gtoolbar">
+                <span class="gt-ref">{{ colLabel(gsel()!.c) }}{{ gsel()!.r }}</span>
+                <button class="gt" [class.on]="cl.bold" (click)="cl.bold = !cl.bold; touch()" title="Gras"><b>G</b></button>
+                <button class="gt" [class.on]="cl.italic" (click)="cl.italic = !cl.italic; touch()" title="Italique"><i>I</i></button>
+                <button class="gt" [class.on]="cl.underline" (click)="cl.underline = !cl.underline; touch()" title="Souligné"><u>S</u></button>
+                <span class="gt-sep"></span>
+                <button class="gt" [class.on]="(cl.align||'left')==='left'" (click)="cl.align='left'; touch()">⯇</button>
+                <button class="gt" [class.on]="cl.align==='center'" (click)="cl.align='center'; touch()">≡</button>
+                <button class="gt" [class.on]="cl.align==='right'" (click)="cl.align='right'; touch()">⯈</button>
+                <span class="gt-sep"></span>
+                <label class="gt-col" title="Couleur du texte">A<input type="color" [ngModel]="cl.color || '#1d1e1b'" (ngModelChange)="cl.color = $event; touch()" /></label>
+                <label class="gt-col" title="Couleur de fond">▮<input type="color" [ngModel]="cl.bg || '#ffffff'" (ngModelChange)="cl.bg = $event; touch()" /></label>
+                <span class="gt-sep"></span>
+                <label class="chk"><input type="checkbox" [ngModel]="cl.border !== false" (ngModelChange)="cl.border = $event; touch()" /> Bord</label>
+                <label class="chk"><input type="checkbox" [(ngModel)]="cl.wrap" (ngModelChange)="touch()" /> Retour</label>
+                <span class="span">Taille</span><input type="number" min="6" max="48" [ngModel]="cl.size || 11" (ngModelChange)="cl.size = +$event; touch()" style="width:52px" />
+                <span class="span">Fusion</span>
+                <input type="number" min="1" [ngModel]="cl.row_span || 1" (ngModelChange)="setSpan(cl,'row_span',$event)" style="width:44px" title="Lignes" />×<input type="number" min="1" [ngModel]="cl.col_span || 1" (ngModelChange)="setSpan(cl,'col_span',$event)" style="width:44px" title="Colonnes" />
+                <input [ngModel]="cl.number_format" (ngModelChange)="cl.number_format=$event; touch()" placeholder="Format (#,##0.00)" style="width:150px" />
+              </div>
+            } @else { <div class="gtoolbar muted">Sélectionnez une cellule pour la styliser.</div> }
+
+            <div class="gwrap">
+              <table class="gtable">
+                <thead>
+                  <tr>
+                    <th class="ghdr corner"></th>
+                    @for (c of colRange(s); track c) {
+                      <th class="ghdr" [style.width.px]="colW(s,c)">
+                        <div class="ghlbl">{{ colLabel(c) }}<button class="ghx" (click)="delCol(s,c)" title="Supprimer la colonne">✕</button></div>
+                        <input class="ghsize" type="number" min="3" [ngModel]="rawColW(s,c)" (ngModelChange)="setColW(s,c,$event)" title="Largeur" />
+                      </th>
+                    }
+                    <th class="ghdr addcol"><button class="mini" (click)="addCol(s)" title="Ajouter une colonne">＋</button></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of rowRange(s); track r) {
+                    <tr>
+                      <th class="ghdr rownum">
+                        <div>{{ r }}<button class="ghx" (click)="delRow(s,r)" title="Supprimer la ligne">✕</button></div>
+                        <input class="ghsize" type="number" min="8" [ngModel]="rawRowH(s,r)" (ngModelChange)="setRowH(s,r,$event)" title="Hauteur" />
+                      </th>
+                      @for (c of colRange(s); track c) {
+                        @if (!covered(s,r,c)) {
+                          <td class="gcellx" [class.selected]="isSel(r,c)"
+                              [attr.colspan]="spanC(s,r,c)" [attr.rowspan]="spanR(s,r,c)"
+                              [style.background]="bgOf(s,r,c)" [style.border]="borderOf(s,r,c)"
+                              (click)="selectCell(s,r,c)">
+                            <input class="gin"
+                              [style.color]="colorOf(s,r,c)" [style.font-weight]="boldOf(s,r,c)"
+                              [style.font-style]="italicOf(s,r,c)" [style.text-align]="alignOf(s,r,c)"
+                              [style.font-size.px]="sizeOf(s,r,c)"
+                              [ngModel]="valOf(s,r,c)" (ngModelChange)="setVal(s,r,c,$event)"
+                              (focus)="selectCell(s,r,c)" />
+                          </td>
+                        }
+                      }
+                      <td class="gpad"></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="line" style="margin-top:.4rem;gap:.5rem">
+              <button class="btn-sm" (click)="addRow(s)">＋ Ligne</button>
+              <button class="btn-sm" (click)="addCol(s)">＋ Colonne</button>
+              <span class="hint">{{ (s.cells?.length || 0) }} cellule(s) définie(s)</span>
+            </div>
+
+            <h4>Images / logo <span class="hint">(position et taille libres)</span></h4>
+            <p class="hint">Ancrée à une cellule (ligne/colonne), avec largeur/hauteur en pixels et décalage fin. Laissez une seule dimension pour conserver les proportions.</p>
+            <div class="gridcells">
+              @for (im of s.images ?? []; track $index) {
+                <div class="gcell">
+                  <div class="line">
+                    <select [ngModel]="im.source || 'company'" (ngModelChange)="im.source = $event" title="Source de l'image">
+                      <option value="company">Logo entreprise</option>
+                      <option value="url">Image (URL média)</option>
+                    </select>
+                    @if (im.source === 'url') {
+                      <input [(ngModel)]="im.url" placeholder="/media/…" style="flex:2" />
+                    }
+                    <button class="mini del" (click)="s.images!.splice($index, 1)">✕</button>
+                  </div>
+                  <div class="line">
+                    <span class="span">Ancrage L</span><input type="number" min="1" [ngModel]="im.row" (ngModelChange)="im.row = +$event" style="width:56px" />
+                    <span class="span">C</span><input type="number" min="1" [ngModel]="im.col" (ngModelChange)="im.col = +$event" style="width:56px" />
+                    <span class="span">Largeur px</span><input type="number" min="0" [ngModel]="im.width" (ngModelChange)="im.width = +$event || undefined" style="width:70px" />
+                    <span class="span">Hauteur px</span><input type="number" min="0" [ngModel]="im.height" (ngModelChange)="im.height = +$event || undefined" style="width:70px" />
+                  </div>
+                  <div class="line">
+                    <span class="span">Décalage X px</span><input type="number" [ngModel]="im.offset_x || 0" (ngModelChange)="im.offset_x = +$event" style="width:70px" />
+                    <span class="span">Y px</span><input type="number" [ngModel]="im.offset_y || 0" (ngModelChange)="im.offset_y = +$event" style="width:70px" />
+                  </div>
+                </div>
+              }
+            </div>
+            <button class="btn-sm" (click)="addImage(s)">+ Image / logo</button>
+          }
+        </div>
+      } @else {
+        <div class="empty">Aucun onglet. Ajoutez-en un ci-dessus.</div>
+      }
+    </div>

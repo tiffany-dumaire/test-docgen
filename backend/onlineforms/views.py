@@ -5,8 +5,10 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import FormSubmission, FormTemplate, OnlineForm, ShortLink
 from .serializers import (FormSubmissionSerializer, FormTemplateSerializer,
@@ -61,6 +63,8 @@ class FormTemplateViewSet(viewsets.ModelViewSet):
             report_template=template.report_template,
             confidentiality=template.confidentiality,
             success_message=template.success_message,
+            show_progress=template.show_progress,
+            theme=copy.deepcopy(template.theme or {}),
         )
         form.ensure_short_link()
         return Response(OnlineFormSerializer(form, context={"request": request}).data,
@@ -169,6 +173,24 @@ class FormSubmissionViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ["form"]
 
 
+class FormAssetUploadView(APIView):
+    """Téléversement authentifié d'un fichier réutilisable dans l'éditeur de
+    formulaire (image d'illustration, fichier modèle, information fixe)."""
+
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        from .models import FormAsset
+        f = request.FILES.get("file")
+        if not f:
+            return Response({"detail": "Aucun fichier fourni."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        asset = FormAsset.objects.create(file=f, name=f.name)
+        url = request.build_absolute_uri(asset.file.url)
+        return Response({"id": asset.id, "url": url, "name": asset.name},
+                        status=status.HTTP_201_CREATED)
+
+
 # ---------------------------------------------------------------------------
 # Endpoints publics
 # ---------------------------------------------------------------------------
@@ -181,7 +203,7 @@ def public_form(request, code):
     if form is None:
         return Response({"detail": "Aucun formulaire lié à ce code."},
                         status=status.HTTP_404_NOT_FOUND)
-    return Response(PublicFormSerializer(form).data)
+    return Response(PublicFormSerializer(form, context={"request": request}).data)
 
 
 @api_view(["POST"])
@@ -199,11 +221,12 @@ def public_submit(request, code):
 
     data = request.data.get("data", request.data)
 
-    # Validation des champs requis d'après le schéma
+    # Validation des champs requis d'après le schéma (sections + questions).
+    from .schema_utils import iter_questions, question_answered
     missing = []
-    for field in form.schema:
-        if field.get("required") and not str(data.get(field["key"], "")).strip():
-            missing.append(field.get("label", field["key"]))
+    for q in iter_questions(form.schema):
+        if q.get("required") and not question_answered(q, data.get(q["key"])):
+            missing.append(q.get("label", q["key"]))
     if missing:
         return Response(
             {"detail": "Champs obligatoires manquants.", "fields": missing},
@@ -212,6 +235,34 @@ def public_submit(request, code):
     FormSubmission.objects.create(
         form=form, data=data, respondent_ip=_client_ip(request))
     return Response({"detail": form.success_message},
+                    status=status.HTTP_201_CREATED)
+
+
+MAX_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 Mo
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def public_upload(request, code):
+    """Dépôt public d'un fichier en réponse à une question « fichier »."""
+    from .models import FormUpload
+    link = get_object_or_404(ShortLink, code=code)
+    form = getattr(link, "form", None)
+    if form is None or not form.is_open:
+        return Response({"detail": "Formulaire indisponible."},
+                        status=status.HTTP_400_BAD_REQUEST)
+    f = request.FILES.get("file")
+    if not f:
+        return Response({"detail": "Aucun fichier fourni."},
+                        status=status.HTTP_400_BAD_REQUEST)
+    if f.size > MAX_UPLOAD_BYTES:
+        return Response({"detail": "Fichier trop volumineux (max 15 Mo)."},
+                        status=status.HTTP_400_BAD_REQUEST)
+    up = FormUpload.objects.create(
+        form=form, field_key=request.data.get("field", ""),
+        file=f, original_name=f.name)
+    url = request.build_absolute_uri(up.file.url)
+    return Response({"id": up.id, "url": url, "name": up.original_name},
                     status=status.HTTP_201_CREATED)
 
 

@@ -16,7 +16,34 @@ from html.parser import HTMLParser
 
 BLOCK_TAGS = {"h1", "h2", "h3", "h4", "h5", "h6", "p", "ul", "ol", "li",
               "pre", "div", "br"}
-INLINE_KEEP = {"b", "strong", "i", "em", "u", "a"}
+INLINE_KEEP = {"b", "strong", "i", "em", "u", "a", "span", "font"}
+
+
+def _to_hex(val):
+    """Normalise une couleur CSS en #rrggbb (sinon '')."""
+    val = (val or "").strip()
+    if not val:
+        return ""
+    if val.startswith("#"):
+        h = val[1:]
+        if len(h) == 3:
+            h = "".join(c * 2 for c in h)
+        return "#" + h[:6] if re.fullmatch(r"[0-9a-fA-F]{6}", h[:6]) else ""
+    m = re.match(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)", val)
+    if m:
+        return "#%02x%02x%02x" % tuple(min(255, int(x)) for x in m.groups())
+    if re.fullmatch(r"[0-9a-fA-F]{6}", val):
+        return "#" + val
+    return ""
+
+
+def _color_from_attrs(attrs):
+    a = dict(attrs)
+    style = a.get("style", "") or ""
+    m = re.search(r"color\s*:\s*([^;]+)", style)
+    if m:
+        return _to_hex(m.group(1))
+    return _to_hex(a.get("color", ""))
 
 
 class _Parser(HTMLParser):
@@ -75,6 +102,9 @@ class _Parser(HTMLParser):
             if tag == "a":
                 href = dict(attrs).get("href", "")
                 self.buf.append(f'<a href="{_esc_attr(href)}">')
+            elif tag in ("span", "font"):
+                # Conservé uniquement pour la couleur (gras/italique via <b>/<i>).
+                self.buf.append(f'<font color="{_color_from_attrs(attrs)}">')
             else:
                 self.buf.append(f"<{tag}>")
 
@@ -89,7 +119,12 @@ class _Parser(HTMLParser):
         elif tag in ("h1", "h2", "h3", "h4", "h5", "h6", "p", "div", "pre"):
             self._end_block()
         elif tag in INLINE_KEEP:
-            self.buf.append("</a>" if tag == "a" else f"</{tag}>")
+            if tag == "a":
+                self.buf.append("</a>")
+            elif tag in ("span", "font"):
+                self.buf.append("</font>")
+            else:
+                self.buf.append(f"</{tag}>")
 
     def handle_data(self, data):
         if self.mode is None and data.strip():
@@ -125,15 +160,16 @@ def parse_html(html: str):
 # --- Conversion HTML en ligne -> (texte brut + segments enrichis) pour Word ---
 _INLINE_RE = re.compile(
     r"(<b>|</b>|<strong>|</strong>|<i>|</i>|<em>|</em>|<u>|</u>|"
-    r'<a href="[^"]*">|</a>|<br/>)'
+    r'<a href="[^"]*">|</a>|<font color="[^"]*">|</font>|<br/>)'
 )
 
 
 def inline_runs(html: str):
-    """Renvoie une liste de segments {text, bold, italic, underline, href}."""
+    """Segments {text, bold, italic, underline, href, color} depuis l'HTML en ligne."""
     segs = []
     bold = italic = underline = False
     href = None
+    color_stack = []
     for part in _INLINE_RE.split(html or ""):
         if not part:
             continue
@@ -150,9 +186,16 @@ def inline_runs(html: str):
             underline = True
         elif low == "</u>":
             underline = False
+        elif low.startswith("<font "):
+            m = re.search(r'color="([^"]*)"', part)
+            color_stack.append(m.group(1) if m else "")
+        elif low == "</font>":
+            if color_stack:
+                color_stack.pop()
         elif low == "<br/>":
             segs.append({"text": "\n", "bold": bold, "italic": italic,
-                         "underline": underline, "href": href})
+                         "underline": underline, "href": href,
+                         "color": _cur_color(color_stack)})
         elif low.startswith("<a "):
             m = re.search(r'href="([^"]*)"', part)
             href = m.group(1).replace("%22", '"') if m else None
@@ -162,5 +205,13 @@ def inline_runs(html: str):
             text = (part.replace("&amp;", "&").replace("&lt;", "<")
                     .replace("&gt;", ">"))
             segs.append({"text": text, "bold": bold, "italic": italic,
-                         "underline": underline, "href": href})
+                         "underline": underline, "href": href,
+                         "color": _cur_color(color_stack)})
     return segs
+
+
+def _cur_color(stack):
+    for c in reversed(stack):
+        if c:
+            return c
+    return None

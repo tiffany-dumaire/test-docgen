@@ -27,6 +27,9 @@ class UsefulLinkSerializer(serializers.ModelSerializer):
 class CompanyProfileSerializer(serializers.ModelSerializer):
     useful_links = UsefulLinkSerializer(many=True, required=False)
     logo_url = serializers.SerializerMethodField()
+    # write_only : le logo se lit via logo_url et s'écrit via un envoi de fichier
+    # (multipart). On évite ainsi qu'un PUT JSON renvoie une chaîne au champ image.
+    logo = serializers.ImageField(required=False, allow_null=True, write_only=True)
 
     class Meta:
         model = CompanyProfile

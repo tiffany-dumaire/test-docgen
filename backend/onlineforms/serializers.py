@@ -15,6 +15,7 @@ class FormTemplateSerializer(serializers.ModelSerializer):
             "id", "name", "description", "language", "schema", "diagrams",
             "report_template",
             "confidentiality", "confidentiality_display", "success_message",
+            "show_progress", "theme",
             "is_active", "scope", "projects", "form_count",
             "created_at", "updated_at",
         ]
@@ -54,7 +55,7 @@ class OnlineFormSerializer(serializers.ModelSerializer):
         fields = [
             "id", "title", "description", "project", "project_name",
             "template", "template_name", "report_template",
-            "schema", "diagrams",
+            "schema", "diagrams", "show_progress", "theme",
             "confidentiality", "confidentiality_display", "is_open",
             "success_message", "deadline", "short_link", "short_url", "submission_count",
             "created_at", "updated_at",
@@ -79,10 +80,35 @@ class OnlineFormSerializer(serializers.ModelSerializer):
 class PublicFormSerializer(serializers.ModelSerializer):
     """Vue publique : n'expose que ce qui est nécessaire au remplissage."""
 
+    logo_url = serializers.SerializerMethodField()
+    company_name = serializers.SerializerMethodField()
+
     class Meta:
         model = OnlineForm
         fields = ["title", "description", "schema", "is_open",
-                  "success_message"]
+                  "success_message", "show_progress", "theme",
+                  "logo_url", "company_name"]
+
+    def _company(self):
+        if not hasattr(self, "_company_cache"):
+            from company.models import CompanyProfile
+            self._company_cache = CompanyProfile.load()
+        return self._company_cache
+
+    def get_logo_url(self, obj):
+        company = self._company()
+        logo = getattr(company, "logo", None)
+        if not logo:
+            return None
+        request = self.context.get("request")
+        try:
+            url = logo.url
+        except Exception:
+            return None
+        return request.build_absolute_uri(url) if request else url
+
+    def get_company_name(self, obj):
+        return self._company().name
 
 
 class FormSubmissionSerializer(serializers.ModelSerializer):

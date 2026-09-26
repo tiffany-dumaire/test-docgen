@@ -1,0 +1,22 @@
+      .detail-tabs { margin-top: 1rem; }
+      .tabpad { padding-top: 1.2rem; }
+      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+      @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+      .mono { font-family: ui-monospace, monospace; font-size: 0.8rem; }
+      .req { color: var(--danger); }
+      .cmt { max-width: 220px; }
+      .preview-heading { font-weight: 700; color: var(--dark); margin: 0.3rem 0 0; }
+      .preview-text { color: var(--muted); font-size: 0.88rem; white-space: pre-wrap; border-left: 3px solid var(--border); padding-left: 0.6rem; }
+      .info-block { background: var(--primary-light); color: var(--primary-dark); border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.85rem; }
+      .sheet-tabs { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.5rem; }
+      .stab { border: 1px solid var(--border); background: #fff; border-radius: 8px; padding: 0.35rem 0.7rem; cursor: pointer; font-size: 0.82rem; font-weight: 600; }
+      .stab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+      .col-hints { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.5rem; }
+      .col-hints .chip { background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 0.1rem 0.55rem; font-size: 0.74rem; color: var(--dark); }
+      .col-hints .chip em { color: var(--muted); font-style: normal; }
+      .preview-rich { font-size: 0.88rem; color: var(--dark); border-left: 3px solid var(--border); padding-left: 0.6rem; }
+      .preview-list { margin: 0.2rem 0 0.2rem 1rem; color: var(--muted); font-size: 0.88rem; }
+      .preview-thumb { max-width: 100%; border: 1px solid var(--border); border-radius: 6px; }
+      .preview-code { background: var(--bg); border-radius: 6px; padding: 0.5rem 0.7rem; font-family: ui-monospace, monospace; font-size: 0.8rem; white-space: pre-wrap; }
+      .pv-inline { width: 100%; height: 78vh; min-height: 520px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+      .pv-inline-img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }

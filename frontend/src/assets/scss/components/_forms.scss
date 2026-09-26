@@ -1,0 +1,17 @@
+/* Formulaires */
+label { display: block; font-weight: 600; margin-bottom: .32rem; font-size: .84rem; color: var(--muted); }
+input, select, textarea {
+  width: 100%; padding: .58rem .72rem;
+  border: 1px solid var(--mat-sys-outline); border-radius: var(--pd-r-xs);
+  font-family: inherit; font-size: .875rem; background: var(--field-bg); color: var(--text);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+input::placeholder, textarea::placeholder { color: var(--muted-2); }
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--mat-sys-primary); box-shadow: var(--ring);
+}
+textarea { resize: vertical; min-height: 80px; }
+.field { margin-bottom: 1rem; }
+.field small { color: var(--muted); font-weight: 400; }
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 1rem; }
+@media (max-width: 620px) { .form-grid { grid-template-columns: 1fr; } }

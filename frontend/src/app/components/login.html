@@ -1,0 +1,23 @@
+    <div class="auth-wrap">
+      <div class="auth-card card">
+        <div class="brand"><span class="logo"><img src="/images/logo/polydocs-6b.svg" alt="PolyDocs" /></span><div><b>PolyDocs</b><div class="tag">{{ 'login.tagline' | transloco }}</div></div></div>
+        <h2>{{ 'login.title' | transloco }}</h2>
+
+        @if (auth.isDev()) {
+          <p class="muted">{{ 'login.dev_hint' | transloco }}</p>
+          <div class="field"><label>{{ 'login.email' | transloco }}</label><input [(ngModel)]="email" /></div>
+          <div class="form-grid">
+            <div class="field"><label>{{ 'login.first_name' | transloco }}</label><input [(ngModel)]="firstName" /></div>
+            <div class="field"><label>{{ 'login.last_name' | transloco }}</label><input [(ngModel)]="lastName" /></div>
+          </div>
+          <div class="field"><label>{{ 'login.roles' | transloco }}</label>
+            <input [(ngModel)]="roles" [placeholder]="'login.roles_ph' | transloco" /></div>
+          <button class="btn btn-primary" style="width:100%" (click)="devLogin()" [disabled]="loading()">
+            {{ (loading() ? 'login.signing_in' : 'login.sign_in') | transloco }}
+          </button>
+        } @else {
+          <p class="muted">{{ 'login.oidc_hint' | transloco }}</p>
+          <button class="btn btn-primary" style="width:100%" (click)="oidcLogin()">{{ 'login.sign_in' | transloco }}</button>
+        }
+      </div>
+    </div>

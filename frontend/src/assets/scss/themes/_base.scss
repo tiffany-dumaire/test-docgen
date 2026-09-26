@@ -1,0 +1,66 @@
+/* =========================================================
+   THÈME DE BASE (VNV) — jetons partagés par TOUS les thèmes.
+   - Couleurs par défaut : charte VNV (orange #ec6608).
+   - Typographie VNV (Montserrat / Oswald) : commune à tous les thèmes,
+     définie ici uniquement (les saisons ne surchargent que les couleurs).
+   - Jetons de formes, de types de document (--doc-*) et de statut (--st-*).
+   data-theme : "light" | "dark" | (absent → système)
+   ========================================================= */
+:root{
+  /* Couleurs (VNV — clair) */
+  --mat-sys-primary:#EC6608; --mat-sys-on-primary:#FFFFFF;
+  --mat-sys-primary-container:#FFDCC2; --mat-sys-on-primary-container:#331200;
+  --mat-sys-secondary:#5B5A55; --mat-sys-on-secondary:#FFFFFF;
+  --mat-sys-secondary-container:#E6E4DF; --mat-sys-on-secondary-container:#1D1E1B;
+  --mat-sys-tertiary:#6D6D6A; --mat-sys-on-tertiary:#FFFFFF;
+  --mat-sys-tertiary-container:#E9E9E7; --mat-sys-on-tertiary-container:#1D1E1B;
+  --mat-sys-surface:#FBFAF8; --mat-sys-on-surface:#1D1E1B; --mat-sys-on-surface-variant:#48473F;
+  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#F5F3EF;
+  --mat-sys-surface-container:#EFEDE8; --mat-sys-surface-container-high:#E9E7E1;
+  --mat-sys-surface-container-highest:#E3E1DA;
+  --mat-sys-outline:#79766D; --mat-sys-outline-variant:#CBC7BC;
+  --mat-sys-inverse-surface:#31302C; --mat-sys-inverse-on-surface:#F3F1EC; --mat-sys-inverse-primary:#FFB68A;
+  --mat-sys-error:#B3261E; --mat-sys-on-error:#FFFFFF;
+  --mat-sys-error-container:#F9DEDC; --mat-sys-on-error-container:#410E0B;
+
+  /* Typographie VNV — commune à tous les thèmes */
+  --pd-display:"Montserrat","Segoe UI",system-ui,sans-serif;
+  --pd-body:"Montserrat","Segoe UI",system-ui,sans-serif;
+  --pd-mono:"Oswald","Segoe UI",system-ui,sans-serif;
+  --pd-display-wght:600; --pd-display-track:-0.01em;
+
+  /* Formes */
+  --pd-r-xs:6px; --pd-r-s:10px; --pd-r-m:16px; --pd-r-l:28px; --pd-r-btn:999px; --pd-row:48px;
+
+  /* Types de document (--doc-*) et statuts (--st-*) — clair */
+  --doc-word:#2E5E8E; --doc-pdf:#A32638; --doc-md:#4A5360; --doc-ppt:#A34E2A; --doc-xls:#2E6B55;
+  --doc-a3:#5B4F8A; --doc-stats:#6B3F6E; --doc-letter:#806A2E; --doc-mail:#2D6E7E;
+  --st-calm:#2F6B45; --st-breeze:#7F6400; --st-gale:#B04A12; --st-storm:#A1202A;
+  color-scheme: light;
+}
+
+/* ---------- Variantes sombres (VNV + doc/st) ---------- */
+@mixin base-dark {
+  --mat-sys-primary:#FFB68A; --mat-sys-on-primary:#4A1C00;
+  --mat-sys-primary-container:#6A2E00; --mat-sys-on-primary-container:#FFDCC2;
+  --mat-sys-secondary:#CBC7BC; --mat-sys-on-secondary:#2F2E29;
+  --mat-sys-secondary-container:#45443E; --mat-sys-on-secondary-container:#E6E4DF;
+  --mat-sys-tertiary:#C6C5C0; --mat-sys-on-tertiary:#2F2F2C;
+  --mat-sys-tertiary-container:#454542; --mat-sys-on-tertiary-container:#E9E9E7;
+  --mat-sys-surface:#16150F; --mat-sys-on-surface:#E9E7E0; --mat-sys-on-surface-variant:#CBC7BC;
+  --mat-sys-surface-container-lowest:#100F0A; --mat-sys-surface-container-low:#1E1D16;
+  --mat-sys-surface-container:#22211A; --mat-sys-surface-container-high:#2C2B24;
+  --mat-sys-surface-container-highest:#37362E;
+  --mat-sys-outline:#928E82; --mat-sys-outline-variant:#48473F;
+  --mat-sys-inverse-surface:#E9E7E0; --mat-sys-inverse-on-surface:#31302C; --mat-sys-inverse-primary:#EC6608;
+  --mat-sys-error:#F2B8B5; --mat-sys-on-error:#601410;
+  --mat-sys-error-container:#8C1D18; --mat-sys-on-error-container:#F9DEDC;
+  --doc-word:#A6C8F0; --doc-pdf:#F5A3AE; --doc-md:#BFC7D2; --doc-ppt:#F2A98A; --doc-xls:#93D3B8;
+  --doc-a3:#C4B8F2; --doc-stats:#DDB0DD; --doc-letter:#DCC68A; --doc-mail:#8FD0DF;
+  --st-calm:#8FD3A6; --st-breeze:#E3C04E; --st-gale:#F59E6B; --st-storm:#F28B8B;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ @include base-dark; }
+}
+:root[data-theme="dark"]{ @include base-dark; }

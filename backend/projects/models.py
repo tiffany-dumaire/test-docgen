@@ -5,6 +5,8 @@ class Client(models.Model):
     """Client de l'entreprise, rattachable à plusieurs projets."""
 
     name = models.CharField("Nom du client", max_length=255)
+    logo = models.ImageField("Logo du client", upload_to="clients/",
+                             blank=True, null=True)
     contact_name = models.CharField("Contact principal", max_length=200, blank=True)
     email = models.EmailField("Email", blank=True)
     phone = models.CharField("Téléphone", max_length=50, blank=True)
@@ -52,8 +54,20 @@ class Project(models.Model):
         help_text="{tasks:[], milestones:[], risks:[], snapshots:[]} pour les "
                   "diagrammes de suivi (Gantt, avancement, risques…).",
     )
+    instances = models.JSONField(
+        "Instances / machines", default=list, blank=True,
+        help_text="[{name, ip, domain, url}] — serveurs / instances du projet.",
+    )
+    repos = models.JSONField(
+        "Dépôts Git", default=list, blank=True,
+        help_text="[{id, parent, name, url, component, instance}] — arborescence "
+                  "des dépôts Git : composante du projet et instance associée.",
+    )
     client_logo = models.ImageField(
         "Logo du client", upload_to="projects/", blank=True, null=True
+    )
+    logo = models.ImageField(
+        "Logo du projet (facultatif)", upload_to="projects/", blank=True, null=True
     )
     description = models.TextField("Description", blank=True)
 
@@ -159,6 +173,7 @@ class Meeting(models.Model):
     notes = models.TextField("Notes", blank=True)
     documents = models.ManyToManyField("documents.Document", blank=True,
                                        related_name="meetings")
+    cancelled = models.BooleanField("Annulée", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -179,14 +194,18 @@ class JournalEntry(models.Model):
     CATEGORY_CHOICES = [
         ("note", "Note"), ("decision", "Décision"), ("risk", "Risque"),
         ("action", "Action"), ("incident", "Incident"), ("info", "Information"),
+        ("event", "Événement"),
     ]
     CONFIDENTIALITY_CHOICES = [
         ("public", "Public"), ("internal", "Interne"),
         ("confidential", "Confidentiel"), ("restricted", "Strictement confidentiel"),
     ]
 
-    project = models.ForeignKey(Project, related_name="journal",
-                                on_delete=models.CASCADE)
+    # Entrée rattachable à un projet et/ou directement à un client (journal client).
+    project = models.ForeignKey(Project, related_name="journal", null=True,
+                                blank=True, on_delete=models.CASCADE)
+    client = models.ForeignKey("Client", related_name="journal", null=True,
+                               blank=True, on_delete=models.CASCADE)
     meeting = models.ForeignKey(Meeting, related_name="journal", null=True,
                                 blank=True, on_delete=models.SET_NULL)
     document_version = models.ForeignKey(
@@ -197,7 +216,11 @@ class JournalEntry(models.Model):
     confidentiality = models.CharField("Confidentialité", max_length=20,
                                        choices=CONFIDENTIALITY_CHOICES,
                                        default="internal")
-    body = models.TextField("Contenu")
+    body = models.TextField("Contenu", blank=True)
+    body_html = models.TextField("Contenu enrichi", blank=True)
+    # Entrées automatiques : posées par l'application (génération, réunion…).
+    is_automatic = models.BooleanField("Automatique", default=False)
+    event = models.CharField("Événement", max_length=40, blank=True)
     author = models.CharField("Auteur", max_length=150, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

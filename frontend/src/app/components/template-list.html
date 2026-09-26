@@ -1,0 +1,105 @@
+    <div class="row between">
+      <h1>{{ 'nav.templates' | transloco }}</h1>
+      <a class="btn btn-primary" routerLink="/templates/new">+ {{ 'templates.new' | transloco }}</a>
+    </div>
+    <p class="muted">{{ 'templates.subtitle' | transloco }}</p>
+    <div class="row" style="gap:.5rem; align-items:center; margin-bottom:.4rem">
+      <span class="tag">{{ 'templates.language' | transloco }} :</span>
+      <button class="lang-pill" [class.active]="lang() === 'all'" (click)="lang.set('all')">{{ 'templates.all_langs' | transloco }}</button>
+      @for (l of languages; track l.value) {
+        <button class="lang-pill" [class.active]="lang() === l.value" (click)="lang.set(l.value)">{{ l.flag }} {{ l.label }}</button>
+      }
+    </div>
+
+    <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+      @for (tab of typeTabs; track tab.key) {
+        <mat-tab label="{{ tab.icon }} {{ tab.label }} ({{ byType(tab.key).length }})">
+          <div class="tabpad">
+            @if (byType(tab.key).length) {
+              <div class="grid-cards">
+                @for (t of byType(tab.key); track t.id) {
+                  <div class="card tpl-card" [style.--tc]="colorFor(tab.key)">
+                    <div class="tpl-head">
+                      <span class="tpl-ico">{{ tab.icon }}</span>
+                      <div class="tpl-title">
+                        <strong>{{ cardName(t) }}</strong>
+                        <span class="tpl-sub">{{ cardFlag(t) }} {{ tab.label }} · {{ summary(t) }}</span>
+                      </div>
+                      @if (t.is_system) { <span class="chip-sys">{{ 'templates.system' | transloco }}</span> }
+                    </div>
+                    @if (tab.key === 'a3') {
+                      <button type="button" class="tpl-thumb" (click)="preview(t)" [title]="'templates.preview' | transloco">
+                        @if (thumbs()[t.id!]; as thumb) {
+                          <img [src]="thumb" alt="aperçu A3" loading="lazy" />
+                        } @else {
+                          <span class="tpl-thumb-ph"><span class="spin"></span></span>
+                        }
+                      </button>
+                    }
+                    <p class="tpl-desc">{{ t.description || '—' }}</p>
+                    <div class="tpl-actions">
+                      @if (t.is_block_based || t.builder_key === 'excel_workbook' || t.doc_type === 'a3') {
+                        <a class="btn btn-sm btn-ghost" [routerLink]="['/templates', t.id]">✏️ {{ 'common.edit' | transloco }}</a>
+                      } @else {
+                        <span class="tag">{{ 'templates.advanced' | transloco }}</span>
+                      }
+                      <button class="btn btn-sm btn-ghost" (click)="preview(t)">👁 {{ 'templates.preview' | transloco }}</button>
+                      @if (t.doc_type === 'a3') {
+                        <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'pdf')">⬇ PDF</button>
+                        <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'png')">⬇ PNG</button>
+                        <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'svg')">⬇ SVG</button>
+                      }
+                      <button class="btn btn-sm btn-ghost" (click)="duplicate(t)">⧉ {{ 'templates.duplicate' | transloco }}</button>
+                      @if (!t.is_system && canManage()) {
+                        <button class="btn btn-sm btn-danger" (click)="remove(t)">{{ 'templates.delete_short' | transloco }}</button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty">
+                <span class="empty-ico">{{ tab.icon }}</span>
+                <div>{{ 'templates.empty' | transloco: { type: tab.label } }}</div>
+                <a class="btn btn-sm btn-primary" routerLink="/templates/new">+ {{ 'templates.create_one' | transloco }}</a>
+              </div>
+            }
+          </div>
+        </mat-tab>
+      }
+
+      <!-- ============ FORMULAIRES (modèles de formulaire) ============ -->
+      <mat-tab label="📋 {{ 'forms.title' | transloco }} ({{ filteredForms().length }})">
+        <div class="tabpad">
+          <div class="row between">
+            <p class="muted" style="margin:0">{{ 'templates.forms_hint' | transloco }}</p>
+            <a class="btn btn-sm btn-primary" routerLink="/form-templates/new">+ {{ 'templates.new_form_template' | transloco }}</a>
+          </div>
+          @if (filteredForms().length) {
+            <div class="grid-cards" style="margin-top:1rem">
+              @for (ft of filteredForms(); track ft.id) {
+                <div class="card tpl-card" [style.--tc]="'var(--doc-stats)'">
+                  <div class="tpl-head">
+                    <span class="tpl-ico">📋</span>
+                    <div class="tpl-title">
+                      <strong>{{ ft.name }}</strong>
+                      <span class="tpl-sub">{{ 'templates.form_summary' | transloco: { q: qCount(ft), d: ft.diagrams.length, f: ft.formCount } }}</span>
+                    </div>
+                  </div>
+                  <p class="tpl-desc">{{ ft.description || '—' }}</p>
+                  <div class="tpl-actions">
+                    <a class="btn btn-sm btn-ghost" [routerLink]="['/form-templates', ft.id]">✏️ {{ 'common.edit' | transloco }}</a>
+                    <button class="btn btn-sm btn-ghost" (click)="instantiate(ft)">＋ {{ 'templates.generate_form' | transloco }}</button>
+                    @if (canManage()) { <button class="btn btn-sm btn-danger" (click)="removeForm(ft)">{{ 'templates.delete_short' | transloco }}</button> }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty" style="margin-top:1rem">
+              {{ 'templates.no_form_templates' | transloco }} <a routerLink="/form-templates/new">{{ 'templates.create_one' | transloco }}</a>.
+            </div>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>

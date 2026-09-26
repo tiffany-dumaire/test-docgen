@@ -1,0 +1,10 @@
+    .search { width: 340px; max-width: 100%; margin: .5rem 0 1rem; }
+    .tablecard { background: var(--mat-sys-surface); border: 1px solid var(--mat-sys-outline-variant); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
+    table { width: 100%; background: transparent; }
+    .strong { font-weight: 600; }
+    .actions { text-align: right; white-space: nowrap; }
+    .chip { display: inline-block; padding: .15rem .6rem; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+    .st-active { background: #dcfce7; color: #15803d; }
+    .st-on_hold { background: #ffedd5; color: #c2410c; }
+    .st-archived { background: #e2e8f0; color: #475569; }
+    .empty { padding: 2.5rem; text-align: center; color: var(--mat-sys-outline); }

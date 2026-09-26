@@ -1,0 +1,365 @@
+    @if (project(); as p) {
+      <div class="row between">
+        <div class="row" style="gap:.9rem;align-items:center">
+          @if (p.logoUrl) { <img class="proj-logo" [src]="p.logoUrl" alt="logo projet" /> }
+          <div>
+            <h1 style="margin:0">{{ p.name }}</h1>
+            <div class="muted">{{ p.clientName }} · {{ p.reference || 'sans référence' }}
+              @if (p.parent) { · sous-projet }
+            </div>
+          </div>
+        </div>
+        <div class="row" style="gap:.5rem">
+          <a class="btn btn-ghost" [routerLink]="['/projects', p.id, 'edit']">Éditer</a>
+          <a class="btn btn-primary" [routerLink]="['/documents/new']" [queryParams]="{ project: p.id }">+ Document</a>
+        </div>
+      </div>
+
+      <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+        <mat-tab label="Vue d'ensemble">
+          <div class="tabpad">
+            <div class="card"><h3>📝 Description</h3>
+              @if (p.description) { <p style="white-space:pre-line;margin:0">{{ p.description }}</p> }
+              @else { <p class="muted" style="margin:0">Aucune description.</p> }
+            </div>
+
+            @if (p.children?.length) {
+              <div class="card"><h3>🌳 Sous-projets</h3>
+                @for (ch of p.children; track ch.id) {
+                  <div class="row between" style="padding:.3rem 0"><a [routerLink]="['/projects', ch.id]">{{ ch.name }}</a><span class="tag">{{ ch.status }}</span></div>
+                }
+              </div>
+            }
+            @if (p.clientsDetail?.length) {
+              <div class="card"><h3>🤝 Clients associés</h3>
+                <div class="row wrap" style="gap:.4rem">@for (cl of p.clientsDetail; track cl.id) { <span class="badge badge-type">{{ cl.name }}</span> }</div>
+              </div>
+            }
+            <div class="grid-cards">
+              <div class="card"><h3>👤 Contacts client</h3>
+                @for (c of clientContacts(p); track c.id) {
+                  <div class="contact"><strong>{{ c.fullName }}</strong><div class="muted">{{ c.role }}</div><div class="tag">{{ c.email }} · {{ c.phone }}</div></div>
+                } @empty { <div class="muted">Aucun contact client.</div> }
+              </div>
+              <div class="card"><h3>🧑‍💼 Contacts internes</h3>
+                @for (c of internalContacts(p); track c.id) {
+                  <div class="contact"><strong>{{ c.fullName }}</strong><div class="muted">{{ c.role }}</div><div class="tag">{{ c.email }} · {{ c.phone }}</div></div>
+                } @empty { <div class="muted">Aucun contact interne.</div> }
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Client">
+          <div class="tabpad">
+            @if (p.clientsDetail?.length) {
+              @for (cl of p.clientsDetail; track cl.id) {
+                <div class="card">
+                  <div class="row between" style="align-items:flex-start">
+                    <div class="row" style="gap:.9rem;align-items:center">
+                      @if (cl.logoUrl) { <img class="client-logo" [src]="cl.logoUrl" alt="logo client" /> }
+                      <div>
+                        <h3 style="margin:0">{{ cl.name }}</h3>
+                        @if (cl.contactName) { <div class="muted">Contact principal : {{ cl.contactName }}</div> }
+                        @if (cl.projectCount) { <div class="tag">{{ cl.projectCount }} projet(s)</div> }
+                      </div>
+                    </div>
+                    <a class="btn btn-sm btn-ghost" [routerLink]="['/clients', cl.id]">Fiche client</a>
+                  </div>
+                  <div class="infogrid" style="margin-top:.8rem">
+                    <div><span class="k">Email</span><span class="v">@if (cl.email) { <a [href]="'mailto:' + cl.email">{{ cl.email }}</a> } @else { — }</span></div>
+                    <div><span class="k">Téléphone</span><span class="v">@if (cl.phone) { <a [href]="'tel:' + cl.phone">{{ cl.phone }}</a> } @else { — }</span></div>
+                    <div style="grid-column:1/-1"><span class="k">Adresse</span><span class="v" style="white-space:pre-line">{{ cl.address || '—' }}</span></div>
+                    @if (cl.notes) { <div style="grid-column:1/-1"><span class="k">Notes</span><span class="v" style="white-space:pre-line">{{ cl.notes }}</span></div> }
+                  </div>
+                </div>
+              }
+            } @else if (p.clientName) {
+              <div class="card"><h3 style="margin:0">{{ p.clientName }}</h3>
+                <p class="muted" style="margin:.4rem 0 0">Aucune fiche client détaillée n'est associée à ce projet.</p></div>
+            } @else {
+              <div class="card"><p class="muted" style="margin:0">Aucun client associé à ce projet.</p></div>
+            }
+
+            <div class="card"><h3>👤 Contacts client</h3>
+              @if (clientContacts(p).length) {
+                <table><thead><tr><th>Nom</th><th>Rôle</th><th>Email</th><th>Téléphone</th></tr></thead>
+                  <tbody>@for (c of clientContacts(p); track c.id) {
+                    <tr><td><b>{{ c.fullName }}</b></td><td>{{ c.role || '—' }}</td>
+                      <td>@if (c.email) { <a [href]="'mailto:' + c.email">{{ c.email }}</a> } @else { — }</td>
+                      <td>{{ c.phone || '—' }}</td></tr>
+                  }</tbody></table>
+              } @else { <div class="muted">Aucun contact client pour ce projet.</div> }
+            </div>
+
+            <div class="card"><h3>🧑‍💼 Contacts internes</h3>
+              @if (internalContacts(p).length) {
+                <table><thead><tr><th>Nom</th><th>Rôle</th><th>Email</th><th>Téléphone</th></tr></thead>
+                  <tbody>@for (c of internalContacts(p); track c.id) {
+                    <tr><td><b>{{ c.fullName }}</b></td><td>{{ c.role || '—' }}</td>
+                      <td>@if (c.email) { <a [href]="'mailto:' + c.email">{{ c.email }}</a> } @else { — }</td>
+                      <td>{{ c.phone || '—' }}</td></tr>
+                  }</tbody></table>
+              } @else { <div class="muted">Aucun contact interne pour ce projet.</div> }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Informations complémentaires">
+          <div class="tabpad">
+            <div class="card"><h3>🧩 Champs personnalisés</h3>
+              @if (p.customFieldDefs?.length) {
+                <div class="infogrid">
+                  @for (def of p.customFieldDefs; track def.key) {
+                    <div><span class="k">{{ def.label }}</span><span class="v">{{ cfDisplay(p, def) }}</span></div>
+                  }
+                </div>
+              } @else { <p class="muted" style="margin:0">Aucun champ personnalisé.</p> }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Instances">
+          <div class="tabpad">
+            <div class="card"><h3>🖥️ Instances</h3>
+              @if (p.instances?.length) {
+                <div class="inst-grid">
+                  @for (inst of p.instances; track $index) {
+                    <a class="inst-card" [href]="instUrl(inst)" target="_blank" rel="noopener">
+                      <div class="inst-name">{{ inst.name || 'Instance' }} <span class="material-icons">open_in_new</span></div>
+                      @if (inst.ip) { <div class="inst-line"><span class="material-icons">dns</span> {{ inst.ip }}</div> }
+                      @if (inst.domain) { <div class="inst-line"><span class="material-icons">language</span> {{ inst.domain }}</div> }
+                    </a>
+                  }
+                </div>
+              } @else {
+                <p class="muted" style="margin:0">Aucune instance. Ajoutez-en dans <a [routerLink]="['/projects', p.id, 'edit']">l'édition du projet</a>.</p>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Dépôts Git">
+          <div class="tabpad">
+            <div class="card"><h3>🌳 Arborescence des dépôts Git</h3>
+              @if (p.repos?.length) {
+                <div class="repotree">
+                  @for (node of repoTree(p.repos!); track node.repo.id) {
+                    <div class="repo-node" [style.padding-left.px]="node.depth * 22">
+                      <span class="repo-branch">{{ node.depth > 0 ? '└' : '' }}</span>
+                      <span class="material-icons repo-ic">folder_open</span>
+                      @if (node.repo.url) {
+                        <a class="repo-name" [href]="repoUrl(node.repo.url)" target="_blank" rel="noopener">{{ node.repo.name || 'Dépôt' }}</a>
+                      } @else { <span class="repo-name">{{ node.repo.name || 'Dépôt' }}</span> }
+                      @if (node.repo.component) { <span class="badge badge-type">{{ node.repo.component }}</span> }
+                      @if (node.repo.instance) { <span class="repo-inst"><span class="material-icons">dns</span> {{ node.repo.instance }}</span> }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="muted" style="margin:0">Aucun dépôt. Ajoutez-en dans <a [routerLink]="['/projects', p.id, 'edit']">l'édition du projet</a> (onglet « Dépôts Git »).</p>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Équipe & accès">
+          <div class="tabpad">
+            <div class="card"><h3>🛠️ Équipe de développement</h3>
+              @if (p.assignments?.length) {
+                <table><thead><tr><th>Membre</th><th>Rôle</th><th>Équipe</th><th>Email</th></tr></thead>
+                  <tbody>@for (a of p.assignments; track a.id) {
+                    <tr><td><b>{{ a.memberName }}</b></td><td>{{ a.role || '—' }}</td><td>{{ a.teamName }}</td><td>{{ a.memberEmail || '—' }}</td></tr>
+                  }</tbody></table>
+              } @else { <div class="muted">Aucun membre affecté.</div> }
+            </div>
+            <div class="card"><h3>🔐 Membres & accès</h3>
+              @if (members().length) {
+                <table><thead><tr><th>Utilisateur</th><th>Email</th><th>Rôles</th><th></th></tr></thead>
+                  <tbody>@for (m of members(); track m.id) {
+                    <tr><td><b>{{ m.userName || '—' }}</b></td><td>{{ m.userEmail }}</td><td>{{ (m.roles || []).join(', ') || '—' }}</td>
+                      <td><button class="btn btn-sm btn-danger" (click)="removeMember(m)">✕</button></td></tr>
+                  }</tbody></table>
+              } @else { <div class="muted">Aucun utilisateur rattaché.</div> }
+              <div class="row" style="gap:.5rem;margin-top:.6rem;flex-wrap:wrap;align-items:end">
+                <div class="field" style="margin:0;min-width:200px"><label>Utilisateur</label>
+                  <select [(ngModel)]="newUser"><option [ngValue]="null">—</option>
+                    @for (u of users(); track u.id) { <option [ngValue]="u.id">{{ u.full_name || u.email }}</option> }</select></div>
+                <div class="field" style="margin:0;flex:1;min-width:180px"><label>Rôles (virgules)</label><input [(ngModel)]="newRoles" placeholder="Chef de projet, Validateur" /></div>
+                <button class="btn btn-ghost" (click)="addMember()" [disabled]="!newUser">+ Rattacher</button>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Documents & formulaires">
+          <div class="tabpad">
+            <div class="card"><div class="row between"><h3>📄 Documents</h3>
+              <a class="btn btn-sm btn-primary" [routerLink]="['/documents/new']" [queryParams]="{ project: p.id }">+ Nouveau</a></div>
+              @if (documents().length) {
+                <table><thead><tr><th>Titre</th><th>Type</th><th>Confidentialité</th><th>Version</th><th></th></tr></thead>
+                  <tbody>@for (d of documents(); track d.id) {
+                    <tr><td><a [routerLink]="['/documents', d.id]">{{ d.title }}</a></td>
+                      <td><span class="badge badge-type">{{ d.docType }}</span></td>
+                      <td><span class="badge" [class]="'badge-' + d.confidentiality">{{ d.confidentialityDisplay }}</span></td>
+                      <td>v{{ d.currentVersion }}</td>
+                      <td><a class="btn btn-sm btn-ghost" [routerLink]="['/documents', d.id]">Ouvrir</a></td></tr>
+                  }</tbody></table>
+              } @else { <div class="muted">Aucun document.</div> }
+            </div>
+            <div class="card"><div class="row between"><h3>📝 Formulaires liés</h3>
+              <a class="btn btn-sm btn-ghost" [routerLink]="['/forms/new']" [queryParams]="{ project: p.id }">+ Vierge</a></div>
+              @if (formTemplates().length) {
+                <div class="row" style="gap:.4rem; align-items:center; margin-bottom:.6rem; flex-wrap:wrap">
+                  <span class="tag">Générer depuis un modèle :</span>
+                  <select [(ngModel)]="selTemplate" style="max-width:260px">
+                    <option [ngValue]="null" disabled>— choisir un modèle —</option>
+                    @for (ft of formTemplates(); track ft.id) { <option [ngValue]="ft.id">{{ ft.name }}</option> }
+                  </select>
+                  <button class="btn btn-sm btn-primary" (click)="genForm(p)" [disabled]="!selTemplate">Générer</button>
+                </div>
+              }
+              @if (forms().length) {
+                <table><thead><tr><th>Titre</th><th>Modèle</th><th>Lien réduit</th><th>Réponses</th></tr></thead>
+                  <tbody>@for (f of forms(); track f.id) {
+                    <tr><td><a [routerLink]="['/forms', f.id]">{{ f.title }}</a></td>
+                      <td>{{ f.templateName || '—' }}</td>
+                      <td><a [href]="f.shortUrl" target="_blank">{{ f.shortUrl }}</a></td><td>{{ f.submissionCount }}</td></tr>
+                  }</tbody></table>
+              } @else { <div class="muted">Aucun formulaire lié.</div> }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Suivi de projet">
+          <div class="tabpad">
+            <app-project-tracking [id]="p.id!" mode="data" />
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Documents de suivi">
+          <div class="tabpad">
+            <app-project-tracking [id]="p.id!" mode="diagrams" />
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Liens utiles">
+          <div class="tabpad">
+            <div class="card"><h3>🔗 Liens utiles</h3>
+              @for (l of links(); track l.id) {
+                <div class="row between" style="margin-bottom:.3rem">
+                  <div><span class="tag">{{ l.category || '—' }}</span> <a [href]="l.url" target="_blank">{{ l.name }}</a>
+                    @if (l.comment) { <div class="muted" style="font-size:.75rem">{{ l.comment }}</div> }</div>
+                  <button class="btn btn-sm btn-danger" (click)="delLink(l)">✕</button></div>
+              } @empty { <div class="muted">Aucun lien.</div> }
+              <div class="row" style="gap:.3rem;flex-wrap:wrap;margin-top:.6rem;align-items:center">
+                <select [ngModel]="nlCatSel" (ngModelChange)="onNlCat($event)" style="width:170px">
+                  @for (c of linkCategories; track c) { <option [value]="c">{{ c }}</option> }
+                  <option value="__custom">Autre (personnalisée)…</option>
+                </select>
+                @if (nlCatSel === '__custom') { <input [(ngModel)]="nlCat" placeholder="Nouvelle catégorie" style="width:150px" /> }
+                <input [(ngModel)]="nlName" placeholder="Nom" style="flex:1;min-width:120px" />
+                <input [(ngModel)]="nlUrl" placeholder="https://…" style="flex:1;min-width:140px" />
+                <input [(ngModel)]="nlComment" placeholder="Commentaire" style="flex:1;min-width:120px" />
+                <button class="btn btn-primary btn-sm" (click)="addLink(p.id!)">+ Ajouter</button></div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Réunions">
+          <div class="tabpad">
+            <app-meeting-calendar [meetings]="meetings()" />
+            <div class="card">
+              <h3>➕ Ajouter une réunion</h3>
+              <div class="row" style="gap:.3rem;flex-wrap:wrap;align-items:center">
+                <input [(ngModel)]="nmTitle" placeholder="Titre" style="flex:1;min-width:140px" />
+                <input type="datetime-local" [(ngModel)]="nmDate" style="width:210px" />
+                <input [(ngModel)]="nmLoc" placeholder="Lieu / lien" style="flex:1;min-width:140px" />
+                <button class="btn btn-primary btn-sm" (click)="addMeeting(p.id!)">+ Ajouter</button>
+              </div>
+              <div class="listwrap">
+                @for (mtg of meetings(); track mtg.id) {
+                  <div class="row between mtg-line">
+                    <div><b [style.text-decoration]="mtg.cancelled ? 'line-through' : 'none'">{{ mtg.title }}</b>
+                      @if (mtg.cancelled) { <span class="chip-cancel">annulée</span> }
+                      <span class="muted" style="font-size:.78rem">
+                        @if (mtg.date) { · {{ mtg.date | date:'dd/MM/yyyy HH:mm' }} } @if (mtg.location) { · {{ mtg.location }} }
+                      </span></div>
+                    <div class="row" style="gap:.3rem">
+                      @if (!mtg.cancelled) { <button class="btn btn-sm btn-ghost" (click)="cancelMeeting(mtg)">Annuler</button> }
+                      <button class="btn btn-sm btn-danger" (click)="delMeeting(mtg)">✕</button>
+                    </div>
+                  </div>
+                } @empty { <div class="muted">Aucune réunion planifiée.</div> }
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Journal">
+          <div class="tabpad">
+            <div class="card"><h3>📓 Journal du projet</h3>
+              <div class="jform">
+                <div class="row" style="gap:.3rem;flex-wrap:wrap;align-items:center;margin-bottom:.4rem">
+                  <select [(ngModel)]="njCat" style="width:130px"><option value="note">Note</option><option value="decision">Décision</option><option value="risk">Risque</option><option value="action">Action</option><option value="incident">Incident</option><option value="info">Info</option></select>
+                  <select [(ngModel)]="njConf" style="width:170px"><option value="public">Public</option><option value="internal">Interne</option><option value="confidential">Confidentiel</option><option value="restricted">Strictement confidentiel</option></select>
+                </div>
+                <app-rich-text-editor [(value)]="njHtml" />
+                <div class="row" style="justify-content:flex-end;margin-top:.4rem">
+                  <button class="btn btn-ghost btn-sm" (click)="addJournal(p.id!)" [disabled]="!hasContent(njHtml)">+ Ajouter au journal</button>
+                </div>
+              </div>
+
+              <div class="row" style="gap:.6rem;align-items:center;margin:.6rem 0 .2rem">
+                <label class="muted" style="font-size:.8rem;display:flex;gap:.3rem;align-items:center">
+                  <input type="checkbox" [(ngModel)]="showAuto" /> Afficher les entrées automatiques
+                </label>
+              </div>
+
+              <div class="timeline">
+              @for (j of visibleJournal(); track j.id) {
+                <div class="jentry" [class.auto]="j.isAutomatic" [style.--jc]="catColor(j)">
+                  <div class="jicon">{{ eventIcon(j) }}</div>
+                  <div class="jbody">
+                    <div class="jmeta">
+                      <span class="badge" [class.badge-internal]="j.confidentiality==='internal'" [class.badge-confidential]="j.confidentiality==='confidential'" [class.badge-restricted]="j.confidentiality==='restricted'" [class.badge-public]="j.confidentiality==='public'">{{ j.categoryLabel || j.category }}</span>
+                      @if (j.isAutomatic) { <span class="chip-auto">auto</span> }
+                      <span class="muted jdate">{{ j.author || '—' }} · {{ j.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    @if (j.bodyHtml) {
+                      <div class="rich" [innerHTML]="j.bodyHtml"></div>
+                    } @else {
+                      <div>{{ j.body }}</div>
+                    }
+                  </div>
+                  @if (!j.isAutomatic) {
+                    <button class="btn btn-sm btn-danger jdel" (click)="delJournal(j)">✕</button>
+                  }
+                </div>
+              } @empty { <div class="muted">Aucune entrée.</div> }
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Style du projet">
+          <div class="tabpad">
+            <div class="card"><h3>🎨 Style du projet</h3>
+              @if (styleEntries(p).length) {
+                <div class="styles-grid">
+                  @for (st of styleEntries(p); track st.key) {
+                    <div class="style-row">
+                      <span class="style-key">{{ st.key }}</span>
+                      @if (st.color) { <span class="style-sw" [style.background]="st.color"></span><span class="tag">{{ st.color }}</span> }
+                      @if (st.font) { <span class="tag" [style.font-family]="st.font">{{ st.font }}</span> }
+                      @if (st.size) { <span class="tag">{{ st.size }} pt</span> }
+                      @if (st.bold) { <span class="tag">gras</span> }
+                    </div>
+                  }
+                </div>
+              } @else { <p class="muted" style="margin:0">Aucun style spécifique. Les modèles utilisent les styles par défaut / de l'entreprise.</p> }
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    }

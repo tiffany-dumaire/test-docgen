@@ -8,49 +8,8 @@ interface Cell { date: Date | null; items: any[]; today: boolean; }
 @Component({
   selector: 'app-meeting-calendar',
   imports: [DatePipe, MatIconModule, MatButtonModule],
-  template: `
-    <div class="cal">
-      <div class="cal-head">
-        <button mat-icon-button (click)="prev()"><mat-icon>chevron_left</mat-icon></button>
-        <div class="month">{{ label() }}</div>
-        <button mat-icon-button (click)="next()"><mat-icon>chevron_right</mat-icon></button>
-        <span class="grow"></span>
-        <button mat-stroked-button (click)="goToday()"><mat-icon>today</mat-icon> Aujourd'hui</button>
-      </div>
-      <div class="dow">
-        @for (d of dows; track d) { <div>{{ d }}</div> }
-      </div>
-      <div class="grid">
-        @for (c of cells(); track $index) {
-          <div class="cell" [class.empty]="!c.date" [class.today]="c.today">
-            @if (c.date) {
-              <div class="num">{{ c.date.getDate() }}</div>
-              @for (m of c.items; track m.id) {
-                <div class="ev" [title]="m.title + (m.project_name ? ' · ' + m.project_name : '')">
-                  <span class="dot"></span>{{ m.date ? (m.date | date:'HH:mm') : '' }} {{ m.title }}
-                </div>
-              }
-            }
-          </div>
-        }
-      </div>
-    </div>
-  `,
-  styles: [`
-    .cal { background: var(--mat-sys-surface); border: 1px solid var(--mat-sys-outline-variant); border-radius: 16px; padding: 1rem; box-shadow: var(--shadow); }
-    .cal-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .6rem; }
-    .month { font-weight: 700; font-size: 1.1rem; text-transform: capitalize; min-width: 160px; text-align: center; }
-    .grow { flex: 1; }
-    .dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
-    .dow div { text-align: center; font-size: .72rem; font-weight: 700; color: var(--mat-sys-outline); text-transform: uppercase; }
-    .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .cell { min-height: 92px; border: 1px solid var(--mat-sys-outline-variant); border-radius: 10px; padding: 4px 5px; background: var(--mat-sys-surface-container-low); }
-    .cell.empty { background: transparent; border: none; }
-    .cell.today { outline: 2px solid var(--mat-sys-primary); }
-    .num { font-size: .75rem; font-weight: 700; color: var(--mat-sys-outline); text-align: right; }
-    .ev { font-size: .68rem; background: color-mix(in srgb, var(--mat-sys-primary) 14%, var(--mat-sys-surface)); color: var(--mat-sys-on-surface); border-radius: 6px; padding: 2px 5px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ev .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--mat-sys-primary); margin-right: 4px; }
-  `],
+  templateUrl: './meeting-calendar.html',
+  styleUrl: './meeting-calendar.scss',
 })
 export class MeetingCalendar {
   private _meetings: any[] = [];

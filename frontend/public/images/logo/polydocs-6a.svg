@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="PolyDocs">
+  <defs>
+    <linearGradient id="a_gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6C866"/><stop offset="1" stop-color="#D98A24"/></linearGradient>
+    <linearGradient id="a_amber" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E7A038"/><stop offset="1" stop-color="#B4701C"/></linearGradient>
+    <linearGradient id="a_orange" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D8781F"/><stop offset="1" stop-color="#A94E17"/></linearGradient>
+    <linearGradient id="a_burnt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#BE5F1B"/><stop offset="1" stop-color="#8A3312"/></linearGradient>
+    <linearGradient id="a_rust" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A23C16"/><stop offset="1" stop-color="#6E2A14"/></linearGradient>
+    <linearGradient id="a_deep" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C2F12"/><stop offset="1" stop-color="#481B0C"/></linearGradient>
+  </defs>
+  <g stroke-linecap="round" fill="none" opacity=".8">
+    <path d="M2 26c8-3 14-2 19 1" stroke="#E7A038" stroke-width="1.4"/>
+    <path d="M1 34c9-2 15 0 19 3" stroke="#C97A22" stroke-width="1.2"/>
+    <path d="M4 42c7-1 12 1 15 4" stroke="#B4701C" stroke-width="1"/>
+  </g>
+  <path d="M9 12l4 1-2 3z" fill="#D8781F" opacity=".9"/>
+  <path d="M57 50l4-1-1 4z" fill="#A23C16" opacity=".85"/>
+  <polygon points="32,5 14,24 32,18" fill="url(#a_amber)"/>
+  <polygon points="32,5 32,18 50,24" fill="url(#a_orange)"/>
+  <polygon points="32,5 50,24 50,33" fill="url(#a_burnt)"/>
+  <polygon points="32,5 50,33 32,39" fill="url(#a_orange)"/>
+  <polygon points="32,5 32,39 14,33" fill="url(#a_gold)"/>
+  <polygon points="32,5 14,33 14,24" fill="url(#a_amber)"/>
+  <polygon points="50,24 50,33 32,59" fill="url(#a_deep)"/>
+  <polygon points="50,33 32,39 32,59" fill="url(#a_rust)"/>
+  <polygon points="32,39 14,33 32,59" fill="url(#a_rust)"/>
+  <polygon points="14,33 14,24 32,59" fill="url(#a_deep)"/>
+  <g stroke="#FBEAC8" stroke-width=".5" opacity=".45" fill="none" stroke-linejoin="round">
+    <path d="M32 5L14 24M32 5L32 18M32 5L50 24M32 5L50 33M32 5L32 39M32 5L14 33"/>
+    <path d="M32 59L50 24M32 59L50 33M32 59L32 39M32 59L14 33M32 59L14 24"/>
+  </g>
+  <polygon points="32,5 32,39 14,33" fill="#FFF3D6" opacity=".18"/>
+</svg>

@@ -427,6 +427,13 @@ def render(ctx: GenerationContext) -> bytes:
                          border, header_font, label_font, center,
                          PatternFill, get_column_letter, autosize)
 
+        # ---- Onglet GRID (grille libre : style par cellule, fusions, tailles) ----
+        elif stype == "grid":
+            _write_grid(ws, sdef, pctx, start_row,
+                        Font, PatternFill, Alignment, Border, Side,
+                        get_column_letter)
+            _add_sheet_images(ws, sdef, ctx, start_row)
+
         # ---- Onglet INFO (cellules fixes typées) ----
         elif stype == "info":
             r = start_row
@@ -450,6 +457,142 @@ def render(ctx: GenerationContext) -> bytes:
     buffer = io.BytesIO()
     wb.save(buffer)
     return buffer.getvalue()
+
+
+def _logo_source_path(ctx, image):
+    """Chemin fichier local d'une image de feuille (logo entreprise ou média)."""
+    from .block_gen import _logo_path, _resolve_asset
+    source = (image.get("source") or "company").lower()
+    if source == "url":
+        return _resolve_asset(image.get("url"))
+    return _logo_path(ctx)
+
+
+def _add_sheet_images(ws, sdef, ctx, start_row):
+    """Ajoute les images (logo) positionnées et dimensionnées d'une grille.
+
+    sdef["images"] = [{
+        source: "company" | "url", url, col, row,
+        width, height,            # px (si une seule est donnée, ratio conservé)
+        offset_x, offset_y,       # décalage px depuis le coin de la cellule
+    }]
+    Les index col/row sont 1-indexés et relatifs au début de l'onglet.
+    """
+    images = sdef.get("images") or []
+    if not images:
+        return
+    try:
+        from openpyxl.drawing.image import Image as XLImage
+        from openpyxl.drawing.spreadsheet_drawing import (AnchorMarker,
+                                                          OneCellAnchor)
+        from openpyxl.drawing.xdr import XDRPositiveSize2D
+        from openpyxl.utils.units import pixels_to_EMU
+    except Exception:
+        return
+    off = start_row - 1
+    for image in images:
+        path = _logo_source_path(ctx, image)
+        if not path:
+            continue
+        try:
+            img = XLImage(path)
+        except Exception:
+            continue
+        # Dimensions : conserve le ratio si une seule dimension est fournie.
+        nat_w, nat_h = img.width or 1, img.height or 1
+        w = image.get("width"); h = image.get("height")
+        try:
+            if w and not h:
+                w = float(w); h = w * nat_h / nat_w
+            elif h and not w:
+                h = float(h); w = h * nat_w / nat_h
+            elif w and h:
+                w = float(w); h = float(h)
+            else:
+                w, h = float(nat_w), float(nat_h)
+        except (TypeError, ValueError, ZeroDivisionError):
+            w, h = float(nat_w), float(nat_h)
+        try:
+            c = max(1, int(image.get("col", 1))) - 1
+            r = max(1, int(image.get("row", 1))) - 1 + off
+        except (TypeError, ValueError):
+            continue
+        offx = pixels_to_EMU(int(image.get("offset_x", 0) or 0))
+        offy = pixels_to_EMU(int(image.get("offset_y", 0) or 0))
+        marker = AnchorMarker(col=c, colOff=offx, row=r, rowOff=offy)
+        img.anchor = OneCellAnchor(
+            _from=marker,
+            ext=XDRPositiveSize2D(pixels_to_EMU(int(w)), pixels_to_EMU(int(h))))
+        ws.add_image(img)
+
+
+def _write_grid(ws, sdef, pctx, start_row, Font, PatternFill, Alignment,
+                Border, Side, get_column_letter):
+    """Grille libre : chaque cellule porte sa valeur, son style, sa fusion.
+
+    sdef = {
+      "cells": [{row,col,value,bold,italic,color,bg,align,valign,size,wrap,
+                 number_format,border,col_span,row_span}],
+      "col_widths": {"<col>": width}, "row_heights": {"<row>": height},
+    }
+    Les index de ligne/colonne sont relatifs au début de l'onglet (1 = 1re ligne
+    sous le titre) et 1-indexés.
+    """
+    thin = Side(style="thin", color=BORDER_COLOR)
+    box = Border(left=thin, right=thin, top=thin, bottom=thin)
+    off = start_row - 1  # décalage pour laisser la place au titre
+
+    for cell in (sdef.get("cells") or []):
+        try:
+            r = int(cell.get("row", 1)) + off
+            c = int(cell.get("col", 1))
+        except (TypeError, ValueError):
+            continue
+        if r < 1 or c < 1:
+            continue
+        raw = cell.get("value", "")
+        value = interpolate(raw, pctx) if isinstance(raw, str) else raw
+        # Conversion numérique douce si demandé via number_format numérique.
+        target = ws.cell(row=r, column=c, value=value)
+        cspan = max(1, int(cell.get("col_span", 1) or 1))
+        rspan = max(1, int(cell.get("row_span", 1) or 1))
+        if cspan > 1 or rspan > 1:
+            try:
+                ws.merge_cells(start_row=r, start_column=c,
+                               end_row=r + rspan - 1, end_column=c + cspan - 1)
+            except Exception:
+                pass
+        color = _norm_hex(cell.get("color")) if cell.get("color") else None
+        target.font = Font(bold=bool(cell.get("bold")),
+                           italic=bool(cell.get("italic")),
+                           underline="single" if cell.get("underline") else None,
+                           size=float(cell.get("size") or 11),
+                           color=color or "000000")
+        bg = _norm_hex(cell.get("bg")) if cell.get("bg") else None
+        if bg:
+            target.fill = PatternFill("solid", fgColor=bg)
+        target.alignment = Alignment(
+            horizontal=cell.get("align") or "left",
+            vertical=cell.get("valign") or "center",
+            wrap_text=bool(cell.get("wrap")))
+        if cell.get("number_format"):
+            target.number_format = cell["number_format"]
+        if cell.get("border", True):
+            # Applique la bordure à toute la plage fusionnée.
+            for rr in range(r, r + rspan):
+                for cc in range(c, c + cspan):
+                    ws.cell(row=rr, column=cc).border = box
+
+    for col, width in (sdef.get("col_widths") or {}).items():
+        try:
+            ws.column_dimensions[get_column_letter(int(col))].width = float(width)
+        except (TypeError, ValueError):
+            pass
+    for row, height in (sdef.get("row_heights") or {}).items():
+        try:
+            ws.row_dimensions[int(row) + off].height = float(height)
+        except (TypeError, ValueError):
+            pass
 
 
 def _write_pivot(ws, sdef, tables, pctx, start_row, border, header_font,

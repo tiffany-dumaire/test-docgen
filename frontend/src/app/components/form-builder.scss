@@ -1,0 +1,15 @@
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+    .pv-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 1000; display: flex; justify-content: center; align-items: flex-start; padding: 2rem 1rem; overflow: auto; }
+    .pv-panel { width: 700px; max-width: 100%; }
+    .pv-bar { display: flex; justify-content: space-between; align-items: center; color: #fff; margin-bottom: .5rem; font-weight: 600; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 0.3rem; font-weight: 600; }
+    .chk input { width: auto; }
+    .linkbox { display: flex; gap: 0.4rem; }
+    .linkbox input { font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    .sub { border-bottom: 1px solid var(--border); padding: 0.6rem 0; font-size: 0.85rem; }
+    .sub:last-child { border-bottom: none; }
+    .diag-card { border: 1px solid var(--border); border-radius: 10px; padding: .5rem; margin-bottom: .7rem; background: #fff; }
+    .diag-card img { width: 100%; border-radius: 6px; }
+    .diag-empty { padding: 1.2rem .6rem; color: var(--muted); font-size: .82rem; text-align: center; }
+    .tag { display: inline-block; font-size: .7rem; font-weight: 700; color: var(--muted); }

@@ -1,0 +1,23 @@
+    <div class="pv-head">
+      <mat-icon>visibility</mat-icon>
+      <b>{{ data.title }}</b>
+      <span class="grow"></span>
+      <a mat-button [href]="blobSafe" target="_blank"><mat-icon>open_in_new</mat-icon> Ouvrir</a>
+      <button mat-icon-button (click)="ref.close()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="pv-body">
+      @if (data.kind === 'html' || data.kind === 'pdf') {
+        <!-- On charge le document depuis son URL blob (et non via [srcdoc]) :
+             Angular assainit [srcdoc] et retire <style>/<head>, ce qui cassait
+             l'aperçu HTML. Le blob rend le document complet dans l'iframe. -->
+        <iframe [src]="blobSafe" title="Aperçu" sandbox="allow-same-origin"></iframe>
+      } @else if (data.kind === 'image') {
+        <div class="pv-image"><img [src]="data.blobUrl" alt="Aperçu" /></div>
+      } @else {
+        <div class="pv-native">
+          <mat-icon>description</mat-icon>
+          <p>Aperçu indisponible pour ce format.</p>
+          <a mat-flat-button [href]="blobSafe" target="_blank">Ouvrir le fichier</a>
+        </div>
+      }
+    </div>

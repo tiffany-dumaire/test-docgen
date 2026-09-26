@@ -33,6 +33,9 @@ def _tpl_settings(ctx):
         "include_suivi": s.get("include_suivi", True),
         "include_toc": s.get("include_toc", True),
         "table_color": (s.get("table_color") or "").lstrip("#") or None,
+        # En-tête / pied de page configurables (None = conserver le modèle de base).
+        "header": s.get("header"),
+        "footer": s.get("footer"),
     }
 
 
@@ -507,22 +510,105 @@ def render_docx(ctx: GenerationContext) -> bytes:
         elif bt == "spacer":
             doc.add_paragraph()
 
-    # -- Pied : profil entreprise --
-    foot = doc.add_paragraph()
-    align(foot, "center")
-    bits = [b for b in [ctx.company.website_url, ctx.company.email,
-                        ctx.company.phone] if b]
-    if bits:
-        fr = foot.add_run("  ·  ".join(bits))
-        fr.font.size = Pt(8)
-        fr.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+    # -- Pied de page « profil entreprise » dans le corps --
+    # Conservé uniquement si le modèle ne définit PAS d'en-tête/pied configurables
+    # (settings.footer). Sinon, c'est le vrai pied de page de section qui gère.
+    if cfg.get("footer") is None:
+        foot = doc.add_paragraph()
+        align(foot, "center")
+        bits = [b for b in [ctx.company.website_url, ctx.company.email,
+                            ctx.company.phone] if b]
+        if bits:
+            fr = foot.add_run("  ·  ".join(bits))
+            fr.font.size = Pt(8)
+            fr.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
 
     if sectPr is not None:
         body.append(sectPr)
 
+    # En-tête / pied de page configurables (Word, PDF-via-Word, Lettre).
+    _apply_docx_header_footer(doc, cfg, ctx, pctx)
+
     buffer = io.BytesIO()
     doc.save(buffer)
     return buffer.getvalue()
+
+
+def _apply_docx_header_footer(doc, cfg, ctx, pctx):
+    """Applique l'en-tête et le pied de page définis dans les réglages du modèle.
+
+    settings.header / settings.footer = {
+        "enabled": bool, "text": "…\\n…" (variables {{…}} interpolées),
+        "align": "left|center|right", "show_logo": bool (en-tête).
+    }
+    Clé absente → on ne touche pas (comportement du modèle de base conservé).
+    """
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Inches, Pt, RGBColor
+
+    from docx.oxml.ns import qn as _qn
+
+    header_cfg = cfg.get("header")
+    footer_cfg = cfg.get("footer")
+    if header_cfg is None and footer_cfg is None:
+        return
+    try:
+        sec = doc.sections[0]
+    except (IndexError, AttributeError):
+        return
+    # Le modèle de base (Modele.docx) définit un en-tête/pied de PREMIÈRE PAGE
+    # (titlePg) ; sur une lettre d'une page, c'est lui qui s'affiche. On retire
+    # titlePg pour que l'en-tête/pied principal (celui qu'on configure) s'applique
+    # à toutes les pages.
+    try:
+        tp = sec._sectPr.find(_qn("w:titlePg"))
+        if tp is not None:
+            sec._sectPr.remove(tp)
+    except Exception:
+        pass
+    amap = {"left": WD_ALIGN_PARAGRAPH.LEFT, "center": WD_ALIGN_PARAGRAPH.CENTER,
+            "right": WD_ALIGN_PARAGRAPH.RIGHT}
+
+    def fill(part, conf, is_footer):
+        part.is_linked_to_previous = False
+        for p in list(part.paragraphs):
+            p._element.getparent().remove(p._element)
+        for t in list(part.tables):
+            t._element.getparent().remove(t._element)
+        if not conf.get("enabled", True):
+            part.add_paragraph("")  # pied/en-tête volontairement vide
+            return
+        alignment = amap.get(conf.get("align", "center" if is_footer else "left"),
+                             WD_ALIGN_PARAGRAPH.LEFT)
+        if not is_footer and conf.get("show_logo"):
+            logo = _logo_path(ctx)
+            if logo:
+                p = part.add_paragraph(); p.alignment = alignment
+                try:
+                    p.add_run().add_picture(logo, height=Inches(0.7))
+                except Exception:
+                    pass
+        html = conf.get("html")
+        if html and html.strip():
+            # Texte enrichi (couleur, gras, listes…) interpolé puis rendu.
+            _render_rich_into(part, interpolate(html, pctx), alignment,
+                              8 if is_footer else 10, is_footer)
+        else:
+            text = interpolate(conf.get("text", "") or "", pctx)
+            lines = text.split("\n") if text.strip() else []
+            for line in lines:
+                p = part.add_paragraph(); p.alignment = alignment
+                run = p.add_run(line)
+                run.font.size = Pt(8 if is_footer else 10)
+                if is_footer:
+                    run.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+        if not part.paragraphs:
+            part.add_paragraph("")
+
+    if header_cfg is not None:
+        fill(sec.header, header_cfg, False)
+    if footer_cfg is not None:
+        fill(sec.footer, footer_cfg, True)
 
 
 def _list_style(styles, ordered):
@@ -548,6 +634,53 @@ def _add_inline(paragraph, html, doc, add_hyperlink):
         run.bold = seg.get("bold", False)
         run.italic = seg.get("italic", False)
         run.underline = seg.get("underline", False)
+        color = seg.get("color")
+        if color:
+            try:
+                run.font.color.rgb = RGBColor.from_string(color.lstrip("#").upper())
+            except Exception:
+                pass
+
+
+def _add_hyperlink_part(paragraph, url, text):
+    """Ajoute un lien hypertexte dans un paragraphe (corps, en-tête ou pied)."""
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+    part = paragraph.part
+    r_id = part.relate_to(
+        url, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+        is_external=True)
+    hyper = OxmlElement("w:hyperlink"); hyper.set(qn("r:id"), r_id)
+    run = OxmlElement("w:r"); rpr = OxmlElement("w:rPr")
+    c = OxmlElement("w:color"); c.set(qn("w:val"), "0000FF"); rpr.append(c)
+    u = OxmlElement("w:u"); u.set(qn("w:val"), "single"); rpr.append(u)
+    run.append(rpr)
+    t = OxmlElement("w:t"); t.text = text; run.append(t)
+    hyper.append(run); paragraph._p.append(hyper)
+
+
+def _render_rich_into(part, html, alignment, base_size, is_footer):
+    """Rend un fragment HTML enrichi (couleur/gras/listes) dans un en-tête/pied."""
+    from docx.shared import Pt, RGBColor
+    added = False
+    for node in parse_html(html):
+        if node["kind"] in ("heading", "paragraph"):
+            p = part.add_paragraph(); p.alignment = alignment
+            _add_inline(p, node["html"], None, _add_hyperlink_part)
+            for run in p.runs:
+                run.font.size = Pt(base_size + (1 if node["kind"] == "heading" else 0))
+                if node["kind"] == "heading":
+                    run.bold = True
+            added = True
+        elif node["kind"] == "list":
+            for item in node["items"]:
+                p = part.add_paragraph(); p.alignment = alignment
+                p.add_run("• ").font.size = Pt(base_size)
+                _add_inline(p, item, None, _add_hyperlink_part)
+                for run in p.runs:
+                    run.font.size = Pt(base_size)
+                added = True
+    return added
 
 
 def _contacts_docx(doc, block, ctx, styles):
@@ -1094,3 +1227,4 @@ BLOCK_RENDERERS["md"] = _render_md
 BLOCK_RENDERERS["brochure"] = render_docx   # Brochure -> Word
 BLOCK_RENDERERS["lettre"] = render_docx     # Lettre  -> Word
 BLOCK_RENDERERS["mail"] = _render_md        # Mail    -> Markdown
+BLOCK_RENDERERS["offre"] = render_docx      # Offre   -> Word

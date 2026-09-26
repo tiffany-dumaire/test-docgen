@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { PreviewDialog } from '../../shared/preview-dialog';
+import { PreviewDialog } from '@shared/preview-dialog';
 import { PreviewResult } from './document.service';
 
 @Injectable({ providedIn: 'root' })

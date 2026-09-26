@@ -1,0 +1,32 @@
+    <div class="rte">
+      <div class="toolbar">
+        <select (change)="format($event)" title="Style">
+          <option value="">Paragraphe</option>
+          <option value="H1">Titre 1</option>
+          <option value="H2">Titre 2</option>
+          <option value="H3">Titre 3</option>
+          <option value="H4">Titre 4</option>
+          <option value="H5">Titre 5</option>
+        </select>
+        <button type="button" (click)="cmd('bold')" title="Gras"><b>G</b></button>
+        <button type="button" (click)="cmd('italic')" title="Italique"><i>I</i></button>
+        <button type="button" (click)="cmd('underline')" title="Souligné"><u>S</u></button>
+        <span class="sep"></span>
+        <button type="button" (click)="cmd('insertUnorderedList')" title="Liste à puces">• —</button>
+        <button type="button" (click)="cmd('insertOrderedList')" title="Liste numérotée">1. —</button>
+        <span class="sep"></span>
+        <label class="colorbtn" title="Couleur du texte">
+          <span style="font-weight:700">A</span>
+          <input type="color" (input)="setColor($event)" value="#ec6608" />
+        </label>
+        <button type="button" (click)="addLink()" title="Lien">🔗</button>
+        <button type="button" (click)="cmd('removeFormat')" title="Effacer le format">✕</button>
+      </div>
+      <div
+        #editor
+        class="editable"
+        contenteditable="true"
+        (input)="onInput()"
+        (blur)="onInput()"
+      ></div>
+    </div>

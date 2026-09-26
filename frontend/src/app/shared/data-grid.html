@@ -1,0 +1,45 @@
+    <div class="grid-wrap">
+      <table class="grid">
+        <thead>
+          <tr>
+            <th class="rownum"></th>
+            @for (col of model.columns; track $index) {
+              <th>
+                @if (allowColumns) {
+                  <div class="colhead">
+                    <input [(ngModel)]="model.columns[$index]" placeholder="Colonne" (ngModelChange)="changed()" />
+                    <button class="mini" title="Supprimer la colonne" (click)="removeColumn($index)">✕</button>
+                  </div>
+                } @else {
+                  <span>{{ col }}</span>
+                }
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of model.rows; track $index; let ri = $index) {
+            <tr>
+              <td class="rownum">{{ ri + 1 }}</td>
+              @for (col of model.columns; track $index; let ci = $index) {
+                <td>
+                  <input [ngModel]="cell(ri, ci)" (ngModelChange)="setCell(ri, ci, $event)" />
+                </td>
+              }
+              <td class="rowdel">
+                <button class="mini" title="Supprimer la ligne" (click)="removeRow(ri)">✕</button>
+              </td>
+            </tr>
+          }
+          @if (!model.rows.length) {
+            <tr><td [attr.colspan]="model.columns.length + 1" class="muted empty-row">Aucune ligne. Cliquez sur « + Ligne ».</td></tr>
+          }
+        </tbody>
+      </table>
+      <div class="grid-actions">
+        <button class="btn btn-sm btn-ghost" (click)="addRow()">+ Ligne</button>
+        @if (allowColumns) {
+          <button class="btn btn-sm btn-ghost" (click)="addColumn()">+ Colonne</button>
+        }
+      </div>
+    </div>
