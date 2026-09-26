@@ -8,8 +8,16 @@ import { ToastService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PreviewService } from '../../core/services/preview.service';
 import { Block, DocumentTemplate, FormTemplate, LANGUAGES } from '../../core/models';
+import { FormSchemaEditor } from '../forms/form-schema-editor';
 
 interface TypeTab { key: string; label: string; icon: string; }
+
+const TYPE_COLORS: Record<string, string> = {
+  docx: 'var(--doc-word)', pdf: 'var(--doc-pdf)', xlsx: 'var(--doc-xls)',
+  a3: 'var(--doc-a3)', md: 'var(--doc-md)', pptx: 'var(--doc-ppt)',
+  brochure: 'var(--doc-word)', lettre: 'var(--doc-letter)', mail: 'var(--doc-mail)',
+  offre: 'var(--doc-stats)',
+};
 
 const TYPE_TABS: TypeTab[] = [
   { key: 'docx', label: 'Word', icon: '📝' },
@@ -48,14 +56,17 @@ const TYPE_TABS: TypeTab[] = [
             @if (byType(tab.key).length) {
               <div class="grid-cards">
                 @for (t of byType(tab.key); track t.id) {
-                  <div class="card">
-                    <div class="row between">
-                      <strong>{{ cardName(t) }}</strong>
-                      <span class="badge badge-type">{{ cardFlag(t) }} {{ tab.label }}</span>
+                  <div class="card tpl-card" [style.--tc]="colorFor(tab.key)">
+                    <div class="tpl-head">
+                      <span class="tpl-ico">{{ tab.icon }}</span>
+                      <div class="tpl-title">
+                        <strong>{{ cardName(t) }}</strong>
+                        <span class="tpl-sub">{{ cardFlag(t) }} {{ tab.label }} · {{ summary(t) }}</span>
+                      </div>
+                      @if (t.is_system) { <span class="chip-sys">{{ 'templates.system' | transloco }}</span> }
                     </div>
-                    <p class="muted" style="min-height:2.4em">{{ t.description }}</p>
-                    <div class="tag">{{ summary(t) }}</div>
-                    <div class="row" style="gap:.4rem; margin-top:.6rem; flex-wrap:wrap">
+                    <p class="tpl-desc">{{ t.description || '—' }}</p>
+                    <div class="tpl-actions">
                       @if (t.is_block_based || t.builder_key === 'excel_workbook' || t.doc_type === 'a3') {
                         <a class="btn btn-sm btn-ghost" [routerLink]="['/templates', t.id]">✏️ {{ 'common.edit' | transloco }}</a>
                       } @else {
@@ -68,10 +79,8 @@ const TYPE_TABS: TypeTab[] = [
                         <button class="btn btn-sm btn-ghost" (click)="exportA3(t, 'svg')">⬇ SVG</button>
                       }
                       <button class="btn btn-sm btn-ghost" (click)="duplicate(t)">⧉ {{ 'templates.duplicate' | transloco }}</button>
-                      @if (!t.is_system) {
-                        @if (canManage()) { <button class="btn btn-sm btn-danger" (click)="remove(t)">{{ 'templates.delete_short' | transloco }}</button> }
-                      } @else {
-                        <span class="tag">{{ 'templates.system' | transloco }}</span>
+                      @if (!t.is_system && canManage()) {
+                        <button class="btn btn-sm btn-danger" (click)="remove(t)">{{ 'templates.delete_short' | transloco }}</button>
                       }
                     </div>
                   </div>
@@ -79,8 +88,9 @@ const TYPE_TABS: TypeTab[] = [
               </div>
             } @else {
               <div class="empty">
-                {{ 'templates.empty' | transloco: { type: tab.label } }}
-                <a routerLink="/templates/new">{{ 'templates.create_one' | transloco }}</a>.
+                <span class="empty-ico">{{ tab.icon }}</span>
+                <div>{{ 'templates.empty' | transloco: { type: tab.label } }}</div>
+                <a class="btn btn-sm btn-primary" routerLink="/templates/new">+ {{ 'templates.create_one' | transloco }}</a>
               </div>
             }
           </div>
@@ -97,14 +107,16 @@ const TYPE_TABS: TypeTab[] = [
           @if (filteredForms().length) {
             <div class="grid-cards" style="margin-top:1rem">
               @for (ft of filteredForms(); track ft.id) {
-                <div class="card">
-                  <div class="row between">
-                    <strong>{{ ft.name }}</strong>
-                    <span class="badge badge-type">{{ 'templates.form_badge' | transloco }}</span>
+                <div class="card tpl-card" [style.--tc]="'var(--doc-stats)'">
+                  <div class="tpl-head">
+                    <span class="tpl-ico">📋</span>
+                    <div class="tpl-title">
+                      <strong>{{ ft.name }}</strong>
+                      <span class="tpl-sub">{{ 'templates.form_summary' | transloco: { q: qCount(ft), d: ft.diagrams.length, f: ft.form_count } }}</span>
+                    </div>
                   </div>
-                  <p class="muted" style="min-height:2.4em">{{ ft.description }}</p>
-                  <div class="tag">{{ 'templates.form_summary' | transloco: { q: ft.schema.length, d: ft.diagrams.length, f: ft.form_count } }}</div>
-                  <div class="row" style="gap:.4rem; margin-top:.6rem; flex-wrap:wrap">
+                  <p class="tpl-desc">{{ ft.description || '—' }}</p>
+                  <div class="tpl-actions">
                     <a class="btn btn-sm btn-ghost" [routerLink]="['/form-templates', ft.id]">✏️ {{ 'common.edit' | transloco }}</a>
                     <button class="btn btn-sm btn-ghost" (click)="instantiate(ft)">＋ {{ 'templates.generate_form' | transloco }}</button>
                     @if (canManage()) { <button class="btn btn-sm btn-danger" (click)="removeForm(ft)">{{ 'templates.delete_short' | transloco }}</button> }
@@ -126,6 +138,22 @@ const TYPE_TABS: TypeTab[] = [
     .tabpad { padding-top: 1.2rem; }
     .lang-pill { border:1px solid var(--border-strong); background:var(--surface); border-radius:999px; padding:.2rem .7rem; cursor:pointer; font-size:.8rem; font-weight:600; }
     .lang-pill.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .tpl-card { position: relative; display: flex; flex-direction: column; gap: .55rem; overflow: hidden;
+      border-top: 3px solid var(--tc, var(--mat-sys-primary)); }
+    .tpl-card::before { content: none; }
+    .tpl-head { display: flex; align-items: flex-start; gap: .7rem; }
+    .tpl-ico { flex: none; width: 40px; height: 40px; border-radius: var(--pd-r-s); display: grid; place-items: center;
+      font-size: 1.2rem; background: color-mix(in srgb, var(--tc, var(--mat-sys-primary)) 16%, transparent); }
+    .tpl-title { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+    .tpl-title strong { font-size: 1rem; line-height: 1.2; }
+    .tpl-sub { font-size: .74rem; color: var(--muted); margin-top: .15rem; }
+    .chip-sys { flex: none; font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+      background: var(--mat-sys-surface-container-highest); color: var(--muted); border-radius: 6px; padding: .12rem .4rem; }
+    .tpl-desc { margin: 0; color: var(--muted); font-size: .86rem; min-height: 2.4em;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .tpl-actions { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: auto; padding-top: .3rem;
+      border-top: 1px solid var(--border); }
+    .tpl-card h3:first-child::before { content: none; }
   `],
 })
 export class TemplateList {
@@ -182,6 +210,11 @@ export class TemplateList {
   filteredForms(): FormTemplate[] {
     const l = this.lang();
     return this.formTemplates().filter((t) => l === 'all' || this.langsOf(t).includes(l));
+  }
+
+  colorFor(key: string): string { return TYPE_COLORS[key] || 'var(--mat-sys-primary)'; }
+  qCount(ft: FormTemplate): number {
+    return FormSchemaEditor.questions(FormSchemaEditor.toSections((ft.schema || []) as any[])).length;
   }
 
   summary(t: DocumentTemplate): string {

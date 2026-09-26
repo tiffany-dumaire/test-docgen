@@ -32,6 +32,7 @@ export const routes: Routes = [
       { path: 'form-templates/:id', loadComponent: () => import('./features/forms/form-template-builder').then((m) => m.FormTemplateBuilder) },
       { path: 'suivi', loadComponent: () => import('./features/tracking/tracking').then((m) => m.Tracking) },
       { path: 'clients', loadComponent: () => import('./features/clients/client-list').then((m) => m.ClientList) },
+      { path: 'clients/new', loadComponent: () => import('./features/clients/client-detail').then((m) => m.ClientDetail) },
       { path: 'clients/:id', loadComponent: () => import('./features/clients/client-detail').then((m) => m.ClientDetail) },
       { path: 'teams', pathMatch: 'full', redirectTo: 'company' },
       { path: 'teams/:id', loadComponent: () => import('./features/teams/team-detail').then((m) => m.TeamDetail) },

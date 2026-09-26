@@ -38,23 +38,23 @@ interface NavItem { path: string; icon: string; label: string; }
               <div class="brandtext"><strong>DocuGen</strong><div class="tag">Documents</div></div>
             }
           </div>
-          <mat-nav-list>
+          <nav class="railnav" [class.israil]="rail()">
             @for (n of nav; track n.path) {
-              <a mat-list-item [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()"
+              <a [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()" class="railitem"
                  [matTooltip]="rail() ? (n.label | transloco) : ''" matTooltipPosition="right">
-                <mat-icon matListItemIcon>{{ n.icon }}</mat-icon>
-                @if (!rail()) { <span matListItemTitle>{{ n.label | transloco }}</span> }
+                <span class="ico"><mat-icon>{{ n.icon }}</mat-icon></span>
+                <span class="lbl">{{ n.label | transloco }}</span>
               </a>
             }
             <div class="sep"></div>
             @for (n of navBottom; track n.path) {
-              <a mat-list-item [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()"
+              <a [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()" class="railitem"
                  [matTooltip]="rail() ? (n.label | transloco) : ''" matTooltipPosition="right">
-                <mat-icon matListItemIcon>{{ n.icon }}</mat-icon>
-                @if (!rail()) { <span matListItemTitle>{{ n.label | transloco }}</span> }
+                <span class="ico"><mat-icon>{{ n.icon }}</mat-icon></span>
+                <span class="lbl">{{ n.label | transloco }}</span>
               </a>
             }
-          </mat-nav-list>
+          </nav>
         </mat-sidenav>
 
         <mat-sidenav-content class="main">
@@ -144,12 +144,21 @@ interface NavItem { path: string; icon: string; label: string; }
       display: grid; place-items: center; background: var(--brand, var(--mat-sys-primary)); color: var(--mat-sys-on-primary); }
     .brand strong { color: var(--mat-sys-on-surface); font-family: var(--pd-display); letter-spacing: var(--pd-display-track); font-size: 1.1rem; }
     .brand .tag { color: var(--mat-sys-on-surface-variant); font-size: .7rem; }
-    mat-nav-list { --mat-list-list-item-label-text-color: var(--mat-sys-on-surface-variant); padding: 0 .5rem; }
-    mat-nav-list a { border-radius: var(--pd-r-btn); }
-    mat-nav-list a.active { background: var(--mat-sys-secondary-container);
-      color: var(--mat-sys-on-secondary-container); border-radius: var(--pd-r-btn); }
-    mat-nav-list a.active mat-icon, mat-nav-list a.active span { color: var(--mat-sys-on-secondary-container); }
-    mat-nav-list mat-icon { color: var(--mat-sys-on-surface-variant); }
+    /* Navigation rail / drawer (Material 3) */
+    .railnav { display: flex; flex-direction: column; gap: .15rem; padding: .5rem; }
+    .railitem { display: flex; align-items: center; gap: .85rem; padding: .25rem .55rem; border-radius: var(--pd-r-btn);
+      color: var(--mat-sys-on-surface-variant); text-decoration: none; transition: background .14s ease, color .14s ease; }
+    .railitem:hover { background: color-mix(in srgb, var(--mat-sys-on-surface) 5%, transparent); text-decoration: none; }
+    .railitem .ico { display: grid; place-items: center; width: 58px; height: 34px; border-radius: 999px; flex: none;
+      transition: background .16s ease; }
+    .railitem .ico mat-icon { color: var(--mat-sys-on-surface-variant); }
+    .railitem .lbl { font-weight: 600; font-size: .9rem; white-space: nowrap; }
+    .railitem.active { color: var(--mat-sys-on-secondary-container); }
+    .railitem.active .ico { background: var(--mat-sys-secondary-container); }
+    .railitem.active .ico mat-icon { color: var(--mat-sys-on-secondary-container); }
+    /* Mode rail : icônes empilées sur un petit libellé */
+    .railnav.israil .railitem { flex-direction: column; gap: .1rem; padding: .35rem 0; }
+    .railnav.israil .railitem .lbl { font-size: .6rem; font-weight: 600; opacity: .9; }
     .sep { height: 1px; background: var(--mat-sys-outline-variant); margin: .5rem .8rem; }
     /* Menu de thème */
     .tm-head { padding: .4rem 1rem .2rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--mat-sys-on-surface-variant); font-weight: 700; }
@@ -174,7 +183,7 @@ interface NavItem { path: string; icon: string; label: string; }
     @media (max-width: 640px) { .uname { display: none; } }
     .menuhead { padding: .6rem 1rem; border-bottom: 1px solid var(--mat-sys-outline-variant); }
     .menuhead .mn { font-weight: 700; } .menuhead .mr { font-size: .75rem; color: var(--mat-sys-outline); text-transform: capitalize; }
-    .content { padding: 1.8rem 2.2rem; max-width: 1280px; }
+    .content { padding: 1.8rem 2.2rem; max-width: 1240px; margin: 0 auto; width: 100%; }
     @media (max-width: 700px) { .content { padding: 1rem; } }
     .toast { position: fixed; bottom: 1.4rem; right: 1.4rem; z-index: 1000; background: #0f172a; color: #fff;
       padding: .7rem .8rem .7rem 1rem; border-radius: 12px; box-shadow: 0 18px 44px rgba(0,0,0,.3);

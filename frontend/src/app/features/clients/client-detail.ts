@@ -1,5 +1,5 @@
 import { Component, inject, signal, Input } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -27,7 +27,43 @@ interface Bundle {
     MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, MatTooltipModule, MeetingCalendar, RichTextEditor,
   ],
   template: `
-    @if (data(); as b) {
+    @if (creating()) {
+      <div class="row between">
+        <div class="row" style="gap:.8rem;align-items:center">
+          <div class="avatar new"><mat-icon>person_add</mat-icon></div>
+          <div>
+            <h1 style="margin:0">Nouveau client</h1>
+            <div class="muted">Renseignez les informations, puis créez la fiche.</div>
+          </div>
+        </div>
+        <a mat-stroked-button routerLink="/clients"><mat-icon>arrow_back</mat-icon> Clients</a>
+      </div>
+
+      <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+        <mat-tab label="Informations">
+          <div class="tabpad">
+            @if (editing(); as m) {
+              <div class="card stack">
+                <h3>Informations du client</h3>
+                <div class="formgrid">
+                  <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput [(ngModel)]="m.name" required /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Contact principal</mat-label><input matInput [(ngModel)]="m.contact_name" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Email</mat-label><input matInput type="email" [(ngModel)]="m.email" /></mat-form-field>
+                  <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput [(ngModel)]="m.phone" /></mat-form-field>
+                  <mat-form-field appearance="outline" class="full"><mat-label>Adresse</mat-label><textarea matInput [(ngModel)]="m.address" rows="2"></textarea></mat-form-field>
+                  <mat-form-field appearance="outline" class="full"><mat-label>Notes</mat-label><textarea matInput [(ngModel)]="m.notes" rows="3"></textarea></mat-form-field>
+                </div>
+                <div class="row" style="gap:.5rem">
+                  <button mat-flat-button color="primary" (click)="saveEdit()"><mat-icon>save</mat-icon> Créer le client</button>
+                  <a mat-stroked-button routerLink="/clients">Annuler</a>
+                </div>
+                <p class="muted" style="font-size:.82rem;margin:0">Les projets, contacts, réunions et le journal seront disponibles une fois la fiche créée.</p>
+              </div>
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    } @else if (data(); as b) {
       <div class="row between">
         <div class="row" style="gap:.8rem;align-items:center">
           <div class="avatar">{{ initials(b.client.name) }}</div>
@@ -216,6 +252,7 @@ interface Bundle {
     .filters mat-form-field { width: 200px; }
     .mini { font-size: .8rem; }
     .avatar { width: 3rem; height: 3rem; border-radius: 50%; background: var(--primary, #ec6608); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; }
+    .avatar.new { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); }
     .formgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
     .formgrid .full { grid-column: 1 / -1; } .formgrid mat-form-field { width: 100%; }
     @media (max-width: 760px) { .formgrid { grid-template-columns: 1fr; } }
@@ -236,7 +273,9 @@ interface Bundle {
 export class ClientDetail {
   private service = inject(ClientService);
   private toast = inject(ToastService);
-  @Input() id!: string;
+  private router = inject(Router);
+  @Input() id?: string;
+  creating = () => !this.id;
   data = signal<Bundle | null>(null);
   journal = signal<JournalEntry[]>([]);
   editing = signal<Client | null>(null);
@@ -254,11 +293,17 @@ export class ClientDetail {
   };
 
   constructor() {
-    setTimeout(() => this.reload());
+    setTimeout(() => {
+      if (this.creating()) {
+        this.editing.set({ name: '', contact_name: '', email: '', phone: '', address: '', notes: '' } as Client);
+      } else {
+        this.reload();
+      }
+    });
   }
 
   reload() {
-    this.service.detailBundle(+this.id).subscribe((b) => {
+    this.service.detailBundle(+this.id!).subscribe((b) => {
       this.data.set(b);
       this.journal.set(b.journal || []);
     });
@@ -272,6 +317,13 @@ export class ClientDetail {
   saveEdit() {
     const m = this.editing();
     if (!m || !m.name?.trim()) { this.toast.error('Le nom est requis.'); return; }
+    if (this.creating()) {
+      this.service.create(m).subscribe({
+        next: (c) => { this.toast.success('Client créé.'); this.router.navigate(['/clients', c.id]); },
+        error: () => this.toast.error('Création impossible.'),
+      });
+      return;
+    }
     this.service.update(m.id!, m).subscribe({
       next: () => { this.toast.success('Fiche client mise à jour.'); this.editing.set(null); this.reload(); },
       error: () => this.toast.error('Enregistrement impossible.'),
@@ -289,7 +341,7 @@ export class ClientDetail {
   }
   addJournal() {
     if (!this.hasContent(this.njHtml)) return;
-    this.service.addJournal(+this.id, { category: this.njCat, confidentiality: this.njConf, body_html: this.njHtml })
+    this.service.addJournal(+this.id!, { category: this.njCat, confidentiality: this.njConf, body_html: this.njHtml })
       .subscribe(() => { this.njHtml = ''; this.reload(); });
   }
 
