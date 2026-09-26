@@ -76,56 +76,6 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
                 <input #pl type="file" accept="image/*" hidden (change)="onLogo($event)" />
               </div>
             </div>
-
-            <div class="field">
-              <div class="row between">
-                <label>🖥️ Instances / machines</label>
-                <button class="btn btn-sm btn-ghost" type="button" (click)="addInstance(m)">+ Ajouter</button>
-              </div>
-              @for (inst of m.instances ?? []; track $index) {
-                <div class="inst-row">
-                  <input [(ngModel)]="inst.name" placeholder="Nom (ex : Prod web)" />
-                  <input [(ngModel)]="inst.ip" placeholder="IP machine (ex : 10.0.0.4)" />
-                  <input [(ngModel)]="inst.domain" placeholder="Domaine (ex : app.client.ch)" />
-                  <input [(ngModel)]="inst.url" placeholder="URL (facultatif)" />
-                  <button class="btn btn-sm btn-danger" type="button" (click)="removeInstance(m, $index)">✕</button>
-                </div>
-              } @empty { <p class="hint" style="margin:.2rem 0">Aucune instance. Elles s'affichent en cartes cliquables dans la vue d'ensemble.</p> }
-            </div>
-
-            <div class="field">
-              <div class="row between">
-                <label>🧩 Champs personnalisés</label>
-                <button class="btn btn-sm btn-ghost" (click)="addFieldDef(m)">+ Définir un champ</button>
-              </div>
-              @for (def of m.custom_field_defs ?? []; track $index) {
-                <div class="row" style="gap:.4rem; margin-bottom:.3rem; align-items:end">
-                  <input [(ngModel)]="def.label" placeholder="Libellé" style="flex:1" (ngModelChange)="syncFieldKey(def)" />
-                  <select [(ngModel)]="def.type" style="width:150px">
-                    <option value="text">Texte</option><option value="textarea">Texte long</option>
-                    <option value="number">Nombre</option><option value="date">Date</option>
-                    <option value="boolean">Oui/Non</option><option value="select">Liste</option>
-                  </select>
-                  @if (def.type === 'select') {
-                    <input [ngModel]="(def.options ?? []).join(', ')" (ngModelChange)="def.options = splitList($event)" placeholder="Options" style="flex:1" />
-                  }
-                  <span class="field" style="margin:0;flex:1">
-                    @switch (def.type) {
-                      @case ('textarea') { <input [ngModel]="cfVal(m, def.key)" (ngModelChange)="setCf(m, def.key, $event)" placeholder="Valeur" /> }
-                      @case ('boolean') { <select [ngModel]="cfVal(m, def.key)" (ngModelChange)="setCf(m, def.key, $event)"><option [ngValue]="true">Oui</option><option [ngValue]="false">Non</option></select> }
-                      @case ('select') { <select [ngModel]="cfVal(m, def.key)" (ngModelChange)="setCf(m, def.key, $event)"><option value="">—</option>@for (o of def.options ?? []; track o) { <option [value]="o">{{ o }}</option> }</select> }
-                      @default { <input [type]="def.type === 'number' ? 'number' : def.type === 'date' ? 'date' : 'text'" [ngModel]="cfVal(m, def.key)" (ngModelChange)="setCf(m, def.key, $event)" placeholder="Valeur" /> }
-                    }
-                  </span>
-                  <button class="btn btn-sm btn-danger" (click)="m.custom_field_defs!.splice($index, 1)">✕</button>
-                </div>
-              }
-            </div>
-
-            <div class="field">
-              <label>🎨 Styles du projet (hérités par ses modèles)</label>
-              <app-style-editor [styles]="projStyles(m)" />
-            </div>
           </div>
         </mat-tab>
 
@@ -177,6 +127,58 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
         </mat-tab>
 
         @if (isEdit()) {
+          <!-- ===== INFORMATIONS COMPLÉMENTAIRES ===== -->
+          <mat-tab label="Informations complémentaires">
+            <div class="tabpad card stack">
+              <div class="row between">
+                <label>🧩 Champs personnalisés</label>
+                <button class="btn btn-sm btn-ghost" (click)="addFieldDef(m)">+ Définir un champ</button>
+              </div>
+              @for (def of m.custom_field_defs ?? []; track $index) {
+                <div class="row" style="gap:.4rem; margin-bottom:.3rem; align-items:end">
+                  <input [(ngModel)]="def.label" placeholder="Libellé" style="flex:1" (ngModelChange)="syncFieldKey(def)" />
+                  <select [(ngModel)]="def.type" style="width:150px">
+                    <option value="text">Texte</option><option value="textarea">Texte long</option>
+                    <option value="number">Nombre</option><option value="date">Date</option>
+                    <option value="boolean">Oui/Non</option><option value="select">Liste</option>
+                  </select>
+                  @if (def.type === 'select') {
+                    <input [ngModel]="(def.options ?? []).join(', ')" (ngModelChange)="def.options = splitList($event)" placeholder="Options" style="flex:1" />
+                  }
+                  <span class="field" style="margin:0;flex:1">
+                    @switch (def.type) {
+                      @case ('textarea') { <input [ngModel]="cfVal(m, def.key)" (ngModelChange)="setCf(m, def.key, $event)" placeholder="Valeur" /> }
+                      @case ('boolean') { <select [ngModel]="cfVal(m, def.key)" (ngModelChange)="setCf(m, def.key, $event)"><option [ngValue]="true">Oui</option><option [ngValue]="false">Non</option></select> }
+                      @case ('select') { <select [ngModel]="cfVal(m, def.key)" (ngModelChange)="setCf(m, def.key, $event)"><option value="">—</option>@for (o of def.options ?? []; track o) { <option [value]="o">{{ o }}</option> }</select> }
+                      @default { <input [type]="def.type === 'number' ? 'number' : def.type === 'date' ? 'date' : 'text'" [ngModel]="cfVal(m, def.key)" (ngModelChange)="setCf(m, def.key, $event)" placeholder="Valeur" /> }
+                    }
+                  </span>
+                  <button class="btn btn-sm btn-danger" (click)="m.custom_field_defs!.splice($index, 1)">✕</button>
+                </div>
+              } @empty { <p class="hint">Aucun champ personnalisé. Ajoutez-en pour compléter la fiche du projet.</p> }
+            </div>
+          </mat-tab>
+
+          <!-- ===== INSTANCES ===== -->
+          <mat-tab label="Instances">
+            <div class="tabpad card stack">
+              <div class="row between">
+                <div><strong>🖥️ Instances / machines</strong>
+                  <div class="muted" style="font-size:.82rem">Serveurs / instances du projet (nom, IP, domaine, URL).</div></div>
+                <button class="btn btn-sm btn-ghost" type="button" (click)="addInstance(m)">+ Ajouter</button>
+              </div>
+              @for (inst of m.instances ?? []; track $index) {
+                <div class="inst-row">
+                  <input [(ngModel)]="inst.name" placeholder="Nom (ex : Prod web)" />
+                  <input [(ngModel)]="inst.ip" placeholder="IP machine (ex : 10.0.0.4)" />
+                  <input [(ngModel)]="inst.domain" placeholder="Domaine (ex : app.client.ch)" />
+                  <input [(ngModel)]="inst.url" placeholder="URL (facultatif)" />
+                  <button class="btn btn-sm btn-danger" type="button" (click)="removeInstance(m, $index)">✕</button>
+                </div>
+              } @empty { <p class="hint" style="margin:.2rem 0">Aucune instance. Elles s'affichent en cartes cliquables dans la vue d'ensemble.</p> }
+            </div>
+          </mat-tab>
+
           <!-- ===== DÉPÔTS GIT ===== -->
           <mat-tab label="Dépôts Git">
             <div class="tabpad card stack">
@@ -225,6 +227,14 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, Team, TeamMember } 
                   <button class="btn btn-sm btn-danger" (click)="m.assignments!.splice($index, 1)">✕</button>
                 </div>
               }
+            </div>
+          </mat-tab>
+
+          <!-- ===== STYLE DU PROJET (dernier) ===== -->
+          <mat-tab label="Style du projet">
+            <div class="tabpad card stack">
+              <label>🎨 Styles du projet (hérités par ses modèles)</label>
+              <app-style-editor [styles]="projStyles(m)" />
             </div>
           </mat-tab>
         }

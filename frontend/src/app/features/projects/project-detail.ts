@@ -45,42 +45,6 @@ import { Router } from '@angular/router';
               @else { <p class="muted" style="margin:0">Aucune description.</p> }
             </div>
 
-            <div class="card"><h3>🖥️ Instances</h3>
-              @if (p.instances?.length) {
-                <div class="inst-grid">
-                  @for (inst of p.instances; track $index) {
-                    <a class="inst-card" [href]="instUrl(inst)" target="_blank" rel="noopener">
-                      <div class="inst-name">{{ inst.name || 'Instance' }} <span class="material-icons">open_in_new</span></div>
-                      @if (inst.ip) { <div class="inst-line"><span class="material-icons">dns</span> {{ inst.ip }}</div> }
-                      @if (inst.domain) { <div class="inst-line"><span class="material-icons">language</span> {{ inst.domain }}</div> }
-                    </a>
-                  }
-                </div>
-              } @else {
-                <p class="muted" style="margin:0">Aucune instance. Ajoutez-en dans <a [routerLink]="['/projects', p.id, 'edit']">l'édition du projet</a>.</p>
-              }
-            </div>
-
-            <div class="card"><h3>🌳 Dépôts Git</h3>
-              @if (p.repos?.length) {
-                <div class="repotree">
-                  @for (node of repoTree(p.repos!); track node.repo.id) {
-                    <div class="repo-node" [style.padding-left.px]="node.depth * 22">
-                      <span class="repo-branch">{{ node.depth > 0 ? '└' : '' }}</span>
-                      <span class="material-icons repo-ic">folder_open</span>
-                      @if (node.repo.url) {
-                        <a class="repo-name" [href]="repoUrl(node.repo.url)" target="_blank" rel="noopener">{{ node.repo.name || 'Dépôt' }}</a>
-                      } @else { <span class="repo-name">{{ node.repo.name || 'Dépôt' }}</span> }
-                      @if (node.repo.component) { <span class="badge badge-type">{{ node.repo.component }}</span> }
-                      @if (node.repo.instance) { <span class="repo-inst"><span class="material-icons">dns</span> {{ node.repo.instance }}</span> }
-                    </div>
-                  }
-                </div>
-              } @else {
-                <p class="muted" style="margin:0">Aucun dépôt. Ajoutez-en dans <a [routerLink]="['/projects', p.id, 'edit']">l'édition du projet</a> (onglet « Dépôts Git »).</p>
-              }
-            </div>
-
             @if (p.children?.length) {
               <div class="card"><h3>🌳 Sous-projets</h3>
                 @for (ch of p.children; track ch.id) {
@@ -104,6 +68,64 @@ import { Router } from '@angular/router';
                   <div class="contact"><strong>{{ c.full_name }}</strong><div class="muted">{{ c.role }}</div><div class="tag">{{ c.email }} · {{ c.phone }}</div></div>
                 } @empty { <div class="muted">Aucun contact interne.</div> }
               </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Informations complémentaires">
+          <div class="tabpad">
+            <div class="card"><h3>🧩 Champs personnalisés</h3>
+              @if (p.custom_field_defs?.length) {
+                <div class="infogrid">
+                  @for (def of p.custom_field_defs; track def.key) {
+                    <div><span class="k">{{ def.label }}</span><span class="v">{{ cfDisplay(p, def) }}</span></div>
+                  }
+                </div>
+              } @else { <p class="muted" style="margin:0">Aucun champ personnalisé.</p> }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Instances">
+          <div class="tabpad">
+            <div class="card"><h3>🖥️ Instances</h3>
+              @if (p.instances?.length) {
+                <div class="inst-grid">
+                  @for (inst of p.instances; track $index) {
+                    <a class="inst-card" [href]="instUrl(inst)" target="_blank" rel="noopener">
+                      <div class="inst-name">{{ inst.name || 'Instance' }} <span class="material-icons">open_in_new</span></div>
+                      @if (inst.ip) { <div class="inst-line"><span class="material-icons">dns</span> {{ inst.ip }}</div> }
+                      @if (inst.domain) { <div class="inst-line"><span class="material-icons">language</span> {{ inst.domain }}</div> }
+                    </a>
+                  }
+                </div>
+              } @else {
+                <p class="muted" style="margin:0">Aucune instance. Ajoutez-en dans <a [routerLink]="['/projects', p.id, 'edit']">l'édition du projet</a>.</p>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Dépôts Git">
+          <div class="tabpad">
+            <div class="card"><h3>🌳 Arborescence des dépôts Git</h3>
+              @if (p.repos?.length) {
+                <div class="repotree">
+                  @for (node of repoTree(p.repos!); track node.repo.id) {
+                    <div class="repo-node" [style.padding-left.px]="node.depth * 22">
+                      <span class="repo-branch">{{ node.depth > 0 ? '└' : '' }}</span>
+                      <span class="material-icons repo-ic">folder_open</span>
+                      @if (node.repo.url) {
+                        <a class="repo-name" [href]="repoUrl(node.repo.url)" target="_blank" rel="noopener">{{ node.repo.name || 'Dépôt' }}</a>
+                      } @else { <span class="repo-name">{{ node.repo.name || 'Dépôt' }}</span> }
+                      @if (node.repo.component) { <span class="badge badge-type">{{ node.repo.component }}</span> }
+                      @if (node.repo.instance) { <span class="repo-inst"><span class="material-icons">dns</span> {{ node.repo.instance }}</span> }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="muted" style="margin:0">Aucun dépôt. Ajoutez-en dans <a [routerLink]="['/projects', p.id, 'edit']">l'édition du projet</a> (onglet « Dépôts Git »).</p>
+              }
             </div>
           </div>
         </mat-tab>
@@ -286,6 +308,26 @@ import { Router } from '@angular/router';
             </div>
           </div>
         </mat-tab>
+
+        <mat-tab label="Style du projet">
+          <div class="tabpad">
+            <div class="card"><h3>🎨 Style du projet</h3>
+              @if (styleEntries(p).length) {
+                <div class="styles-grid">
+                  @for (st of styleEntries(p); track st.key) {
+                    <div class="style-row">
+                      <span class="style-key">{{ st.key }}</span>
+                      @if (st.color) { <span class="style-sw" [style.background]="st.color"></span><span class="tag">{{ st.color }}</span> }
+                      @if (st.font) { <span class="tag" [style.font-family]="st.font">{{ st.font }}</span> }
+                      @if (st.size) { <span class="tag">{{ st.size }} pt</span> }
+                      @if (st.bold) { <span class="tag">gras</span> }
+                    </div>
+                  }
+                </div>
+              } @else { <p class="muted" style="margin:0">Aucun style spécifique. Les modèles utilisent les styles par défaut / de l'entreprise.</p> }
+            </div>
+          </div>
+        </mat-tab>
       </mat-tab-group>
     }
   `,
@@ -333,6 +375,15 @@ import { Router } from '@angular/router';
       .repo-name { font-weight: 600; }
       .repo-inst { display: inline-flex; align-items: center; gap: .25rem; font-size: .78rem; color: var(--muted); font-family: ui-monospace, monospace; }
       .repo-inst .material-icons { font-size: 14px; }
+      .infogrid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem 2rem; }
+      @media (max-width: 700px) { .infogrid { grid-template-columns: 1fr; } }
+      .infogrid .k { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 700; }
+      .infogrid .v { font-size: 1rem; }
+      .styles-grid { display: flex; flex-direction: column; gap: .5rem; }
+      .style-row { display: flex; align-items: center; gap: .5rem; padding: .3rem 0; border-bottom: 1px solid var(--border); }
+      .style-row:last-child { border-bottom: none; }
+      .style-key { font-weight: 600; min-width: 120px; text-transform: capitalize; }
+      .style-sw { width: 18px; height: 18px; border-radius: 5px; border: 1px solid var(--border); }
     `,
   ],
 })
@@ -375,6 +426,23 @@ export class ProjectDetail {
     if (j.is_automatic && j.event) return ProjectDetail.EVENT_ICONS[j.event] || 'ℹ️';
     return ({ note: '🗒️', decision: '✅', risk: '⚠️', action: '⚡',
               incident: '🔥', info: 'ℹ️', event: '•' } as Record<string, string>)[j.category] || '🗒️';
+  }
+  cfDisplay(p: any, def: { key: string; type?: string }): string {
+    const v = (p.custom_fields || {})[def.key];
+    if (v === undefined || v === null || v === '') return '—';
+    if (def.type === 'boolean') return v ? 'Oui' : 'Non';
+    return String(v);
+  }
+  styleEntries(p: any): { key: string; color?: string; font?: string; size?: number; bold?: boolean }[] {
+    const styles = p.styles || {};
+    const out: { key: string; color?: string; font?: string; size?: number; bold?: boolean }[] = [];
+    for (const [key, val] of Object.entries(styles)) {
+      if (val && typeof val === 'object') {
+        const o = val as any;
+        out.push({ key, color: o.color, font: o.font, size: o.size, bold: o.bold });
+      }
+    }
+    return out;
   }
   repoUrl(url?: string): string {
     if (!url) return '#';

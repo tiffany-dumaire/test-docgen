@@ -1,6 +1,7 @@
 import { Component, inject, signal, Input, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DocumentService } from '../../core/services/document.service';
@@ -32,7 +33,7 @@ import {
 
     @if (doc(); as d) {
       <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
-        <mat-tab label="Contenu à remplir">
+        <mat-tab label="Informations de base (Paramètres)">
         <div class="stack tabpad">
           <div class="card stack">
             <h3>Paramètres</h3>
@@ -75,6 +76,16 @@ import {
             </div>
           </div>
 
+          <div class="row">
+            <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+              {{ isEdit() ? 'Enregistrer' : 'Créer le document' }}
+            </button>
+          </div>
+        </div>
+        </mat-tab>
+
+        <mat-tab label="Contenu">
+        <div class="stack tabpad">
           <!-- Saisie assistée depuis les blocs -->
           @if (activeTemplate(); as tpl) {
             @if (isExcelWorkbook(tpl)) {
@@ -201,7 +212,29 @@ import {
         </div>
         </mat-tab>
 
-        <mat-tab label="Génération & versions">
+        <mat-tab label="Aperçu">
+        <div class="stack tabpad">
+          <div class="card stack">
+            <div class="row between">
+              <h3>Aperçu du document</h3>
+              <button class="btn btn-sm btn-primary" (click)="refreshPreview()" [disabled]="previewing() || !isEdit()">
+                {{ previewing() ? 'Génération…' : '↻ Rafraîchir l\\'aperçu' }}
+              </button>
+            </div>
+            @if (!isEdit()) {
+              <p class="muted" style="margin:0">Enregistrez d'abord le document pour afficher son aperçu.</p>
+            } @else if (previewKind() === 'image' && previewImg()) {
+              <img [src]="previewImg()" class="pv-inline-img" alt="aperçu" />
+            } @else if (previewFrame()) {
+              <iframe class="pv-inline" [src]="previewFrame()" title="Aperçu"></iframe>
+            } @else {
+              <p class="muted" style="margin:0">Cliquez sur « Rafraîchir l'aperçu » pour générer un aperçu à jour du document.</p>
+            }
+          </div>
+        </div>
+        </mat-tab>
+
+        <mat-tab label="Générations et versions">
         <div class="stack tabpad">
           <div class="card stack">
             <h3>Générer une version</h3>
@@ -284,6 +317,8 @@ import {
       .preview-list { margin: 0.2rem 0 0.2rem 1rem; color: var(--muted); font-size: 0.88rem; }
       .preview-thumb { max-width: 100%; border: 1px solid var(--border); border-radius: 6px; }
       .preview-code { background: var(--bg); border-radius: 6px; padding: 0.5rem 0.7rem; font-family: ui-monospace, monospace; font-size: 0.8rem; white-space: pre-wrap; }
+      .pv-inline { width: 100%; height: 78vh; min-height: 520px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+      .pv-inline-img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
     `,
   ],
 })
@@ -293,8 +328,15 @@ export class DocumentEditor {
   private companySvc = inject(CompanyService);
   private toast = inject(ToastService);
   private previewSvc = inject(PreviewService);
+  private san = inject(DomSanitizer);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+
+  // Aperçu inline (onglet « Aperçu »)
+  previewFrame = signal<SafeResourceUrl | null>(null);
+  previewImg = signal<string | null>(null);
+  previewKind = signal<string | null>(null);
+  private previewUrl: string | null = null;
 
   @Input() id?: string;
 
@@ -504,6 +546,33 @@ export class DocumentEditor {
       error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
     });
   }
+
+  /** Aperçu affiché en ligne dans l'onglet « Aperçu ». */
+  refreshPreview() {
+    const d = this.doc();
+    if (!d?.id) { this.toast.error('Enregistrez d\'abord le document.'); return; }
+    this.previewing.set(true);
+    this.service.update(d.id, d).subscribe({
+      next: () => {
+        this.service.preview(d.id!).subscribe({
+          next: (r) => {
+            this.previewing.set(false);
+            const bytes = Uint8Array.from(atob(r.b64 || ''), (c) => c.charCodeAt(0));
+            const blob = new Blob([bytes], { type: r.mime || 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
+            this.previewUrl = url;
+            this.previewKind.set(r.kind);
+            if (r.kind === 'image') { this.previewImg.set(url); this.previewFrame.set(null); }
+            else { this.previewFrame.set(this.san.bypassSecurityTrustResourceUrl(url)); this.previewImg.set(null); }
+          },
+          error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+        });
+      },
+      error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+    });
+  }
+  ngOnDestroy() { if (this.previewUrl) URL.revokeObjectURL(this.previewUrl); }
 
   save() {
     const d = this.doc();
