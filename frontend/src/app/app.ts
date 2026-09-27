@@ -179,14 +179,16 @@ interface NavItem { path: string; icon: string; label: string; }
 
     /* Conteneur (sidenav + contenu) sous la barre, occupe le reste de la hauteur */
     .shell { flex: 1 1 auto; min-height: 0; background: var(--mat-sys-surface-container-low, #f4f5fb); }
-    /* Fond du contenu : voiles de couleur du thème + texture pointillée discrète */
+    /* Fond du contenu : voiles de couleur du thème + line-art « papier plié » (masque SVG, teinté par le thème) */
     .main { position: relative; background:
-        radial-gradient(1200px 560px at 12% -12%, color-mix(in srgb, var(--mat-sys-primary) 10%, transparent), transparent 58%),
-        radial-gradient(1000px 520px at 100% -6%, color-mix(in srgb, var(--mat-sys-tertiary) 9%, transparent), transparent 55%),
+        radial-gradient(1200px 620px at 78% 30%, color-mix(in srgb, var(--mat-sys-primary) 9%, transparent), transparent 60%),
+        radial-gradient(1000px 520px at 8% -8%, color-mix(in srgb, var(--mat-sys-tertiary) 7%, transparent), transparent 55%),
         var(--mat-sys-surface); }
-    .main::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: .6;
-      background-image: radial-gradient(color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent) 1px, transparent 1.4px);
-      background-size: 24px 24px; mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 92%); }
+    .main::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background: var(--mat-sys-primary); opacity: .15;
+      -webkit-mask: url('/images/bg-lines.svg') center / cover no-repeat;
+      mask: url('/images/bg-lines.svg') center / cover no-repeat; }
+    :root.dark .main::before { opacity: .18; }
 
     /* ===== Sidenav original, collé au thème, avec motif « papier plié » ===== */
     .nav { width: 244px; overflow: hidden; color: var(--mat-sys-on-surface);
