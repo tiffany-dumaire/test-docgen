@@ -33,9 +33,11 @@ interface NavItem { path: string; icon: string; label: string; }
       <div class="app-shell">
         <!-- ===== Barre supérieure : pleine largeur de l'application ===== -->
         <mat-toolbar class="topbar">
-          <button mat-icon-button (click)="toggleNav()" [matTooltip]="'topbar.menu' | transloco">
-            <mat-icon>{{ (isMobile() ? !mobileOpen() : collapsed()) ? 'menu' : 'menu_open' }}</mat-icon>
-          </button>
+          @if (isMobile()) {
+            <button mat-icon-button (click)="mobileOpen.set(!mobileOpen())" [matTooltip]="'topbar.menu' | transloco">
+              <mat-icon>menu</mat-icon>
+            </button>
+          }
           <a class="brand" routerLink="/dashboard">
             <span class="logo"><img src="/images/logo/polydocs-6b.svg" alt="PolyDocs" /></span>
             <span class="brandtext"><strong>PolyDocs</strong><span class="tag">Documents</span></span>
@@ -78,10 +80,10 @@ interface NavItem { path: string; icon: string; label: string; }
             <mat-icon>{{ theme.resolvedDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
           </button>
           @if (auth.user(); as u) {
-            <button mat-button [matMenuTriggerFor]="menu" class="userbtn">
+            <button type="button" [matMenuTriggerFor]="menu" class="userbtn">
               <span class="avatar">{{ initials(u) }}</span>
               <span class="uname">{{ u.full_name || u.email }}</span>
-              <mat-icon>arrow_drop_down</mat-icon>
+              <mat-icon class="ucaret">arrow_drop_down</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
               <div class="menuhead">
@@ -110,6 +112,13 @@ interface NavItem { path: string; icon: string; label: string; }
               <polygon points="55,74 37,80 49,60" fill="currentColor" opacity=".3"/>
               <polygon points="192,40 210,47 203,72 185,65" fill="currentColor" opacity=".4"/>
             </svg>
+            @if (!isMobile()) {
+              <button type="button" class="rail-toggle" (click)="collapsed.set(!collapsed())"
+                [matTooltip]="'topbar.menu' | transloco" matTooltipPosition="right"
+                [attr.aria-label]="'topbar.menu' | transloco">
+                <mat-icon>{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+              </button>
+            }
             <nav class="railnav" [class.israil]="rail()">
               @for (n of nav; track n.path) {
                 <a [routerLink]="n.path" routerLinkActive="active" (click)="onNavClick()" class="railitem"
@@ -170,7 +179,14 @@ interface NavItem { path: string; icon: string; label: string; }
 
     /* Conteneur (sidenav + contenu) sous la barre, occupe le reste de la hauteur */
     .shell { flex: 1 1 auto; min-height: 0; background: var(--mat-sys-surface-container-low, #f4f5fb); }
-    .main { background: var(--mat-sys-surface-container-low, #f4f5fb); }
+    /* Fond du contenu : voiles de couleur du thème + texture pointillée discrète */
+    .main { position: relative; background:
+        radial-gradient(1200px 560px at 12% -12%, color-mix(in srgb, var(--mat-sys-primary) 10%, transparent), transparent 58%),
+        radial-gradient(1000px 520px at 100% -6%, color-mix(in srgb, var(--mat-sys-tertiary) 9%, transparent), transparent 55%),
+        var(--mat-sys-surface); }
+    .main::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: .6;
+      background-image: radial-gradient(color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent) 1px, transparent 1.4px);
+      background-size: 24px 24px; mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 92%); }
 
     /* ===== Sidenav original, collé au thème, avec motif « papier plié » ===== */
     .nav { width: 244px; position: relative; overflow: hidden; color: var(--mat-sys-on-surface);
@@ -182,23 +198,34 @@ interface NavItem { path: string; icon: string; label: string; }
     .nav.rail { width: 72px; }
     .nav-motif { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 58%;
       color: var(--mat-sys-primary); opacity: .13; pointer-events: none; z-index: 0; }
+    /* Bouton de réduction : flèche sur le côté (bord droit) de la sidebar */
+    .rail-toggle { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); z-index: 3;
+      width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--mat-sys-outline-variant);
+      background: var(--mat-sys-surface-container-lowest); color: var(--mat-sys-on-surface-variant);
+      display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow-xs);
+      transition: background .14s ease, color .14s ease, border-color .14s ease, box-shadow .14s ease; }
+    .rail-toggle:hover { color: var(--mat-sys-primary); border-color: var(--mat-sys-primary); box-shadow: var(--shadow); }
+    .rail-toggle mat-icon { font-size: 20px; width: 20px; height: 20px; }
 
     /* Navigation rail / drawer (Material 3) */
-    .railnav { position: relative; z-index: 1; display: flex; flex-direction: column; gap: .15rem; padding: .8rem .5rem; }
-    .railitem { display: flex; align-items: center; gap: .85rem; padding: .25rem .55rem; border-radius: var(--pd-r-btn);
+    .railnav { position: relative; z-index: 1; display: flex; flex-direction: column; gap: .2rem; padding: .9rem .55rem; }
+    .railitem { display: flex; align-items: center; gap: .75rem; padding: .4rem .5rem; border-radius: var(--pd-r-btn);
       color: var(--mat-sys-on-surface-variant); text-decoration: none; transition: background .14s ease, color .14s ease; }
     .railitem:hover { background: color-mix(in srgb, var(--mat-sys-on-surface) 5%, transparent); text-decoration: none; }
-    .railitem .ico { display: grid; place-items: center; width: 58px; height: 34px; border-radius: 999px; flex: none;
+    .railitem .ico { display: grid; place-items: center; width: 46px; height: 40px; border-radius: 999px; flex: none;
       transition: background .16s ease; }
-    .railitem .ico mat-icon { color: var(--mat-sys-on-surface-variant); }
-    .railitem .lbl { font-weight: 600; font-size: .9rem; white-space: nowrap; }
+    .railitem .ico mat-icon { font-size: 24px; width: 24px; height: 24px; line-height: 24px;
+      color: var(--mat-sys-on-surface-variant); }
+    .railitem .lbl { font-weight: 600; font-size: .92rem; white-space: nowrap; }
     .railitem.active { color: var(--mat-sys-on-secondary-container); }
     .railitem.active .ico { background: var(--mat-sys-secondary-container); }
     .railitem.active .ico mat-icon { color: var(--mat-sys-on-secondary-container); }
-    /* Mode rail : icônes empilées sur un petit libellé */
-    .railnav.israil .railitem { flex-direction: column; gap: .1rem; padding: .35rem 0; }
+    /* Mode rail : icônes centrées, empilées sur un petit libellé */
+    .railnav.israil { padding: .9rem .35rem; }
+    .railnav.israil .railitem { flex-direction: column; gap: .15rem; padding: .45rem 0; }
+    .railnav.israil .railitem .ico { width: 100%; }
     .railnav.israil .railitem .lbl { font-size: .6rem; font-weight: 600; opacity: .9; }
-    .sep { height: 1px; background: var(--mat-sys-outline-variant); margin: .5rem .8rem; }
+    .sep { height: 1px; background: var(--mat-sys-outline-variant); margin: .55rem .8rem; }
 
     /* Menu de thème */
     .tm-head { padding: .4rem 1rem .2rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--mat-sys-on-surface-variant); font-weight: 700; }
@@ -211,16 +238,20 @@ interface NavItem { path: string; icon: string; label: string; }
     .tm-modes button mat-icon { font-size: 20px; width: 20px; height: 20px; }
     .tm-modes button.on { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); border-color: transparent; }
 
-    .userbtn { display: inline-flex; align-items: center; gap: .5rem; }
-    .avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center;
-      color: var(--mat-sys-on-primary); font-weight: 700; font-size: .75rem; text-transform: uppercase;
+    .userbtn { display: inline-flex; align-items: center; gap: .5rem; flex-wrap: nowrap; white-space: nowrap;
+      height: 42px; padding: 0 .35rem 0 .45rem; border: none; background: transparent; cursor: pointer;
+      color: var(--mat-sys-on-surface); font: inherit; border-radius: 999px; transition: background .14s ease; }
+    .userbtn:hover { background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent); }
+    .userbtn .ucaret { flex: none; color: var(--mat-sys-on-surface-variant); font-size: 22px; width: 22px; height: 22px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; flex: none; display: grid; place-items: center;
+      color: var(--mat-sys-on-primary); font-weight: 700; font-size: .78rem; text-transform: uppercase;
       background: linear-gradient(135deg, var(--brand, var(--mat-sys-primary)), var(--mat-sys-tertiary)); }
     .uname { font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     @media (max-width: 640px) { .uname { display: none; } }
     .menuhead { padding: .6rem 1rem; border-bottom: 1px solid var(--mat-sys-outline-variant); }
     .menuhead .mn { font-weight: 700; } .menuhead .mr { font-size: .75rem; color: var(--mat-sys-outline); text-transform: capitalize; }
 
-    .content { padding: 1.8rem 2.2rem; max-width: 1240px; margin: 0 auto; width: 100%; }
+    .content { position: relative; z-index: 1; padding: 1.8rem 2.2rem; max-width: 1240px; margin: 0 auto; width: 100%; }
     @media (max-width: 700px) { .content { padding: 1rem; } }
 
     .toast { position: fixed; bottom: 1.4rem; right: 1.4rem; z-index: 1000; background: #0f172a; color: #fff;
