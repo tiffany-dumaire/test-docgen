@@ -189,7 +189,7 @@ interface NavItem { path: string; icon: string; label: string; }
       background-size: 24px 24px; mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 92%); }
 
     /* ===== Sidenav original, collé au thème, avec motif « papier plié » ===== */
-    .nav { width: 244px; position: relative; overflow: hidden; color: var(--mat-sys-on-surface);
+    .nav { width: 244px; overflow: hidden; color: var(--mat-sys-on-surface);
       border: none !important; border-right: 1px solid var(--mat-sys-outline-variant) !important;
       background: linear-gradient(180deg,
         color-mix(in srgb, var(--mat-sys-primary) 8%, var(--mat-sys-surface-container)) 0%,
@@ -199,8 +199,8 @@ interface NavItem { path: string; icon: string; label: string; }
     .nav-motif { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 58%;
       color: var(--mat-sys-primary); opacity: .13; pointer-events: none; z-index: 0; }
     /* Bouton de réduction : flèche sur le côté (bord droit) de la sidebar */
-    .rail-toggle { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); z-index: 3;
-      width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--mat-sys-outline-variant);
+    .rail-toggle { position: absolute; top: 50%; right: 0px; transform: translateY(-50%); z-index: 3;
+      width: 28px; padding: 0; height: 28px; border-radius: 50%; border: 1px solid var(--mat-sys-outline-variant);
       background: var(--mat-sys-surface-container-lowest); color: var(--mat-sys-on-surface-variant);
       display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow-xs);
       transition: background .14s ease, color .14s ease, border-color .14s ease, box-shadow .14s ease; }
