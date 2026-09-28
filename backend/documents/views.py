@@ -298,12 +298,18 @@ class DocumentVersionViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Export PDF à la volée pour les documents Word / PowerPoint.
         if request.query_params.get("format") == "pdf" and ext in (".docx", ".pptx"):
-            from .services import to_pdf_for_preview
+            from .services import to_pdf_for_preview, native_pdf_from_version
             content = version.file.open("rb").read()
+            # 1) Fidélité maximale via Word/LibreOffice si disponible.
             pdf = to_pdf_for_preview(content, ext)
+            # 2) Repli natif (reportlab) pour les documents Word par blocs,
+            #    sans dépendance bureautique côté serveur.
+            if pdf is None and ext == ".docx":
+                pdf = native_pdf_from_version(version)
             if pdf is None:
                 return Response(
-                    {"detail": "Conversion PDF indisponible (LibreOffice requis sur le serveur)."},
+                    {"detail": "Conversion PDF indisponible pour ce document "
+                     "(installez LibreOffice pour l'export PowerPoint → PDF)."},
                     status=503)
             resp = HttpResponse(pdf, content_type="application/pdf")
             resp["Content-Disposition"] = (

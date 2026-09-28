@@ -218,6 +218,35 @@ def to_pdf_for_preview(content: bytes, ext: str):
     return None
 
 
+def native_pdf_from_version(version):
+    """Rend un PDF nativement (reportlab), sans Word ni LibreOffice.
+
+    Utilisé comme repli pour l'export PDF des documents Word « par blocs »
+    (docx / lettre / offre / brochure) sur un serveur sans suite bureautique.
+    Renvoie les octets du PDF, ou None si le type n'est pas pris en charge.
+    """
+    document = version.document
+    dt = document.doc_type
+    if dt not in ("docx", "lettre", "offre", "brochure"):
+        return None
+    # Le rendu natif reconstruit le PDF depuis les blocs : réservé aux modèles
+    # « par blocs » (sinon le rendu Word natif nécessite LibreOffice/Word).
+    if not getattr(document.template, "is_block_based", False):
+        return None
+    try:
+        ctx = GenerationContext.build(
+            document,
+            version_number=version.version_number,
+            data=version.data_snapshot or document.data,
+            author_initials=version.author_initials or "—",
+            author_name=version.author_name or "",
+            comment=version.comment or "")
+        from .generators import block_gen
+        return block_gen.render_pdf(ctx)
+    except Exception:
+        return None
+
+
 @transaction.atomic
 def generate_version(document: Document, *, author_initials, author_name="",
                      comment="", confidentiality=None, data=None):
