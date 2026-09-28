@@ -1,6 +1,6 @@
 import { Component, inject, signal, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { ChDatePipe } from '@core/date/ch-date.pipe';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -24,7 +24,7 @@ import { Router } from '@angular/router';
   imports: [
     RouterLink,
     FormsModule,
-    DatePipe,
+    ChDatePipe,
     MatTabsModule,
     MatFormFieldModule,
     MatInputModule,

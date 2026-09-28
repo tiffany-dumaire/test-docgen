@@ -2,11 +2,13 @@ import { Component, inject, signal, Input } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { BackDirective } from '@shared/back.directive';
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { ChDatePipe } from '@core/date/ch-date.pipe';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { isoToLuxon, luxonToIso } from '@core/date/swiss-date';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -30,11 +32,12 @@ interface Bundle {
   imports: [
     RouterLink,
     FormsModule,
-    DatePipe,
+    ChDatePipe,
     MatTabsModule,
     MatTableModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
     MatSelectModule,
     MatIconModule,
     MatButtonModule,
@@ -47,6 +50,8 @@ interface Bundle {
   styleUrl: './client-detail.scss',
 })
 export class ClientDetail {
+  protected toDate = isoToLuxon;
+  protected toIso = luxonToIso;
   private service = inject(ClientService);
   private toast = inject(ToastService);
   private router = inject(Router);

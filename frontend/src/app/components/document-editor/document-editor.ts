@@ -1,10 +1,12 @@
 import { Component, inject, signal, Input, computed, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { ChDatePipe } from '@core/date/ch-date.pipe';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { isoToLuxon, luxonToIso } from '@core/date/swiss-date';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BackDirective } from '@shared/back.directive';
@@ -32,17 +34,20 @@ import {
   imports: [
     BackDirective,
     FormsModule,
-    DatePipe,
+    ChDatePipe,
     DataGrid,
     MatTabsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
     MatSelectModule,
   ],
   templateUrl: './document-editor.html',
   styleUrl: './document-editor.scss',
 })
 export class DocumentEditor implements OnDestroy {
+  protected toDate = isoToLuxon;
+  protected toIso = luxonToIso;
   private service = inject(DocumentService);
   private projectSvc = inject(ProjectService);
   private companySvc = inject(CompanyService);

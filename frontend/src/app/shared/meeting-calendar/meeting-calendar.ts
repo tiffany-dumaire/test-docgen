@@ -1,5 +1,5 @@
 import { Component, Input, signal, computed } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { ChDatePipe } from '@core/date/ch-date.pipe';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -11,7 +11,7 @@ interface Cell {
 
 @Component({
   selector: 'app-meeting-calendar',
-  imports: [DatePipe, MatIconModule, MatButtonModule],
+  imports: [ChDatePipe, MatIconModule, MatButtonModule],
   templateUrl: './meeting-calendar.html',
   styleUrl: './meeting-calendar.scss',
 })

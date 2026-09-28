@@ -53,10 +53,12 @@
             <mat-label>Date du document</mat-label>
             <input
               matInput
-              type="date"
-              [ngModel]="d.docDate"
-              (ngModelChange)="d.docDate = $event || null"
+              [matDatepicker]="dpDocDate"
+              [value]="toDate(d.docDate)"
+              (dateChange)="d.docDate = toIso($event.value)"
             />
+            <mat-datepicker-toggle matIconSuffix [for]="dpDocDate"></mat-datepicker-toggle>
+            <mat-datepicker #dpDocDate></mat-datepicker>
             <mat-hint>Utilisable dans les textes via {{ '{{' }}doc_date{{ '}}' }}.</mat-hint>
           </mat-form-field>
         </div>
@@ -111,9 +113,7 @@
                   </div>
                 } @else {
                   <div class="info-block">
-                    ℹ️ Informations fixes définies dans le modèle ({{
-                      (sh.items ?? []).length
-                    }}
+                    ℹ️ Informations fixes définies dans le modèle ({{ (sh.items ?? []).length }}
                     élément(s)). Elles seront insérées telles quelles.
                   </div>
                 }
@@ -355,7 +355,7 @@
                 @for (v of versions(); track v.id) {
                   <tr>
                     <td>v{{ v.versionNumber }}</td>
-                    <td>{{ v.createdAt | date: 'dd/MM/yy HH:mm' }}</td>
+                    <td>{{ v.createdAt | chDate: true }}</td>
                     <td>{{ v.authorInitials }}</td>
                     <td>
                       <span class="badge" [class]="'badge-' + v.confidentiality">{{

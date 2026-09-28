@@ -18,7 +18,7 @@
           <div class="num">{{ c.date.getDate() }}</div>
           @for (m of c.items; track m.id) {
             <div class="ev" [title]="m.title + (m.project_name ? ' · ' + m.project_name : '')">
-              <span class="dot"></span>{{ m.date ? (m.date | date: 'HH:mm') : '' }} {{ m.title }}
+              <span class="dot"></span>{{ m.date ? (m.date | chDate: 'time') : '' }} {{ m.title }}
             </div>
           }
         }

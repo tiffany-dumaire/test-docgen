@@ -45,22 +45,28 @@
           <div class="field"></div>
         </div>
         <div class="form-grid">
-          <mat-form-field appearance="outline"
-            ><mat-label>Date de début</mat-label
-            ><input
+          <mat-form-field appearance="outline">
+            <mat-label>Date de début</mat-label>
+            <input
               matInput
-              type="date"
-              [ngModel]="m.startDate"
-              (ngModelChange)="m.startDate = $event || null"
-          /></mat-form-field>
-          <mat-form-field appearance="outline"
-            ><mat-label>Date de fin prévue</mat-label
-            ><input
+              [matDatepicker]="dpStart"
+              [value]="toDate(m.startDate)"
+              (dateChange)="m.startDate = toIso($event.value)"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="dpStart"></mat-datepicker-toggle>
+            <mat-datepicker #dpStart></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Date de fin prévue</mat-label>
+            <input
               matInput
-              type="date"
-              [ngModel]="m.endDate"
-              (ngModelChange)="m.endDate = $event || null"
-          /></mat-form-field>
+              [matDatepicker]="dpEnd"
+              [value]="toDate(m.endDate)"
+              (dateChange)="m.endDate = toIso($event.value)"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="dpEnd"></mat-datepicker-toggle>
+            <mat-datepicker #dpEnd></mat-datepicker>
+          </mat-form-field>
         </div>
         <mat-form-field appearance="outline">
           <mat-label>Description</mat-label>

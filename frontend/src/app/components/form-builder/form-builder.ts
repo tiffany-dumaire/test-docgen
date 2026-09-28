@@ -1,8 +1,10 @@
 import { Component, inject, signal, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { ChDatePipe } from '@core/date/ch-date.pipe';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { isoToLuxon, luxonToIso } from '@core/date/swiss-date';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Router } from '@angular/router';
@@ -30,9 +32,10 @@ import {
   imports: [
     BackDirective,
     FormsModule,
-    DatePipe,
+    ChDatePipe,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
     MatSelectModule,
     MatCheckboxModule,
     FormSchemaEditor,
@@ -43,6 +46,8 @@ import {
   styleUrl: './form-builder.scss',
 })
 export class FormBuilder {
+  protected toDate = isoToLuxon;
+  protected toIso = luxonToIso;
   private service = inject(FormService);
   private projectSvc = inject(ProjectService);
   private docSvc = inject(DocumentService);

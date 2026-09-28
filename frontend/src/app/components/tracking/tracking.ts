@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { ChDatePipe } from '@core/date/ch-date.pipe';
 import { MatTabsModule } from '@angular/material/tabs';
 import { DocumentService } from '@core/services/document.service';
 import { FormService } from '@core/services/form.service';
@@ -11,7 +11,7 @@ import { OnlineForm, ProjectDocument } from '@core/models';
 
 @Component({
   selector: 'app-tracking',
-  imports: [FormsModule, RouterLink, DatePipe, MatTabsModule],
+  imports: [FormsModule, RouterLink, ChDatePipe, MatTabsModule],
   templateUrl: './tracking.html',
   styleUrl: './tracking.scss',
 })

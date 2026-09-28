@@ -2,9 +2,11 @@ import { Component, inject, signal, Input, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ProjectService } from '@core/services/project.service';
 import { ToastService } from '@core/services/api.service';
 import { ProjectTracking as TrackingData, TrackTask } from '@core/models';
+import { isoToLuxon, luxonToIso } from '@core/date/swiss-date';
 
 const TYPES: { key: string; label: string }[] = [
   { key: 'gantt', label: 'Diagramme de Gantt' },
@@ -22,11 +24,13 @@ const TYPES: { key: string; label: string }[] = [
 
 @Component({
   selector: 'app-project-tracking',
-  imports: [FormsModule],
+  imports: [FormsModule, MatDatepickerModule],
   templateUrl: './project-tracking.html',
   styleUrl: './project-tracking.scss',
 })
 export class ProjectTracking implements OnInit {
+  protected toDate = isoToLuxon;
+  protected toIso = luxonToIso;
   private http = inject(HttpClient);
   private san = inject(DomSanitizer);
   private svc = inject(ProjectService);

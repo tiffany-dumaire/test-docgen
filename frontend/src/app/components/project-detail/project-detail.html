@@ -600,7 +600,7 @@
                   }
                   <span class="muted" style="font-size: 0.78rem">
                     @if (mtg.date) {
-                      · {{ mtg.date | date: 'dd/MM/yyyy HH:mm' }}
+                      · {{ mtg.date | chDate: true }}
                     }
                     @if (mtg.location) {
                       · {{ mtg.location }}
@@ -687,7 +687,7 @@
                       <span class="chip-auto">auto</span>
                     }
                     <span class="muted jdate"
-                      >{{ j.author || '—' }} · {{ j.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span
+                      >{{ j.author || '—' }} · {{ j.createdAt | chDate: true }}</span
                     >
                   </div>
                   @if (j.bodyHtml) {

@@ -47,10 +47,12 @@
           <mat-label>Date limite de réponse</mat-label>
           <input
             matInput
-            type="date"
-            [ngModel]="m.deadline"
-            (ngModelChange)="m.deadline = $event || null"
+            [matDatepicker]="dpDeadline"
+            [value]="toDate(m.deadline)"
+            (dateChange)="m.deadline = toIso($event.value)"
           />
+          <mat-datepicker-toggle matIconSuffix [for]="dpDeadline"></mat-datepicker-toggle>
+          <mat-datepicker #dpDeadline></mat-datepicker>
         </mat-form-field>
         <mat-checkbox [(ngModel)]="m.isOpen">Ouvert aux réponses</mat-checkbox>
       </div>
@@ -133,7 +135,7 @@
           @if (submissions().length) {
             @for (s of submissions(); track s.id) {
               <div class="sub">
-                <div class="tag">{{ s.submittedAt | date: 'dd/MM/yy HH:mm' }}</div>
+                <div class="tag">{{ s.submittedAt | chDate: true }}</div>
                 @for (entry of entries(s); track entry[0]) {
                   <div>
                     <strong>{{ entry[0] }} :</strong> {{ entry[1] }}

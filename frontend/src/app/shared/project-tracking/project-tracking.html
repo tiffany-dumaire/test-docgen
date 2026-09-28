@@ -44,9 +44,39 @@
         @for (t of tk().tasks!; track $index) {
           <tr>
             <td><input [(ngModel)]="t.name" /></td>
-            <td><input type="date" [(ngModel)]="t.start" /></td>
-            <td><input type="date" [(ngModel)]="t.end" /></td>
-            <td><input type="date" [(ngModel)]="t.planned_end" /></td>
+            <td>
+              <input
+                class="datecell"
+                readonly
+                [matDatepicker]="dpTs"
+                [value]="toDate(t.start)"
+                (dateChange)="t.start = toIso($event.value) ?? undefined"
+                (click)="dpTs.open()"
+              />
+              <mat-datepicker #dpTs></mat-datepicker>
+            </td>
+            <td>
+              <input
+                class="datecell"
+                readonly
+                [matDatepicker]="dpTe"
+                [value]="toDate(t.end)"
+                (dateChange)="t.end = toIso($event.value) ?? undefined"
+                (click)="dpTe.open()"
+              />
+              <mat-datepicker #dpTe></mat-datepicker>
+            </td>
+            <td>
+              <input
+                class="datecell"
+                readonly
+                [matDatepicker]="dpTpe"
+                [value]="toDate(t.planned_end)"
+                (dateChange)="t.planned_end = toIso($event.value) ?? undefined"
+                (click)="dpTpe.open()"
+              />
+              <mat-datepicker #dpTpe></mat-datepicker>
+            </td>
             <td>
               <input type="number" min="0" max="100" [(ngModel)]="t.progress" style="width: 70px" />
             </td>
@@ -105,8 +135,28 @@
         @for (m of tk().milestones!; track $index) {
           <tr>
             <td><input [(ngModel)]="m.name" /></td>
-            <td><input type="date" [(ngModel)]="m.planned" /></td>
-            <td><input type="date" [(ngModel)]="m.actual" /></td>
+            <td>
+              <input
+                class="datecell"
+                readonly
+                [matDatepicker]="dpMp"
+                [value]="toDate(m.planned)"
+                (dateChange)="m.planned = toIso($event.value) ?? undefined"
+                (click)="dpMp.open()"
+              />
+              <mat-datepicker #dpMp></mat-datepicker>
+            </td>
+            <td>
+              <input
+                class="datecell"
+                readonly
+                [matDatepicker]="dpMa"
+                [value]="toDate(m.actual)"
+                (dateChange)="m.actual = toIso($event.value) ?? undefined"
+                (click)="dpMa.open()"
+              />
+              <mat-datepicker #dpMa></mat-datepicker>
+            </td>
             <td>
               <button class="btn btn-sm btn-danger" (click)="tk().milestones!.splice($index, 1)">
                 ✕
@@ -198,7 +248,17 @@
       <tbody>
         @for (s of tk().snapshots!; track $index) {
           <tr>
-            <td><input type="date" [(ngModel)]="s.date" /></td>
+            <td>
+              <input
+                class="datecell"
+                readonly
+                [matDatepicker]="dpSd"
+                [value]="toDate(s.date)"
+                (dateChange)="s.date = toIso($event.value) ?? undefined"
+                (click)="dpSd.open()"
+              />
+              <mat-datepicker #dpSd></mat-datepicker>
+            </td>
             <td><input type="number" [(ngModel)]="s.planned" style="width: 80px" /></td>
             <td><input type="number" [(ngModel)]="s.actual" style="width: 80px" /></td>
             <td>

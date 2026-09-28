@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { isoToLuxon, luxonToIso } from '@core/date/swiss-date';
 import { MatSelectModule } from '@angular/material/select';
 import { BackDirective } from '@shared/back.directive';
 import { ProjectService } from '@core/services/project.service';
@@ -32,6 +34,7 @@ import {
     MatTabsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
     MatSelectModule,
     BackDirective,
   ],
@@ -39,6 +42,8 @@ import {
   styleUrl: './project-form.scss',
 })
 export class ProjectForm {
+  protected toDate = isoToLuxon;
+  protected toIso = luxonToIso;
   private service = inject(ProjectService);
   private clientService = inject(ClientService);
   private teamService = inject(TeamService);

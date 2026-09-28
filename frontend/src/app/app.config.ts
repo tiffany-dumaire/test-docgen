@@ -14,10 +14,12 @@ import { authInterceptor } from '@core/interceptors/auth.interceptor';
 import { AuthService } from '@core/auth/auth.service';
 import { LanguageService } from '@core/services/language.service';
 import { TranslocoHttpLoader } from '@core/services/transloco-loader';
+import { provideSwissDates } from '@core/date/swiss-date';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
+    provideSwissDates(),
     provideRouter(
       routes,
       withComponentInputBinding(),

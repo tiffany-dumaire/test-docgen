@@ -19,14 +19,18 @@
         <span class="brandtext"><strong>PolyDocs</strong><span class="tag">Documents</span></span>
       </a>
       <span class="grow"></span>
-      <button mat-icon-button [matMenuTriggerFor]="langMenu" [matTooltip]="'topbar.language' | transloco">
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="langMenu"
+        [matTooltip]="'topbar.language' | transloco"
+      >
         <mat-icon>translate</mat-icon>
       </button>
       <mat-menu #langMenu="matMenu">
         <div class="tm-head">{{ 'topbar.language' | transloco }}</div>
         @for (l of lang.langs; track l.code) {
           <button mat-menu-item (click)="setLang(l.code)">
-            <span class="tm-dot" style="box-shadow:none">{{ l.flag }}</span>
+            <span class="tm-dot" style="box-shadow: none">{{ l.flag }}</span>
             <span class="tm-name">{{ l.label }}</span>
             @if (lang.active() === l.code) {
               <mat-icon class="tm-check">check</mat-icon>
@@ -34,7 +38,11 @@
           </button>
         }
       </mat-menu>
-      <button mat-icon-button [matMenuTriggerFor]="themeMenu" [matTooltip]="'topbar.theme' | transloco">
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="themeMenu"
+        [matTooltip]="'topbar.theme' | transloco"
+      >
         <mat-icon>palette</mat-icon>
       </button>
       <mat-menu #themeMenu="matMenu" class="theme-menu">
@@ -104,7 +112,12 @@
         class="nav"
       >
         <!-- Motif décoratif « papier plié » (rappel du logo), collé au thème -->
-        <svg class="nav-motif" viewBox="0 0 244 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <svg
+          class="nav-motif"
+          viewBox="0 0 244 260"
+          preserveAspectRatio="xMidYMax slice"
+          aria-hidden="true"
+        >
           <polygon points="-8,260 58,116 120,260" fill="currentColor" opacity=".55" />
           <polygon points="58,116 120,260 152,178" fill="currentColor" opacity=".33" />
           <polygon points="120,260 152,178 212,120 252,260" fill="currentColor" opacity=".5" />
@@ -135,7 +148,9 @@
               [matTooltip]="rail() ? (n.label | transloco) : ''"
               matTooltipPosition="right"
             >
-              <span class="ico"><mat-icon>{{ n.icon }}</mat-icon></span>
+              <span class="ico"
+                ><mat-icon>{{ n.icon }}</mat-icon></span
+              >
               <span class="lbl">{{ n.label | transloco }}</span>
             </a>
           }
@@ -149,7 +164,9 @@
               [matTooltip]="rail() ? (n.label | transloco) : ''"
               matTooltipPosition="right"
             >
-              <span class="ico"><mat-icon>{{ n.icon }}</mat-icon></span>
+              <span class="ico"
+                ><mat-icon>{{ n.icon }}</mat-icon></span
+              >
               <span class="lbl">{{ n.label | transloco }}</span>
             </a>
           }
@@ -158,7 +175,12 @@
 
       <mat-sidenav-content class="main">
         <!-- Fond décoratif : nervures d'une feuille (rappel du logo « papier/feuille »), teinté par le thème -->
-        <svg class="bg-leaf" viewBox="0 0 1440 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <svg
+          class="bg-leaf"
+          viewBox="0 0 1440 620"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+        >
           <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
             <g class="v3" stroke-width="0.9">
               <path d="M199.8 566.3 L213.3 587.9" />

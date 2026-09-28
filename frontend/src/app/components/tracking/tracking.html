@@ -75,7 +75,7 @@
                     }}</span>
                   </td>
                   <td>v{{ d.currentVersion }}</td>
-                  <td class="muted">{{ d.updatedAt | date: 'dd/MM/yy' }}</td>
+                  <td class="muted">{{ d.updatedAt | chDate }}</td>
                   <td><button class="btn btn-sm btn-ghost" (click)="previewDoc(d)">👁</button></td>
                 </tr>
               }
