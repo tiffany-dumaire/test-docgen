@@ -147,6 +147,38 @@ def _render_free_page_docx(ctx, layout) -> bytes:
     return buffer.getvalue()
 
 
+# --- Numérotation / puces des styles (titres numérotés, formats de listes) ---
+_BULLET_CHARS = {"disc": "●", "circle": "○", "square": "▪",
+                 "dash": "–"}
+
+
+def _roman(n):
+    vals = [(1000, "M"), (900, "CM"), (500, "D"), (400, "CD"), (100, "C"),
+            (90, "XC"), (50, "L"), (40, "XL"), (10, "X"), (9, "IX"), (5, "V"),
+            (4, "IV"), (1, "I")]
+    out = ""
+    for v, s in vals:
+        while n >= v:
+            out += s
+            n -= v
+    return out or "I"
+
+
+def _fmt_counter(n, fmt):
+    """Formate un compteur (1-indexé) selon un format de numérotation."""
+    if n < 1:
+        n = 1
+    if fmt == "upper-alpha":
+        return chr(64 + ((n - 1) % 26) + 1) + "."
+    if fmt == "lower-alpha":
+        return chr(96 + ((n - 1) % 26) + 1) + ")"
+    if fmt == "upper-roman":
+        return _roman(n) + "."
+    if fmt == "decimal-paren":
+        return f"{n})"
+    return f"{n}."
+
+
 # ===========================================================================
 def render_docx(ctx: GenerationContext) -> bytes:
     from docx import Document as Docx
@@ -409,12 +441,34 @@ def render_docx(ctx: GenerationContext) -> bytes:
             elif node["kind"] == "code":
                 shaded_code(node["text"])
 
+    _hcounters = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    _numbered_levels = set()
     for block in ctx.document.template.schema:
         bt = block.get("type")
         if bt == "heading":
-            lvl = int(block.get("level", 2))
-            p = para(interpolate(block.get("text", ""), pctx),
-                     HS.DOCX_STYLE_IDS.get(f"h{lvl}", "Titre2"))
+            lvl = max(1, min(5, int(block.get("level", 2))))
+            el = f"h{lvl}"
+            rprops = (_resolved_styles or {}).get(el, {})
+            text = interpolate(block.get("text", ""), pctx)
+            if rprops.get("numbered"):
+                fmt = rprops.get("number_format") or "decimal"
+                _hcounters[lvl] += 1
+                for d in range(lvl + 1, 6):
+                    _hcounters[d] = 0
+                _numbered_levels.add(lvl)
+                if fmt == "decimal":
+                    label = ".".join(str(_hcounters[i]) for i in range(1, lvl + 1)
+                                     if i in _numbered_levels)
+                else:
+                    label = _fmt_counter(_hcounters[lvl], fmt)
+                if label:
+                    text = f"{label} {text}"
+            p = para(text, HS.DOCX_STYLE_IDS.get(f"h{lvl}", "Titre2"))
+            if rprops.get("numbered") and rprops.get("number_indent"):
+                try:
+                    p.paragraph_format.left_indent = Pt(float(rprops["number_indent"]))
+                except (TypeError, ValueError):
+                    pass
         elif bt == "text":
             para(interpolate(block.get("text", ""), pctx),
                  HS.DOCX_STYLE_IDS["normal"])
@@ -422,17 +476,35 @@ def render_docx(ctx: GenerationContext) -> bytes:
             render_richtext(interpolate(block.get("text", ""), pctx))
         elif bt in ("bullet_list", "numbered_list"):
             ordered = bt == "numbered_list"
+            el = "numbered_list" if ordered else "bullet_list"
+            rprops = (_resolved_styles or {}).get(el, {})
+            lf = rprops.get("list_format")
+            indent = rprops.get("list_indent")
             items = block.get("items")
             if not items:
                 items = [l for l in interpolate(block.get("text", ""), pctx).split("\n") if l.strip()]
             for n, it in enumerate(items, 1):
-                sid = _list_style(styles, ordered)
-                p = doc.add_paragraph()
-                if sid:
-                    p.style = styles[sid]
-                    p.add_run(interpolate(str(it), pctx))
+                text = interpolate(str(it), pctx)
+                if lf:
+                    # Format explicite : marqueur manuel (puce ou numéro formaté).
+                    marker = _fmt_counter(n, lf) if ordered else _BULLET_CHARS.get(lf, "•")
+                    p = doc.add_paragraph()
+                    p.add_run(f"{marker} {text}")
                 else:
-                    p.add_run((f"{n}. " if ordered else "• ") + interpolate(str(it), pctx))
+                    sid = _list_style(styles, ordered)
+                    p = doc.add_paragraph()
+                    if sid:
+                        p.style = styles[sid]
+                        p.add_run(text)
+                    else:
+                        p.add_run((f"{n}. " if ordered else "• ") + text)
+                if indent:
+                    try:
+                        p.paragraph_format.left_indent = Pt(float(indent))
+                    except (TypeError, ValueError):
+                        pass
+                # Applique police/gras/italique/souligné/taille/couleur du style de liste.
+                STYLES.apply(p, el, _resolved_styles)
         elif bt == "diagram":
             from . import diagram_render as DR
             png, wpx, hpx = DR.render_png(block, ctx, color=table_hex)

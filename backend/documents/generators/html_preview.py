@@ -212,19 +212,66 @@ def _blocks_html(ctx, resolved):
             except Exception:
                 pass
 
+    from .block_gen import _fmt_counter, _BULLET_CHARS
+    hcounters = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    numbered_levels = set()
     for b in (tpl.schema or []):
         t = b.get("type")
         if t == "heading":
             lvl = min(max(int(b.get("level", 2)), 1), 5)
-            out.append(f'<h{lvl} style="{_heading_css(lvl, resolved)}">{_esc(interpolate(b.get("text",""), pctx))}</h{lvl}>')
+            rp = (resolved or {}).get(f"h{lvl}", {})
+            htext = _esc(interpolate(b.get("text", ""), pctx))
+            if rp.get("numbered"):
+                fmt = rp.get("number_format") or "decimal"
+                hcounters[lvl] += 1
+                for d in range(lvl + 1, 6):
+                    hcounters[d] = 0
+                numbered_levels.add(lvl)
+                if fmt == "decimal":
+                    label = ".".join(str(hcounters[i]) for i in range(1, lvl + 1)
+                                     if i in numbered_levels)
+                else:
+                    label = _fmt_counter(hcounters[lvl], fmt)
+                if label:
+                    htext = f"{label} {htext}"
+            out.append(f'<h{lvl} style="{_heading_css(lvl, resolved)}">{htext}</h{lvl}>')
         elif t == "text":
             out.append(f'<p{pstyle}>{_esc(interpolate(b.get("text",""), pctx)).replace(chr(10), "<br/>")}</p>')
         elif t == "richtext":
             out.append(f'<div class="rich"{pstyle}>{interpolate(b.get("text",""), pctx)}</div>')
         elif t in ("bullet_list", "numbered_list"):
-            tag = "ol" if t == "numbered_list" else "ul"
-            items = "".join(f"<li>{_esc(interpolate(x, pctx))}</li>" for x in (b.get("items") or []) if x)
-            out.append(f"<{tag}>{items}</{tag}>")
+            ordered = t == "numbered_list"
+            el = "numbered_list" if ordered else "bullet_list"
+            rp = (resolved or {}).get(el, {})
+            lf = rp.get("list_format")
+            decls = _style_css(rp)
+            if rp.get("list_indent") not in (None, ""):
+                try:
+                    decls += (";" if decls else "") + f"padding-left:{float(rp['list_indent']) * 1.6:g}px"
+                except (TypeError, ValueError):
+                    pass
+            # Marqueur : type CSS natif si possible, sinon puce/numéro manuel.
+            manual = None
+            css_type = None
+            if lf in ("disc", "circle", "square", "decimal", "lower-alpha", "upper-alpha", "upper-roman"):
+                css_type = lf
+            elif lf:
+                manual = lf  # 'dash' ou 'decimal-paren' → marqueur manuel
+            if css_type:
+                decls += (";" if decls else "") + f"list-style-type:{css_type}"
+            tag = "ol" if ordered else "ul"
+            raw_items = [x for x in (b.get("items") or []) if x]
+            if manual:
+                decls += (";" if decls else "") + "list-style:none;padding-left:1.2em"
+                lis = "".join(
+                    f'<li><span style="display:inline-block;min-width:1.4em">'
+                    f'{_esc(_fmt_counter(i, manual) if ordered else _BULLET_CHARS.get(manual, chr(8226)))}'
+                    f'</span>{_esc(interpolate(x, pctx))}</li>'
+                    for i, x in enumerate(raw_items, 1))
+            else:
+                lis = "".join(f"<li>{_esc(interpolate(x, pctx))}</li>" for x in raw_items)
+            styd = f' style="{decls}"' if decls else ""
+            out.append(f"<{tag}{styd}>{lis}</{tag}>")
         elif t == "table":
             cols = b.get("columns") or []
             if b.get("label"):
