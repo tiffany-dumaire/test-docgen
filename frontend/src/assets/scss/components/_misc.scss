@@ -2,73 +2,84 @@
   width: 10px;
   height: 10px;
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--mat-sys-outline-variant);
   border-radius: 8px;
   border: 2px solid var(--mat-sys-surface);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--mat-sys-outline);
+  &:hover {
+    background: var(--mat-sys-outline);
+  }
 }
 
 /* Titres de page : filet primaire */
+
 h1 {
   position: relative;
   padding-bottom: 0.35rem;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 56px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--mat-sys-primary);
+  }
 }
-h1::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 56px;
-  height: 3px;
-  border-radius: 3px;
-  background: var(--mat-sys-primary);
-}
+
 .row.between > h1 {
   margin-bottom: 0;
 }
 
 /* Onglets Material : indicateur */
+
 .mat-mdc-tab .mdc-tab-indicator__content--underline {
   border-color: var(--mat-sys-primary) !important;
   border-top-width: 3px !important;
 }
 
 /* Liens : soulignement animé */
+
 a:not(.btn):not(.tab) {
   background-image: linear-gradient(var(--mat-sys-primary), var(--mat-sys-primary));
   background-size: 0% 2px;
   background-repeat: no-repeat;
   background-position: 0 100%;
   transition: background-size 0.2s ease;
+  &:hover {
+    background-size: 100% 2px;
+    text-decoration: none;
+  }
 }
-a:not(.btn):not(.tab):hover {
-  background-size: 100% 2px;
-  text-decoration: none;
-}
+
 /* ============ Accessibilité & finitions globales ============ */
+
 ::selection {
   background: color-mix(in srgb, var(--mat-sys-primary) 26%, transparent);
 }
 
 /* Anneau de focus clavier cohérent (souris = pas d'anneau) */
+
 :where(a, button, .btn, [role='button'], summary):focus-visible,
 :where(input, select, textarea):focus-visible {
   outline: 2px solid var(--mat-sys-primary);
   outline-offset: 2px;
   border-radius: var(--pd-r-xs);
 }
+
 .btn:focus:not(:focus-visible) {
   outline: none;
 }
 
 /* Cartes cliquables : indice visuel au survol */
+
 a.card,
 .card.clickable {
   cursor: pointer;
 }
+
 a.card:hover,
 .card.clickable:hover {
   transform: translateY(-2px);
@@ -78,12 +89,14 @@ a.card:hover,
 }
 
 /* États vides plus vivants */
+
 .empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
 }
+
 .empty mat-icon,
 .empty .empty-ico {
   font-size: 34px;
@@ -93,29 +106,31 @@ a.card:hover,
 }
 
 /* Squelettes de chargement réutilisables */
+
 .skeleton {
   position: relative;
   overflow: hidden;
   background: var(--mat-sys-surface-container-high);
   border-radius: var(--pd-r-s);
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: skeleton 1.3s ease-in-out infinite;
+  }
+  &.line {
+    height: 12px;
+    margin: 0.4rem 0;
+  }
 }
-.skeleton::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent),
-    transparent
-  );
-  transform: translateX(-100%);
-  animation: skeleton 1.3s ease-in-out infinite;
-}
-.skeleton.line {
-  height: 12px;
-  margin: 0.4rem 0;
-}
+
 @keyframes skeleton {
   to {
     transform: translateX(100%);
@@ -123,6 +138,7 @@ a.card:hover,
 }
 
 /* Champs invalides (validation native) */
+
 input:user-invalid,
 select:user-invalid,
 textarea:user-invalid {
@@ -130,11 +146,13 @@ textarea:user-invalid {
 }
 
 /* Zone déposer / téléverser cohérente */
+
 input[type='file'] {
   cursor: pointer;
 }
 
 /* Respect des préférences de mouvement réduit */
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

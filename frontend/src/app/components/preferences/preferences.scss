@@ -3,6 +3,7 @@
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
 .sw {
   width: 38px;
   height: 38px;
@@ -10,10 +11,11 @@
   border: 2px solid #fff;
   cursor: pointer;
   box-shadow: 0 0 0 1px var(--border);
+  &.active {
+    box-shadow: 0 0 0 3px var(--primary);
+  }
 }
-.sw.active {
-  box-shadow: 0 0 0 3px var(--primary);
-}
+
 .preview {
   display: flex;
   flex-direction: column;
@@ -23,16 +25,19 @@
   border-radius: 12px;
   margin: 0.4rem 0;
 }
+
 .props {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.6rem;
 }
+
 @media (max-width: 560px) {
   .props {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
 .prop {
   display: flex;
   flex-direction: column;
@@ -44,35 +49,37 @@
   cursor: pointer;
   background: var(--surface, #fff);
   text-align: left;
+  &:hover {
+    border-color: var(--primary);
+  }
+  &.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary);
+  }
+  .dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--border);
+    margin-bottom: 0.25rem;
+  }
+  .pn {
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .ps {
+    font-size: 0.76rem;
+    color: var(--muted);
+  }
 }
-.prop:hover {
-  border-color: var(--primary);
-}
-.prop.active {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px var(--primary);
-}
-.prop .dot {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--border);
-  margin-bottom: 0.25rem;
-}
-.prop .pn {
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-.prop .ps {
-  font-size: 0.76rem;
-  color: var(--muted);
-}
+
 .seg {
   display: inline-flex;
   border: 1px solid var(--border);
   border-radius: 9px;
   overflow: hidden;
 }
+
 .segb {
   border: 0;
   background: transparent;
@@ -81,16 +88,18 @@
   font-weight: 600;
   font-size: 0.84rem;
   color: var(--fg, inherit);
+  &.active {
+    background: var(--primary);
+    color: #fff;
+  }
 }
-.segb.active {
-  background: var(--primary);
-  color: #fff;
-}
+
 .langs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
 .langb {
   display: inline-flex;
   align-items: center;
@@ -103,14 +112,14 @@
   font-weight: 600;
   font-size: 0.86rem;
   color: var(--text, inherit);
-}
-.langb:hover {
-  border-color: var(--primary);
-}
-.langb.active {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px var(--primary);
-}
-.langb .flag {
-  font-size: 1.1rem;
+  &:hover {
+    border-color: var(--primary);
+  }
+  &.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary);
+  }
+  .flag {
+    font-size: 1.1rem;
+  }
 }

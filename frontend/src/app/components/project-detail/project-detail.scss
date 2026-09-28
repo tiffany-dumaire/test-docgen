@@ -1,19 +1,22 @@
 .detail-tabs {
   margin-top: 1rem;
 }
+
 .tabpad {
   padding-top: 1.2rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
+
 .contact {
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--border);
+  &:last-child {
+    border-bottom: none;
+  }
 }
-.contact:last-child {
-  border-bottom: none;
-}
+
 .jform {
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -21,29 +24,32 @@
   background: var(--bg);
   margin-bottom: 0.8rem;
 }
+
 .timeline {
   position: relative;
   margin-top: 0.4rem;
+  &::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--border);
+  }
 }
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 15px;
-  top: 6px;
-  bottom: 6px;
-  width: 2px;
-  background: var(--border);
-}
+
 .jentry {
   display: flex;
   gap: 0.7rem;
   align-items: flex-start;
   padding: 0.5rem 0;
   position: relative;
+  &.auto .jbody {
+    color: var(--muted);
+  }
 }
-.jentry.auto .jbody {
-  color: var(--muted);
-}
+
 .jicon {
   width: 32px;
   height: 32px;
@@ -58,6 +64,7 @@
   position: relative;
   z-index: 1;
 }
+
 .jbody {
   flex: 1;
   min-width: 0;
@@ -67,9 +74,11 @@
   border-radius: 10px;
   padding: 0.5rem 0.7rem;
 }
+
 .jdel {
   align-self: center;
 }
+
 .jmeta {
   display: flex;
   gap: 0.4rem;
@@ -77,9 +86,11 @@
   flex-wrap: wrap;
   margin-bottom: 0.15rem;
 }
+
 .jdate {
   font-size: 0.72rem;
 }
+
 .chip-auto {
   font-size: 0.62rem;
   text-transform: uppercase;
@@ -90,17 +101,21 @@
   padding: 0.05rem 0.35rem;
   font-weight: 700;
 }
+
 .rich :is(h1, h2, h3) {
   margin: 0.3em 0;
   font-size: 1rem;
 }
+
 .rich ul,
 .rich ol {
   margin: 0.2em 0 0.2em 1.1em;
 }
+
 .rich p {
   margin: 0.25em 0;
 }
+
 .chip-cancel {
   font-size: 0.62rem;
   text-transform: uppercase;
@@ -111,6 +126,7 @@
   font-weight: 700;
   margin-left: 0.3rem;
 }
+
 .proj-logo {
   width: 3.2rem;
   height: 3.2rem;
@@ -120,6 +136,7 @@
   border: 1px solid var(--border);
   padding: 3px;
 }
+
 .client-logo {
   width: 3rem;
   height: 3rem;
@@ -130,11 +147,13 @@
   padding: 3px;
   flex: none;
 }
+
 .inst-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 0.8rem;
 }
+
 .inst-card {
   display: flex;
   flex-direction: column;
@@ -150,22 +169,24 @@
     transform 0.14s ease,
     box-shadow 0.16s ease,
     border-color 0.14s ease;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-strong);
+  }
 }
-.inst-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--border-strong);
-}
+
 .inst-name {
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  .material-icons {
+    font-size: 15px;
+    color: var(--muted);
+  }
 }
-.inst-name .material-icons {
-  font-size: 15px;
-  color: var(--muted);
-}
+
 .inst-line {
   display: flex;
   align-items: center;
@@ -173,32 +194,38 @@
   font-size: 0.84rem;
   color: var(--muted);
   font-family: ui-monospace, monospace;
+  .material-icons {
+    font-size: 15px;
+  }
 }
-.inst-line .material-icons {
-  font-size: 15px;
-}
+
 .repotree {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
+
 .repo-node {
   display: flex;
   align-items: center;
   gap: 0.45rem;
   padding: 0.3rem 0;
 }
+
 .repo-branch {
   color: var(--muted);
   font-family: ui-monospace, monospace;
 }
+
 .repo-ic {
   font-size: 18px;
   color: var(--mat-sys-primary);
 }
+
 .repo-name {
   font-weight: 600;
 }
+
 .repo-inst {
   display: inline-flex;
   align-items: center;
@@ -206,20 +233,23 @@
   font-size: 0.78rem;
   color: var(--muted);
   font-family: ui-monospace, monospace;
+  .material-icons {
+    font-size: 14px;
+  }
 }
-.repo-inst .material-icons {
-  font-size: 14px;
-}
+
 .infogrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.8rem 2rem;
 }
+
 @media (max-width: 700px) {
   .infogrid {
     grid-template-columns: 1fr;
   }
 }
+
 .infogrid .k {
   display: block;
   font-size: 0.72rem;
@@ -228,29 +258,34 @@
   color: var(--muted);
   font-weight: 700;
 }
+
 .infogrid .v {
   font-size: 1rem;
 }
+
 .styles-grid {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
+
 .style-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.3rem 0;
   border-bottom: 1px solid var(--border);
+  &:last-child {
+    border-bottom: none;
+  }
 }
-.style-row:last-child {
-  border-bottom: none;
-}
+
 .style-key {
   font-weight: 600;
   min-width: 120px;
   text-transform: capitalize;
 }
+
 .style-sw {
   width: 18px;
   height: 18px;

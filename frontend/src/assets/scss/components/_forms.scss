@@ -2,6 +2,7 @@
    Remarque : ces styles natifs ne visent QUE les champs HTML bruts restants
    (couleur, fichier, etc.). Les composants Angular Material gèrent eux-mêmes
    leurs champs internes — on les exclut via :not(.mdc-*)/:not(.mat-mdc-*). */
+
 label:not(.mdc-floating-label):not(.mdc-label) {
   display: block;
   font-weight: 600;
@@ -9,6 +10,7 @@ label:not(.mdc-floating-label):not(.mdc-label) {
   font-size: 0.84rem;
   color: var(--muted);
 }
+
 input:not(.mat-mdc-input-element),
 select:not(.mat-mdc-select-value-text),
 textarea:not(.mat-mdc-input-element) {
@@ -24,10 +26,12 @@ textarea:not(.mat-mdc-input-element) {
     border-color 0.15s ease,
     box-shadow 0.15s ease;
 }
+
 input:not(.mat-mdc-input-element)::placeholder,
 textarea:not(.mat-mdc-input-element)::placeholder {
   color: var(--muted-2);
 }
+
 input:not(.mat-mdc-input-element):focus,
 select:focus,
 textarea:not(.mat-mdc-input-element):focus {
@@ -35,31 +39,36 @@ textarea:not(.mat-mdc-input-element):focus {
   border-color: var(--mat-sys-primary);
   box-shadow: var(--ring);
 }
+
 textarea:not(.mat-mdc-input-element) {
   resize: vertical;
   min-height: 80px;
 }
 
 /* Ceinture et bretelles : neutralise tout héritage natif dans les champs Material. */
+
 .mat-mdc-form-field {
   width: 100%;
+  .mat-mdc-input-element {
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
 }
-.mat-mdc-form-field .mat-mdc-input-element {
-  padding: 0;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  border-radius: 0;
-}
+
 .field {
   margin-bottom: 1rem;
+  small {
+    color: var(--muted);
+    font-weight: 400;
+  }
 }
-.field small {
-  color: var(--muted);
-  font-weight: 400;
-}
+
 /* Légende de groupe : même rendu qu'un <label> mais sans être un label
    (utilisé quand la légende coiffe un groupe de champs, pas un champ unique). */
+
 .field-label {
   display: block;
   font-weight: 600;
@@ -67,11 +76,13 @@ textarea:not(.mat-mdc-input-element) {
   font-size: 0.84rem;
   color: var(--muted);
 }
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0 1rem;
 }
+
 @media (max-width: 620px) {
   .form-grid {
     grid-template-columns: 1fr;

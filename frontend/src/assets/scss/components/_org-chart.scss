@@ -1,23 +1,25 @@
 /* ---------- Organigramme (arbre CSS) ---------- */
+
 .orgtree {
   overflow-x: auto;
   padding: 1rem 0.2rem 0.4rem;
+  ul {
+    position: relative;
+    padding-top: 22px;
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 0;
+    list-style: none;
+  }
+  li {
+    list-style: none;
+    position: relative;
+    padding: 22px 10px 0;
+    text-align: center;
+  }
 }
-.orgtree ul {
-  position: relative;
-  padding-top: 22px;
-  display: flex;
-  justify-content: center;
-  gap: 0;
-  margin: 0;
-  list-style: none;
-}
-.orgtree li {
-  list-style: none;
-  position: relative;
-  padding: 22px 10px 0;
-  text-align: center;
-}
+
 .orgtree li::before,
 .orgtree li::after {
   content: '';
@@ -28,29 +30,36 @@
   width: 50%;
   height: 22px;
 }
+
 .orgtree li::after {
   right: auto;
   left: 50%;
   border-left: 2px solid var(--border-strong);
 }
+
 .orgtree li:only-child::after,
 .orgtree li:only-child::before {
   display: none;
 }
+
 .orgtree li:only-child {
   padding-top: 0;
 }
+
 .orgtree li:first-child::before,
 .orgtree li:last-child::after {
   border: 0 none;
 }
+
 .orgtree li:last-child::before {
   border-right: 2px solid var(--border-strong);
   border-radius: 0 6px 0 0;
 }
+
 .orgtree li:first-child::after {
   border-radius: 6px 0 0 0;
 }
+
 .orgtree ul ul::before {
   content: '';
   position: absolute;
@@ -60,6 +69,7 @@
   width: 0;
   height: 22px;
 }
+
 .org-node {
   display: inline-flex;
   flex-direction: column;
@@ -77,33 +87,35 @@
   transition:
     transform 0.14s ease,
     box-shadow 0.18s ease;
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  .org-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--team, var(--mat-sys-primary));
+  }
+  .org-name {
+    font-weight: 700;
+  }
+  .org-meta {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .org-rel {
+    font-size: 0.68rem;
+    color: var(--mat-sys-tertiary);
+    font-weight: 600;
+  }
 }
-.org-node:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-}
-.org-node .org-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--team, var(--mat-sys-primary));
-}
-.org-node .org-name {
-  font-weight: 700;
-}
-.org-node .org-meta {
-  font-size: 0.72rem;
-  color: var(--muted);
-}
-.org-node .org-rel {
-  font-size: 0.68rem;
-  color: var(--mat-sys-tertiary);
-  font-weight: 600;
-}
+
 .org-avatars {
   display: inline-flex;
   margin-top: 0.2rem;
 }
+
 .org-av {
   width: 24px;
   height: 24px;
@@ -116,11 +128,11 @@
   font-weight: 700;
   background: var(--mat-sys-secondary-container);
   color: var(--mat-sys-on-secondary-container);
-}
-.org-av.more {
-  background: var(--mat-sys-surface-container-highest);
-  color: var(--muted);
-}
-.org-av:first-child {
-  margin-left: 0;
+  &.more {
+    background: var(--mat-sys-surface-container-highest);
+    color: var(--muted);
+  }
+  &:first-child {
+    margin-left: 0;
+  }
 }

@@ -1,4 +1,5 @@
 /* Boutons */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -20,44 +21,49 @@
   color: var(--text);
   text-decoration: none;
   white-space: nowrap;
+  &:hover {
+    text-decoration: none;
+  }
+  &:active {
+    filter: brightness(0.97);
+  }
 }
-.btn:hover {
-  text-decoration: none;
-}
-.btn:active {
-  filter: brightness(0.97);
-}
+
 .btn-primary {
   background: var(--mat-sys-primary);
   color: var(--mat-sys-on-primary);
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.14),
     0 4px 10px rgba(0, 0, 0, 0.1);
+  &:hover {
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.18),
+      0 8px 18px rgba(0, 0, 0, 0.14);
+  }
 }
-.btn-primary:hover {
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.18),
-    0 8px 18px rgba(0, 0, 0, 0.14);
-}
+
 .btn-ghost {
   background: transparent;
   border-color: var(--mat-sys-outline);
   color: var(--mat-sys-primary);
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+  }
 }
-.btn-ghost:hover {
-  background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
-}
+
 .btn-danger {
   background: var(--mat-sys-error);
   color: var(--mat-sys-on-error);
+  &:hover {
+    filter: brightness(0.95);
+  }
 }
-.btn-danger:hover {
-  filter: brightness(0.95);
-}
+
 .btn-sm {
   padding: 0.34rem 0.72rem;
   font-size: 0.8rem;
 }
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;

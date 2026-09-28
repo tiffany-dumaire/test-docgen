@@ -1,35 +1,43 @@
 .detail-tabs {
   margin-top: 1rem;
 }
+
 .tabpad {
   padding-top: 1.2rem;
 }
+
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   align-items: start;
 }
+
 @media (max-width: 900px) {
   .grid-2 {
     grid-template-columns: 1fr;
   }
 }
+
 .mono {
   font-family: ui-monospace, monospace;
   font-size: 0.8rem;
 }
+
 .req {
   color: var(--danger);
 }
+
 .cmt {
   max-width: 220px;
 }
+
 .preview-heading {
   font-weight: 700;
   color: var(--dark);
   margin: 0.3rem 0 0;
 }
+
 .preview-text {
   color: var(--muted);
   font-size: 0.88rem;
@@ -37,6 +45,7 @@
   border-left: 3px solid var(--border);
   padding-left: 0.6rem;
 }
+
 .info-block {
   background: var(--primary-light);
   color: var(--primary-dark);
@@ -44,12 +53,14 @@
   padding: 0.6rem 0.8rem;
   font-size: 0.85rem;
 }
+
 .sheet-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
   margin-bottom: 0.5rem;
 }
+
 .stab {
   border: 1px solid var(--border);
   background: #fff;
@@ -58,46 +69,51 @@
   cursor: pointer;
   font-size: 0.82rem;
   font-weight: 600;
+  &.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
 }
-.stab.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
+
 .col-hints {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
   margin-bottom: 0.5rem;
+  .chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+    font-size: 0.74rem;
+    color: var(--dark);
+    em {
+      color: var(--muted);
+      font-style: normal;
+    }
+  }
 }
-.col-hints .chip {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.1rem 0.55rem;
-  font-size: 0.74rem;
-  color: var(--dark);
-}
-.col-hints .chip em {
-  color: var(--muted);
-  font-style: normal;
-}
+
 .preview-rich {
   font-size: 0.88rem;
   color: var(--dark);
   border-left: 3px solid var(--border);
   padding-left: 0.6rem;
 }
+
 .preview-list {
   margin: 0.2rem 0 0.2rem 1rem;
   color: var(--muted);
   font-size: 0.88rem;
 }
+
 .preview-thumb {
   max-width: 100%;
   border: 1px solid var(--border);
   border-radius: 6px;
 }
+
 .preview-code {
   background: var(--bg);
   border-radius: 6px;
@@ -106,6 +122,7 @@
   font-size: 0.8rem;
   white-space: pre-wrap;
 }
+
 .pv-inline {
   width: 100%;
   height: 78vh;
@@ -114,6 +131,7 @@
   border-radius: 8px;
   background: #fff;
 }
+
 .pv-inline-img {
   max-width: 100%;
   border: 1px solid var(--border);
@@ -122,45 +140,47 @@
 
 /* Grille de saisie « en place » : rendu fidèle du modèle, cellules modifiables
    éditables directement dans la grille, cellules fixes en lecture seule. */
+
 .gridfill-wrap {
   overflow-x: auto;
   margin: 0.4rem 0 0.8rem;
   border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 8px;
 }
+
 table.gridfill {
   border-collapse: collapse;
   width: 100%;
   font-size: 0.85rem;
-}
-table.gridfill td {
-  border: 1px solid var(--mat-sys-outline-variant);
-  padding: 0;
-  min-width: 90px;
-  height: 34px;
-  vertical-align: middle;
-}
-table.gridfill td .gf-fixed {
-  display: block;
-  padding: 0.3rem 0.5rem;
-  color: var(--mat-sys-on-surface);
-}
-table.gridfill td.gf-empty {
-  background: color-mix(in srgb, var(--mat-sys-surface-variant) 40%, transparent);
-}
-table.gridfill td.editable {
-  box-shadow: inset 0 0 0 2px var(--mat-sys-primary);
-  background: color-mix(in srgb, var(--mat-sys-primary) 6%, transparent);
-}
-table.gridfill td.editable .gf-in {
-  width: 100%;
-  border: none;
-  background: transparent;
-  padding: 0.3rem 0.5rem;
-  font: inherit;
-  color: var(--mat-sys-on-surface);
-  outline: none;
-}
-table.gridfill td.editable .gf-in:focus {
-  background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+  td {
+    border: 1px solid var(--mat-sys-outline-variant);
+    padding: 0;
+    min-width: 90px;
+    height: 34px;
+    vertical-align: middle;
+    .gf-fixed {
+      display: block;
+      padding: 0.3rem 0.5rem;
+      color: var(--mat-sys-on-surface);
+    }
+    &.gf-empty {
+      background: color-mix(in srgb, var(--mat-sys-surface-variant) 40%, transparent);
+    }
+    &.editable {
+      box-shadow: inset 0 0 0 2px var(--mat-sys-primary);
+      background: color-mix(in srgb, var(--mat-sys-primary) 6%, transparent);
+      .gf-in {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0.3rem 0.5rem;
+        font: inherit;
+        color: var(--mat-sys-on-surface);
+        outline: none;
+        &:focus {
+          background: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+        }
+      }
+    }
+  }
 }

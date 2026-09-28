@@ -6,6 +6,7 @@
    - Jetons de formes, de types de document (--doc-*) et de statut (--st-*).
    data-theme : "light" | "dark" | (absent → système)
    ========================================================= */
+
 :root {
   /* Couleurs (VNV — clair) */
   --mat-sys-primary: #ec6608;
@@ -37,14 +38,12 @@
   --mat-sys-on-error: #ffffff;
   --mat-sys-error-container: #f9dedc;
   --mat-sys-on-error-container: #410e0b;
-
   /* Typographie VNV — commune à tous les thèmes */
   --pd-display: 'Montserrat', 'Segoe UI', system-ui, sans-serif;
   --pd-body: 'Montserrat', 'Segoe UI', system-ui, sans-serif;
   --pd-mono: 'Oswald', 'Segoe UI', system-ui, sans-serif;
   --pd-display-wght: 600;
   --pd-display-track: -0.01em;
-
   /* Formes */
   --pd-r-xs: 6px;
   --pd-r-s: 10px;
@@ -52,7 +51,6 @@
   --pd-r-l: 28px;
   --pd-r-btn: 999px;
   --pd-row: 48px;
-
   /* Types de document (--doc-*) et statuts (--st-*) — clair */
   --doc-word: #2e5e8e;
   --doc-pdf: #a32638;
@@ -71,6 +69,7 @@
 }
 
 /* ---------- Variantes sombres (VNV + doc/st) ---------- */
+
 @mixin base-dark {
   --mat-sys-primary: #ffb68a;
   --mat-sys-on-primary: #4a1c00;
@@ -116,11 +115,13 @@
   --st-storm: #f28b8b;
   color-scheme: dark;
 }
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     @include base-dark;
   }
 }
+
 :root[data-theme='dark'] {
   @include base-dark;
 }

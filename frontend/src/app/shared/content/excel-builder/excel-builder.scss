@@ -5,6 +5,7 @@
   align-items: center;
   margin-bottom: 0.6rem;
 }
+
 .tab {
   border: 1px solid var(--border);
   background: #fff;
@@ -13,64 +14,74 @@
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
+  &.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .ico {
+    margin-right: 0.3rem;
+  }
 }
-.tab.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
-.tab .ico {
-  margin-right: 0.3rem;
-}
+
 .add {
   display: flex;
   align-items: center;
   gap: 0.3rem;
   margin-left: auto;
+  .lbl {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
 }
-.add .lbl {
-  font-size: 0.8rem;
-  color: var(--muted);
-}
+
 .sheet-head {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: 0.8rem;
   align-items: end;
 }
+
 .sheet-actions {
   display: flex;
   gap: 0.3rem;
   align-items: center;
 }
+
 .type-badge {
   font-size: 0.8rem;
   color: var(--muted);
   margin: 0.5rem 0 0.2rem;
 }
+
 h4 {
   margin: 1rem 0 0.4rem;
   font-size: 0.95rem;
 }
+
 .hint {
   font-weight: 400;
   color: var(--muted);
   font-size: 0.78rem;
 }
+
 .warn {
   color: var(--warn, #ea580c);
   font-size: 0.85rem;
 }
+
 .line {
   display: flex;
   gap: 0.4rem;
   align-items: center;
   margin-bottom: 0.35rem;
 }
+
 .line input,
 .line select {
   padding: 0.35rem 0.5rem;
 }
+
 .span {
   display: flex;
   align-items: center;
@@ -78,6 +89,7 @@ h4 {
   font-size: 0.78rem;
   color: var(--muted);
 }
+
 .mini {
   border: 1px solid var(--border);
   background: #fff;
@@ -86,17 +98,18 @@ h4 {
   padding: 0.2rem 0.45rem;
   font-size: 0.75rem;
   color: var(--muted);
+  &:hover {
+    background: var(--bg);
+  }
+  &:disabled {
+    opacity: 0.35;
+  }
+  &.del:hover {
+    background: #fee2e2;
+    color: var(--danger);
+  }
 }
-.mini:hover {
-  background: var(--bg);
-}
-.mini:disabled {
-  opacity: 0.35;
-}
-.mini.del:hover {
-  background: #fee2e2;
-  color: var(--danger);
-}
+
 .btn-sm {
   border: 1px dashed var(--border);
   background: var(--bg);
@@ -107,39 +120,45 @@ h4 {
   font-weight: 600;
   color: var(--primary);
 }
+
 .toggles {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   margin-top: 0.8rem;
 }
+
 .chk {
   display: flex;
   align-items: center;
   gap: 0.35rem;
   font-size: 0.85rem;
   font-weight: 500;
+  input {
+    width: auto;
+  }
 }
-.chk input {
-  width: auto;
-}
+
 .grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.6rem 1rem;
 }
+
 @media (max-width: 700px) {
   .grid2,
   .sheet-head {
     grid-template-columns: 1fr;
   }
 }
+
 code {
   background: var(--bg);
   padding: 0.05rem 0.3rem;
   border-radius: 4px;
   font-size: 0.8rem;
 }
+
 .empty {
   padding: 1.5rem;
   text-align: center;
@@ -147,27 +166,31 @@ code {
   border: 2px dashed var(--border);
   border-radius: 10px;
 }
+
 .gridcells {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
+
 .gcell {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem 0.6rem;
   background: var(--surface, #fff);
+  .line {
+    margin-bottom: 0.3rem;
+    flex-wrap: wrap;
+  }
+  input[type='color'] {
+    width: 38px;
+    height: 30px;
+    padding: 2px;
+  }
 }
-.gcell .line {
-  margin-bottom: 0.3rem;
-  flex-wrap: wrap;
-}
-.gcell input[type='color'] {
-  width: 38px;
-  height: 30px;
-  padding: 2px;
-}
+
 /* Éditeur tableur */
+
 .gtoolbar {
   display: flex;
   flex-wrap: wrap;
@@ -182,12 +205,14 @@ code {
   top: 0;
   z-index: 2;
 }
+
 .gt-ref {
   font-weight: 700;
   font-family: ui-monospace, monospace;
   min-width: 38px;
   color: var(--primary);
 }
+
 .gt {
   border: 1px solid var(--border);
   background: #fff;
@@ -197,18 +222,20 @@ code {
   cursor: pointer;
   font-size: 0.85rem;
   color: var(--text);
+  &.on {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
 }
-.gt.on {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
+
 .gt-sep {
   width: 1px;
   height: 20px;
   background: var(--border);
   margin: 0 0.2rem;
 }
+
 .gt-col {
   display: inline-flex;
   align-items: center;
@@ -219,24 +246,27 @@ code {
   height: 28px;
   font-size: 0.8rem;
   cursor: pointer;
+  input[type='color'] {
+    width: 22px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    background: none;
+  }
 }
-.gt-col input[type='color'] {
-  width: 22px;
-  height: 20px;
-  padding: 0;
-  border: none;
-  background: none;
-}
+
 .gwrap {
   overflow: auto;
   border: 1px solid var(--border);
   border-radius: 10px;
   max-height: 520px;
 }
+
 table.gtable {
   border-collapse: separate;
   border-spacing: 0;
 }
+
 .gtable th.ghdr {
   background: var(--mat-sys-surface-container-high);
   position: sticky;
@@ -249,12 +279,14 @@ table.gtable {
   border: 1px solid var(--border);
   min-width: 64px;
 }
+
 .gtable th.rownum {
   position: sticky;
   left: 0;
   z-index: 1;
   min-width: 40px;
 }
+
 .gtable th.corner {
   position: sticky;
   left: 0;
@@ -262,6 +294,7 @@ table.gtable {
   z-index: 3;
   min-width: 40px;
 }
+
 .ghlbl {
   display: flex;
   align-items: center;
@@ -270,6 +303,7 @@ table.gtable {
   font-weight: 700;
   color: var(--text);
 }
+
 .ghx {
   border: none;
   background: none;
@@ -278,12 +312,15 @@ table.gtable {
   font-size: 0.6rem;
   opacity: 0;
 }
+
 th.ghdr:hover .ghx {
   opacity: 0.7;
 }
+
 .ghx:hover {
   color: var(--danger);
 }
+
 .ghsize {
   width: 100%;
   border: none;
@@ -293,19 +330,23 @@ th.ghdr:hover .ghx {
   color: var(--muted);
   padding: 0;
 }
+
 .gtable th.addcol .mini {
   min-width: 24px;
 }
+
 td.gcellx {
   padding: 0;
   min-width: 64px;
   cursor: cell;
+  &.selected {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+  }
 }
-td.gcellx.selected {
-  outline: 2px solid var(--primary);
-  outline-offset: -2px;
-}
+
 /* Cellule marquée « modifiable à la génération » : liseré pointillé + fond léger. */
+
 td.gcellx.editable-cell {
   background-image: repeating-linear-gradient(
     45deg,
@@ -316,6 +357,7 @@ td.gcellx.editable-cell {
   );
   box-shadow: inset 0 0 0 1px var(--mat-sys-primary, #2563eb);
 }
+
 .gin {
   width: 100%;
   min-width: 64px;
@@ -325,10 +367,11 @@ td.gcellx.editable-cell {
   padding: 2px 5px;
   font: inherit;
   color: inherit;
+  &:focus {
+    outline: none;
+  }
 }
-.gin:focus {
-  outline: none;
-}
+
 td.gpad,
 .gpad {
   border: none;

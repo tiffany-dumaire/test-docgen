@@ -1,4 +1,5 @@
 /* Coquille : barre en haut (pleine largeur) puis conteneur en dessous */
+
 .app-shell {
   height: 100vh;
   display: flex;
@@ -7,6 +8,7 @@
 }
 
 /* Barre supérieure pleine largeur */
+
 .topbar {
   flex: none;
   z-index: 20;
@@ -15,41 +17,35 @@
   background: color-mix(in srgb, var(--mat-sys-surface) 90%, var(--mat-sys-primary) 4%);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
-
   .brand {
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
     margin-left: 0.25rem;
     text-decoration: none;
-
     .logo {
       width: 34px;
       height: 34px;
       flex: none;
       display: grid;
       place-items: center;
-
       img {
         width: 100%;
         height: 100%;
         display: block;
       }
     }
-
     .brandtext {
       display: flex;
       flex-direction: column;
       line-height: 1.05;
     }
-
     strong {
       color: var(--mat-sys-on-surface);
       font-family: var(--pd-display);
       letter-spacing: var(--pd-display-track);
       font-size: 1.05rem;
     }
-
     .tag {
       color: var(--mat-sys-on-surface-variant);
       font-size: 0.6rem;
@@ -57,10 +53,9 @@
       letter-spacing: 0.16em;
       margin-top: 0.12rem;
     }
-  }
-
-  .brand:hover {
-    text-decoration: none;
+    &:hover {
+      text-decoration: none;
+    }
   }
 }
 
@@ -75,6 +70,7 @@
 }
 
 /* Conteneur (sidenav + contenu) sous la barre, occupe le reste de la hauteur */
+
 .shell {
   flex: 1 1 auto;
   min-height: 0;
@@ -82,6 +78,7 @@
 }
 
 /* Fond du contenu : voiles de couleur du thème + nervures de feuille (SVG inline, teinté par le thème) */
+
 .main {
   position: relative;
   background:
@@ -99,6 +96,7 @@
 }
 
 /* Nervures de feuille : dessin vectoriel intégré, couleur = accent du thème */
+
 .bg-leaf {
   position: absolute;
   inset: 0;
@@ -108,11 +106,9 @@
   opacity: 0.16;
   pointer-events: none;
   z-index: 0;
-
   .v3 {
     opacity: 0.5;
   }
-
   .marg {
     opacity: 0.75;
   }
@@ -123,6 +119,7 @@
 }
 
 /* ===== Sidenav original, collé au thème, avec motif « papier plié » ===== */
+
 .nav {
   width: 244px;
   overflow: hidden;
@@ -135,10 +132,11 @@
     var(--mat-sys-surface-container-low) 46%
   ) !important;
   transition: width 0.18s ease;
+  &.rail {
+    width: 72px;
+  }
 }
-.nav.rail {
-  width: 72px;
-}
+
 .nav-motif {
   position: absolute;
   left: 0;
@@ -151,7 +149,9 @@
   pointer-events: none;
   z-index: 0;
 }
+
 /* Bouton de réduction : flèche sur le côté (bord droit) de la sidebar */
+
 .rail-toggle {
   position: absolute;
   top: 50%;
@@ -174,20 +174,20 @@
     color 0.14s ease,
     border-color 0.14s ease,
     box-shadow 0.14s ease;
-
   mat-icon {
     font-size: 20px;
     width: 20px;
     height: 20px;
   }
-}
-.rail-toggle:hover {
-  color: var(--mat-sys-primary);
-  border-color: var(--mat-sys-primary);
-  box-shadow: var(--shadow);
+  &:hover {
+    color: var(--mat-sys-primary);
+    border-color: var(--mat-sys-primary);
+    box-shadow: var(--shadow);
+  }
 }
 
 /* Navigation rail / drawer (Material 3) */
+
 .railnav {
   position: relative;
   z-index: 1;
@@ -196,6 +196,7 @@
   gap: 0.2rem;
   padding: 0.9rem 0.55rem;
 }
+
 .railitem {
   display: flex;
   align-items: center;
@@ -207,7 +208,6 @@
   transition:
     background 0.14s ease,
     color 0.14s ease;
-
   .ico {
     display: grid;
     place-items: center;
@@ -216,7 +216,6 @@
     border-radius: 999px;
     flex: none;
     transition: background 0.16s ease;
-
     mat-icon {
       font-size: 24px;
       width: 24px;
@@ -225,44 +224,37 @@
       color: var(--mat-sys-on-surface-variant);
     }
   }
-
   .lbl {
     font-weight: 600;
     font-size: 0.92rem;
     white-space: nowrap;
   }
-}
-
-.railitem:hover {
-  background: color-mix(in srgb, var(--mat-sys-on-surface) 5%, transparent);
-  text-decoration: none;
-}
-
-.railitem.active {
-  color: var(--mat-sys-on-secondary-container);
-
-  .ico {
-    background: var(--mat-sys-secondary-container);
-
-    mat-icon {
-      color: var(--mat-sys-on-secondary-container);
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 5%, transparent);
+    text-decoration: none;
+  }
+  &.active {
+    color: var(--mat-sys-on-secondary-container);
+    .ico {
+      background: var(--mat-sys-secondary-container);
+      mat-icon {
+        color: var(--mat-sys-on-secondary-container);
+      }
     }
   }
 }
 
 /* Mode rail : icônes centrées, empilées sur un petit libellé */
+
 .railnav.israil {
   padding: 0.9rem 0.35rem;
-
   .railitem {
     flex-direction: column;
     gap: 0.15rem;
     padding: 0.45rem 0;
-
     .ico {
       width: 100%;
     }
-
     .lbl {
       font-size: 0.6rem;
       font-weight: 600;
@@ -278,6 +270,7 @@
 }
 
 /* Menu de thème */
+
 .tm-head {
   padding: 0.4rem 1rem 0.2rem;
   font-size: 0.68rem;
@@ -314,7 +307,6 @@
   display: flex;
   gap: 0.3rem;
   padding: 0.2rem 0.8rem 0.6rem;
-
   button {
     flex: 1;
     display: flex;
@@ -328,18 +320,16 @@
     padding: 0.4rem;
     cursor: pointer;
     font-size: 0.72rem;
-
     mat-icon {
       font-size: 20px;
       width: 20px;
       height: 20px;
     }
-  }
-
-  button.on {
-    background: var(--mat-sys-secondary-container);
-    color: var(--mat-sys-on-secondary-container);
-    border-color: transparent;
+    &.on {
+      background: var(--mat-sys-secondary-container);
+      color: var(--mat-sys-on-secondary-container);
+      border-color: transparent;
+    }
   }
 }
 
@@ -358,7 +348,6 @@
   font: inherit;
   border-radius: 999px;
   transition: background 0.14s ease;
-
   .ucaret {
     flex: none;
     color: var(--mat-sys-on-surface-variant);
@@ -366,10 +355,9 @@
     width: 22px;
     height: 22px;
   }
-}
-
-.userbtn:hover {
-  background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
+  }
 }
 
 .avatar {
@@ -389,6 +377,7 @@
     var(--mat-sys-tertiary)
   );
 }
+
 .uname {
   font-weight: 600;
   max-width: 180px;
@@ -396,19 +385,19 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 @media (max-width: 640px) {
   .uname {
     display: none;
   }
 }
+
 .menuhead {
   padding: 0.6rem 1rem;
   border-bottom: 1px solid var(--mat-sys-outline-variant);
-
   .mn {
     font-weight: 700;
   }
-
   .mr {
     font-size: 0.75rem;
     color: var(--mat-sys-outline);
@@ -445,19 +434,16 @@
   align-items: center;
   gap: 0.6rem;
   max-width: 420px;
-
   .ti {
     font-size: 20px;
     width: 20px;
     height: 20px;
     flex: none;
   }
-
   .tt {
     flex: 1;
     line-height: 1.35;
   }
-
   .tc {
     background: transparent;
     border: none;
@@ -468,27 +454,26 @@
     place-items: center;
     padding: 2px;
     border-radius: 6px;
-
     mat-icon {
       font-size: 18px;
       width: 18px;
       height: 18px;
     }
+    &:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.15);
+    }
   }
-
-  .tc:hover {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.15);
+  &.error {
+    background: #dc2626;
   }
-}
-.toast.error {
-  background: #dc2626;
-}
-.toast.success {
-  background: #16a34a;
+  &.success {
+    background: #16a34a;
+  }
 }
 
 /* Barre de progression de navigation (chargement de route / chunk) */
+
 .route-progress {
   position: relative;
   flex: none;
@@ -496,7 +481,6 @@
   z-index: 6;
   background: color-mix(in srgb, var(--mat-sys-primary) 18%, transparent);
   overflow: hidden;
-
   span {
     position: absolute;
     height: 100%;
@@ -520,6 +504,7 @@
 }
 
 /* Lien d'évitement (accessibilité clavier) */
+
 .skip-link {
   position: fixed;
   left: 12px;
@@ -531,8 +516,8 @@
   border-radius: 8px;
   font-weight: 700;
   transition: top 0.18s ease;
-}
-.skip-link:focus {
-  top: 12px;
-  text-decoration: none;
+  &:focus {
+    top: 12px;
+    text-decoration: none;
+  }
 }

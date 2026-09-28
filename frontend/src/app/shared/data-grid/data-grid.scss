@@ -1,37 +1,43 @@
 .grid-wrap {
   overflow-x: auto;
 }
+
 table.grid {
   border-collapse: collapse;
   width: 100%;
 }
+
 table.grid th,
 table.grid td {
   border: 1px solid var(--border);
   padding: 0;
 }
+
 table.grid th {
   background: var(--bg);
   padding: 0.2rem;
 }
+
 table.grid input {
   border: none;
   border-radius: 0;
   padding: 0.45rem 0.5rem;
   font-size: 0.85rem;
   background: transparent;
+  &:focus {
+    box-shadow: inset 0 0 0 2px var(--primary);
+  }
 }
-table.grid input:focus {
-  box-shadow: inset 0 0 0 2px var(--primary);
-}
+
 .colhead {
   display: flex;
   align-items: center;
   gap: 0.2rem;
+  input {
+    font-weight: 600;
+  }
 }
-.colhead input {
-  font-weight: 600;
-}
+
 .rownum {
   width: 2rem;
   text-align: center;
@@ -39,15 +45,18 @@ table.grid input:focus {
   background: var(--bg);
   font-size: 0.75rem;
 }
+
 .rowdel {
   width: 2rem;
   border: none !important;
   text-align: center;
 }
+
 .empty-row {
   text-align: center;
   padding: 0.8rem;
 }
+
 .mini {
   border: none;
   background: transparent;
@@ -56,11 +65,12 @@ table.grid input:focus {
   font-size: 0.8rem;
   padding: 0.1rem 0.3rem;
   border-radius: 4px;
+  &:hover {
+    background: #fee2e2;
+    color: var(--danger);
+  }
 }
-.mini:hover {
-  background: #fee2e2;
-  color: var(--danger);
-}
+
 .grid-actions {
   display: flex;
   gap: 0.5rem;

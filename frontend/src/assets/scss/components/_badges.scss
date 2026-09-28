@@ -1,4 +1,5 @@
 /* Badges */
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -9,22 +10,27 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
+
 .badge-public {
   background: color-mix(in srgb, var(--st-calm) 18%, transparent);
   color: var(--st-calm);
 }
+
 .badge-internal {
   background: var(--mat-sys-primary-container);
   color: var(--mat-sys-on-primary-container);
 }
+
 .badge-confidential {
   background: color-mix(in srgb, var(--st-breeze) 22%, transparent);
   color: var(--st-breeze);
 }
+
 .badge-restricted {
   background: var(--mat-sys-error-container);
   color: var(--mat-sys-on-error-container);
 }
+
 .badge-type {
   background: var(--mat-sys-surface-container-highest);
   color: var(--muted);
