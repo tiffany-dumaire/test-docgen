@@ -9,46 +9,46 @@
         <mat-tab label="Vue d'ensemble">
           <div class="tabpad card stack">
             <div class="form-grid">
-              <div class="field"><label>Nom du projet *</label><input [(ngModel)]="m.name" /></div>
-              <div class="field"><label>Nom du client *</label><input [(ngModel)]="m.clientName" /></div>
+              <mat-form-field appearance="outline"><mat-label>Nom du projet *</mat-label><input matInput [(ngModel)]="m.name" /></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Nom du client *</mat-label><input matInput [(ngModel)]="m.clientName" /></mat-form-field>
             </div>
             <div class="form-grid">
-              <div class="field">
-                <label>Projet parent (arborescence)</label>
-                <select [ngModel]="m.parent ?? null" (ngModelChange)="m.parent = $event">
-                  <option [ngValue]="null">— Aucun (projet racine) —</option>
+              <mat-form-field appearance="outline">
+                <mat-label>Projet parent (arborescence)</mat-label>
+                <mat-select [ngModel]="m.parent ?? null" (ngModelChange)="m.parent = $event">
+                  <mat-option [value]="null">— Aucun (projet racine) —</mat-option>
                   @for (pr of allProjects(); track pr.id) {
-                    @if (pr.id !== +(id || 0)) { <option [ngValue]="pr.id">{{ pr.name }}</option> }
+                    @if (pr.id !== +(id || 0)) { <mat-option [value]="pr.id">{{ pr.name }}</mat-option> }
                   }
-                </select>
-              </div>
-              <div class="field">
-                <label>Référence interne</label>
-                <input [(ngModel)]="m.reference" placeholder="PRJ-2026-001" />
-              </div>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Référence interne</mat-label>
+                <input matInput [(ngModel)]="m.reference" placeholder="PRJ-2026-001" />
+              </mat-form-field>
             </div>
             <div class="form-grid">
-              <div class="field">
-                <label>Statut</label>
-                <select [(ngModel)]="m.status">
-                  <option value="active">Actif</option>
-                  <option value="on_hold">En pause</option>
-                  <option value="archived">Archivé</option>
-                </select>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Statut</mat-label>
+                <mat-select [(ngModel)]="m.status">
+                  <mat-option value="active">Actif</mat-option>
+                  <mat-option value="on_hold">En pause</mat-option>
+                  <mat-option value="archived">Archivé</mat-option>
+                </mat-select>
+              </mat-form-field>
               <div class="field"></div>
             </div>
             <div class="form-grid">
-              <div class="field"><label>Date de début</label><input type="date" [ngModel]="m.startDate" (ngModelChange)="m.startDate = $event || null" /></div>
-              <div class="field"><label>Date de fin prévue</label><input type="date" [ngModel]="m.endDate" (ngModelChange)="m.endDate = $event || null" /></div>
+              <mat-form-field appearance="outline"><mat-label>Date de début</mat-label><input matInput type="date" [ngModel]="m.startDate" (ngModelChange)="m.startDate = $event || null" /></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Date de fin prévue</mat-label><input matInput type="date" [ngModel]="m.endDate" (ngModelChange)="m.endDate = $event || null" /></mat-form-field>
             </div>
-            <div class="field">
-              <label>Description</label>
-              <textarea [(ngModel)]="m.description" rows="3"></textarea>
-            </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <textarea matInput [(ngModel)]="m.description" rows="3"></textarea>
+            </mat-form-field>
 
             <div class="field">
-              <label>🖼️ Logo du projet <span class="muted" style="font-weight:400">(facultatif)</span></label>
+              <span class="field-label">🖼️ Logo du projet <span class="muted" style="font-weight:400">(facultatif)</span></span>
               <div class="logo-row">
                 <div class="logo-slot" (click)="pl.click()">
                   @if (m.logoUrl) { <img [src]="m.logoUrl" alt="logo" /> } @else { <span class="material-icons">add_photo_alternate</span> }
@@ -67,16 +67,16 @@
         <mat-tab label="Client et contacts">
           <div class="tabpad card stack">
             <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Fiche client (optionnel)</mat-label>
+                <mat-select [ngModel]="m.client ?? null" (ngModelChange)="onClientChange($event, m)">
+                  <mat-option [value]="null">— Aucune —</mat-option>
+                  @for (cl of clients(); track cl.id) { <mat-option [value]="cl.id">{{ cl.name }}</mat-option> }
+                </mat-select>
+                <mat-hint>Rattacher ce projet à un client existant (menu Clients).</mat-hint>
+              </mat-form-field>
               <div class="field">
-                <label>Fiche client (optionnel)</label>
-                <select [ngModel]="m.client ?? null" (ngModelChange)="onClientChange($event, m)">
-                  <option [ngValue]="null">— Aucune —</option>
-                  @for (cl of clients(); track cl.id) { <option [ngValue]="cl.id">{{ cl.name }}</option> }
-                </select>
-                <small class="muted">Rattacher ce projet à un client existant (menu Clients).</small>
-              </div>
-              <div class="field">
-                <label>Clients associés</label>
+                <span class="field-label">Clients associés</span>
                 <div class="proj-pick">
                   @for (cl of clients(); track cl.id) {
                     <label class="chip-check">
@@ -90,7 +90,7 @@
 
             <div class="field">
               <div class="row between">
-                <label>👤 Contacts client</label>
+                <span class="field-label">👤 Contacts client</span>
                 <button class="btn btn-sm btn-ghost" (click)="addContact(ContactKind.Client)">+ Ajouter</button>
               </div>
               @for (c of clientContacts(); track c) {
@@ -100,7 +100,7 @@
 
             <div class="field">
               <div class="row between">
-                <label>🧑‍💼 Contacts internes</label>
+                <span class="field-label">🧑‍💼 Contacts internes</span>
                 <button class="btn btn-sm btn-ghost" (click)="addContact(ContactKind.Internal)">+ Ajouter</button>
               </div>
               @for (c of internalContacts(); track c) {
@@ -115,7 +115,7 @@
           <mat-tab label="Informations complémentaires">
             <div class="tabpad card stack">
               <div class="row between">
-                <label>🧩 Champs personnalisés</label>
+                <span class="field-label">🧩 Champs personnalisés</span>
                 <button class="btn btn-sm btn-ghost" (click)="addFieldDef(m)">+ Définir un champ</button>
               </div>
               @for (def of m.customFieldDefs ?? []; track $index) {
@@ -194,7 +194,7 @@
           <mat-tab label="Équipe">
             <div class="tabpad card stack">
               <div class="row between">
-                <label>🛠️ Équipe de développement</label>
+                <span class="field-label">🛠️ Équipe de développement</span>
                 <button class="btn btn-sm btn-ghost" (click)="addAssignment()" [disabled]="!allMembers().length">+ Affecter un membre</button>
               </div>
               @if (!allMembers().length) {
@@ -217,7 +217,7 @@
           <!-- ===== STYLE DU PROJET (dernier) ===== -->
           <mat-tab label="Style du projet">
             <div class="tabpad card stack">
-              <label>🎨 Styles du projet (hérités par ses modèles)</label>
+              <span class="field-label">🎨 Styles du projet (hérités par ses modèles)</span>
               <app-style-editor [styles]="projStyles(m)" />
             </div>
           </mat-tab>

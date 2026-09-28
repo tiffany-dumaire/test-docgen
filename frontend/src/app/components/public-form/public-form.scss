@@ -22,7 +22,7 @@
     .pf-file { display:inline-block; color:var(--pf-accent); font-weight:600; text-decoration:none; }
     .pf-file.sm { font-size:.82rem; margin:.2rem 0; }
     .pf-field { margin:.9rem 0; display:flex; flex-direction:column; gap:.35rem; }
-    .pf-q { font-weight:600; } .req { color:#e11d48; }
+    .pf-q { display:block; font-weight:600; } .req { color:#e11d48; }
     .pf-hint { font-size:.82rem; color:#64748b; }
     .pf-qimg { max-width:100%; border-radius:8px; margin:.2rem 0; }
     .pf-field input:not([type=radio]):not([type=checkbox]):not([type=file]), .pf-field textarea, .pf-field select {

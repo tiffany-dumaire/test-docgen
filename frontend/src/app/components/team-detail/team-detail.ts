@@ -2,6 +2,9 @@ import { Component, inject, signal, Input, WritableSignal } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { TeamService } from '@core/services/company.service';
 import { ProjectService } from '@core/services/project.service';
 import { ToastService } from '@core/services/api.service';
@@ -9,7 +12,7 @@ import { Project, Team, TeamMember } from '@core/models';
 
 @Component({
   selector: 'app-team-detail',
-  imports: [FormsModule, RouterLink, MatTabsModule],
+  imports: [FormsModule, RouterLink, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './team-detail.html',
   styleUrl: './team-detail.scss',
 })

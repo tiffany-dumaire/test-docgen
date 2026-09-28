@@ -10,6 +10,9 @@ import { RichTextEditor } from '@shared/rich-text-editor/rich-text-editor';
 import { ExcelBuilder } from '@shared/content/excel-builder/excel-builder';
 import { LayoutEditor } from '@shared/content/layout-editor/layout-editor';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { StyleEditor } from '@shared/content/style-editor/style-editor';
 import { ProjectService } from '@core/services/project.service';
 import {
@@ -49,7 +52,7 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
 
 @Component({
   selector: 'app-template-builder',
-  imports: [BackDirective, FormsModule, RichTextEditor, NgTemplateOutlet, ExcelBuilder, LayoutEditor, StyleEditor, MatTabsModule],
+  imports: [BackDirective, FormsModule, RichTextEditor, NgTemplateOutlet, ExcelBuilder, LayoutEditor, StyleEditor, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './template-builder.html',
   styleUrl: './template-builder.scss',
 })

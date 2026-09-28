@@ -1,5 +1,7 @@
 import { Component, Input, signal, computed, HostListener, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { TemplateSettings } from '@core/models';
 import { CompanyService } from '@core/services/company.service';
 
@@ -19,7 +21,7 @@ const DISP_W = 460;
 
 @Component({
   selector: 'app-layout-editor',
-  imports: [FormsModule],
+  imports: [FormsModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './layout-editor.html',
   styleUrl: './layout-editor.scss',
 })

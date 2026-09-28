@@ -17,50 +17,50 @@
         <mat-tab label="Général">
           <div class="tabpad">
             <div class="card stack">
-              <div class="field">
-                <label>Nom du modèle *</label>
-                <input [(ngModel)]="m.name" />
-              </div>
-              <div class="field">
-                <label>Description</label>
-                <textarea [(ngModel)]="m.description" rows="2"></textarea>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Nom du modèle *</mat-label>
+                <input matInput [(ngModel)]="m.name" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Description</mat-label>
+                <textarea matInput [(ngModel)]="m.description" rows="2"></textarea>
+              </mat-form-field>
               <div class="form-grid">
-                <div class="field">
-                  <label>Confidentialité par défaut</label>
-                  <select [(ngModel)]="m.confidentiality">
-                    @for (c of confidentialityLevels(); track c.value) { <option [value]="c.value">{{ c.label }}</option> }
-                  </select>
-                </div>
-                <div class="field">
-                  <label>Portée</label>
-                  <select [(ngModel)]="m.scope">
-                    <option value="global">Ouvert à tous les projets</option>
-                    <option value="projects">Spécifique à certains projets</option>
-                  </select>
-                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Confidentialité par défaut</mat-label>
+                  <mat-select [(ngModel)]="m.confidentiality">
+                    @for (c of confidentialityLevels(); track c.value) { <mat-option [value]="c.value">{{ c.label }}</mat-option> }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Portée</mat-label>
+                  <mat-select [(ngModel)]="m.scope">
+                    <mat-option value="global">Ouvert à tous les projets</mat-option>
+                    <mat-option value="projects">Spécifique à certains projets</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
-              <div class="field">
-                <label>Message de confirmation</label>
-                <input [(ngModel)]="m.successMessage" />
-              </div>
-              <div class="field">
-                <label>Langue</label>
-                <select [(ngModel)]="m.language">
-                  @for (l of languages; track l.value) { <option [value]="l.value">{{ l.flag }} {{ l.label }}</option> }
-                </select>
-              </div>
-              <div class="field">
-                <label>Modèle de rapport (Word / PDF)</label>
-                <select [(ngModel)]="m.reportTemplate">
-                  <option [ngValue]="null">— aucun —</option>
-                  @for (t of reportTemplates(); track t.id) { <option [ngValue]="t.id">{{ t.name }} ({{ t.doc_type }})</option> }
-                </select>
-                <small class="muted">Document dans lequel les diagrammes du formulaire s'insèrent (bloc « Diagramme de formulaire », identifiants d1, d2…).</small>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Message de confirmation</mat-label>
+                <input matInput [(ngModel)]="m.successMessage" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Langue</mat-label>
+                <mat-select [(ngModel)]="m.language">
+                  @for (l of languages; track l.value) { <mat-option [value]="l.value">{{ l.flag }} {{ l.label }}</mat-option> }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Modèle de rapport (Word / PDF)</mat-label>
+                <mat-select [(ngModel)]="m.reportTemplate">
+                  <mat-option [value]="null">— aucun —</mat-option>
+                  @for (t of reportTemplates(); track t.id) { <mat-option [value]="t.id">{{ t.name }} ({{ t.doc_type }})</mat-option> }
+                </mat-select>
+                <mat-hint>Document dans lequel les diagrammes du formulaire s'insèrent (bloc « Diagramme de formulaire », identifiants d1, d2…).</mat-hint>
+              </mat-form-field>
               @if (m.scope === 'projects') {
                 <div class="field">
-                  <label>Projets autorisés</label>
+                  <span class="field-label">Projets autorisés</span>
                   <div class="proj-pick">
                     @for (pr of projects(); track pr.id) {
                       <label class="chip-check">
@@ -108,62 +108,59 @@
                     <button class="mini del" (click)="removeDiagram(m, i)">✕</button>
                   </div>
                   <div class="form-grid">
-                    <div class="field">
-                      <label>Type de graphique</label>
-                      <select [(ngModel)]="dg.variant">
-                        @for (v of variants; track v.value) { <option [value]="v.value">{{ v.label }}</option> }
-                      </select>
-                    </div>
-                    <div class="field">
-                      <label>Analyse</label>
-                      <select [(ngModel)]="dg.mode">
-                        <option value="distribution">Répartition des réponses (par question)</option>
-                        <option value="crosstab">Croisement (regrouper + agréger)</option>
-                      </select>
-                    </div>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Type de graphique</mat-label>
+                      <mat-select [(ngModel)]="dg.variant">
+                        @for (v of variants; track v.value) { <mat-option [value]="v.value">{{ v.label }}</mat-option> }
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Analyse</mat-label>
+                      <mat-select [(ngModel)]="dg.mode">
+                        <mat-option value="distribution">Répartition des réponses (par question)</mat-option>
+                        <mat-option value="crosstab">Croisement (regrouper + agréger)</mat-option>
+                      </mat-select>
+                    </mat-form-field>
                   </div>
 
                   @if (dg.mode === 'distribution') {
-                    <div class="field">
-                      <label>Question analysée</label>
-                      <select [(ngModel)]="dg.question">
-                        <option [ngValue]="undefined" disabled>— choisir —</option>
-                        @for (f of questions(m); track f.key) { <option [value]="f.key">{{ f.label || f.key }}</option> }
-                      </select>
-                      <small class="muted">Compte le nombre de réponses par valeur (idéal pour listes et cases à cocher).</small>
-                    </div>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Question analysée</mat-label>
+                      <mat-select [(ngModel)]="dg.question" placeholder="— choisir —">
+                        @for (f of questions(m); track f.key) { <mat-option [value]="f.key">{{ f.label || f.key }}</mat-option> }
+                      </mat-select>
+                      <mat-hint>Compte le nombre de réponses par valeur (idéal pour listes et cases à cocher).</mat-hint>
+                    </mat-form-field>
                   } @else {
                     <div class="form-grid">
-                      <div class="field">
-                        <label>Regrouper par (question)</label>
-                        <select [(ngModel)]="dg.group_by">
-                          <option [ngValue]="undefined" disabled>— choisir —</option>
-                          @for (f of questions(m); track f.key) { <option [value]="f.key">{{ f.label || f.key }}</option> }
-                        </select>
-                      </div>
-                      <div class="field">
-                        <label>Agrégation</label>
-                        <select [(ngModel)]="dg.agg">
-                          <option value="count">Nombre de réponses</option>
-                          <option value="sum">Somme</option>
-                          <option value="avg">Moyenne</option>
-                        </select>
-                      </div>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Regrouper par (question)</mat-label>
+                        <mat-select [(ngModel)]="dg.group_by" placeholder="— choisir —">
+                          @for (f of questions(m); track f.key) { <mat-option [value]="f.key">{{ f.label || f.key }}</mat-option> }
+                        </mat-select>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Agrégation</mat-label>
+                        <mat-select [(ngModel)]="dg.agg">
+                          <mat-option value="count">Nombre de réponses</mat-option>
+                          <mat-option value="sum">Somme</mat-option>
+                          <mat-option value="avg">Moyenne</mat-option>
+                        </mat-select>
+                      </mat-form-field>
                     </div>
                     @if (dg.agg !== 'count') {
-                      <div class="field">
-                        <label>Valeur agrégée (question numérique)</label>
-                        <select [(ngModel)]="dg.value">
-                          <option [ngValue]="undefined" disabled>— choisir —</option>
-                          @for (f of numericFields(m); track f.key) { <option [value]="f.key">{{ f.label || f.key }}</option> }
-                        </select>
-                      </div>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Valeur agrégée (question numérique)</mat-label>
+                        <mat-select [(ngModel)]="dg.value" placeholder="— choisir —">
+                          @for (f of numericFields(m); track f.key) { <mat-option [value]="f.key">{{ f.label || f.key }}</mat-option> }
+                        </mat-select>
+                      </mat-form-field>
                     }
                   }
 
                   <div class="field" style="max-width:220px">
-                    <label>Couleur principale</label>
-                    <input type="color" [ngModel]="dg.color || '#1F497D'" (ngModelChange)="dg.color = $event" style="width:52px; height:34px; padding:2px" />
+                    <label for="ftb-diag-color-{{ i }}">Couleur principale</label>
+                    <input id="ftb-diag-color-{{ i }}" type="color" [ngModel]="dg.color || '#1F497D'" (ngModelChange)="dg.color = $event" style="width:52px; height:34px; padding:2px" />
                   </div>
                 </div>
               }

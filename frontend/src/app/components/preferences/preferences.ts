@@ -1,5 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/auth/auth.service';
 import { ToastService } from '@core/services/api.service';
@@ -9,7 +11,7 @@ import { LanguageService, Lang } from '@core/services/language.service';
 
 @Component({
   selector: 'app-preferences',
-  imports: [FormsModule, TranslocoModule],
+  imports: [FormsModule, TranslocoModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './preferences.html',
   styleUrl: './preferences.scss',
 })

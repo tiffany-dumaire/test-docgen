@@ -20,7 +20,7 @@
     .pf-cimg { max-width:100%; border-radius:8px; } .pf-ctext { margin:.2rem 0; color:#334155; white-space:pre-line; }
     .pf-file { display:inline-block; color:var(--pf-accent); font-weight:600; text-decoration:none; } .pf-file.sm { font-size:.82rem; }
     .pf-field { margin:.8rem 0; display:flex; flex-direction:column; gap:.3rem; }
-    .pf-q { font-weight:600; } .req { color:#e11d48; } .pf-hint { font-size:.82rem; color:#64748b; }
+    .pf-q { display:block; font-weight:600; } .req { color:#e11d48; } .pf-hint { font-size:.82rem; color:#64748b; }
     .pf-qimg { max-width:100%; border-radius:8px; margin:.2rem 0; }
     .pf-field input:not([type=radio]):not([type=checkbox]):not([type=file]), .pf-field textarea, .pf-field select { width:100%; padding:.55rem .7rem; border:1px solid #d7dce5; border-radius:9px; font:inherit; box-sizing:border-box; }
     .pf-choices { display:flex; flex-direction:column; gap:.3rem; }

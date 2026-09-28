@@ -1,5 +1,8 @@
 import { Component, Input, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import {
   CellType,
   ExcelColumn,
@@ -23,7 +26,7 @@ const CELL_TYPES: { value: CellType; label: string }[] = [
 
 @Component({
   selector: 'app-excel-builder',
-  imports: [FormsModule],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './excel-builder.html',
   styleUrl: './excel-builder.scss',
 })
@@ -191,7 +194,7 @@ export class ExcelBuilder {
   delRow(s: ExcelSheet, r: number) {
     s.cells = (s.cells ?? []).filter((x) => x.row !== r);
     for (const cl of s.cells) if (cl.row > r) cl.row -= 1;
-    // s.col_widths = s.col_widths;
+    // Les largeurs de colonnes sont inchangées lors d'une suppression de ligne.
     s.row_heights = this.shiftDims(s.row_heights, r);
     if ((s as any).grid_rows) (s as any).grid_rows = Math.max(1, (s as any).grid_rows - 1);
     this.gsel.set(null); this.touch();

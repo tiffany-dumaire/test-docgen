@@ -26,7 +26,7 @@
         }
       </div>
       <div class="row" style="gap:.5rem;align-items:center;margin-top:.3rem">
-        <label style="margin:0">{{ 'prefs.brightness' | transloco }}</label>
+        <span class="field-label" style="margin:0">{{ 'prefs.brightness' | transloco }}</span>
         <div class="seg">
           @for (m of modes; track m.v) {
             <button class="segb" [class.active]="mode() === m.v" (click)="pickMode(m.v)">{{ m.l | transloco }}</button>
@@ -44,8 +44,8 @@
         }
       </div>
       <div class="row" style="gap:.8rem;align-items:center;margin-top:.6rem">
-        <label style="margin:0">{{ 'prefs.custom' | transloco }}</label>
-        <input type="color" [ngModel]="accent() || vnvPrimary" (ngModelChange)="pick($event)" style="width:56px;height:38px;padding:2px" />
+        <label for="pref-accent" style="margin:0">{{ 'prefs.custom' | transloco }}</label>
+        <input id="pref-accent" type="color" [ngModel]="accent() || vnvPrimary" (ngModelChange)="pick($event)" style="width:56px;height:38px;padding:2px" />
         <button class="btn btn-ghost btn-sm" (click)="resetColor()">{{ 'prefs.theme_color' | transloco }}</button>
       </div>
     </div>
@@ -54,20 +54,20 @@
       <h3>{{ 'prefs.typography' | transloco }}</h3>
       <p class="muted" style="margin:0">{{ 'prefs.typo_hint' | transloco }}</p>
       <div class="form-grid">
-        <div class="field">
-          <label>{{ 'prefs.title_font' | transloco }}</label>
-          <select [ngModel]="fontTitle()" (ngModelChange)="pickFont('title', $event)">
-            <option value="">{{ 'prefs.theme_font' | transloco }}</option>
-            @for (f of fonts; track f.value) { <option [value]="f.value">{{ f.label }}</option> }
-          </select>
-        </div>
-        <div class="field">
-          <label>{{ 'prefs.body_font' | transloco }}</label>
-          <select [ngModel]="fontBody()" (ngModelChange)="pickFont('body', $event)">
-            <option value="">{{ 'prefs.theme_font' | transloco }}</option>
-            @for (f of fonts; track f.value) { <option [value]="f.value">{{ f.label }}</option> }
-          </select>
-        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'prefs.title_font' | transloco }}</mat-label>
+          <mat-select [ngModel]="fontTitle()" (ngModelChange)="pickFont('title', $event)">
+            <mat-option value="">{{ 'prefs.theme_font' | transloco }}</mat-option>
+            @for (f of fonts; track f.value) { <mat-option [value]="f.value">{{ f.label }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'prefs.body_font' | transloco }}</mat-label>
+          <mat-select [ngModel]="fontBody()" (ngModelChange)="pickFont('body', $event)">
+            <mat-option value="">{{ 'prefs.theme_font' | transloco }}</mat-option>
+            @for (f of fonts; track f.value) { <mat-option [value]="f.value">{{ f.label }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
       </div>
       <button class="btn btn-ghost btn-sm" (click)="resetFonts()" style="align-self:flex-start">{{ 'prefs.theme_fonts' | transloco }}</button>
     </div>

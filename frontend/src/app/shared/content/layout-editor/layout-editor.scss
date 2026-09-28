@@ -1,6 +1,7 @@
-    .fmt { display:flex; gap:1rem; margin:.2rem 0 .6rem; }
+    .fmt { display:flex; gap:1rem; margin:.2rem 0 .6rem; align-items:center; }
     .fmt label { display:flex; align-items:center; gap:.4rem; font-size:.82rem; font-weight:600; }
     .fmt select { width:auto; padding:.25rem .4rem; }
+    .fmt .fmt-field { width:170px; }
     .tabs { display:flex; gap:.4rem; align-items:center; margin-bottom:.6rem; flex-wrap:wrap; }
     .tab { border:1px solid var(--border); background:#fff; border-radius:8px; padding:.4rem .7rem; cursor:pointer; font-weight:600; font-size:.85rem; }
     .tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }

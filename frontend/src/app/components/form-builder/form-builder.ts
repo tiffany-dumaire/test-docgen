@@ -1,6 +1,10 @@
 import { Component, inject, signal, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Router } from '@angular/router';
 import { BackDirective } from '@shared/back.directive';
 import { FormService } from '@core/services/form.service';
@@ -15,7 +19,7 @@ import { Choice, Confidentiality, FormField, FormSection, FormSubmission, Online
 
 @Component({
   selector: 'app-form-builder',
-  imports: [BackDirective, FormsModule, DatePipe, FormSchemaEditor, FormAppearanceEditor, FormPreview],
+  imports: [BackDirective, FormsModule, DatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatCheckboxModule, FormSchemaEditor, FormAppearanceEditor, FormPreview],
   templateUrl: './form-builder.html',
   styleUrl: './form-builder.scss',
 })

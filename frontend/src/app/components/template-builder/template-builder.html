@@ -34,36 +34,36 @@
           <div class="tabpad">
             <div class="card stack">
               <div class="form-grid">
-                <div class="field">
-                  <label>Nom du modèle *</label>
-                  <input [(ngModel)]="m.name" (ngModelChange)="onName($event, m)" />
-                </div>
-                <div class="field">
-                  <label>Type de modèle *</label>
-                  <select [(ngModel)]="m.doc_type" (ngModelChange)="onFormatChange(m)" [disabled]="isEdit()">
-                    @for (dt of typeOptions(); track dt.value) { <option [value]="dt.value">{{ dt.label }}</option> }
-                  </select>
-                  @if (!isEdit()) { <small class="muted">Le type détermine les onglets de configuration.</small> }
-                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Nom du modèle *</mat-label>
+                  <input matInput [(ngModel)]="m.name" (ngModelChange)="onName($event, m)" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Type de modèle *</mat-label>
+                  <mat-select [(ngModel)]="m.doc_type" (ngModelChange)="onFormatChange(m)" [disabled]="isEdit()">
+                    @for (dt of typeOptions(); track dt.value) { <mat-option [value]="dt.value">{{ dt.label }}</mat-option> }
+                  </mat-select>
+                  @if (!isEdit()) { <mat-hint>Le type détermine les onglets de configuration.</mat-hint> }
+                </mat-form-field>
               </div>
               <div class="form-grid">
-                <div class="field">
-                  <label>Description</label>
-                  <input [(ngModel)]="m.description" placeholder="À quoi sert ce modèle ?" />
-                </div>
-                <div class="field">
-                  <label>Langue principale</label>
-                  <select [(ngModel)]="m.language">
+                <mat-form-field appearance="outline">
+                  <mat-label>Description</mat-label>
+                  <input matInput [(ngModel)]="m.description" placeholder="À quoi sert ce modèle ?" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Langue principale</mat-label>
+                  <mat-select [(ngModel)]="m.language">
                     @for (l of availableLangs(m); track l) {
-                      <option [value]="l">{{ flagOf(l) }} {{ labelOf(l) }}</option>
+                      <mat-option [value]="l">{{ flagOf(l) }} {{ labelOf(l) }}</mat-option>
                     }
-                  </select>
-                  <small class="muted">Repli si une langue demandée n'est pas disponible.</small>
-                </div>
+                  </mat-select>
+                  <mat-hint>Repli si une langue demandée n'est pas disponible.</mat-hint>
+                </mat-form-field>
               </div>
 
               <div class="field">
-                <label>Langues disponibles</label>
+                <span class="field-label">Langues disponibles</span>
                 <div class="row" style="gap:.8rem; flex-wrap:wrap">
                   @for (l of languages; track l.value) {
                     <label class="chk">
@@ -76,7 +76,7 @@
               </div>
 
               <div class="field">
-                <label>Nom du modèle par langue</label>
+                <span class="field-label">Nom du modèle par langue</span>
                 @for (l of availableLangs(m); track l) {
                   <div class="row" style="gap:.6rem; align-items:center; margin-bottom:.35rem">
                     <span style="width:2.2rem">{{ flagOf(l) }}</span>
@@ -90,9 +90,9 @@
 
               @if (hasTableColor()) {
                 <div class="field">
-                  <label>Couleur principale des tableaux</label>
+                  <label for="tb-table-color">Couleur principale des tableaux</label>
                   <div class="row" style="gap:.6rem; align-items:center">
-                    <input type="color" [ngModel]="'#' + (settings().table_color || '1F497D')" (ngModelChange)="settings().table_color = $event.slice(1)" style="width:52px; height:36px; padding:2px" />
+                    <input id="tb-table-color" type="color" [ngModel]="'#' + (settings().table_color || '1F497D')" (ngModelChange)="settings().table_color = $event.slice(1)" style="width:52px; height:36px; padding:2px" />
                     <span class="muted">Appliquée aux en-têtes de tableaux (Word, PDF et Excel).</span>
                   </div>
                 </div>
@@ -105,16 +105,16 @@
                 </div>
               }
 
-              <div class="field">
-                <label>Portée du modèle</label>
-                <select [(ngModel)]="m.scope">
-                  <option value="global">Ouvert à tous les projets</option>
-                  <option value="projects">Spécifique à certains projets</option>
-                </select>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Portée du modèle</mat-label>
+                <mat-select [(ngModel)]="m.scope">
+                  <mat-option value="global">Ouvert à tous les projets</mat-option>
+                  <mat-option value="projects">Spécifique à certains projets</mat-option>
+                </mat-select>
+              </mat-form-field>
               @if (m.scope === 'projects') {
                 <div class="field">
-                  <label>Projets autorisés</label>
+                  <span class="field-label">Projets autorisés</span>
                   <div class="proj-pick">
                     @for (pr of allProjects(); track pr.id) {
                       <label class="chip-check">
@@ -186,11 +186,11 @@
                         </div>
                       }
                       @case ('table') {
-                        <div class="field">
-                          <label>Titre du tableau (facultatif)</label>
-                          <input [(ngModel)]="block.label" />
-                        </div>
-                        <label>Colonnes</label>
+                        <mat-form-field appearance="outline">
+                          <mat-label>Titre du tableau (facultatif)</mat-label>
+                          <input matInput [(ngModel)]="block.label" />
+                        </mat-form-field>
+                        <span class="field-label">Colonnes</span>
                         @for (col of block.columns ?? []; track $index) {
                           <div class="row" style="gap:.4rem; margin-bottom:.3rem">
                             <input [(ngModel)]="col.label" placeholder="Nom de colonne" />
@@ -202,16 +202,16 @@
                       }
                       @case ('field') {
                         <div class="form-grid">
-                          <div class="field"><label>Libellé</label><input [(ngModel)]="block.label" (ngModelChange)="syncKey(block)" /></div>
-                          <div class="field"><label>Type</label>
-                            <select [(ngModel)]="block.field_type">
-                              <option value="text">Texte court</option><option value="textarea">Texte long</option>
-                              <option value="number">Nombre</option><option value="date">Date</option><option value="select">Liste</option>
-                            </select>
-                          </div>
+                          <mat-form-field appearance="outline"><mat-label>Libellé</mat-label><input matInput [(ngModel)]="block.label" (ngModelChange)="syncKey(block)" /></mat-form-field>
+                          <mat-form-field appearance="outline"><mat-label>Type</mat-label>
+                            <mat-select [(ngModel)]="block.field_type">
+                              <mat-option value="text">Texte court</mat-option><mat-option value="textarea">Texte long</mat-option>
+                              <mat-option value="number">Nombre</mat-option><mat-option value="date">Date</mat-option><mat-option value="select">Liste</mat-option>
+                            </mat-select>
+                          </mat-form-field>
                         </div>
                         @if (block.field_type === 'select') {
-                          <div class="field"><label>Options (virgules)</label><input [ngModel]="(block.options ?? []).join(', ')" (ngModelChange)="setOptions(block, $event)" /></div>
+                          <mat-form-field appearance="outline"><mat-label>Options (virgules)</mat-label><input matInput [ngModel]="(block.options ?? []).join(', ')" (ngModelChange)="setOptions(block, $event)" /></mat-form-field>
                         }
                         <div class="row" style="gap:1.2rem">
                           <label class="chk"><input type="checkbox" [(ngModel)]="block.required" /> Obligatoire</label>
@@ -223,26 +223,26 @@
                       }
                       @case ('link') {
                         <div class="form-grid">
-                          <div class="field"><label>Texte du lien</label><input [(ngModel)]="block.label" placeholder="Voir le site" /></div>
-                          <div class="field"><label>URL</label><input [(ngModel)]="block.url" placeholder="https://…" /></div>
+                          <mat-form-field appearance="outline"><mat-label>Texte du lien</mat-label><input matInput [(ngModel)]="block.label" placeholder="Voir le site" /></mat-form-field>
+                          <mat-form-field appearance="outline"><mat-label>URL</mat-label><input matInput [(ngModel)]="block.url" placeholder="https://…" /></mat-form-field>
                         </div>
                       }
                       @case ('diagram') {
                         <div class="form-grid">
-                          <div class="field"><label>Type de diagramme</label>
-                            <select [(ngModel)]="block.variant">
-                              <option value="process">Processus (flèches)</option>
-                              <option value="list">Liste</option>
-                              <option value="cycle">Cycle</option>
-                              <option value="hierarchy">Hiérarchie</option>
-                              <option value="pyramid">Pyramide</option>
-                            </select>
-                          </div>
-                          <div class="field"><label>Largeur : {{ block.width_pct || 100 }}%</label>
+                          <mat-form-field appearance="outline"><mat-label>Type de diagramme</mat-label>
+                            <mat-select [(ngModel)]="block.variant">
+                              <mat-option value="process">Processus (flèches)</mat-option>
+                              <mat-option value="list">Liste</mat-option>
+                              <mat-option value="cycle">Cycle</mat-option>
+                              <mat-option value="hierarchy">Hiérarchie</mat-option>
+                              <mat-option value="pyramid">Pyramide</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                          <label class="range-field" style="flex:1">Largeur : {{ block.width_pct || 100 }}%
                             <input type="range" min="40" max="100" [ngModel]="block.width_pct || 100" (ngModelChange)="block.width_pct = +$event" />
-                          </div>
+                          </label>
                         </div>
-                        <label>Éléments</label>
+                        <span class="field-label">Éléments</span>
                         @for (it of block.diagram_items ?? []; track $index) {
                           <div class="row" style="gap:.4rem; margin-bottom:.3rem">
                             <input [(ngModel)]="it.title" placeholder="Titre" style="flex:1" />
@@ -254,22 +254,22 @@
                       }
                       @case ('contacts') {
                         <div class="form-grid">
-                          <div class="field"><label>Titre</label><input [(ngModel)]="block.label" /></div>
-                          <div class="field"><label>Portée</label>
-                            <select [(ngModel)]="block.scope">
-                              <option value="both">Client + interne</option><option value="client">Client</option><option value="internal">Interne</option>
-                            </select>
-                          </div>
+                          <mat-form-field appearance="outline"><mat-label>Titre</mat-label><input matInput [(ngModel)]="block.label" /></mat-form-field>
+                          <mat-form-field appearance="outline"><mat-label>Portée</mat-label>
+                            <mat-select [(ngModel)]="block.scope">
+                              <mat-option value="both">Client + interne</mat-option><mat-option value="client">Client</mat-option><mat-option value="internal">Interne</mat-option>
+                            </mat-select>
+                          </mat-form-field>
                         </div>
                       }
                       @case ('form_diagram') {
                         <div class="form-grid">
-                          <div class="field"><label>Identifiant du diagramme (formulaire)</label>
-                            <input [(ngModel)]="block.diagram_key" placeholder="ex : d1" />
-                          </div>
-                          <div class="field"><label>Largeur : {{ block.width_pct || 90 }}%</label>
+                          <mat-form-field appearance="outline"><mat-label>Identifiant du diagramme (formulaire)</mat-label>
+                            <input matInput [(ngModel)]="block.diagram_key" placeholder="ex : d1" />
+                          </mat-form-field>
+                          <label class="range-field" style="flex:1">Largeur : {{ block.width_pct || 90 }}%
                             <input type="range" min="40" max="100" [ngModel]="block.width_pct || 90" (ngModelChange)="block.width_pct = +$event" />
-                          </div>
+                          </label>
                         </div>
                         <p class="muted" style="font-size:.78rem;margin:0">Insère, lors de la génération d'un rapport lié à un formulaire, le diagramme correspondant (calculé sur les réponses).</p>
                       }
@@ -304,12 +304,12 @@
                   <label class="chk"><input type="checkbox" [ngModel]="hfVal('header','enabled')" (ngModelChange)="setHf('header','enabled',$event)" /> En-tête actif</label>
                   @if (hfVal('header','enabled')) {
                     <label class="chk"><input type="checkbox" [ngModel]="hfVal('header','show_logo')" (ngModelChange)="setHf('header','show_logo',$event)" /> Afficher le logo de l'entreprise</label>
-                    <div class="field"><label>Contenu de l'en-tête (texte enrichi : couleur, gras, listes… — variables {{ '{{' }}…{{ '}}' }})</label>
+                    <div class="field"><span class="field-label">Contenu de l'en-tête (texte enrichi : couleur, gras, listes… — variables {{ '{{' }}…{{ '}}' }})</span>
                       <app-rich-text-editor [value]="$any(hfVal('header','html'))" (valueChange)="setHf('header','html',$event)" /></div>
-                    <div class="field" style="max-width:220px"><label>Alignement</label>
-                      <select [ngModel]="hfVal('header','align')" (ngModelChange)="setHf('header','align',$event)">
-                        <option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option>
-                      </select></div>
+                    <mat-form-field appearance="outline" style="max-width:220px"><mat-label>Alignement</mat-label>
+                      <mat-select [ngModel]="hfVal('header','align')" (ngModelChange)="setHf('header','align',$event)">
+                        <mat-option value="left">Gauche</mat-option><mat-option value="center">Centre</mat-option><mat-option value="right">Droite</mat-option>
+                      </mat-select></mat-form-field>
                   } @else { <p class="muted" style="margin:0">L'en-tête sera vide (aucun en-tête sur le document).</p> }
                 } @else { <p class="muted" style="margin:0">L'en-tête du modèle de base est utilisé.</p> }
               </div>
@@ -320,12 +320,12 @@
                 @if (hfConfigured('footer')) {
                   <label class="chk"><input type="checkbox" [ngModel]="hfVal('footer','enabled')" (ngModelChange)="setHf('footer','enabled',$event)" /> Pied de page actif</label>
                   @if (hfVal('footer','enabled')) {
-                    <div class="field"><label>Contenu du pied de page (texte enrichi : couleur, gras, listes… — variables {{ '{{' }}…{{ '}}' }})</label>
+                    <div class="field"><span class="field-label">Contenu du pied de page (texte enrichi : couleur, gras, listes… — variables {{ '{{' }}…{{ '}}' }})</span>
                       <app-rich-text-editor [value]="$any(hfVal('footer','html'))" (valueChange)="setHf('footer','html',$event)" /></div>
-                    <div class="field" style="max-width:220px"><label>Alignement</label>
-                      <select [ngModel]="hfVal('footer','align')" (ngModelChange)="setHf('footer','align',$event)">
-                        <option value="left">Gauche</option><option value="center">Centre</option><option value="right">Droite</option>
-                      </select></div>
+                    <mat-form-field appearance="outline" style="max-width:220px"><mat-label>Alignement</mat-label>
+                      <mat-select [ngModel]="hfVal('footer','align')" (ngModelChange)="setHf('footer','align',$event)">
+                        <mat-option value="left">Gauche</mat-option><mat-option value="center">Centre</mat-option><mat-option value="right">Droite</mat-option>
+                      </mat-select></mat-form-field>
                   } @else { <p class="muted" style="margin:0">Le pied de page sera vide (aucun pied sur le document).</p> }
                 } @else { <p class="muted" style="margin:0">Le pied de page du modèle de base est utilisé.</p> }
               </div>
@@ -346,14 +346,14 @@
                 </div>
                 @if (settings().include_cover) {
                   <div class="form-grid">
-                    <div class="field">
-                      <label>Titre de couverture</label>
-                      <input [(ngModel)]="settings().cover_title" placeholder="{{ '{{' }}document_title{{ '}}' }}" />
-                    </div>
-                    <div class="field">
-                      <label>Sous-titre</label>
-                      <input [(ngModel)]="settings().cover_subtitle" />
-                    </div>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Titre de couverture</mat-label>
+                      <input matInput [(ngModel)]="settings().cover_title" placeholder="{{ '{{' }}document_title{{ '}}' }}" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Sous-titre</mat-label>
+                      <input matInput [(ngModel)]="settings().cover_subtitle" />
+                    </mat-form-field>
                   </div>
                 }
               </div>
@@ -379,9 +379,9 @@
                 <h3>Thème de la présentation</h3>
                 <p class="muted" style="margin:0 0 .4rem">Rendu fidèle au thème fourni. Personnalisation : logo de la diapositive de titre et couleur principale.</p>
                 <div class="field">
-                  <label>Couleur principale</label>
+                  <label for="tb-pptx-color">Couleur principale</label>
                   <div class="row" style="gap:.6rem; align-items:center">
-                    <input type="color" [ngModel]="pptx().main_color || '#1F497D'" (ngModelChange)="pptx().main_color = $event" style="width:52px; height:36px; padding:2px" />
+                    <input id="tb-pptx-color" type="color" [ngModel]="pptx().main_color || '#1F497D'" (ngModelChange)="pptx().main_color = $event" style="width:52px; height:36px; padding:2px" />
                     <span class="muted">Titres et accents des diapositives.</span>
                   </div>
                 </div>
@@ -423,28 +423,28 @@
                 @for (ov of overlays(); track ov.id) {
                   @if (activeOverlay() === ov.id) {
                     <div class="form-grid">
-                      <div class="field">
-                        <label>Nom du calque</label>
-                        <input [(ngModel)]="ov.name" />
-                      </div>
-                      <div class="field">
-                        <label>{{ isPptx() ? 'Diapositives ciblées' : 'Pages ciblées' }}</label>
-                        <select [ngModel]="pagePreset(ov)" (ngModelChange)="setPagePreset(ov, $event)">
-                          <option value="all">Toutes</option>
-                          <option value="first">{{ isPptx() ? 'Première diapo' : 'Première page' }}</option>
-                          <option value="last">{{ isPptx() ? 'Dernière diapo' : 'Dernière page' }}</option>
-                          <option value="odd">{{ isPptx() ? 'Diapos impaires' : 'Pages impaires' }}</option>
-                          <option value="even">{{ isPptx() ? 'Diapos paires' : 'Pages paires' }}</option>
-                          <option value="custom">Personnalisé…</option>
-                        </select>
-                      </div>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Nom du calque</mat-label>
+                        <input matInput [(ngModel)]="ov.name" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{ isPptx() ? 'Diapositives ciblées' : 'Pages ciblées' }}</mat-label>
+                        <mat-select [ngModel]="pagePreset(ov)" (ngModelChange)="setPagePreset(ov, $event)">
+                          <mat-option value="all">Toutes</mat-option>
+                          <mat-option value="first">{{ isPptx() ? 'Première diapo' : 'Première page' }}</mat-option>
+                          <mat-option value="last">{{ isPptx() ? 'Dernière diapo' : 'Dernière page' }}</mat-option>
+                          <mat-option value="odd">{{ isPptx() ? 'Diapos impaires' : 'Pages impaires' }}</mat-option>
+                          <mat-option value="even">{{ isPptx() ? 'Diapos paires' : 'Pages paires' }}</mat-option>
+                          <mat-option value="custom">Personnalisé…</mat-option>
+                        </mat-select>
+                      </mat-form-field>
                     </div>
                     @if (pagePreset(ov) === 'custom') {
-                      <div class="field" style="max-width:360px">
-                        <label>{{ isPptx() ? 'N° de diapositives' : 'N° de pages' }} (ex : 1,3-5)</label>
-                        <input [(ngModel)]="ov.target.pages" placeholder="1,3-5" />
-                        <small class="muted">Numéros séparés par des virgules ; plages avec un tiret. Mots-clés : first, last.</small>
-                      </div>
+                      <mat-form-field appearance="outline" style="max-width:360px">
+                        <mat-label>{{ isPptx() ? 'N° de diapositives' : 'N° de pages' }} (ex : 1,3-5)</mat-label>
+                        <input matInput [(ngModel)]="ov.target.pages" placeholder="1,3-5" />
+                        <mat-hint>Numéros séparés par des virgules ; plages avec un tiret. Mots-clés : first, last.</mat-hint>
+                      </mat-form-field>
                     }
                     <label class="chk"><input type="checkbox" [ngModel]="ov.enabled !== false" (ngModelChange)="ov.enabled = $event" /> Calque actif</label>
                     <app-layout-editor [single]="ov.layout" [sizeMode]="isPptx() ? 'slide' : 'page'" />
@@ -500,10 +500,10 @@
 
                 @for (pg of a3Pages(); track pg.id) {
                   @if (activeA3() === pg.id) {
-                    <div class="field" style="max-width:320px">
-                      <label>Nom de la page</label>
-                      <input [(ngModel)]="pg.name" />
-                    </div>
+                    <mat-form-field appearance="outline" style="max-width:320px">
+                      <mat-label>Nom de la page</mat-label>
+                      <input matInput [(ngModel)]="pg.name" />
+                    </mat-form-field>
                     <app-layout-editor [single]="pg.layout" />
                   }
                 }
@@ -569,14 +569,14 @@
 
     <ng-template #sizePos let-block>
       <div class="row" style="gap:1rem; align-items:center">
-        <label style="flex:1">Largeur : {{ block.width_pct || 40 }}%
+        <label class="range-field" style="flex:1">Largeur : {{ block.width_pct || 40 }}%
           <input type="range" min="10" max="100" [ngModel]="block.width_pct || 40" (ngModelChange)="block.width_pct = +$event" />
         </label>
-        <div class="field" style="margin:0">
-          <label>Position</label>
-          <select [(ngModel)]="block.align">
-            <option value="left">Gauche</option><option value="center">Centré</option><option value="right">Droite</option>
-          </select>
-        </div>
+        <mat-form-field appearance="outline" style="margin:0; min-width:160px">
+          <mat-label>Position</mat-label>
+          <mat-select [(ngModel)]="block.align">
+            <mat-option value="left">Gauche</mat-option><mat-option value="center">Centré</mat-option><mat-option value="right">Droite</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
     </ng-template>

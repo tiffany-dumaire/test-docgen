@@ -9,43 +9,41 @@
         <div class="stack tabpad">
           <div class="card stack">
             <h3>Paramètres</h3>
-            <div class="field">
-              <label>Titre du document *</label>
-              <input [(ngModel)]="d.title" />
-            </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Titre du document *</mat-label>
+              <input matInput [(ngModel)]="d.title" />
+            </mat-form-field>
             <div class="form-grid">
-              <div class="field">
-                <label>Projet *</label>
-                <select [(ngModel)]="d.project" [disabled]="isEdit()" (ngModelChange)="onProjectChange($event)">
-                  <option [ngValue]="null" disabled>— choisir —</option>
+              <mat-form-field appearance="outline">
+                <mat-label>Projet *</mat-label>
+                <mat-select [(ngModel)]="d.project" [disabled]="isEdit()" (ngModelChange)="onProjectChange($event)" placeholder="— choisir —">
                   @for (p of projects(); track p.id) {
-                    <option [ngValue]="p.id">{{ p.name }} ({{ p.clientName }})</option>
+                    <mat-option [value]="p.id">{{ p.name }} ({{ p.clientName }})</mat-option>
                   }
-                </select>
-              </div>
-              <div class="field">
-                <label>Modèle *</label>
-                <select [(ngModel)]="d.template" [disabled]="isEdit()" (ngModelChange)="onTemplateChange()">
-                  <option [ngValue]="null" disabled>— choisir —</option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Modèle *</mat-label>
+                <mat-select [(ngModel)]="d.template" [disabled]="isEdit()" (ngModelChange)="onTemplateChange()" placeholder="— choisir —">
                   @for (t of templates(); track t.id) {
-                    <option [ngValue]="t.id">{{ t.name }}</option>
+                    <mat-option [value]="t.id">{{ t.name }}</mat-option>
                   }
-                </select>
-              </div>
+                </mat-select>
+              </mat-form-field>
             </div>
-            <div class="field">
-              <label>Niveau de confidentialité</label>
-              <select [(ngModel)]="d.confidentiality">
+            <mat-form-field appearance="outline">
+              <mat-label>Niveau de confidentialité</mat-label>
+              <mat-select [(ngModel)]="d.confidentiality">
                 @for (c of confidentialityLevels(); track c.value) {
-                  <option [value]="c.value">{{ c.label }}</option>
+                  <mat-option [value]="c.value">{{ c.label }}</mat-option>
                 }
-              </select>
-            </div>
-            <div class="field">
-              <label>Date du document</label>
-              <input type="date" [ngModel]="d.docDate" (ngModelChange)="d.docDate = $event || null" />
-              <small class="muted">Utilisable dans les textes via {{ '{{' }}doc_date{{ '}}' }}.</small>
-            </div>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Date du document</mat-label>
+              <input matInput type="date" [ngModel]="d.docDate" (ngModelChange)="d.docDate = $event || null" />
+              <mat-hint>Utilisable dans les textes via {{ '{{' }}doc_date{{ '}}' }}.</mat-hint>
+            </mat-form-field>
           </div>
 
           <div class="row">
@@ -123,31 +121,31 @@
                       <div class="preview-text">🔗 {{ block.label || block.url }}</div>
                     }
                     @case ('field') {
-                      <div class="field">
-                        <label>{{ block.label || 'Champ' }} @if (block.required) { <span class="req">*</span> }</label>
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{ block.label || 'Champ' }} @if (block.required) { <span class="req">*</span> }</mat-label>
                         @switch (block.field_type) {
                           @case ('textarea') {
-                            <textarea [ngModel]="fieldVal(d, block.key!)" (ngModelChange)="setField(d, block.key!, $event)" rows="3"></textarea>
+                            <textarea matInput [ngModel]="fieldVal(d, block.key!)" (ngModelChange)="setField(d, block.key!, $event)" rows="3"></textarea>
                           }
                           @case ('select') {
-                            <select [ngModel]="fieldVal(d, block.key!)" (ngModelChange)="setField(d, block.key!, $event)">
-                              <option value="">—</option>
-                              @for (opt of block.options ?? []; track opt) { <option [value]="opt">{{ opt }}</option> }
-                            </select>
+                            <mat-select [ngModel]="fieldVal(d, block.key!)" (ngModelChange)="setField(d, block.key!, $event)">
+                              <mat-option value="">—</mat-option>
+                              @for (opt of block.options ?? []; track opt) { <mat-option [value]="opt">{{ opt }}</mat-option> }
+                            </mat-select>
                           }
                           @default {
-                            <input
+                            <input matInput
                               [type]="inputType(block.field_type)"
                               [ngModel]="fieldVal(d, block.key!)"
                               (ngModelChange)="setField(d, block.key!, $event)"
                             />
                           }
                         }
-                      </div>
+                      </mat-form-field>
                     }
                     @case ('table') {
                       <div class="field">
-                        <label>{{ block.label || 'Tableau' }}</label>
+                        <span class="field-label">{{ block.label || 'Tableau' }}</span>
                         <app-data-grid
                           [model]="tableModel(d, block)"
                           [allowColumns]="!!block.allow_edit_columns"
@@ -214,19 +212,19 @@
               <p class="muted">Enregistrez d'abord le document, puis générez sa première version.</p>
             } @else {
               <div class="form-grid">
-                <div class="field">
-                  <label>Vos initiales *</label>
-                  <input [(ngModel)]="gen.author_initials" maxlength="10" placeholder="ex : PM" />
-                </div>
-                <div class="field">
-                  <label>Votre nom</label>
-                  <input [(ngModel)]="gen.author_name" placeholder="Paul Martin" />
-                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Vos initiales *</mat-label>
+                  <input matInput [(ngModel)]="gen.author_initials" maxlength="10" placeholder="ex : PM" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Votre nom</mat-label>
+                  <input matInput [(ngModel)]="gen.author_name" placeholder="Paul Martin" />
+                </mat-form-field>
               </div>
-              <div class="field">
-                <label>Commentaire de modification</label>
-                <textarea [(ngModel)]="gen.comment" rows="2" placeholder="Ce qui a changé…"></textarea>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Commentaire de modification</mat-label>
+                <textarea matInput [(ngModel)]="gen.comment" rows="2" placeholder="Ce qui a changé…"></textarea>
+              </mat-form-field>
               <button class="btn btn-primary" (click)="generate()" [disabled]="generating()">
                 🖨️ {{ (doc()?.currentVersion ?? 0) > 0 ? 'Régénérer (nouvelle version)' : 'Générer la version 1' }}
               </button>

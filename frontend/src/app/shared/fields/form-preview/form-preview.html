@@ -37,7 +37,7 @@
                 </div>
               } @else {
                 <div class="pf-field">
-                  <label class="pf-q">{{ asQ(el).label || 'Question' }} @if (asQ(el).required) { <span class="req">*</span> }</label>
+                  <span class="pf-q">{{ asQ(el).label || 'Question' }} @if (asQ(el).required) { <span class="req">*</span> }</span>
                   @if (asQ(el).hint) { <div class="pf-hint">{{ asQ(el).hint }}</div> }
                   @if (asQ(el).image) { <img class="pf-qimg" [src]="asQ(el).image" alt="" /> }
                   @if (asQ(el).template_file) { <a class="pf-file sm" [href]="asQ(el).template_file" target="_blank" rel="noopener">📎 Fichier modèle : {{ asQ(el).template_file_name || 'télécharger' }}</a> }

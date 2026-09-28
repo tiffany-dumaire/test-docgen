@@ -33,9 +33,9 @@
           <div class="tabpad">
             <div class="card stack">
               <h3>Coordonnées</h3>
-              <div class="field"><label>Email de contact</label><input [(ngModel)]="m.email" type="email" placeholder="contact@…" /></div>
-              <div class="field"><label>Adresse</label><textarea [(ngModel)]="m.address" rows="3" placeholder="Adresse postale…"></textarea></div>
-              <div class="field"><label>Téléphone</label><input [(ngModel)]="m.phone" placeholder="+33 …" /></div>
+              <mat-form-field appearance="outline"><mat-label>Email de contact</mat-label><input matInput [(ngModel)]="m.email" type="email" placeholder="contact@…" /></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Adresse</mat-label><textarea matInput [(ngModel)]="m.address" rows="3" placeholder="Adresse postale…"></textarea></mat-form-field>
+              <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label><input matInput [(ngModel)]="m.phone" placeholder="+33 …" /></mat-form-field>
             </div>
           </div>
         </mat-tab>
@@ -45,11 +45,11 @@
           <div class="tabpad">
             <div class="card stack">
               <h3>Ajouter un collaborateur</h3>
-              <div class="row wrap" style="gap:.5rem; align-items:end">
-                <div class="field" style="margin:0"><label>Prénom</label><input [(ngModel)]="nc.firstName" /></div>
-                <div class="field" style="margin:0"><label>Nom</label><input [(ngModel)]="nc.lastName" /></div>
-                <div class="field" style="margin:0"><label>Fonction</label><input [(ngModel)]="nc.role" /></div>
-                <div class="field" style="margin:0"><label>Email</label><input [(ngModel)]="nc.email" /></div>
+              <div class="row wrap" style="gap:.5rem; align-items:center">
+                <mat-form-field appearance="outline" style="margin:0"><mat-label>Prénom</mat-label><input matInput [(ngModel)]="nc.firstName" /></mat-form-field>
+                <mat-form-field appearance="outline" style="margin:0"><mat-label>Nom</mat-label><input matInput [(ngModel)]="nc.lastName" /></mat-form-field>
+                <mat-form-field appearance="outline" style="margin:0"><mat-label>Fonction</mat-label><input matInput [(ngModel)]="nc.role" /></mat-form-field>
+                <mat-form-field appearance="outline" style="margin:0"><mat-label>Email</mat-label><input matInput [(ngModel)]="nc.email" /></mat-form-field>
                 <button class="btn btn-primary" (click)="addCollaborator()">+ Ajouter</button>
               </div>
             </div>
@@ -82,15 +82,15 @@
           <div class="tabpad">
             <div class="card stack">
               <h3>Nouvelle équipe</h3>
-              <div class="row wrap" style="gap:.5rem; align-items:end">
-                <div class="field" style="margin:0; flex:1"><label>Nom</label><input [(ngModel)]="ntName" placeholder="ex : Équipe Développement" /></div>
-                <div class="field" style="margin:0"><label>Couleur</label><input type="color" [(ngModel)]="ntColor" style="width:52px;height:36px;padding:2px" /></div>
-                <div class="field" style="margin:0"><label>Équipe parente</label>
-                  <select [(ngModel)]="ntParent">
-                    <option [ngValue]="null">— aucune —</option>
-                    @for (t of teams(); track t.id) { <option [ngValue]="t.id">{{ t.name }}</option> }
-                  </select>
-                </div>
+              <div class="row wrap" style="gap:.5rem; align-items:center">
+                <mat-form-field appearance="outline" style="margin:0; flex:1"><mat-label>Nom</mat-label><input matInput [(ngModel)]="ntName" placeholder="ex : Équipe Développement" /></mat-form-field>
+                <div class="field" style="margin:0"><label for="cs-team-color">Couleur</label><input id="cs-team-color" type="color" [(ngModel)]="ntColor" style="width:52px;height:36px;padding:2px" /></div>
+                <mat-form-field appearance="outline" style="margin:0"><mat-label>Équipe parente</mat-label>
+                  <mat-select [(ngModel)]="ntParent">
+                    <mat-option [value]="null">— aucune —</mat-option>
+                    @for (t of teams(); track t.id) { <mat-option [value]="t.id">{{ t.name }}</mat-option> }
+                  </mat-select>
+                </mat-form-field>
                 <button class="btn btn-primary" (click)="addTeam()">+ Créer</button>
               </div>
             </div>

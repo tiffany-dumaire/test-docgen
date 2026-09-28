@@ -2,6 +2,9 @@ import { Component, inject, signal, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MeetingCalendar } from '@shared/meeting-calendar/meeting-calendar';
 import { RichTextEditor } from '@shared/rich-text-editor/rich-text-editor';
 import { ProjectTracking } from '@shared/project-tracking/project-tracking';
@@ -18,7 +21,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-project-detail',
-  imports: [RouterLink, FormsModule, DatePipe, MatTabsModule, MeetingCalendar, RichTextEditor, ProjectTracking],
+  imports: [RouterLink, FormsModule, DatePipe, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MeetingCalendar, RichTextEditor, ProjectTracking],
   templateUrl: './project-detail.html',
   styleUrl: './project-detail.scss',
 })

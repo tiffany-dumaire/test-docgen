@@ -3,6 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BackDirective } from '@shared/back.directive';
 import { DocumentService } from '@core/services/document.service';
@@ -26,7 +29,7 @@ import {
 
 @Component({
   selector: 'app-document-editor',
-  imports: [BackDirective, FormsModule, DatePipe, DataGrid, MatTabsModule],
+  imports: [BackDirective, FormsModule, DatePipe, DataGrid, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './document-editor.html',
   styleUrl: './document-editor.scss',
 })

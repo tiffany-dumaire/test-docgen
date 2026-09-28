@@ -3,6 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BackDirective } from '@shared/back.directive';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { FormService } from '@core/services/form.service';
 import { ProjectService } from '@core/services/project.service';
 import { DocumentService } from '@core/services/document.service';
@@ -32,7 +35,7 @@ const VARIANTS: { value: string; label: string }[] = [
 
 @Component({
   selector: 'app-form-template-builder',
-  imports: [BackDirective, FormsModule, MatTabsModule, FormSchemaEditor, FormAppearanceEditor, FormPreview],
+  imports: [BackDirective, FormsModule, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule, FormSchemaEditor, FormAppearanceEditor, FormPreview],
   templateUrl: './form-template-builder.html',
   styleUrl: './form-template-builder.scss',
 })

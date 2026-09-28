@@ -10,23 +10,25 @@
 
       @if (enabled()) {
         <div class="fmt">
-          <label>Format
+          <mat-form-field appearance="outline" class="fmt-field">
+            <mat-label>Format</mat-label>
             @if (sizeMode === 'slide') {
-              <select [ngModel]="layout().page_size || 'slide'" (ngModelChange)="setSize($event)">
-                <option value="slide">Diapo 16:9</option><option value="slide43">Diapo 4:3</option>
-              </select>
+              <mat-select [ngModel]="layout().page_size || 'slide'" (ngModelChange)="setSize($event)">
+                <mat-option value="slide">Diapo 16:9</mat-option><mat-option value="slide43">Diapo 4:3</mat-option>
+              </mat-select>
             } @else {
-              <select [ngModel]="layout().page_size || 'a4'" (ngModelChange)="setSize($event)">
-                <option value="a4">A4</option><option value="a3">A3</option>
-              </select>
+              <mat-select [ngModel]="layout().page_size || 'a4'" (ngModelChange)="setSize($event)">
+                <mat-option value="a4">A4</mat-option><mat-option value="a3">A3</mat-option>
+              </mat-select>
             }
-          </label>
+          </mat-form-field>
           @if (sizeMode !== 'slide') {
-            <label>Orientation
-              <select [ngModel]="layout().orientation || 'portrait'" (ngModelChange)="setOrient($event)">
-                <option value="portrait">Portrait</option><option value="landscape">Paysage</option>
-              </select>
-            </label>
+            <mat-form-field appearance="outline" class="fmt-field">
+              <mat-label>Orientation</mat-label>
+              <mat-select [ngModel]="layout().orientation || 'portrait'" (ngModelChange)="setOrient($event)">
+                <mat-option value="portrait">Portrait</mat-option><mat-option value="landscape">Paysage</mat-option>
+              </mat-select>
+            </mat-form-field>
           }
         </div>
         <div class="work">

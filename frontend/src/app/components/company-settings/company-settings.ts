@@ -2,6 +2,9 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { StyleEditor } from '@shared/content/style-editor/style-editor';
 import { OrgChart } from '@shared/org-chart/org-chart';
 import { CompanyService, TeamService } from '@core/services/company.service';
@@ -23,7 +26,7 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
 
 @Component({
   selector: 'app-company-settings',
-  imports: [FormsModule, RouterLink, StyleEditor, OrgChart, MatTabsModule],
+  imports: [FormsModule, RouterLink, StyleEditor, OrgChart, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './company-settings.html',
   styleUrl: './company-settings.scss',
 })

@@ -1,5 +1,9 @@
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormService } from '@core/services/form.service';
 import { ToastService } from '@core/services/api.service';
 import { FormTheme } from '@core/models';
@@ -7,7 +11,7 @@ import { FormTheme } from '@core/models';
 /** Éditeur d'apparence partagé (couleurs, disposition, couverture, progression). */
 @Component({
   selector: 'app-form-appearance-editor',
-  imports: [FormsModule],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatCheckboxModule],
   templateUrl: './form-appearance-editor.html',
   styleUrl: './form-appearance-editor.scss',
 })

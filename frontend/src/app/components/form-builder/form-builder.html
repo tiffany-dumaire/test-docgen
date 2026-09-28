@@ -10,38 +10,38 @@
       <div class="grid-2">
         <div class="stack">
           <div class="card stack">
-            <div class="field">
-              <label>Titre *</label>
-              <input [(ngModel)]="m.title" />
-            </div>
-            <div class="field">
-              <label>Description</label>
-              <textarea [(ngModel)]="m.description" rows="2"></textarea>
-            </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Titre *</mat-label>
+              <input matInput [(ngModel)]="m.title" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <textarea matInput [(ngModel)]="m.description" rows="2"></textarea>
+            </mat-form-field>
             <div class="form-grid">
-              <div class="field">
-                <label>Projet lié</label>
-                <select [(ngModel)]="m.project">
-                  <option [ngValue]="null">— aucun —</option>
-                  @for (p of projects(); track p.id) { <option [ngValue]="p.id">{{ p.name }}</option> }
-                </select>
-              </div>
-              <div class="field">
-                <label>Confidentialité</label>
-                <select [(ngModel)]="m.confidentiality">
-                  @for (c of confidentialityLevels(); track c.value) { <option [value]="c.value">{{ c.label }}</option> }
-                </select>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Projet lié</mat-label>
+                <mat-select [(ngModel)]="m.project">
+                  <mat-option [value]="null">— aucun —</mat-option>
+                  @for (p of projects(); track p.id) { <mat-option [value]="p.id">{{ p.name }}</mat-option> }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Confidentialité</mat-label>
+                <mat-select [(ngModel)]="m.confidentiality">
+                  @for (c of confidentialityLevels(); track c.value) { <mat-option [value]="c.value">{{ c.label }}</mat-option> }
+                </mat-select>
+              </mat-form-field>
             </div>
-            <div class="field">
-              <label>Message de confirmation</label>
-              <input [(ngModel)]="m.successMessage" />
-            </div>
-            <div class="field">
-              <label>Date limite de réponse</label>
-              <input type="date" [ngModel]="m.deadline" (ngModelChange)="m.deadline = $event || null" />
-            </div>
-            <label class="chk"><input type="checkbox" [(ngModel)]="m.isOpen" /> Ouvert aux réponses</label>
+            <mat-form-field appearance="outline">
+              <mat-label>Message de confirmation</mat-label>
+              <input matInput [(ngModel)]="m.successMessage" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Date limite de réponse</mat-label>
+              <input matInput type="date" [ngModel]="m.deadline" (ngModelChange)="m.deadline = $event || null" />
+            </mat-form-field>
+            <mat-checkbox [(ngModel)]="m.isOpen">Ouvert aux réponses</mat-checkbox>
           </div>
 
           <app-form-appearance-editor [theme]="theme(m)" [(showProgress)]="m.showProgress!" (changed)="touch()" />

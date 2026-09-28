@@ -3,6 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { BackDirective } from '@shared/back.directive';
 import { ProjectService } from '@core/services/project.service';
 import { ClientService } from '@core/services/client.service';
@@ -13,7 +16,7 @@ import { Client, Contact, ContactKind, Project, ProjectRepo, ProjectStatus, Team
 
 @Component({
   selector: 'app-project-form',
-  imports: [FormsModule, NgTemplateOutlet, StyleEditor, MatTabsModule, BackDirective],
+  imports: [FormsModule, NgTemplateOutlet, StyleEditor, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule, BackDirective],
   templateUrl: './project-form.html',
   styleUrl: './project-form.scss',
 })

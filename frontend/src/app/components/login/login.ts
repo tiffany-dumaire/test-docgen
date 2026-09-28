@@ -1,5 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { Router } from '@angular/router';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '@core/auth/auth.service';
@@ -7,7 +9,7 @@ import { ToastService } from '@core/services/api.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, TranslocoModule],
+  imports: [FormsModule, TranslocoModule, MatFormFieldModule, MatInputModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

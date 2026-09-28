@@ -19,10 +19,14 @@
         <div class="sheet card">
           <!-- Barre d'onglet -->
           <div class="sheet-head">
-            <div class="field"><label>Nom de l'onglet</label>
-              <input [(ngModel)]="s.name" /></div>
-            <div class="field"><label>Titre affiché (facultatif)</label>
-              <input [(ngModel)]="s.title" placeholder="{{ '{{' }}document_title{{ '}}' }}" /></div>
+            <mat-form-field appearance="outline">
+              <mat-label>Nom de l'onglet</mat-label>
+              <input matInput [(ngModel)]="s.name" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Titre affiché (facultatif)</mat-label>
+              <input matInput [(ngModel)]="s.title" placeholder="{{ '{{' }}document_title{{ '}}' }}" />
+            </mat-form-field>
             <div class="sheet-actions">
               <button class="mini" (click)="move(-1)" [disabled]="active() === 0">◀</button>
               <button class="mini" (click)="move(1)" [disabled]="active() === sheets.length - 1">▶</button>
@@ -131,41 +135,50 @@
               <p class="warn">Créez d'abord un onglet « Table » pour l'utiliser comme source.</p>
             } @else {
               <div class="grid2">
-                <div class="field"><label>Onglet source</label>
-                  <select [(ngModel)]="s.pivot!.source">
-                    @for (t of tableSheets(); track t.id) { <option [value]="t.id">{{ t.name }}</option> }
-                  </select>
-                </div>
-                <div class="field"><label>Agrégation</label>
-                  <select [(ngModel)]="s.pivot!.agg">
-                    <option value="sum">Somme</option><option value="count">Nombre</option>
-                    <option value="avg">Moyenne</option><option value="min">Minimum</option><option value="max">Maximum</option>
-                  </select>
-                </div>
-                <div class="field"><label>Lignes (regroupement)</label>
-                  <select [(ngModel)]="s.pivot!.row_field">
-                    @for (c of sourceCols(s); track c.key) { <option [value]="c.key">{{ c.label }}</option> }
-                  </select>
-                </div>
-                <div class="field"><label>Colonnes (facultatif)</label>
-                  <select [(ngModel)]="s.pivot!.col_field">
-                    <option value="">— aucune —</option>
-                    @for (c of sourceCols(s); track c.key) { <option [value]="c.key">{{ c.label }}</option> }
-                  </select>
-                </div>
-                <div class="field"><label>Valeur à agréger</label>
-                  <select [(ngModel)]="s.pivot!.value_field">
-                    @for (c of sourceCols(s); track c.key) { <option [value]="c.key">{{ c.label }}</option> }
-                  </select>
-                </div>
-                <div class="field"><label>Format des valeurs</label>
-                  <select [(ngModel)]="s.pivot!.value_type">
-                    @for (t of cellTypes; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
-                  </select>
-                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Onglet source</mat-label>
+                  <mat-select [(ngModel)]="s.pivot!.source">
+                    @for (t of tableSheets(); track t.id) { <mat-option [value]="t.id">{{ t.name }}</mat-option> }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Agrégation</mat-label>
+                  <mat-select [(ngModel)]="s.pivot!.agg">
+                    <mat-option value="sum">Somme</mat-option><mat-option value="count">Nombre</mat-option>
+                    <mat-option value="avg">Moyenne</mat-option><mat-option value="min">Minimum</mat-option><mat-option value="max">Maximum</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Lignes (regroupement)</mat-label>
+                  <mat-select [(ngModel)]="s.pivot!.row_field">
+                    @for (c of sourceCols(s); track c.key) { <mat-option [value]="c.key">{{ c.label }}</mat-option> }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Colonnes (facultatif)</mat-label>
+                  <mat-select [(ngModel)]="s.pivot!.col_field">
+                    <mat-option value="">— aucune —</mat-option>
+                    @for (c of sourceCols(s); track c.key) { <mat-option [value]="c.key">{{ c.label }}</mat-option> }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Valeur à agréger</mat-label>
+                  <mat-select [(ngModel)]="s.pivot!.value_field">
+                    @for (c of sourceCols(s); track c.key) { <mat-option [value]="c.key">{{ c.label }}</mat-option> }
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Format des valeurs</mat-label>
+                  <mat-select [(ngModel)]="s.pivot!.value_type">
+                    @for (t of cellTypes; track t.value) { <mat-option [value]="t.value">{{ t.label }}</mat-option> }
+                  </mat-select>
+                </mat-form-field>
               </div>
               @if (s.pivot!.value_type === 'currency') {
-                <div class="field" style="max-width:120px"><label>Symbole</label><input [(ngModel)]="s.pivot!.symbol" placeholder="€" /></div>
+                <mat-form-field appearance="outline" style="max-width:120px">
+                  <mat-label>Symbole</mat-label>
+                  <input matInput [(ngModel)]="s.pivot!.symbol" placeholder="€" />
+                </mat-form-field>
               }
             }
           }

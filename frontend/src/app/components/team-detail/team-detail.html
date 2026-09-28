@@ -16,17 +16,17 @@
           <div class="tabpad">
             <div class="card stack">
               <div class="form-grid">
-                <div class="field"><label>Nom</label><input [(ngModel)]="t.name" /></div>
-                <div class="field"><label>Couleur</label><input type="color" [(ngModel)]="t.color" style="width:52px;height:36px;padding:2px" /></div>
+                <mat-form-field appearance="outline"><mat-label>Nom</mat-label><input matInput [(ngModel)]="t.name" /></mat-form-field>
+                <div class="field"><label for="td-color">Couleur</label><input id="td-color" type="color" [(ngModel)]="t.color" style="width:52px;height:36px;padding:2px" /></div>
               </div>
-              <div class="field"><label>Description</label><textarea [(ngModel)]="t.description" rows="3"></textarea></div>
-              <div class="field">
-                <label>Équipe parente</label>
-                <select [(ngModel)]="t.parent">
-                  <option [ngValue]="null">— aucune (racine) —</option>
-                  @for (o of otherTeams(); track o.id) { <option [ngValue]="o.id">{{ o.name }}</option> }
-                </select>
-              </div>
+              <mat-form-field appearance="outline"><mat-label>Description</mat-label><textarea matInput [(ngModel)]="t.description" rows="3"></textarea></mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Équipe parente</mat-label>
+                <mat-select [(ngModel)]="t.parent">
+                  <mat-option [value]="null">— aucune (racine) —</mat-option>
+                  @for (o of otherTeams(); track o.id) { <mat-option [value]="o.id">{{ o.name }}</mat-option> }
+                </mat-select>
+              </mat-form-field>
               <button class="btn btn-primary" (click)="saveInfo()" [disabled]="saving()">Enregistrer</button>
             </div>
           </div>
