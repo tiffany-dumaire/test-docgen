@@ -114,27 +114,51 @@
                 } @else if (sh.type === 'grid') {
                   @if (hasEditableGrid(sh)) {
                     <p class="muted" style="margin: 0.2rem 0">
-                      Renseignez les cellules modifiables. Les autres cellules de la grille sont
-                      fixes (définies dans le modèle) et verrouillées dans le fichier généré.
+                      Complétez directement les cellules encadrées (modifiables). Les autres
+                      cellules sont fixes (définies dans le modèle) et verrouillées dans le fichier
+                      Excel généré.
                     </p>
-                    <div class="grid-fill">
-                      @for (cell of gridEditableCells(sh); track cell.row + '_' + cell.col) {
-                        <mat-form-field appearance="outline">
-                          <mat-label>{{ gridCellLabel(sh, cell) }}</mat-label>
-                          <input
-                            matInput
-                            [ngModel]="gridVal(d, sh, cell)"
-                            (ngModelChange)="setGridVal(d, sh, cell, $event)"
-                          />
-                        </mat-form-field>
-                      }
-                    </div>
                   } @else {
                     <div class="info-block">
-                      ▧ Grille fixe définie dans le modèle. Aucune cellule n'est modifiable à la
-                      génération ; elle sera insérée telle quelle.
+                      ▧ Grille fixe : aucune cellule n'a été marquée « modifiable » dans le modèle.
+                      Ouvrez le modèle et cochez « 🔓 Modifiable » sur les cellules à remplir ici.
                     </div>
                   }
+                  <div class="gridfill-wrap">
+                    <table class="gridfill">
+                      <tbody>
+                        @for (r of gridRowRange(sh); track r) {
+                          <tr>
+                            @for (c of gridColRange(sh); track c) {
+                              @if (!gridCovered(sh, r, c)) {
+                                @if (gridCellAt(sh, r, c); as cell) {
+                                  <td
+                                    [attr.colspan]="gridSpanC(sh, r, c)"
+                                    [attr.rowspan]="gridSpanR(sh, r, c)"
+                                    [class.editable]="cell.editable"
+                                    [style.background]="cell.bg || null"
+                                  >
+                                    @if (cell.editable) {
+                                      <input
+                                        class="gf-in"
+                                        [attr.aria-label]="gridColLabel(c) + r"
+                                        [ngModel]="gridVal(d, sh, cell)"
+                                        (ngModelChange)="setGridVal(d, sh, cell, $event)"
+                                      />
+                                    } @else {
+                                      <span class="gf-fixed">{{ gridDisplay(sh, r, c) }}</span>
+                                    }
+                                  </td>
+                                } @else {
+                                  <td class="gf-empty"></td>
+                                }
+                              }
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
                 } @else {
                   <div class="info-block">
                     ℹ️ Informations fixes définies dans le modèle ({{ (sh.items ?? []).length }}

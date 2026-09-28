@@ -185,7 +185,7 @@ export class DocumentEditor implements OnDestroy {
     return tpl.settings?.excel?.sheets ?? [];
   }
   sheetIcon(t: string) {
-    return t === 'table' ? '▦' : t === 'pivot' ? '⊞' : 'ℹ';
+    return t === 'table' ? '▦' : t === 'pivot' ? '⊞' : t === 'grid' ? '▧' : 'ℹ';
   }
   typeShort(t: CellType) {
     return (
@@ -262,6 +262,64 @@ export class DocumentEditor implements OnDestroy {
   }
   setGridVal(d: ProjectDocument, sh: ExcelSheet, cell: GridCell, v: string) {
     this.gridStore(d, sh)[`${cell.row}_${cell.col}`] = v;
+  }
+
+  // --- Rendu « en place » de la grille (tableau fidèle au modèle) ---
+  private gridMaxUsed(sh: ExcelSheet): { mr: number; mc: number } {
+    let mr = 0;
+    let mc = 0;
+    for (const c of sh.cells ?? []) {
+      mr = Math.max(mr, c.row + (c.row_span || 1) - 1);
+      mc = Math.max(mc, c.col + (c.col_span || 1) - 1);
+    }
+    return { mr, mc };
+  }
+  gridRows(sh: ExcelSheet): number {
+    return Math.max(this.gridMaxUsed(sh).mr, 1);
+  }
+  gridCols(sh: ExcelSheet): number {
+    return Math.max(this.gridMaxUsed(sh).mc, 1);
+  }
+  gridRowRange(sh: ExcelSheet): number[] {
+    return Array.from({ length: this.gridRows(sh) }, (_, i) => i + 1);
+  }
+  gridColRange(sh: ExcelSheet): number[] {
+    return Array.from({ length: this.gridCols(sh) }, (_, i) => i + 1);
+  }
+  gridColLabel(col: number): string {
+    return this.colLetter(col);
+  }
+  gridCellAt(sh: ExcelSheet, r: number, c: number): GridCell | undefined {
+    return (sh.cells ?? []).find((x) => x.row === r && x.col === c);
+  }
+  /** Cellule couverte par une fusion voisine (donc non rendue). */
+  gridCovered(sh: ExcelSheet, r: number, c: number): boolean {
+    for (const cl of sh.cells ?? []) {
+      const rs = cl.row_span || 1;
+      const cs = cl.col_span || 1;
+      if (rs === 1 && cs === 1) continue;
+      if (
+        r >= cl.row &&
+        r < cl.row + rs &&
+        c >= cl.col &&
+        c < cl.col + cs &&
+        !(r === cl.row && c === cl.col)
+      )
+        return true;
+    }
+    return false;
+  }
+  gridSpanR(sh: ExcelSheet, r: number, c: number): number {
+    return this.gridCellAt(sh, r, c)?.row_span || 1;
+  }
+  gridSpanC(sh: ExcelSheet, r: number, c: number): number {
+    return this.gridCellAt(sh, r, c)?.col_span || 1;
+  }
+  /** Valeur affichée d'une cellule fixe (interpolée), pour l'aperçu en place. */
+  gridDisplay(sh: ExcelSheet, r: number, c: number): string {
+    const cell = this.gridCellAt(sh, r, c);
+    if (!cell || cell.value == null) return '';
+    return this.interpolate(String(cell.value));
   }
 
   tableModel(d: ProjectDocument, block: Block): TableData {
