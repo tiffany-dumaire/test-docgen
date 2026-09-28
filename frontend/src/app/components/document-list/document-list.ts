@@ -71,12 +71,10 @@ export class DocumentList implements AfterViewInit {
   }
   preview(d: ProjectDocument) {
     this.toast.success(this.t.translate('documents.previewing'));
-    this.service
-      .preview(d.id!)
-      .subscribe({
-        next: (r) => this.previewSvc.open(r, d.title),
-        error: () => this.toast.error(this.t.translate('documents.preview_error')),
-      });
+    this.service.preview(d.id!).subscribe({
+      next: (r) => this.previewSvc.open(r, d.title),
+      error: () => this.toast.error(this.t.translate('documents.preview_error')),
+    });
   }
   duplicate(d: ProjectDocument) {
     this.service.duplicateDocument(d.id!).subscribe({

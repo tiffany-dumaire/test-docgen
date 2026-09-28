@@ -101,7 +101,9 @@ export class Preferences {
     this.resetFonts();
     this.theme.setProposition('vnv');
     this.theme.setMode('auto');
-    this.auth.updatePrefs({ theme_proposition: 'vnv', theme_mode: 'auto' }).catch(() => {});
+    this.auth.updatePrefs({ theme_proposition: 'vnv', theme_mode: 'auto' }).catch(() => {
+      console.log('resetAll');
+    });
   }
 
   async save() {

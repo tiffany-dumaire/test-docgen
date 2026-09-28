@@ -122,7 +122,9 @@ export class ProjectTracking implements OnInit {
       this.http.get(url, { responseType: 'text' }).subscribe({
         next: (svg) =>
           this.svgs.update((cur) => ({ ...cur, [t.key]: this.san.bypassSecurityTrustHtml(svg) })),
-        error: () => {},
+        error: (error) => {
+          throw new Error(error);
+        },
       });
     }
   }
