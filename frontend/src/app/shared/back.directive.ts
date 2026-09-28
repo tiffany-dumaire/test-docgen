@@ -9,9 +9,10 @@ import { Router, NavigationEnd } from '@angular/router';
  */
 @Injectable({ providedIn: 'root' })
 export class NavHistoryService {
+  router = inject(Router)
   private count = 0;
-  constructor(router: Router) {
-    router.events.subscribe((e) => {
+  constructor() {
+    this.router.events.subscribe((e) => {
       if (e instanceof NavigationEnd) this.count++;
     });
   }

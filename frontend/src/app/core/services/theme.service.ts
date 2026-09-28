@@ -137,7 +137,7 @@ export class ThemeService {
   /** Applique les polices de titre / corps (vide = valeurs du thème de base). */
   applyFonts(fontTitle: string, fontBody: string) {
     const root = document.documentElement;
-    fontTitle ? root.style.setProperty('--pd-display', fontTitle) : root.style.removeProperty('--pd-display');
-    fontBody ? root.style.setProperty('--pd-body', fontBody) : root.style.removeProperty('--pd-body');
+    if (fontTitle) { root.style.setProperty('--pd-display', fontTitle) } else { root.style.removeProperty('--pd-display');}
+    if (fontBody) { root.style.setProperty('--pd-body', fontBody) } else {root.style.removeProperty('--pd-body');}
   }
 }

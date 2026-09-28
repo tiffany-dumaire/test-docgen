@@ -25,7 +25,11 @@ export class AuthService {
     try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
   }
   private setToken(t: string | null) {
-    try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch { /* noop */ }
+    try { 
+      if (t) {
+        localStorage.setItem(TOKEN_KEY, t)
+       }
+       else { localStorage.removeItem(TOKEN_KEY); }} catch { /* noop */ }
   }
 
   /** Appelé au démarrage (APP_INITIALIZER). */
