@@ -305,6 +305,17 @@ td.gcellx.selected {
   outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
+/* Cellule marquée « modifiable à la génération » : liseré pointillé + fond léger. */
+td.gcellx.editable-cell {
+  background-image: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--mat-sys-primary, #2563eb) 12%, transparent) 0,
+    color-mix(in srgb, var(--mat-sys-primary, #2563eb) 12%, transparent) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  box-shadow: inset 0 0 0 1px var(--mat-sys-primary, #2563eb);
+}
 .gin {
   width: 100%;
   min-width: 64px;

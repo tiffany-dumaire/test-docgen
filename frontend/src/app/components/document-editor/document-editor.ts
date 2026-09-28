@@ -24,6 +24,7 @@ import {
   DocumentTemplate,
   DocumentVersion,
   ExcelSheet,
+  GridCell,
   ProjectDocument,
   Project,
   TableData,
@@ -212,6 +213,55 @@ export class DocumentEditor implements OnDestroy {
       store[sh.id] = sd;
     }
     return sd;
+  }
+
+  // --- Onglet « grille » : cellules modifiables remplies à la génération ---
+  /** Cellules marquées « modifiable » dans une grille, triées (ligne puis colonne). */
+  gridEditableCells(sh: ExcelSheet): GridCell[] {
+    return (sh.cells ?? [])
+      .filter((c) => c.editable)
+      .slice()
+      .sort((a, b) => a.row - b.row || a.col - b.col);
+  }
+  hasEditableGrid(sh: ExcelSheet): boolean {
+    return (sh.cells ?? []).some((c) => c.editable);
+  }
+  /** Libellé d'une cellule modifiable : cellule texte à sa gauche, sinon coordonnée. */
+  gridCellLabel(sh: ExcelSheet, cell: GridCell): string {
+    const left = (sh.cells ?? []).find(
+      (c) =>
+        c.row === cell.row &&
+        c.col === cell.col - 1 &&
+        !c.editable &&
+        c.value != null &&
+        c.value !== '',
+    );
+    if (left) return String(left.value);
+    return `${this.colLetter(cell.col)}${cell.row}`;
+  }
+  private colLetter(col: number): string {
+    let n = col;
+    let s = '';
+    while (n > 0) {
+      const rem = (n - 1) % 26;
+      s = String.fromCharCode(65 + rem) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return s || 'A';
+  }
+  private gridStore(d: ProjectDocument, sh: ExcelSheet): Record<string, string> {
+    const data = d.data as Record<string, unknown>;
+    const store = (data['sheets'] ??= {}) as Record<string, Record<string, unknown>>;
+    const sd = (store[sh.id] ??= {}) as Record<string, unknown>;
+    return (sd['grid'] ??= {}) as Record<string, string>;
+  }
+  gridVal(d: ProjectDocument, sh: ExcelSheet, cell: GridCell): string {
+    const stored = this.gridStore(d, sh)[`${cell.row}_${cell.col}`];
+    if (stored != null && stored !== '') return stored;
+    return cell.value != null ? String(cell.value) : '';
+  }
+  setGridVal(d: ProjectDocument, sh: ExcelSheet, cell: GridCell, v: string) {
+    this.gridStore(d, sh)[`${cell.row}_${cell.col}`] = v;
   }
 
   tableModel(d: ProjectDocument, block: Block): TableData {

@@ -431,7 +431,8 @@ def render(ctx: GenerationContext) -> bytes:
         elif stype == "grid":
             _write_grid(ws, sdef, pctx, start_row,
                         Font, PatternFill, Alignment, Border, Side,
-                        get_column_letter)
+                        get_column_letter,
+                        sheet_data=data_sheets.get(sdef.get("id"), {}))
             _add_sheet_images(ws, sdef, ctx, start_row)
 
         # ---- Onglet INFO (cellules fixes typées) ----
@@ -527,20 +528,31 @@ def _add_sheet_images(ws, sdef, ctx, start_row):
 
 
 def _write_grid(ws, sdef, pctx, start_row, Font, PatternFill, Alignment,
-                Border, Side, get_column_letter):
+                Border, Side, get_column_letter, sheet_data=None):
     """Grille libre : chaque cellule porte sa valeur, son style, sa fusion.
 
     sdef = {
       "cells": [{row,col,value,bold,italic,color,bg,align,valign,size,wrap,
-                 number_format,border,col_span,row_span}],
+                 number_format,border,col_span,row_span,editable}],
       "col_widths": {"<col>": width}, "row_heights": {"<row>": height},
     }
     Les index de ligne/colonne sont relatifs au début de l'onglet (1 = 1re ligne
     sous le titre) et 1-indexés.
+
+    Les cellules marquées ``editable`` sont remplies par l'utilisateur à la
+    génération : leur valeur provient de ``sheet_data["grid"]["<row>_<col>"]``
+    (repli sur la valeur du modèle), et elles restent déverrouillées tandis que
+    les cellules fixes sont verrouillées (feuille protégée) dès qu'au moins une
+    cellule est modifiable.
     """
+    from openpyxl.styles import Protection
+
     thin = Side(style="thin", color=BORDER_COLOR)
     box = Border(left=thin, right=thin, top=thin, bottom=thin)
     off = start_row - 1  # décalage pour laisser la place au titre
+
+    grid_vals = (sheet_data or {}).get("grid") or {}
+    has_editable = False
 
     for cell in (sdef.get("cells") or []):
         try:
@@ -550,10 +562,18 @@ def _write_grid(ws, sdef, pctx, start_row, Font, PatternFill, Alignment,
             continue
         if r < 1 or c < 1:
             continue
+        editable = bool(cell.get("editable"))
         raw = cell.get("value", "")
+        if editable:
+            has_editable = True
+            key = f"{int(cell.get('row', 1))}_{int(cell.get('col', 1))}"
+            override = grid_vals.get(key)
+            if override not in (None, ""):
+                raw = override
         value = interpolate(raw, pctx) if isinstance(raw, str) else raw
         # Conversion numérique douce si demandé via number_format numérique.
         target = ws.cell(row=r, column=c, value=value)
+        target.protection = Protection(locked=not editable)
         cspan = max(1, int(cell.get("col_span", 1) or 1))
         rspan = max(1, int(cell.get("row_span", 1) or 1))
         if cspan > 1 or rspan > 1:
@@ -593,6 +613,15 @@ def _write_grid(ws, sdef, pctx, start_row, Font, PatternFill, Alignment,
             ws.row_dimensions[int(row) + off].height = float(height)
         except (TypeError, ValueError):
             pass
+
+    # Si l'onglet comporte des cellules modifiables, on protège la feuille :
+    # les cellules fixes (verrouillées) ne peuvent plus être modifiées, seules
+    # les cellules « modifiables » (déverrouillées ci-dessus) restent saisissables.
+    if has_editable:
+        ws.protection.sheet = True
+        ws.protection.selectLockedCells = False
+        ws.protection.selectUnlockedCells = True
+        ws.protection.formatCells = False
 
 
 def _write_pivot(ws, sdef, tables, pctx, start_row, border, header_font,

@@ -119,3 +119,10 @@
   border: 1px solid var(--border);
   border-radius: 8px;
 }
+
+/* Grille de saisie des cellules « modifiables » d'un onglet grille Excel. */
+.grid-fill {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0 1rem;
+}

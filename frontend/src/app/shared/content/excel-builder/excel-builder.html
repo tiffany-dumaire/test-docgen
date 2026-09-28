@@ -386,6 +386,16 @@
               ><input type="checkbox" [(ngModel)]="cl.wrap" (ngModelChange)="touch()" />
               Retour</label
             >
+            <label
+              class="chk"
+              title="Cellule remplie par l'utilisateur lors de la génération d'un document ; sinon fixe"
+              ><input
+                type="checkbox"
+                [ngModel]="cl.editable"
+                (ngModelChange)="cl.editable = $event; touch()"
+              />
+              🔓 Modifiable</label
+            >
             <span class="span">Taille</span
             ><input
               type="number"
@@ -474,6 +484,7 @@
                       <td
                         class="gcellx"
                         [class.selected]="isSel(r, c)"
+                        [class.editable-cell]="editableOf(s, r, c)"
                         [attr.colspan]="spanC(s, r, c)"
                         [attr.rowspan]="spanR(s, r, c)"
                         [style.background]="bgOf(s, r, c)"

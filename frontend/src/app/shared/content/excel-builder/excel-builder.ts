@@ -230,6 +230,9 @@ export class ExcelBuilder {
   valOf(s: ExcelSheet, r: number, c: number) {
     return this.find(s, r, c)?.value ?? '';
   }
+  editableOf(s: ExcelSheet, r: number, c: number) {
+    return !!this.find(s, r, c)?.editable;
+  }
 
   // Getters de style pour l'aperçu WYSIWYG
   bgOf(s: ExcelSheet, r: number, c: number) {

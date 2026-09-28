@@ -21,6 +21,8 @@ export interface GridCell {
   border?: boolean;
   col_span?: number;
   row_span?: number;
+  /** true = cellule remplie par l'utilisateur à la génération ; sinon fixe (valeur du modèle). */
+  editable?: boolean;
 }
 
 export interface ExcelColumn {
