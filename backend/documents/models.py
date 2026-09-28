@@ -216,3 +216,31 @@ class DocumentAsset(models.Model):
 
     def __str__(self):
         return self.name or f"Image #{self.pk}"
+
+
+class DocumentTemplateVersion(models.Model):
+    """Version nommée d'un modèle de document (tous types).
+
+    Capture un instantané de la configuration qui influe sur la génération
+    (schéma de blocs + réglages de mise en page/styles). La version marquée
+    par défaut est celle utilisée pour générer les documents.
+    """
+
+    template = models.ForeignKey(
+        DocumentTemplate, related_name="versions",
+        on_delete=models.CASCADE)
+    name = models.CharField("Nom de la version", max_length=255, blank=True)
+    version_number = models.PositiveIntegerField("Numéro de version", default=1)
+    is_default = models.BooleanField("Version par défaut", default=False)
+    schema = models.JSONField("Schéma / Blocs", default=list, blank=True)
+    settings = models.JSONField("Réglages", default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-version_number"]
+        unique_together = ("template", "version_number")
+        verbose_name = "Version de modèle"
+        verbose_name_plural = "Versions de modèles"
+
+    def __str__(self):
+        return f"{self.template.name} — {self.name or ('v' + str(self.version_number))}"

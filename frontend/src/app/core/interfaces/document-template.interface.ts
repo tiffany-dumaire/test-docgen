@@ -35,6 +35,15 @@ export interface TableColumn {
   label: string;
 }
 
+/** Version nommée d'un modèle ; la version par défaut sert à générer. */
+export interface TemplateVersion {
+  id: number;
+  name: string;
+  version_number: number;
+  is_default: boolean;
+  created_at: string;
+}
+
 export interface Block {
   id: string;
   type: BlockType;

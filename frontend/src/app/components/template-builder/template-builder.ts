@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { StyleEditor } from '@shared/content/style-editor/style-editor';
+import { ChDatePipe } from '@core/date/ch-date.pipe';
 import { ProjectService } from '@core/services/project.service';
 import {
   A3Page,
@@ -29,6 +30,7 @@ import {
   StyleMap,
   TemplateLanguage,
   TemplateSettings,
+  TemplateVersion,
 } from '@core/models';
 
 interface PaletteItem {
@@ -79,6 +81,7 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
   imports: [
     BackDirective,
     FormsModule,
+    ChDatePipe,
     RichTextEditor,
     NgTemplateOutlet,
     ExcelBuilder,
@@ -446,6 +449,7 @@ export class TemplateBuilder implements OnDestroy {
           this.loadedLang = t.language || 'fr';
           this.contentLang.set(this.loadedLang);
           if (t.doc_type === 'a3') this.ensureA3(t);
+          this.loadVersions();
           if (t.settings?.overlays?.length) this.activeOverlay.set(t.settings.overlays[0].id);
           this.startHistory();
         });
@@ -585,6 +589,48 @@ export class TemplateBuilder implements OnDestroy {
 
   isEdit() {
     return !!this.id;
+  }
+
+  // --- Versionnement du modèle (nom + version par défaut servant à générer) ---
+  versions = signal<TemplateVersion[]>([]);
+  newVersionName = '';
+  loadVersions() {
+    if (!this.isEdit()) return;
+    this.service.templateVersions(+this.id!).subscribe((v) => this.versions.set(v));
+  }
+  saveVersion() {
+    const m = this.model();
+    if (!this.isEdit() || !m) return;
+    // Persiste la config courante (sans navigation), puis capture la version.
+    this.syncContentForSave();
+    this.service.updateTemplate(+this.id!, m).subscribe({
+      next: () => {
+        this.service
+          .saveTemplateVersion(+this.id!, {
+            name: this.newVersionName.trim() || undefined,
+            make_default: this.versions().length === 0,
+          })
+          .subscribe({
+            next: () => {
+              this.newVersionName = '';
+              this.toast.success('Version enregistrée.');
+              this.loadVersions();
+            },
+            error: () => this.toast.error("Impossible d'enregistrer la version."),
+          });
+      },
+      error: () => this.toast.error("Impossible d'enregistrer le modèle."),
+    });
+  }
+  makeDefaultVersion(v: TemplateVersion) {
+    this.service.setDefaultTemplateVersion(+this.id!, v.id).subscribe({
+      next: (t) => {
+        this.model.set(t);
+        this.toast.success(`« ${v.name} » est la version par défaut.`);
+        this.loadVersions();
+      },
+      error: () => this.toast.error('Impossible de définir la version par défaut.'),
+    });
   }
 
   onFormatChange(m: DocumentTemplate) {

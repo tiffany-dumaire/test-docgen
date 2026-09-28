@@ -119,6 +119,59 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
         return Response(DocumentTemplateSerializer(clone).data,
                         status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=["get"])
+    def versions(self, request, pk=None):
+        """Liste les versions nommées du modèle."""
+        from .models import DocumentTemplateVersion
+        from .serializers import DocumentTemplateVersionSerializer
+        qs = DocumentTemplateVersion.objects.filter(template=self.get_object())
+        return Response(DocumentTemplateVersionSerializer(qs, many=True).data)
+
+    @action(detail=True, methods=["post"])
+    def save_version(self, request, pk=None):
+        """Enregistre la configuration courante du modèle comme nouvelle version.
+
+        payload : {name?, make_default?}
+        """
+        from django.db.models import Max
+        from .models import DocumentTemplateVersion
+        from .serializers import DocumentTemplateVersionSerializer
+        tpl = self.get_object()
+        next_num = (tpl.versions.aggregate(m=Max("version_number"))["m"] or 0) + 1
+        make_default = bool(request.data.get("make_default")) or not tpl.versions.exists()
+        if make_default:
+            tpl.versions.update(is_default=False)
+        version = DocumentTemplateVersion.objects.create(
+            template=tpl,
+            name=(request.data.get("name") or f"Version {next_num}").strip(),
+            version_number=next_num,
+            is_default=make_default,
+            schema=tpl.schema,
+            settings=tpl.settings)
+        return Response(DocumentTemplateVersionSerializer(version).data,
+                        status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"])
+    def set_default_version(self, request, pk=None):
+        """Définit la version par défaut (utilisée pour générer) et recharge sa
+        configuration dans le modèle."""
+        from .models import DocumentTemplateVersion
+        from .serializers import DocumentTemplateSerializer
+        tpl = self.get_object()
+        vid = request.data.get("version")
+        try:
+            version = tpl.versions.get(pk=vid)
+        except DocumentTemplateVersion.DoesNotExist:
+            return Response({"detail": "Version introuvable."}, status=404)
+        tpl.versions.update(is_default=False)
+        version.is_default = True
+        version.save(update_fields=["is_default"])
+        # Recharge la config de la version par défaut dans le modèle vivant.
+        tpl.schema = version.schema
+        tpl.settings = version.settings
+        tpl.save(update_fields=["schema", "settings"])
+        return Response(DocumentTemplateSerializer(tpl).data)
+
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = (Document.objects.select_related("project", "template")

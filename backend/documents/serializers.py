@@ -1,7 +1,14 @@
 from rest_framework import serializers
 
 from .models import (ConfidentialityLevel, Document, DocumentTemplate,
-                     DocumentType, DocumentVersion)
+                     DocumentTemplateVersion, DocumentType, DocumentVersion)
+
+
+class DocumentTemplateVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentTemplateVersion
+        fields = ["id", "name", "version_number", "is_default", "created_at"]
+        read_only_fields = ["id", "version_number", "created_at"]
 
 
 class DocumentTemplateSerializer(serializers.ModelSerializer):

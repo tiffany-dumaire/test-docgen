@@ -263,3 +263,22 @@ code {
     }
   }
 }
+
+.tpl-versions {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  th,
+  td {
+    border: 1px solid var(--mat-sys-outline-variant);
+    padding: 0.35rem 0.55rem;
+    text-align: left;
+  }
+  th {
+    color: var(--muted);
+    font-weight: 600;
+  }
+  tr.is-default td {
+    background: color-mix(in srgb, var(--mat-sys-primary) 7%, transparent);
+  }
+}

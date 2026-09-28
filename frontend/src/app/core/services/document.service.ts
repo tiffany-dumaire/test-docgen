@@ -10,6 +10,7 @@ import {
   GeneratePayload,
   Paginated,
   ProjectDocument,
+  TemplateVersion,
 } from '../models';
 import { ProjectDocumentInterface, DocumentVersionInterface } from '../interfaces';
 import {
@@ -118,6 +119,22 @@ export class DocumentService {
   }
   removeTemplate(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/templates/${id}/`);
+  }
+
+  // Versionnement des modèles (nom + version par défaut servant à générer)
+  templateVersions(id: number): Observable<TemplateVersion[]> {
+    return this.http.get<TemplateVersion[]>(`${this.base}/templates/${id}/versions/`);
+  }
+  saveTemplateVersion(
+    id: number,
+    payload: { name?: string; make_default?: boolean },
+  ): Observable<TemplateVersion> {
+    return this.http.post<TemplateVersion>(`${this.base}/templates/${id}/save_version/`, payload);
+  }
+  setDefaultTemplateVersion(id: number, version: number): Observable<DocumentTemplate> {
+    return this.http.post<DocumentTemplate>(`${this.base}/templates/${id}/set_default_version/`, {
+      version,
+    });
   }
 
   // Choix (confidentialité, types)
