@@ -1,6 +1,8 @@
 import { Meeting, JournalEntry, ProjectLink } from '../models/extras.model';
 import {
-  MeetingInterface, JournalEntryInterface, ProjectLinkInterface,
+  MeetingInterface,
+  JournalEntryInterface,
+  ProjectLinkInterface,
 } from '../interfaces/extras.interface';
 import { pruneUndefined } from './serializer.util';
 

@@ -24,7 +24,8 @@ export class PreviewService {
     }
     this.dialog.open(PreviewDialog, {
       data: { kind: res.kind, srcdoc, blobUrl, mime: res.mime, title },
-      maxWidth: '96vw', panelClass: 'pv-panel',
+      maxWidth: '96vw',
+      panelClass: 'pv-panel',
     });
   }
 }

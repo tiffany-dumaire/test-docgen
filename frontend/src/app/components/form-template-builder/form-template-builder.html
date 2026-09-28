@@ -1,194 +1,240 @@
-    <div class="row between">
-      <h1>{{ isEdit() ? 'Modifier le modèle de formulaire' : 'Nouveau modèle de formulaire' }}</h1>
-      <div class="row" style="gap:.5rem">
-        <button class="btn btn-ghost" (click)="showPreview.set(true)" [disabled]="!model()">👁 Aperçu</button>
-        <button type="button" class="btn btn-ghost" appBack="/templates">Retour aux modèles</button>
-      </div>
-    </div>
-    <p class="muted">
-      Un modèle de formulaire regroupe des questions réutilisables et des diagrammes
-      calculés à partir des réponses (exportables en PNG / SVG). Les formulaires en
-      ligne peuvent ensuite être générés depuis un projet.
-    </p>
+<div class="row between">
+  <h1>{{ isEdit() ? 'Modifier le modèle de formulaire' : 'Nouveau modèle de formulaire' }}</h1>
+  <div class="row" style="gap: 0.5rem">
+    <button class="btn btn-ghost" (click)="showPreview.set(true)" [disabled]="!model()">
+      👁 Aperçu
+    </button>
+    <button type="button" class="btn btn-ghost" appBack="/templates">Retour aux modèles</button>
+  </div>
+</div>
+<p class="muted">
+  Un modèle de formulaire regroupe des questions réutilisables et des diagrammes calculés à partir
+  des réponses (exportables en PNG / SVG). Les formulaires en ligne peuvent ensuite être générés
+  depuis un projet.
+</p>
 
-    @if (model(); as m) {
-      <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
-        <!-- ============ GÉNÉRAL ============ -->
-        <mat-tab label="Général">
-          <div class="tabpad">
-            <div class="card stack">
-              <mat-form-field appearance="outline">
-                <mat-label>Nom du modèle *</mat-label>
-                <input matInput [(ngModel)]="m.name" />
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Description</mat-label>
-                <textarea matInput [(ngModel)]="m.description" rows="2"></textarea>
-              </mat-form-field>
+@if (model(); as m) {
+  <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+    <!-- ============ GÉNÉRAL ============ -->
+    <mat-tab label="Général">
+      <div class="tabpad">
+        <div class="card stack">
+          <mat-form-field appearance="outline">
+            <mat-label>Nom du modèle *</mat-label>
+            <input matInput [(ngModel)]="m.name" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="m.description" rows="2"></textarea>
+          </mat-form-field>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Confidentialité par défaut</mat-label>
+              <mat-select [(ngModel)]="m.confidentiality">
+                @for (c of confidentialityLevels(); track c.value) {
+                  <mat-option [value]="c.value">{{ c.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Portée</mat-label>
+              <mat-select [(ngModel)]="m.scope">
+                <mat-option value="global">Ouvert à tous les projets</mat-option>
+                <mat-option value="projects">Spécifique à certains projets</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Message de confirmation</mat-label>
+            <input matInput [(ngModel)]="m.successMessage" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Langue</mat-label>
+            <mat-select [(ngModel)]="m.language">
+              @for (l of languages; track l.value) {
+                <mat-option [value]="l.value">{{ l.flag }} {{ l.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Modèle de rapport (Word / PDF)</mat-label>
+            <mat-select [(ngModel)]="m.reportTemplate">
+              <mat-option [value]="null">— aucun —</mat-option>
+              @for (t of reportTemplates(); track t.id) {
+                <mat-option [value]="t.id">{{ t.name }} ({{ t.doc_type }})</mat-option>
+              }
+            </mat-select>
+            <mat-hint
+              >Document dans lequel les diagrammes du formulaire s'insèrent (bloc « Diagramme de
+              formulaire », identifiants d1, d2…).</mat-hint
+            >
+          </mat-form-field>
+          @if (m.scope === 'projects') {
+            <div class="field">
+              <span class="field-label">Projets autorisés</span>
+              <div class="proj-pick">
+                @for (pr of projects(); track pr.id) {
+                  <label class="chip-check">
+                    <input
+                      type="checkbox"
+                      [checked]="isProjSel(m, pr.id!)"
+                      (change)="toggleProj(m, pr.id!)"
+                    />
+                    {{ pr.name }}
+                  </label>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ============ QUESTIONS & APPARENCE ============ -->
+    <mat-tab label="Questions ({{ qCount(m) }})">
+      <div class="tabpad">
+        <app-form-appearance-editor
+          [theme]="theme(m)"
+          [(showProgress)]="m.showProgress!"
+          (changed)="touch()"
+        />
+        <app-form-schema-editor [sections]="sections(m)" (changed)="touch()" />
+      </div>
+    </mat-tab>
+
+    <!-- ============ DIAGRAMMES ============ -->
+    <mat-tab label="Diagrammes ({{ m.diagrams.length }})">
+      <div class="tabpad">
+        <div class="card stack">
+          <div class="row between">
+            <h3>Diagrammes à générer</h3>
+            <button class="btn btn-sm btn-primary" (click)="addDiagram(m)" [disabled]="!qCount(m)">
+              + Diagramme
+            </button>
+          </div>
+          <p class="muted" style="margin: 0">
+            Chaque diagramme est calculé à partir des réponses collectées et exportable en PNG /
+            SVG. Choisissez une question à analyser et le type de graphique.
+          </p>
+          @if (!qCount(m)) {
+            <div class="empty">Ajoutez d'abord des questions pour configurer des diagrammes.</div>
+          }
+          @for (dg of m.diagrams; track dg.id; let i = $index) {
+            <div class="diag card">
+              <div class="row between">
+                <div class="dg-head">
+                  <span class="dg-shape">{{ shapeIcon(dg.variant) }}</span>
+                  <input class="dg-title" [(ngModel)]="dg.title" placeholder="Titre du diagramme" />
+                </div>
+                <button class="mini del" (click)="removeDiagram(m, i)">✕</button>
+              </div>
               <div class="form-grid">
                 <mat-form-field appearance="outline">
-                  <mat-label>Confidentialité par défaut</mat-label>
-                  <mat-select [(ngModel)]="m.confidentiality">
-                    @for (c of confidentialityLevels(); track c.value) { <mat-option [value]="c.value">{{ c.label }}</mat-option> }
+                  <mat-label>Type de graphique</mat-label>
+                  <mat-select [(ngModel)]="dg.variant">
+                    @for (v of variants; track v.value) {
+                      <mat-option [value]="v.value">{{ v.label }}</mat-option>
+                    }
                   </mat-select>
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                  <mat-label>Portée</mat-label>
-                  <mat-select [(ngModel)]="m.scope">
-                    <mat-option value="global">Ouvert à tous les projets</mat-option>
-                    <mat-option value="projects">Spécifique à certains projets</mat-option>
+                  <mat-label>Analyse</mat-label>
+                  <mat-select [(ngModel)]="dg.mode">
+                    <mat-option value="distribution"
+                      >Répartition des réponses (par question)</mat-option
+                    >
+                    <mat-option value="crosstab">Croisement (regrouper + agréger)</mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
-              <mat-form-field appearance="outline">
-                <mat-label>Message de confirmation</mat-label>
-                <input matInput [(ngModel)]="m.successMessage" />
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Langue</mat-label>
-                <mat-select [(ngModel)]="m.language">
-                  @for (l of languages; track l.value) { <mat-option [value]="l.value">{{ l.flag }} {{ l.label }}</mat-option> }
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Modèle de rapport (Word / PDF)</mat-label>
-                <mat-select [(ngModel)]="m.reportTemplate">
-                  <mat-option [value]="null">— aucun —</mat-option>
-                  @for (t of reportTemplates(); track t.id) { <mat-option [value]="t.id">{{ t.name }} ({{ t.doc_type }})</mat-option> }
-                </mat-select>
-                <mat-hint>Document dans lequel les diagrammes du formulaire s'insèrent (bloc « Diagramme de formulaire », identifiants d1, d2…).</mat-hint>
-              </mat-form-field>
-              @if (m.scope === 'projects') {
-                <div class="field">
-                  <span class="field-label">Projets autorisés</span>
-                  <div class="proj-pick">
-                    @for (pr of projects(); track pr.id) {
-                      <label class="chip-check">
-                        <input type="checkbox" [checked]="isProjSel(m, pr.id!)" (change)="toggleProj(m, pr.id!)" />
-                        {{ pr.name }}
-                      </label>
+
+              @if (dg.mode === 'distribution') {
+                <mat-form-field appearance="outline">
+                  <mat-label>Question analysée</mat-label>
+                  <mat-select [(ngModel)]="dg.question" placeholder="— choisir —">
+                    @for (f of questions(m); track f.key) {
+                      <mat-option [value]="f.key">{{ f.label || f.key }}</mat-option>
                     }
-                  </div>
+                  </mat-select>
+                  <mat-hint
+                    >Compte le nombre de réponses par valeur (idéal pour listes et cases à
+                    cocher).</mat-hint
+                  >
+                </mat-form-field>
+              } @else {
+                <div class="form-grid">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Regrouper par (question)</mat-label>
+                    <mat-select [(ngModel)]="dg.group_by" placeholder="— choisir —">
+                      @for (f of questions(m); track f.key) {
+                        <mat-option [value]="f.key">{{ f.label || f.key }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Agrégation</mat-label>
+                    <mat-select [(ngModel)]="dg.agg">
+                      <mat-option value="count">Nombre de réponses</mat-option>
+                      <mat-option value="sum">Somme</mat-option>
+                      <mat-option value="avg">Moyenne</mat-option>
+                    </mat-select>
+                  </mat-form-field>
                 </div>
+                @if (dg.agg !== 'count') {
+                  <mat-form-field appearance="outline">
+                    <mat-label>Valeur agrégée (question numérique)</mat-label>
+                    <mat-select [(ngModel)]="dg.value" placeholder="— choisir —">
+                      @for (f of numericFields(m); track f.key) {
+                        <mat-option [value]="f.key">{{ f.label || f.key }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                }
               }
-            </div>
-          </div>
-        </mat-tab>
 
-        <!-- ============ QUESTIONS & APPARENCE ============ -->
-        <mat-tab label="Questions ({{ qCount(m) }})">
-          <div class="tabpad">
-            <app-form-appearance-editor [theme]="theme(m)" [(showProgress)]="m.showProgress!" (changed)="touch()" />
-            <app-form-schema-editor [sections]="sections(m)" (changed)="touch()" />
-          </div>
-        </mat-tab>
-
-        <!-- ============ DIAGRAMMES ============ -->
-        <mat-tab label="Diagrammes ({{ m.diagrams.length }})">
-          <div class="tabpad">
-            <div class="card stack">
-              <div class="row between">
-                <h3>Diagrammes à générer</h3>
-                <button class="btn btn-sm btn-primary" (click)="addDiagram(m)" [disabled]="!qCount(m)">+ Diagramme</button>
+              <div class="field" style="max-width: 220px">
+                <label for="ftb-diag-color-{{ i }}">Couleur principale</label>
+                <input
+                  id="ftb-diag-color-{{ i }}"
+                  type="color"
+                  [ngModel]="dg.color || '#1F497D'"
+                  (ngModelChange)="dg.color = $event"
+                  style="width: 52px; height: 34px; padding: 2px"
+                />
               </div>
-              <p class="muted" style="margin:0">
-                Chaque diagramme est calculé à partir des réponses collectées et exportable
-                en PNG / SVG. Choisissez une question à analyser et le type de graphique.
-              </p>
-              @if (!qCount(m)) {
-                <div class="empty">Ajoutez d'abord des questions pour configurer des diagrammes.</div>
-              }
-              @for (dg of m.diagrams; track dg.id; let i = $index) {
-                <div class="diag card">
-                  <div class="row between">
-                    <div class="dg-head">
-                      <span class="dg-shape">{{ shapeIcon(dg.variant) }}</span>
-                      <input class="dg-title" [(ngModel)]="dg.title" placeholder="Titre du diagramme" />
-                    </div>
-                    <button class="mini del" (click)="removeDiagram(m, i)">✕</button>
-                  </div>
-                  <div class="form-grid">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Type de graphique</mat-label>
-                      <mat-select [(ngModel)]="dg.variant">
-                        @for (v of variants; track v.value) { <mat-option [value]="v.value">{{ v.label }}</mat-option> }
-                      </mat-select>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline">
-                      <mat-label>Analyse</mat-label>
-                      <mat-select [(ngModel)]="dg.mode">
-                        <mat-option value="distribution">Répartition des réponses (par question)</mat-option>
-                        <mat-option value="crosstab">Croisement (regrouper + agréger)</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-
-                  @if (dg.mode === 'distribution') {
-                    <mat-form-field appearance="outline">
-                      <mat-label>Question analysée</mat-label>
-                      <mat-select [(ngModel)]="dg.question" placeholder="— choisir —">
-                        @for (f of questions(m); track f.key) { <mat-option [value]="f.key">{{ f.label || f.key }}</mat-option> }
-                      </mat-select>
-                      <mat-hint>Compte le nombre de réponses par valeur (idéal pour listes et cases à cocher).</mat-hint>
-                    </mat-form-field>
-                  } @else {
-                    <div class="form-grid">
-                      <mat-form-field appearance="outline">
-                        <mat-label>Regrouper par (question)</mat-label>
-                        <mat-select [(ngModel)]="dg.group_by" placeholder="— choisir —">
-                          @for (f of questions(m); track f.key) { <mat-option [value]="f.key">{{ f.label || f.key }}</mat-option> }
-                        </mat-select>
-                      </mat-form-field>
-                      <mat-form-field appearance="outline">
-                        <mat-label>Agrégation</mat-label>
-                        <mat-select [(ngModel)]="dg.agg">
-                          <mat-option value="count">Nombre de réponses</mat-option>
-                          <mat-option value="sum">Somme</mat-option>
-                          <mat-option value="avg">Moyenne</mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                    </div>
-                    @if (dg.agg !== 'count') {
-                      <mat-form-field appearance="outline">
-                        <mat-label>Valeur agrégée (question numérique)</mat-label>
-                        <mat-select [(ngModel)]="dg.value" placeholder="— choisir —">
-                          @for (f of numericFields(m); track f.key) { <mat-option [value]="f.key">{{ f.label || f.key }}</mat-option> }
-                        </mat-select>
-                      </mat-form-field>
-                    }
-                  }
-
-                  <div class="field" style="max-width:220px">
-                    <label for="ftb-diag-color-{{ i }}">Couleur principale</label>
-                    <input id="ftb-diag-color-{{ i }}" type="color" [ngModel]="dg.color || '#1F497D'" (ngModelChange)="dg.color = $event" style="width:52px; height:34px; padding:2px" />
-                  </div>
-                </div>
-              }
             </div>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
-
-      <div class="row" style="margin-top:1rem">
-        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
-          {{ isEdit() ? 'Enregistrer le modèle' : 'Créer le modèle' }}
-        </button>
-        @if (isEdit()) {
-          <button class="btn btn-ghost" (click)="remove()">Supprimer</button>
-        }
-      </div>
-
-      @if (showPreview()) {
-        <div class="pv-overlay" (click)="showPreview.set(false)">
-          <div class="pv-panel" (click)="$event.stopPropagation()">
-            <div class="pv-bar">
-              <span>Aperçu du modèle</span>
-              <button class="btn btn-sm btn-ghost" (click)="showPreview.set(false)">✕ Fermer</button>
-            </div>
-            <app-form-preview [title]="m.name" [description]="m.description"
-              [sections]="sections(m)" [theme]="theme(m)" [showProgress]="m.showProgress !== false"
-              [logoUrl]="logoUrl()" [companyName]="companyName()" />
-          </div>
+          }
         </div>
-      }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <div class="row" style="margin-top: 1rem">
+    <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+      {{ isEdit() ? 'Enregistrer le modèle' : 'Créer le modèle' }}
+    </button>
+    @if (isEdit()) {
+      <button class="btn btn-ghost" (click)="remove()">Supprimer</button>
     }
+  </div>
+
+  @if (showPreview()) {
+    <div class="pv-overlay" (click)="showPreview.set(false)">
+      <div class="pv-panel" (click)="$event.stopPropagation()">
+        <div class="pv-bar">
+          <span>Aperçu du modèle</span>
+          <button class="btn btn-sm btn-ghost" (click)="showPreview.set(false)">✕ Fermer</button>
+        </div>
+        <app-form-preview
+          [title]="m.name"
+          [description]="m.description"
+          [sections]="sections(m)"
+          [theme]="theme(m)"
+          [showProgress]="m.showProgress !== false"
+          [logoUrl]="logoUrl()"
+          [companyName]="companyName()"
+        />
+      </div>
+    </div>
+  }
+}

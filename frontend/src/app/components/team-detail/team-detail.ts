@@ -12,7 +12,14 @@ import { Project, Team, TeamMember } from '@core/models';
 
 @Component({
   selector: 'app-team-detail',
-  imports: [FormsModule, RouterLink, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [
+    FormsModule,
+    RouterLink,
+    MatTabsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+  ],
   templateUrl: './team-detail.html',
   styleUrl: './team-detail.scss',
 })
@@ -49,27 +56,55 @@ export class TeamDetail {
     });
   }
 
-  otherTeams() { return this.allTeams().filter((t) => t.id !== +this.id); }
-  subteams() { return this.allTeams().filter((t) => t.parent === +this.id); }
-  statusLabel(s: string) { return ({ active: 'Actif', on_hold: 'En pause', archived: 'Archivé' } as Record<string, string>)[s] || s; }
+  otherTeams() {
+    return this.allTeams().filter((t) => t.id !== +this.id);
+  }
+  subteams() {
+    return this.allTeams().filter((t) => t.parent === +this.id);
+  }
+  statusLabel(s: string) {
+    return (
+      ({ active: 'Actif', on_hold: 'En pause', archived: 'Archivé' } as Record<string, string>)[
+        s
+      ] || s
+    );
+  }
 
-  toggleMember(id: number) { this.toggle(this._memberIds, id); }
-  toggleProject(id: number) { this.toggle(this._projectIds, id); }
-  toggleRelated(id: number) { this.toggle(this._relatedIds, id); }
+  toggleMember(id: number) {
+    this.toggle(this._memberIds, id);
+  }
+  toggleProject(id: number) {
+    this.toggle(this._projectIds, id);
+  }
+  toggleRelated(id: number) {
+    this.toggle(this._relatedIds, id);
+  }
   private toggle(sig: WritableSignal<number[]>, id: number) {
     const arr = [...sig()];
     const i = arr.indexOf(id);
-    if (i >= 0) arr.splice(i, 1); else arr.push(id);
+    if (i >= 0) arr.splice(i, 1);
+    else arr.push(id);
     sig.set(arr);
   }
 
   saveInfo() {
     const t = this.team()!;
-    this.patch({ name: t.name, description: t.description, color: t.color, parent: t.parent ?? null });
+    this.patch({
+      name: t.name,
+      description: t.description,
+      color: t.color,
+      parent: t.parent ?? null,
+    });
   }
-  saveMembers() { this.patch({ memberIds: this._memberIds() }); }
-  saveProjects() { this.patch({ projectIds: this._projectIds() }); }
-  saveRelated() { this.patch({ relatedTeamIds: this._relatedIds() }); }
+  saveMembers() {
+    this.patch({ memberIds: this._memberIds() });
+  }
+  saveProjects() {
+    this.patch({ projectIds: this._projectIds() });
+  }
+  saveRelated() {
+    this.patch({ relatedTeamIds: this._relatedIds() });
+  }
 
   private patch(data: Partial<Team>) {
     this.saving.set(true);
@@ -82,7 +117,10 @@ export class TeamDetail {
         this.saving.set(false);
         this.toast.success('Équipe mise à jour.');
       },
-      error: () => { this.saving.set(false); this.toast.error('Enregistrement impossible.'); },
+      error: () => {
+        this.saving.set(false);
+        this.toast.error('Enregistrement impossible.');
+      },
     });
   }
 }

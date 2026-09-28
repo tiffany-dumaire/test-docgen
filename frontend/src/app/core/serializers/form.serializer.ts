@@ -1,6 +1,8 @@
 import { FormTemplate, OnlineForm, FormSubmission } from '../models/form.model';
 import {
-  FormTemplateInterface, OnlineFormInterface, FormSubmissionInterface,
+  FormTemplateInterface,
+  OnlineFormInterface,
+  FormSubmissionInterface,
 } from '../interfaces/form.interface';
 import { ShortLinkSerializer } from './document.serializer';
 import { pruneUndefined } from './serializer.util';

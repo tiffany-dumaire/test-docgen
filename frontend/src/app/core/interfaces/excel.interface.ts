@@ -1,11 +1,5 @@
 // ---- Classeurs Excel personnalisables ----
-export type CellType =
-  | 'text'
-  | 'integer'
-  | 'decimal'
-  | 'currency'
-  | 'percent'
-  | 'date';
+export type CellType = 'text' | 'integer' | 'decimal' | 'currency' | 'percent' | 'date';
 
 export type SheetType = 'table' | 'pivot' | 'info' | 'grid';
 
@@ -17,8 +11,8 @@ export interface GridCell {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
-  color?: string;   // #rrggbb texte
-  bg?: string;      // #rrggbb fond
+  color?: string; // #rrggbb texte
+  bg?: string; // #rrggbb fond
   align?: 'left' | 'center' | 'right';
   valign?: 'top' | 'center' | 'bottom';
   size?: number;
@@ -89,13 +83,13 @@ export interface PivotConfig {
 /** Image (logo) positionnée dans une feuille (grille). */
 export interface SheetImage {
   source: 'company' | 'url';
-  url?: string;        // si source === 'url'
-  col: number;         // cellule d'ancrage (coin haut-gauche, 1-indexé)
+  url?: string; // si source === 'url'
+  col: number; // cellule d'ancrage (coin haut-gauche, 1-indexé)
   row: number;
-  width?: number;      // px
-  height?: number;     // px
-  offset_x?: number;   // décalage px depuis le coin de la cellule
-  offset_y?: number;   // décalage px
+  width?: number; // px
+  height?: number; // px
+  offset_x?: number; // décalage px depuis le coin de la cellule
+  offset_y?: number; // décalage px
 }
 
 export interface ExcelSheet {

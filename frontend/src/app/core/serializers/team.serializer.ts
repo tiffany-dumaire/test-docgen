@@ -1,6 +1,8 @@
 import { Team, TeamMember, TeamProjectRef } from '../models/team.model';
 import {
-  TeamInterface, TeamMemberInterface, TeamProjectRefInterface,
+  TeamInterface,
+  TeamMemberInterface,
+  TeamProjectRefInterface,
 } from '../interfaces/team.interface';
 import { mapArray, pruneUndefined } from './serializer.util';
 

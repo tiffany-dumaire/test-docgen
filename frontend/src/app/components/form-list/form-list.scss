@@ -1,2 +1,8 @@
-      .linkbox { display: flex; gap: 0.4rem; }
-      .linkbox input { font-size: 0.78rem; font-family: ui-monospace, monospace; }
+.linkbox {
+  display: flex;
+  gap: 0.4rem;
+}
+.linkbox input {
+  font-size: 0.78rem;
+  font-family: ui-monospace, monospace;
+}

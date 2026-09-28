@@ -1,7 +1,5 @@
 import { Project, ProjectAssignment } from '../models/project.model';
-import {
-  ProjectInterface, ProjectAssignmentInterface,
-} from '../interfaces/project.interface';
+import { ProjectInterface, ProjectAssignmentInterface } from '../interfaces/project.interface';
 import { ClientSerializer } from './client.serializer';
 import { ContactSerializer } from './contact.serializer';
 import { ProjectLinkSerializer } from './extras.serializer';
@@ -46,7 +44,9 @@ export class ProjectSerializer {
     m.startDate = dto.start_date;
     m.endDate = dto.end_date;
     m.client = dto.client;
-    m.clientDetail = dto.client_detail ? ClientSerializer.fromApi(dto.client_detail) : dto.client_detail;
+    m.clientDetail = dto.client_detail
+      ? ClientSerializer.fromApi(dto.client_detail)
+      : dto.client_detail;
     m.clients = dto.clients;
     m.clientsDetail = mapArray(dto.clients_detail, ClientSerializer.fromApi);
     m.parent = dto.parent;
@@ -83,8 +83,10 @@ export class ProjectSerializer {
       custom_field_defs: m.customFieldDefs,
       custom_fields: m.customFields,
       styles: m.styles,
-      contacts: m.contacts ? m.contacts.map(ContactSerializer.toApi) as any : undefined,
-      assignments: m.assignments ? m.assignments.map(ProjectAssignmentSerializer.toApi) as any : undefined,
+      contacts: m.contacts ? (m.contacts.map(ContactSerializer.toApi) as any) : undefined,
+      assignments: m.assignments
+        ? (m.assignments.map(ProjectAssignmentSerializer.toApi) as any)
+        : undefined,
     });
   }
 }

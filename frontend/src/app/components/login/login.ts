@@ -18,21 +18,36 @@ export class Login {
   private router = inject(Router);
   private toast = inject(ToastService);
   private t = inject(TranslocoService);
-  email = 'marie@vnv.ch'; firstName = 'Marie'; lastName = 'Durand'; roles = 'admin';
+  email = 'marie@vnv.ch';
+  firstName = 'Marie';
+  lastName = 'Durand';
+  roles = 'admin';
   loading = signal(false);
 
   async devLogin() {
     this.loading.set(true);
     try {
       await this.auth.devLogin({
-        email: this.email, first_name: this.firstName, last_name: this.lastName,
-        roles: this.roles.split(',').map((r) => r.trim()).filter(Boolean),
+        email: this.email,
+        first_name: this.firstName,
+        last_name: this.lastName,
+        roles: this.roles
+          .split(',')
+          .map((r) => r.trim())
+          .filter(Boolean),
       });
       this.router.navigateByUrl('/dashboard');
-    } catch { this.toast.error(this.t.translate('login.error')); }
-    finally { this.loading.set(false); }
+    } catch {
+      this.toast.error(this.t.translate('login.error'));
+    } finally {
+      this.loading.set(false);
+    }
   }
   async oidcLogin() {
-    try { await this.auth.login(); } catch { this.toast.error(this.t.translate('login.oidc_error')); }
+    try {
+      await this.auth.login();
+    } catch {
+      this.toast.error(this.t.translate('login.oidc_error'));
+    }
   }
 }

@@ -2,7 +2,10 @@ import { ProjectStatus } from '../enums/project-status.enum';
 import { Client } from './client.model';
 import { Contact } from './contact.model';
 import {
-  ProjectInstance, ProjectRepo, ProjectChildRef, CustomFieldDef,
+  ProjectInstance,
+  ProjectRepo,
+  ProjectChildRef,
+  CustomFieldDef,
 } from '../interfaces/project.interface';
 import { ProjectTracking } from '../interfaces/tracking.interface';
 import { StyleMap } from '../interfaces/style.interface';

@@ -23,11 +23,11 @@ export interface ProjectInstance {
 
 export interface ProjectRepo {
   id: string;
-  parent?: string | null;   // id du dépôt parent (arborescence)
+  parent?: string | null; // id du dépôt parent (arborescence)
   name: string;
   url?: string;
-  component?: string;        // composante du projet
-  instance?: string;         // nom de l'instance associée
+  component?: string; // composante du projet
+  instance?: string; // nom de l'instance associée
 }
 
 export interface ProjectChildRef {

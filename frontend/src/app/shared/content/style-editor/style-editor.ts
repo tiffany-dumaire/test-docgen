@@ -24,8 +24,12 @@ export class StyleEditor {
   @Input({ required: true }) styles!: StyleMap;
   elements = ELEMENTS;
 
-  has(k: string) { return !!this.styles[k]; }
-  get(k: string): ElementStyle { return this.styles[k] ?? {}; }
+  has(k: string) {
+    return !!this.styles[k];
+  }
+  get(k: string): ElementStyle {
+    return this.styles[k] ?? {};
+  }
   toggle(k: string, on: boolean) {
     if (on) this.styles[k] = this.styles[k] ?? {};
     else delete this.styles[k];

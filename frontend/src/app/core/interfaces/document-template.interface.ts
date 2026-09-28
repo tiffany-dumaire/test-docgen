@@ -1,8 +1,8 @@
 import { ExcelWorkbook } from './excel.interface';
 import { StyleMap } from './style.interface';
 
-export type DocType = 'pdf' | 'xlsx' | 'docx' | 'pptx' | 'md' | 'a3'
-  | 'brochure' | 'lettre' | 'mail' | 'offre';
+export type DocType =
+  'pdf' | 'xlsx' | 'docx' | 'pptx' | 'md' | 'a3' | 'brochure' | 'lettre' | 'mail' | 'offre';
 
 export type TemplateLanguage = 'fr' | 'en' | 'de' | 'it';
 export const LANGUAGES: { value: TemplateLanguage; label: string; flag: string }[] = [
@@ -71,7 +71,10 @@ export interface Block {
 export interface LayoutElement {
   id: string;
   type: 'text' | 'image' | 'logo' | 'rect' | 'ellipse' | 'line';
-  x: number; y: number; w: number; h: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
   [k: string]: unknown;
 }
 export interface PageLayout {
@@ -91,7 +94,7 @@ export interface Overlay {
   name: string;
   enabled?: boolean;
   doc_type: 'pdf' | 'pptx';
-  target: { pages: string };   // 'all' | 'first' | 'last' | 'odd' | 'even' | '1,3-5'
+  target: { pages: string }; // 'all' | 'first' | 'last' | 'odd' | 'even' | '1,3-5'
   layout: PageLayout & { page_size?: string; orientation?: string };
 }
 
@@ -145,7 +148,10 @@ export interface TemplateSettings {
   header?: HeaderFooter;
   footer?: HeaderFooter;
   /** Contenu spécifique par langue (schéma + réglages), pour TOUS les types. */
-  content_i18n?: Record<string, { schema?: Block[] | SchemaField[]; settings?: Partial<TemplateSettings> }>;
+  content_i18n?: Record<
+    string,
+    { schema?: Block[] | SchemaField[]; settings?: Partial<TemplateSettings> }
+  >;
 }
 
 export interface DocumentTemplate {

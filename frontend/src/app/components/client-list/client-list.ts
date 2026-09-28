@@ -14,7 +14,17 @@ import { Client } from '@core/models';
 
 @Component({
   selector: 'app-client-list',
-  imports: [FormsModule, RouterLink, MatTableModule, MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatTooltipModule, TranslocoModule],
+  imports: [
+    FormsModule,
+    RouterLink,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+    TranslocoModule,
+  ],
   templateUrl: './client-list.html',
   styleUrl: './client-list.scss',
 })
@@ -25,14 +35,21 @@ export class ClientList {
   clients = signal<Client[]>([]);
   cols = ['name', 'contact', 'email', 'projects', 'actions'];
 
-  constructor() { this.reload(); }
+  constructor() {
+    this.reload();
+  }
 
-  reload() { this.service.list().subscribe((r) => this.clients.set(r.results)); }
+  reload() {
+    this.service.list().subscribe((r) => this.clients.set(r.results));
+  }
 
   remove(c: Client) {
     if (!confirm(this.t.translate('clients.confirm_delete', { name: c.name }))) return;
     this.service.remove(c.id!).subscribe({
-      next: () => { this.toast.success(this.t.translate('clients.deleted')); this.reload(); },
+      next: () => {
+        this.toast.success(this.t.translate('clients.deleted'));
+        this.reload();
+      },
       error: () => this.toast.error(this.t.translate('clients.delete_error')),
     });
   }

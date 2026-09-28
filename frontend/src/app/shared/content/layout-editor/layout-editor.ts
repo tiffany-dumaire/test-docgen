@@ -7,13 +7,33 @@ import { CompanyService } from '@core/services/company.service';
 
 type LType = 'text' | 'image' | 'logo' | 'rect' | 'ellipse' | 'line';
 interface LEl {
-  id: string; type: LType; x: number; y: number; w: number; h: number;
-  text?: string; font?: string; size?: number; bold?: boolean; italic?: boolean;
-  color?: string; align?: 'left' | 'center' | 'right';
-  asset_url?: string; fit?: 'contain' | 'stretch';
-  fill?: string; stroke?: string; stroke_width?: number; radius?: number; width?: number;
+  id: string;
+  type: LType;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  text?: string;
+  font?: string;
+  size?: number;
+  bold?: boolean;
+  italic?: boolean;
+  color?: string;
+  align?: 'left' | 'center' | 'right';
+  asset_url?: string;
+  fit?: 'contain' | 'stretch';
+  fill?: string;
+  stroke?: string;
+  stroke_width?: number;
+  radius?: number;
+  width?: number;
 }
-interface LLayout { background?: string; elements: LEl[]; page_size?: string; orientation?: string; }
+interface LLayout {
+  background?: string;
+  elements: LEl[];
+  page_size?: string;
+  orientation?: string;
+}
 
 const PT_W = 595.2755;
 const PT_H = 841.8898;
@@ -48,7 +68,9 @@ export class LayoutEditor implements OnInit {
         if (c?.name) this.companyName.set(c.name);
         this.companyLogo.set(c?.logoUrl || c?.logo || null);
       },
-      error: () => { /* aperçu avec valeurs d'exemple */ },
+      error: () => {
+        /* aperçu avec valeurs d'exemple */
+      },
     });
   }
 
@@ -62,7 +84,8 @@ export class LayoutEditor implements OnInit {
       project_reference: 'REF-2024-001',
       project_description: 'Description du projet de démonstration.',
       version: 'v1',
-      today, doc_date: today,
+      today,
+      doc_date: today,
       company_name: this.companyName(),
       ...(this.previewValues || {}),
     };
@@ -80,15 +103,40 @@ export class LayoutEditor implements OnInit {
   rev = signal(0);
   selected = signal<string | null>(null);
   private A = {
-    a4: [595.2755, 841.8898], a3: [841.8898, 1190.5512],
-    slide: [960, 540], slide43: [720, 540],
+    a4: [595.2755, 841.8898],
+    a3: [841.8898, 1190.5512],
+    slide: [960, 540],
+    slide43: [720, 540],
   } as Record<string, number[]>;
-  pageWpt() { const l = this.layout(); let [w, h] = this.A[l.page_size || 'a4']; if (l.orientation === 'landscape') [w, h] = [h, w]; return { w, h }; }
-  get scale() { this.rev(); return DISP_W / this.pageWpt().w; }
-  get dispW() { this.rev(); return DISP_W; }
-  get dispH() { this.rev(); const { w, h } = this.pageWpt(); return Math.round(DISP_W * h / w); }
-  variables = ['document_title', 'client_name', 'project_name', 'project_reference',
-    'company_name', 'today', 'doc_date', 'version'];
+  pageWpt() {
+    const l = this.layout();
+    let [w, h] = this.A[l.page_size || 'a4'];
+    if (l.orientation === 'landscape') [w, h] = [h, w];
+    return { w, h };
+  }
+  get scale() {
+    this.rev();
+    return DISP_W / this.pageWpt().w;
+  }
+  get dispW() {
+    this.rev();
+    return DISP_W;
+  }
+  get dispH() {
+    this.rev();
+    const { w, h } = this.pageWpt();
+    return Math.round((DISP_W * h) / w);
+  }
+  variables = [
+    'document_title',
+    'client_name',
+    'project_name',
+    'project_reference',
+    'company_name',
+    'today',
+    'doc_date',
+    'version',
+  ];
 
   private drag: { el: LEl; sx: number; sy: number; ox: number; oy: number } | null = null;
   private resize: { el: LEl; sx: number; sy: number; ow: number; oh: number } | null = null;
@@ -117,27 +165,68 @@ export class LayoutEditor implements OnInit {
     return this.layout().elements.find((e) => e.id === id) ?? null;
   });
 
-  setPage(p: 'cover' | 'suivi' | 'page') { this.page.set(p); this.selected.set(null); this.rev.update((v) => v + 1); }
-  setSize(sz: string) { this.layout().page_size = sz; this.rev.update((v) => v + 1); }
-  setOrient(o: string) { this.layout().orientation = o; this.rev.update((v) => v + 1); }
+  setPage(p: 'cover' | 'suivi' | 'page') {
+    this.page.set(p);
+    this.selected.set(null);
+    this.rev.update((v) => v + 1);
+  }
+  setSize(sz: string) {
+    this.layout().page_size = sz;
+    this.rev.update((v) => v + 1);
+  }
+  setOrient(o: string) {
+    this.layout().orientation = o;
+    this.rev.update((v) => v + 1);
+  }
   toggle(on: boolean) {
     const store = this.ensure();
-    if (on) { if (!store[this.page()]) store[this.page()] = { background: '#ffffff', elements: [] }; }
-    else { delete store[this.page()]; this.selected.set(null); }
+    if (on) {
+      if (!store[this.page()]) store[this.page()] = { background: '#ffffff', elements: [] };
+    } else {
+      delete store[this.page()];
+      this.selected.set(null);
+    }
     this.page.set(this.page());
   }
-  setBg(c: string) { this.layout().background = c; }
-  round(n: number) { return Math.round(n); }
+  setBg(c: string) {
+    this.layout().background = c;
+  }
+  round(n: number) {
+    return Math.round(n);
+  }
   typeLabel(t: LType) {
-    return { text: 'Texte', image: 'Image', logo: 'Logo', rect: 'Rectangle', ellipse: 'Ellipse', line: 'Ligne' }[t];
+    return {
+      text: 'Texte',
+      image: 'Image',
+      logo: 'Logo',
+      rect: 'Rectangle',
+      ellipse: 'Ellipse',
+      line: 'Ligne',
+    }[t];
   }
 
   add(type: LType) {
     const id = `el${Date.now()}`;
-    const base: LEl = { id, type, x: 60, y: 80, w: type === 'line' ? 200 : 300, h: type === 'line' ? 2 : 40 };
-    if (type === 'text') Object.assign(base, { text: 'Nouveau texte', font: 'title', size: 24, color: '#1F497D', align: 'left', h: 40 });
+    const base: LEl = {
+      id,
+      type,
+      x: 60,
+      y: 80,
+      w: type === 'line' ? 200 : 300,
+      h: type === 'line' ? 2 : 40,
+    };
+    if (type === 'text')
+      Object.assign(base, {
+        text: 'Nouveau texte',
+        font: 'title',
+        size: 24,
+        color: '#1F497D',
+        align: 'left',
+        h: 40,
+      });
     if (type === 'rect') Object.assign(base, { fill: '#1F497D', h: 120, w: 595, x: 0, y: 0 });
-    if (type === 'ellipse') Object.assign(base, { fill: '#ffffff', stroke: '#1F497D', stroke_width: 2, w: 200, h: 200 });
+    if (type === 'ellipse')
+      Object.assign(base, { fill: '#ffffff', stroke: '#1F497D', stroke_width: 2, w: 200, h: 200 });
     if (type === 'line') Object.assign(base, { color: '#1F497D', width: 2 });
     if (type === 'logo') Object.assign(base, { w: 140, h: 70, fit: 'contain' });
     if (type === 'image') Object.assign(base, { w: 200, h: 120, fit: 'contain' });
@@ -149,8 +238,12 @@ export class LayoutEditor implements OnInit {
     l.elements = l.elements.filter((e) => e.id !== el.id);
     this.selected.set(null);
   }
-  deselect(e: PointerEvent) { if (e.target === e.currentTarget) this.selected.set(null); }
-  insertVar(el: LEl, v: string) { el.text = (el.text || '') + `{{${v}}}`; }
+  deselect(e: PointerEvent) {
+    if (e.target === e.currentTarget) this.selected.set(null);
+  }
+  insertVar(el: LEl, v: string) {
+    el.text = (el.text || '') + `{{${v}}}`;
+  }
 
   startDrag(e: PointerEvent, el: LEl) {
     e.stopPropagation();
@@ -172,17 +265,23 @@ export class LayoutEditor implements OnInit {
       const dx = (e.clientX - this.resize.sx) / this.scale;
       const dy = (e.clientY - this.resize.sy) / this.scale;
       this.resize.el.w = Math.max(10, Math.round(this.resize.ow + dx));
-      if (this.resize.el.type !== 'line') this.resize.el.h = Math.max(6, Math.round(this.resize.oh + dy));
+      if (this.resize.el.type !== 'line')
+        this.resize.el.h = Math.max(6, Math.round(this.resize.oh + dy));
     }
   }
   @HostListener('window:pointerup')
-  onUp() { this.drag = null; this.resize = null; }
+  onUp() {
+    this.drag = null;
+    this.resize = null;
+  }
 
   upload(event: Event, el: LEl) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => { el.asset_url = reader.result as string; };
+    reader.onload = () => {
+      el.asset_url = reader.result as string;
+    };
     reader.readAsDataURL(file);
   }
 }

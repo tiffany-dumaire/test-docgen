@@ -1,39 +1,75 @@
 /* ---------- PRINTEMPS · renouveau (vert tendre + accent floral) ---------- */
 @mixin spring-light {
-  --mat-sys-primary:#3F8F4F; --mat-sys-on-primary:#FFFFFF;
-  --mat-sys-primary-container:#C4EFC6; --mat-sys-on-primary-container:#00210A;
-  --mat-sys-secondary:#55624C; --mat-sys-on-secondary:#FFFFFF;
-  --mat-sys-secondary-container:#D8E7CC; --mat-sys-on-secondary-container:#131F0E;
-  --mat-sys-tertiary:#B03E6E; --mat-sys-on-tertiary:#FFFFFF;
-  --mat-sys-tertiary-container:#FFD9E4; --mat-sys-on-tertiary-container:#3E0021;
-  --mat-sys-surface:#F6FBF4; --mat-sys-on-surface:#191D18; --mat-sys-on-surface-variant:#424A3D;
-  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#F0F6EE;
-  --mat-sys-surface-container:#EAF1E8; --mat-sys-surface-container-high:#E4EBE2;
-  --mat-sys-surface-container-highest:#DEE6DC;
-  --mat-sys-outline:#72796C; --mat-sys-outline-variant:#C2C9BC;
-  --mat-sys-inverse-surface:#2D322B; --mat-sys-inverse-on-surface:#EFF2EA; --mat-sys-inverse-primary:#A3D6A5;
-  --mat-sys-error:#B3261E; --mat-sys-on-error:#FFFFFF;
-  --mat-sys-error-container:#F9DEDC; --mat-sys-on-error-container:#410E0B;
+  --mat-sys-primary: #3f8f4f;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #c4efc6;
+  --mat-sys-on-primary-container: #00210a;
+  --mat-sys-secondary: #55624c;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #d8e7cc;
+  --mat-sys-on-secondary-container: #131f0e;
+  --mat-sys-tertiary: #b03e6e;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #ffd9e4;
+  --mat-sys-on-tertiary-container: #3e0021;
+  --mat-sys-surface: #f6fbf4;
+  --mat-sys-on-surface: #191d18;
+  --mat-sys-on-surface-variant: #424a3d;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #f0f6ee;
+  --mat-sys-surface-container: #eaf1e8;
+  --mat-sys-surface-container-high: #e4ebe2;
+  --mat-sys-surface-container-highest: #dee6dc;
+  --mat-sys-outline: #72796c;
+  --mat-sys-outline-variant: #c2c9bc;
+  --mat-sys-inverse-surface: #2d322b;
+  --mat-sys-inverse-on-surface: #eff2ea;
+  --mat-sys-inverse-primary: #a3d6a5;
+  --mat-sys-error: #b3261e;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #f9dedc;
+  --mat-sys-on-error-container: #410e0b;
 }
 @mixin spring-dark {
-  --mat-sys-primary:#A3D6A5; --mat-sys-on-primary:#0B3818;
-  --mat-sys-primary-container:#26522F; --mat-sys-on-primary-container:#C4EFC6;
-  --mat-sys-secondary:#BCCBB0; --mat-sys-on-secondary:#283420;
-  --mat-sys-secondary-container:#3E4B35; --mat-sys-on-secondary-container:#D8E7CC;
-  --mat-sys-tertiary:#FFB1CC; --mat-sys-on-tertiary:#5E1138;
-  --mat-sys-tertiary-container:#7C2953; --mat-sys-on-tertiary-container:#FFD9E4;
-  --mat-sys-surface:#10140F; --mat-sys-on-surface:#E0E4DB; --mat-sys-on-surface-variant:#C2C9BC;
-  --mat-sys-surface-container-lowest:#0B0F0A; --mat-sys-surface-container-low:#181D16;
-  --mat-sys-surface-container:#1C211A; --mat-sys-surface-container-high:#262B24;
-  --mat-sys-surface-container-highest:#31362E;
-  --mat-sys-outline:#8C9385; --mat-sys-outline-variant:#424A3D;
-  --mat-sys-inverse-surface:#E0E4DB; --mat-sys-inverse-on-surface:#2D322B; --mat-sys-inverse-primary:#3F8F4F;
-  --mat-sys-error:#F2B8B5; --mat-sys-on-error:#601410;
-  --mat-sys-error-container:#8C1D18; --mat-sys-on-error-container:#F9DEDC;
+  --mat-sys-primary: #a3d6a5;
+  --mat-sys-on-primary: #0b3818;
+  --mat-sys-primary-container: #26522f;
+  --mat-sys-on-primary-container: #c4efc6;
+  --mat-sys-secondary: #bccbb0;
+  --mat-sys-on-secondary: #283420;
+  --mat-sys-secondary-container: #3e4b35;
+  --mat-sys-on-secondary-container: #d8e7cc;
+  --mat-sys-tertiary: #ffb1cc;
+  --mat-sys-on-tertiary: #5e1138;
+  --mat-sys-tertiary-container: #7c2953;
+  --mat-sys-on-tertiary-container: #ffd9e4;
+  --mat-sys-surface: #10140f;
+  --mat-sys-on-surface: #e0e4db;
+  --mat-sys-on-surface-variant: #c2c9bc;
+  --mat-sys-surface-container-lowest: #0b0f0a;
+  --mat-sys-surface-container-low: #181d16;
+  --mat-sys-surface-container: #1c211a;
+  --mat-sys-surface-container-high: #262b24;
+  --mat-sys-surface-container-highest: #31362e;
+  --mat-sys-outline: #8c9385;
+  --mat-sys-outline-variant: #424a3d;
+  --mat-sys-inverse-surface: #e0e4db;
+  --mat-sys-inverse-on-surface: #2d322b;
+  --mat-sys-inverse-primary: #3f8f4f;
+  --mat-sys-error: #f2b8b5;
+  --mat-sys-on-error: #601410;
+  --mat-sys-error-container: #8c1d18;
+  --mat-sys-on-error-container: #f9dedc;
   color-scheme: dark;
 }
-:root[data-p="spring"]{ @include spring-light; }
-@media (prefers-color-scheme: dark){
-  :root[data-p="spring"]:not([data-theme="light"]){ @include spring-dark; }
+:root[data-p='spring'] {
+  @include spring-light;
 }
-:root[data-p="spring"][data-theme="dark"]{ @include spring-dark; }
+@media (prefers-color-scheme: dark) {
+  :root[data-p='spring']:not([data-theme='light']) {
+    @include spring-dark;
+  }
+}
+:root[data-p='spring'][data-theme='dark'] {
+  @include spring-dark;
+}

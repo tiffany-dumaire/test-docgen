@@ -10,9 +10,7 @@ export class ApiConfig {
 /** Petit service de notifications (toast). */
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  readonly message = signal<{ text: string; kind: 'success' | 'error' | 'info' } | null>(
-    null,
-  );
+  readonly message = signal<{ text: string; kind: 'success' | 'error' | 'info' } | null>(null);
 
   private timer: ReturnType<typeof setTimeout> | null = null;
 

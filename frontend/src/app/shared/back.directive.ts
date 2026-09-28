@@ -9,7 +9,7 @@ import { Router, NavigationEnd } from '@angular/router';
  */
 @Injectable({ providedIn: 'root' })
 export class NavHistoryService {
-  router = inject(Router)
+  router = inject(Router);
   private count = 0;
   constructor() {
     this.router.events.subscribe((e) => {
@@ -17,7 +17,9 @@ export class NavHistoryService {
     });
   }
   /** Vrai s'il existe une page précédente dans l'application. */
-  canGoBack(): boolean { return this.count > 1; }
+  canGoBack(): boolean {
+    return this.count > 1;
+  }
 }
 
 /**

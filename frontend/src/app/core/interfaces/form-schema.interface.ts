@@ -1,7 +1,18 @@
 export type QuestionType =
-  | 'text' | 'textarea' | 'email' | 'number' | 'date' | 'time'
-  | 'select' | 'radio' | 'checkbox' | 'checkboxes'
-  | 'scale' | 'rating' | 'slot' | 'file';
+  | 'text'
+  | 'textarea'
+  | 'email'
+  | 'number'
+  | 'date'
+  | 'time'
+  | 'select'
+  | 'radio'
+  | 'checkbox'
+  | 'checkboxes'
+  | 'scale'
+  | 'rating'
+  | 'slot'
+  | 'file';
 
 export interface FormField {
   kind?: 'question';
@@ -11,8 +22,8 @@ export interface FormField {
   hint?: string;
   required?: boolean;
   options?: string[];
-  image?: string;          // image d'illustration (URL)
-  template_file?: string;  // fichier modèle à télécharger (URL)
+  image?: string; // image d'illustration (URL)
+  template_file?: string; // fichier modèle à télécharger (URL)
   template_file_name?: string;
   // échelle linéaire
   scale_min?: number;

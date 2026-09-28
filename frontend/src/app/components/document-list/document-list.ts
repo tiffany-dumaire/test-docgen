@@ -19,8 +19,16 @@ import { ProjectDocument } from '@core/models';
 @Component({
   selector: 'app-document-list',
   imports: [
-    RouterLink, FormsModule, MatTableModule, MatSortModule, MatPaginatorModule,
-    MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatTooltipModule,
+    RouterLink,
+    FormsModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
     TranslocoModule,
   ],
   templateUrl: './document-list.html',
@@ -41,21 +49,49 @@ export class DocumentList implements AfterViewInit {
 
   constructor() {
     this.reload();
-    effect(() => { const s = this.sort(); const pg = this.paginator(); if (s) this.ds.sort = s; if (pg) this.ds.paginator = pg; });
+    effect(() => {
+      const s = this.sort();
+      const pg = this.paginator();
+      if (s) this.ds.sort = s;
+      if (pg) this.ds.paginator = pg;
+    });
   }
-  ngAfterViewInit() { const s = this.sort(); const pg = this.paginator(); if (s) this.ds.sort = s; if (pg) this.ds.paginator = pg; }
+  ngAfterViewInit() {
+    const s = this.sort();
+    const pg = this.paginator();
+    if (s) this.ds.sort = s;
+    if (pg) this.ds.paginator = pg;
+  }
 
-  canManage() { return this.auth.hasRole('admin') || this.auth.hasRole('manager') || !this.auth.user(); }
-  reload() { this.service.list({ search: this.search }).subscribe((r) => (this.ds.data = r.results)); }
+  canManage() {
+    return this.auth.hasRole('admin') || this.auth.hasRole('manager') || !this.auth.user();
+  }
+  reload() {
+    this.service.list({ search: this.search }).subscribe((r) => (this.ds.data = r.results));
+  }
   preview(d: ProjectDocument) {
     this.toast.success(this.t.translate('documents.previewing'));
-    this.service.preview(d.id!).subscribe({ next: (r) => this.previewSvc.open(r, d.title), error: () => this.toast.error(this.t.translate('documents.preview_error')) });
+    this.service
+      .preview(d.id!)
+      .subscribe({
+        next: (r) => this.previewSvc.open(r, d.title),
+        error: () => this.toast.error(this.t.translate('documents.preview_error')),
+      });
   }
   duplicate(d: ProjectDocument) {
-    this.service.duplicateDocument(d.id!).subscribe({ next: () => { this.toast.success(this.t.translate('documents.duplicated')); this.reload(); }, error: () => this.toast.error(this.t.translate('documents.duplicate_error')) });
+    this.service.duplicateDocument(d.id!).subscribe({
+      next: () => {
+        this.toast.success(this.t.translate('documents.duplicated'));
+        this.reload();
+      },
+      error: () => this.toast.error(this.t.translate('documents.duplicate_error')),
+    });
   }
   remove(d: ProjectDocument) {
     if (!confirm(this.t.translate('documents.confirm_delete', { title: d.title }))) return;
-    this.service.remove(d.id!).subscribe(() => { this.toast.success(this.t.translate('documents.deleted')); this.reload(); });
+    this.service.remove(d.id!).subscribe(() => {
+      this.toast.success(this.t.translate('documents.deleted'));
+      this.reload();
+    });
   }
 }

@@ -1,6 +1,8 @@
 import { DocumentVersion, ProjectDocument, ShortLink } from '../models/document.model';
 import {
-  DocumentVersionInterface, ProjectDocumentInterface, ShortLinkInterface,
+  DocumentVersionInterface,
+  ProjectDocumentInterface,
+  ShortLinkInterface,
 } from '../interfaces/document.interface';
 import { mapArray, pruneUndefined } from './serializer.util';
 

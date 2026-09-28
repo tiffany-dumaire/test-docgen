@@ -29,7 +29,16 @@ import {
 
 @Component({
   selector: 'app-document-editor',
-  imports: [BackDirective, FormsModule, DatePipe, DataGrid, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [
+    BackDirective,
+    FormsModule,
+    DatePipe,
+    DataGrid,
+    MatTabsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+  ],
   templateUrl: './document-editor.html',
   styleUrl: './document-editor.scss',
 })
@@ -75,8 +84,12 @@ export class DocumentEditor implements OnDestroy {
 
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
-    this.service.templates({ is_active: true, page_size: 1000 }).subscribe((r) => this.templates.set(r.results));
-    this.service.choices().subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
+    this.service
+      .templates({ is_active: true, page_size: 1000 })
+      .subscribe((r) => this.templates.set(r.results));
+    this.service
+      .choices()
+      .subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
     this.companySvc.get().subscribe((c) => this.companyName.set(c.name));
 
     setTimeout(() => {
@@ -165,10 +178,20 @@ export class DocumentEditor implements OnDestroy {
   wbSheets(tpl: DocumentTemplate): ExcelSheet[] {
     return tpl.settings?.excel?.sheets ?? [];
   }
-  sheetIcon(t: string) { return t === 'table' ? '▦' : t === 'pivot' ? '⊞' : 'ℹ'; }
+  sheetIcon(t: string) {
+    return t === 'table' ? '▦' : t === 'pivot' ? '⊞' : 'ℹ';
+  }
   typeShort(t: CellType) {
-    return { text: 'texte', integer: 'entier', decimal: 'décimal',
-      currency: 'monnaie', percent: '%', date: 'date' }[t] ?? t;
+    return (
+      {
+        text: 'texte',
+        integer: 'entier',
+        decimal: 'décimal',
+        currency: 'monnaie',
+        percent: '%',
+        date: 'date',
+      }[t] ?? t
+    );
   }
   sourceName(tpl: DocumentTemplate, sh: ExcelSheet): string {
     const src = this.wbSheets(tpl).find((x) => x.id === sh.pivot?.source);
@@ -199,9 +222,7 @@ export class DocumentEditor implements OnDestroy {
   // --- Interpolation d'aperçu ---
   interpolate(text: string): string {
     const ctx = this.previewContext();
-    return text.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (m, k) =>
-      k in ctx ? String(ctx[k]) : m,
-    );
+    return text.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (m, k) => (k in ctx ? String(ctx[k]) : m));
   }
   private previewContext(): Record<string, unknown> {
     const d = this.doc();
@@ -245,23 +266,38 @@ export class DocumentEditor implements OnDestroy {
 
   preview() {
     const d = this.doc();
-    if (!d?.id) { this.toast.error('Enregistrez d\'abord le document.'); return; }
+    if (!d?.id) {
+      this.toast.error("Enregistrez d'abord le document.");
+      return;
+    }
     this.previewing.set(true);
     this.service.update(d.id, d).subscribe({
       next: () => {
         this.service.preview(d.id!).subscribe({
-          next: (r) => { this.previewing.set(false); this.previewSvc.open(r, d.title || 'Aperçu'); },
-          error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+          next: (r) => {
+            this.previewing.set(false);
+            this.previewSvc.open(r, d.title || 'Aperçu');
+          },
+          error: () => {
+            this.previewing.set(false);
+            this.toast.error('Aperçu impossible.');
+          },
         });
       },
-      error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+      error: () => {
+        this.previewing.set(false);
+        this.toast.error('Aperçu impossible.');
+      },
     });
   }
 
   /** Aperçu affiché en ligne dans l'onglet « Aperçu ». */
   refreshPreview() {
     const d = this.doc();
-    if (!d?.id) { this.toast.error('Enregistrez d\'abord le document.'); return; }
+    if (!d?.id) {
+      this.toast.error("Enregistrez d'abord le document.");
+      return;
+    }
     this.previewing.set(true);
     this.service.update(d.id, d).subscribe({
       next: () => {
@@ -274,16 +310,29 @@ export class DocumentEditor implements OnDestroy {
             if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
             this.previewUrl = url;
             this.previewKind.set(r.kind);
-            if (r.kind === 'image') { this.previewImg.set(url); this.previewFrame.set(null); }
-            else { this.previewFrame.set(this.san.bypassSecurityTrustResourceUrl(url)); this.previewImg.set(null); }
+            if (r.kind === 'image') {
+              this.previewImg.set(url);
+              this.previewFrame.set(null);
+            } else {
+              this.previewFrame.set(this.san.bypassSecurityTrustResourceUrl(url));
+              this.previewImg.set(null);
+            }
           },
-          error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+          error: () => {
+            this.previewing.set(false);
+            this.toast.error('Aperçu impossible.');
+          },
         });
       },
-      error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+      error: () => {
+        this.previewing.set(false);
+        this.toast.error('Aperçu impossible.');
+      },
     });
   }
-  ngOnDestroy() { if (this.previewUrl) URL.revokeObjectURL(this.previewUrl); }
+  ngOnDestroy() {
+    if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
+  }
 
   save() {
     const d = this.doc();
@@ -293,7 +342,7 @@ export class DocumentEditor implements OnDestroy {
       return;
     }
     if (this.jsonError()) {
-      this.toast.error('Corrigez le JSON avant d\'enregistrer.');
+      this.toast.error("Corrigez le JSON avant d'enregistrer.");
       return;
     }
     this.saving.set(true);
@@ -348,7 +397,8 @@ export class DocumentEditor implements OnDestroy {
   restore(v: DocumentVersion) {
     const d = this.doc();
     if (!d?.id || !v.id) return;
-    if (!confirm(`Restaurer la version v${v.versionNumber} ? Une nouvelle version en sera créée.`)) return;
+    if (!confirm(`Restaurer la version v${v.versionNumber} ? Une nouvelle version en sera créée.`))
+      return;
     const initials = this.gen.author_initials.trim() || '—';
     this.service.restoreVersion(d.id, v.id, initials).subscribe({
       next: () => {

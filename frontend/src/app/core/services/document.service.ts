@@ -13,7 +13,9 @@ import {
 } from '../models';
 import { ProjectDocumentInterface, DocumentVersionInterface } from '../interfaces';
 import {
-  ProjectDocumentSerializer, DocumentVersionSerializer, serializePaginated,
+  ProjectDocumentSerializer,
+  DocumentVersionSerializer,
+  serializePaginated,
 } from '../serializers';
 
 /** Résultat d'aperçu inline : contenu en base64 (aucune requête média externe). */
@@ -31,27 +33,39 @@ export class DocumentService {
 
   // Documents
   list(filters: Record<string, unknown> = {}): Observable<Paginated<ProjectDocument>> {
-    return this.http.get<Paginated<ProjectDocumentInterface>>(`${this.base}/`, {
-      params: toHttpParams(filters),
-    }).pipe(map((p) => serializePaginated(p, ProjectDocumentSerializer.fromApi)));
+    return this.http
+      .get<Paginated<ProjectDocumentInterface>>(`${this.base}/`, {
+        params: toHttpParams(filters),
+      })
+      .pipe(map((p) => serializePaginated(p, ProjectDocumentSerializer.fromApi)));
   }
   get(id: number): Observable<ProjectDocument> {
-    return this.http.get<ProjectDocumentInterface>(`${this.base}/${id}/`).pipe(map(ProjectDocumentSerializer.fromApi));
+    return this.http
+      .get<ProjectDocumentInterface>(`${this.base}/${id}/`)
+      .pipe(map(ProjectDocumentSerializer.fromApi));
   }
   create(data: Partial<ProjectDocument>): Observable<ProjectDocument> {
-    return this.http.post<ProjectDocumentInterface>(`${this.base}/`, ProjectDocumentSerializer.toApi(data)).pipe(map(ProjectDocumentSerializer.fromApi));
+    return this.http
+      .post<ProjectDocumentInterface>(`${this.base}/`, ProjectDocumentSerializer.toApi(data))
+      .pipe(map(ProjectDocumentSerializer.fromApi));
   }
   update(id: number, data: Partial<ProjectDocument>): Observable<ProjectDocument> {
-    return this.http.put<ProjectDocumentInterface>(`${this.base}/${id}/`, ProjectDocumentSerializer.toApi(data)).pipe(map(ProjectDocumentSerializer.fromApi));
+    return this.http
+      .put<ProjectDocumentInterface>(`${this.base}/${id}/`, ProjectDocumentSerializer.toApi(data))
+      .pipe(map(ProjectDocumentSerializer.fromApi));
   }
   remove(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}/`);
   }
   generate(id: number, payload: GeneratePayload): Observable<DocumentVersion> {
-    return this.http.post<DocumentVersionInterface>(`${this.base}/${id}/generate/`, payload).pipe(map(DocumentVersionSerializer.fromApi));
+    return this.http
+      .post<DocumentVersionInterface>(`${this.base}/${id}/generate/`, payload)
+      .pipe(map(DocumentVersionSerializer.fromApi));
   }
   duplicateDocument(id: number): Observable<ProjectDocument> {
-    return this.http.post<ProjectDocumentInterface>(`${this.base}/${id}/duplicate/`, {}).pipe(map(ProjectDocumentSerializer.fromApi));
+    return this.http
+      .post<ProjectDocumentInterface>(`${this.base}/${id}/duplicate/`, {})
+      .pipe(map(ProjectDocumentSerializer.fromApi));
   }
   preview(id: number): Observable<PreviewResult> {
     return this.http.get<PreviewResult>(`${this.base}/${id}/preview/`);
@@ -61,12 +75,21 @@ export class DocumentService {
   }
   exportA3(id: number, fmt: 'pdf' | 'png' | 'svg', lang?: string): Observable<Blob> {
     const l = lang ? `&lang=${encodeURIComponent(lang)}` : '';
-    return this.http.get(`${this.base}/templates/${id}/export_a3/?fmt=${fmt}&download=1${l}`,
-      { responseType: 'blob' });
+    return this.http.get(`${this.base}/templates/${id}/export_a3/?fmt=${fmt}&download=1${l}`, {
+      responseType: 'blob',
+    });
   }
-  restoreVersion(id: number, versionId: number, authorInitials: string): Observable<DocumentVersion> {
-    return this.http.post<DocumentVersionInterface>(`${this.base}/${id}/restore/`,
-      { version: versionId, author_initials: authorInitials }).pipe(map(DocumentVersionSerializer.fromApi));
+  restoreVersion(
+    id: number,
+    versionId: number,
+    authorInitials: string,
+  ): Observable<DocumentVersion> {
+    return this.http
+      .post<DocumentVersionInterface>(`${this.base}/${id}/restore/`, {
+        version: versionId,
+        author_initials: authorInitials,
+      })
+      .pipe(map(DocumentVersionSerializer.fromApi));
   }
   duplicateTemplate(id: number): Observable<DocumentTemplate> {
     return this.http.post<DocumentTemplate>(`${this.base}/templates/${id}/duplicate/`, {});

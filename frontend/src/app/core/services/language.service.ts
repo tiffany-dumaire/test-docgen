@@ -3,7 +3,11 @@ import { TranslocoService } from '@jsverse/transloco';
 
 export type Lang = 'fr' | 'en' | 'de' | 'it';
 
-export interface LangDef { code: Lang; label: string; flag: string; }
+export interface LangDef {
+  code: Lang;
+  label: string;
+  flag: string;
+}
 
 export const LANGS: LangDef[] = [
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
@@ -24,7 +28,11 @@ export class LanguageService {
   /** À appeler tôt (avant/à l'amorçage) : applique la langue stockée localement. */
   init() {
     let stored: string | null = null;
-    try { stored = localStorage.getItem(LANG_KEY); } catch { /* noop */ }
+    try {
+      stored = localStorage.getItem(LANG_KEY);
+    } catch {
+      /* noop */
+    }
     const lang = this.normalize(stored) || this.normalize(this.transloco.getActiveLang()) || 'fr';
     this.set(lang, false);
   }
@@ -37,8 +45,16 @@ export class LanguageService {
   set(lang: Lang, persist = true) {
     this.active.set(lang);
     this.transloco.setActiveLang(lang);
-    if (persist) { try { localStorage.setItem(LANG_KEY, lang); } catch { /* noop */ } }
+    if (persist) {
+      try {
+        localStorage.setItem(LANG_KEY, lang);
+      } catch {
+        /* noop */
+      }
+    }
   }
 
-  current(): Lang { return this.active(); }
+  current(): Lang {
+    return this.active();
+  }
 }

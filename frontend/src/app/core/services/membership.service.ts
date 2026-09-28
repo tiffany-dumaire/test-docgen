@@ -17,15 +17,18 @@ export class MembershipService {
   private base = `${inject(ApiConfig).base}/auth`;
 
   list(projectId: number): Observable<Paginated<Membership>> {
-    return this.http.get<Paginated<MembershipInterface>>(`${this.base}/memberships/?project=${projectId}`)
+    return this.http
+      .get<Paginated<MembershipInterface>>(`${this.base}/memberships/?project=${projectId}`)
       .pipe(map((p) => serializePaginated(p, MembershipSerializer.fromApi)));
   }
   create(m: Partial<Membership>): Observable<Membership> {
-    return this.http.post<MembershipInterface>(`${this.base}/memberships/`, MembershipSerializer.toApi(m))
+    return this.http
+      .post<MembershipInterface>(`${this.base}/memberships/`, MembershipSerializer.toApi(m))
       .pipe(map(MembershipSerializer.fromApi));
   }
   update(id: number, m: Partial<Membership>): Observable<Membership> {
-    return this.http.put<MembershipInterface>(`${this.base}/memberships/${id}/`, MembershipSerializer.toApi(m))
+    return this.http
+      .put<MembershipInterface>(`${this.base}/memberships/${id}/`, MembershipSerializer.toApi(m))
       .pipe(map(MembershipSerializer.fromApi));
   }
   remove(id: number): Observable<void> {

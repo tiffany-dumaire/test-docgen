@@ -3,7 +3,11 @@ import { DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
-interface Cell { date: Date | null; items: any[]; today: boolean; }
+interface Cell {
+  date: Date | null;
+  items: any[];
+  today: boolean;
+}
 
 @Component({
   selector: 'app-meeting-calendar',
@@ -13,7 +17,10 @@ interface Cell { date: Date | null; items: any[]; today: boolean; }
 })
 export class MeetingCalendar {
   private _meetings: any[] = [];
-  @Input() set meetings(v: any[]) { this._meetings = v || []; this.bump.set(this.bump() + 1); }
+  @Input() set meetings(v: any[]) {
+    this._meetings = v || [];
+    this.bump.set(this.bump() + 1);
+  }
 
   cursor = signal(new Date());
   bump = signal(0);
@@ -27,7 +34,8 @@ export class MeetingCalendar {
   cells = computed<Cell[]>(() => {
     this.bump();
     const cur = this.cursor();
-    const y = cur.getFullYear(), mo = cur.getMonth();
+    const y = cur.getFullYear(),
+      mo = cur.getMonth();
     const first = new Date(y, mo, 1);
     const startDow = (first.getDay() + 6) % 7; // lundi = 0
     const daysInMonth = new Date(y, mo + 1, 0).getDate();
@@ -52,7 +60,17 @@ export class MeetingCalendar {
     return cells;
   });
 
-  prev() { const c = new Date(this.cursor()); c.setMonth(c.getMonth() - 1); this.cursor.set(c); }
-  next() { const c = new Date(this.cursor()); c.setMonth(c.getMonth() + 1); this.cursor.set(c); }
-  goToday() { this.cursor.set(new Date()); }
+  prev() {
+    const c = new Date(this.cursor());
+    c.setMonth(c.getMonth() - 1);
+    this.cursor.set(c);
+  }
+  next() {
+    const c = new Date(this.cursor());
+    c.setMonth(c.getMonth() + 1);
+    this.cursor.set(c);
+  }
+  goToday() {
+    this.cursor.set(new Date());
+  }
 }

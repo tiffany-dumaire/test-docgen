@@ -15,11 +15,30 @@ import { FormSchemaEditor } from '@shared/fields/form-schema-editor/form-schema-
 import { FormAppearanceEditor } from '@shared/fields/form-appearance-editor/form-appearance-editor';
 import { FormPreview } from '@shared/fields/form-preview/form-preview';
 import { CompanyService } from '@core/services/company.service';
-import { Choice, Confidentiality, FormField, FormSection, FormSubmission, OnlineForm, Project } from '@core/models';
+import {
+  Choice,
+  Confidentiality,
+  FormField,
+  FormSection,
+  FormSubmission,
+  OnlineForm,
+  Project,
+} from '@core/models';
 
 @Component({
   selector: 'app-form-builder',
-  imports: [BackDirective, FormsModule, DatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatCheckboxModule, FormSchemaEditor, FormAppearanceEditor, FormPreview],
+  imports: [
+    BackDirective,
+    FormsModule,
+    DatePipe,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    FormSchemaEditor,
+    FormAppearanceEditor,
+    FormPreview,
+  ],
   templateUrl: './form-builder.html',
   styleUrl: './form-builder.scss',
 })
@@ -45,28 +64,51 @@ export class FormBuilder {
   companyName = signal<string | null>(null);
   private diagramUrls = signal<Record<string, string>>({});
 
-  imgUrl(id: string): string | null { return this.diagramUrls()[id] ?? null; }
-  touch() { const m = this.model(); if (m) this.model.set({ ...m }); }
+  imgUrl(id: string): string | null {
+    return this.diagramUrls()[id] ?? null;
+  }
+  touch() {
+    const m = this.model();
+    if (m) this.model.set({ ...m });
+  }
 
   constructor() {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
-    this.docSvc.choices().subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
-    this.companySvc.get().subscribe((c) => { this.logoUrl.set(c.logoUrl || null); this.companyName.set(c.name || null); });
+    this.docSvc
+      .choices()
+      .subscribe((c) => this.confidentialityLevels.set(c.confidentiality_levels));
+    this.companySvc.get().subscribe((c) => {
+      this.logoUrl.set(c.logoUrl || null);
+      this.companyName.set(c.name || null);
+    });
     setTimeout(() => {
       if (this.id) {
-        this.service.get(+this.id).subscribe((f) => { this.model.set(this.normalize(f)); this.loadDiagrams(); });
+        this.service.get(+this.id).subscribe((f) => {
+          this.model.set(this.normalize(f));
+          this.loadDiagrams();
+        });
         this.service.submissions(+this.id).subscribe((s) => this.submissions.set(s));
       } else {
-        this.model.set(this.normalize({
-          title: '', description: '', project: null, schema: [], diagrams: [],
-          confidentiality: Confidentiality.Internal, isOpen: true, showProgress: true,
-          successMessage: 'Merci, votre réponse a bien été enregistrée.',
-        } as OnlineForm));
+        this.model.set(
+          this.normalize({
+            title: '',
+            description: '',
+            project: null,
+            schema: [],
+            diagrams: [],
+            confidentiality: Confidentiality.Internal,
+            isOpen: true,
+            showProgress: true,
+            successMessage: 'Merci, votre réponse a bien été enregistrée.',
+          } as OnlineForm),
+        );
       }
     });
   }
 
-  isEdit() { return !!this.id; }
+  isEdit() {
+    return !!this.id;
+  }
 
   private normalize(f: OnlineForm): OnlineForm {
     f.schema = FormSchemaEditor.toSections((f.schema || []) as any[]);
@@ -74,13 +116,18 @@ export class FormBuilder {
     if (f.showProgress === undefined) f.showProgress = true;
     return f;
   }
-  sections(m: OnlineForm): FormSection[] { return m.schema as FormSection[]; }
-  theme(m: OnlineForm) { return m.theme || (m.theme = {}); }
+  sections(m: OnlineForm): FormSection[] {
+    return m.schema as FormSection[];
+  }
+  theme(m: OnlineForm) {
+    return m.theme || (m.theme = {});
+  }
 
   entries(s: FormSubmission): [string, string][] {
     return Object.entries(s.data).map(([k, v]) => {
       if (Array.isArray(v)) return [k, v.join(', ')] as [string, string];
-      if (v && typeof v === 'object') return [k, (v as any).name || JSON.stringify(v)] as [string, string];
+      if (v && typeof v === 'object')
+        return [k, (v as any).name || JSON.stringify(v)] as [string, string];
       return [k, String(v)] as [string, string];
     });
   }
@@ -94,7 +141,8 @@ export class FormBuilder {
       this.diagramUrls.set({});
       for (const item of res.diagrams) {
         const cfg = item.config;
-        const hasData = (item.series?.values?.length ?? 0) > 0 && item.series.values.some((v) => v !== 0);
+        const hasData =
+          (item.series?.values?.length ?? 0) > 0 && item.series.values.some((v) => v !== 0);
         if (!hasData) continue;
         this.service.diagramBlob(+this.id!, cfg.id, 'png').subscribe((blob) => {
           const url = URL.createObjectURL(blob);
@@ -110,7 +158,9 @@ export class FormBuilder {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       const safe = (title || 'diagramme').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      a.href = url; a.download = `${safe}.${format}`; a.click();
+      a.href = url;
+      a.download = `${safe}.${format}`;
+      a.click();
       URL.revokeObjectURL(url);
     });
   }
@@ -119,16 +169,29 @@ export class FormBuilder {
     if (!this.id) return;
     this.reporting.set(true);
     this.service.generateReport(+this.id).subscribe({
-      next: (r) => { this.reporting.set(false); this.toast.success('Rapport généré.'); this.router.navigate(['/documents', r.document.id]); },
-      error: (e) => { this.reporting.set(false); this.toast.error(e?.error?.detail || 'Génération impossible.'); },
+      next: (r) => {
+        this.reporting.set(false);
+        this.toast.success('Rapport généré.');
+        this.router.navigate(['/documents', r.document.id]);
+      },
+      error: (e) => {
+        this.reporting.set(false);
+        this.toast.error(e?.error?.detail || 'Génération impossible.');
+      },
     });
   }
-  copy(url: string) { navigator.clipboard?.writeText(url); this.toast.success('Lien copié.'); }
+  copy(url: string) {
+    navigator.clipboard?.writeText(url);
+    this.toast.success('Lien copié.');
+  }
 
   save() {
     const m = this.model();
     if (!m) return;
-    if (!m.title) { this.toast.error('Le titre est obligatoire.'); return; }
+    if (!m.title) {
+      this.toast.error('Le titre est obligatoire.');
+      return;
+    }
     for (const q of FormSchemaEditor.questions(this.sections(m))) this.syncKey(q);
     this.saving.set(true);
     const req = this.isEdit() ? this.service.update(+this.id!, m) : this.service.create(m);
@@ -139,12 +202,20 @@ export class FormBuilder {
         if (!this.isEdit()) this.router.navigate(['/forms', saved.id]);
         else this.model.set(this.normalize(saved));
       },
-      error: () => { this.saving.set(false); this.toast.error("Erreur lors de l'enregistrement."); },
+      error: () => {
+        this.saving.set(false);
+        this.toast.error("Erreur lors de l'enregistrement.");
+      },
     });
   }
 
   private syncKey(f: FormField) {
-    f.key = (f.label || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'champ';
+    f.key =
+      (f.label || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'champ';
   }
 }

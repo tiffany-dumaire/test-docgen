@@ -18,14 +18,30 @@ import { ToastService } from '@core/services/api.service';
 import { Client, ClientSerializer, JournalEntry, JournalEntrySerializer } from '@core/models';
 
 interface Bundle {
-  client: Client; projects: any[]; contacts: any[]; meetings: any[]; journal?: JournalEntry[];
+  client: Client;
+  projects: any[];
+  contacts: any[];
+  meetings: any[];
+  journal?: JournalEntry[];
 }
 
 @Component({
   selector: 'app-client-detail',
   imports: [
-    RouterLink, FormsModule, DatePipe, MatTabsModule, MatTableModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, MatTooltipModule, MeetingCalendar, RichTextEditor, BackDirective,
+    RouterLink,
+    FormsModule,
+    DatePipe,
+    MatTabsModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+    MeetingCalendar,
+    RichTextEditor,
+    BackDirective,
   ],
   templateUrl: './client-detail.html',
   styleUrl: './client-detail.scss',
@@ -41,21 +57,39 @@ export class ClientDetail {
   editing = signal<Client | null>(null);
   contactCols = ['name', 'kind', 'role', 'email', 'project'];
   meetingCols = ['date', 'title', 'project', 'location'];
-  fProject = 0; fFrom = ''; fTo = '';
-  njCat = 'note'; njConf = 'internal'; njHtml = '';
+  fProject = 0;
+  fFrom = '';
+  fTo = '';
+  njCat = 'note';
+  njConf = 'internal';
+  njHtml = '';
   showAuto = true;
 
   private static EVENT_ICONS: Record<string, string> = {
-    document_created: '📄', version_created: '🔄', form_added: '📝',
-    form_response: '📥', meeting_added: '📅', meeting_cancelled: '🚫',
-    contact_added: '➕', contact_removed: '➖', project_added: '📁',
-    team_updated: '🛠️', contact_changed: '✏️',
+    document_created: '📄',
+    version_created: '🔄',
+    form_added: '📝',
+    form_response: '📥',
+    meeting_added: '📅',
+    meeting_cancelled: '🚫',
+    contact_added: '➕',
+    contact_removed: '➖',
+    project_added: '📁',
+    team_updated: '🛠️',
+    contact_changed: '✏️',
   };
 
   constructor() {
     setTimeout(() => {
       if (this.creating()) {
-        this.editing.set({ name: '', contactName: '', email: '', phone: '', address: '', notes: '' } as Client);
+        this.editing.set({
+          name: '',
+          contactName: '',
+          email: '',
+          phone: '',
+          address: '',
+          notes: '',
+        } as Client);
       } else {
         this.reload();
       }
@@ -75,8 +109,12 @@ export class ClientDetail {
   }
 
   initials(name: string) {
-    return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2)
-      .map((w) => w[0].toUpperCase()).join('');
+    return (name || '?')
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0].toUpperCase())
+      .join('');
   }
   private logoFile: File | null = null;
   onLogo(ev: Event) {
@@ -85,10 +123,16 @@ export class ClientDetail {
     const m = this.editing();
     if (f && m) m.logoUrl = URL.createObjectURL(f);
   }
-  startEdit(c: any) { this.logoFile = null; this.editing.set({ ...c }); }
+  startEdit(c: any) {
+    this.logoFile = null;
+    this.editing.set({ ...c });
+  }
   saveEdit() {
     const m = this.editing();
-    if (!m || !m.name?.trim()) { this.toast.error('Le nom est requis.'); return; }
+    if (!m || !m.name?.trim()) {
+      this.toast.error('Le nom est requis.');
+      return;
+    }
     if (this.creating()) {
       this.service.create(m).subscribe({
         next: (c) => this.afterSave(c.id!, 'Client créé.', true),
@@ -103,42 +147,87 @@ export class ClientDetail {
   }
   private afterSave(id: number, msg: string, navigate: boolean) {
     const finish = () => {
-      this.toast.success(msg); this.logoFile = null;
+      this.toast.success(msg);
+      this.logoFile = null;
       if (navigate) this.router.navigate(['/clients', id]);
-      else { this.editing.set(null); this.reload(); }
+      else {
+        this.editing.set(null);
+        this.reload();
+      }
     };
-    if (this.logoFile) this.service.uploadLogo(id, this.logoFile).subscribe({ next: finish, error: finish });
+    if (this.logoFile)
+      this.service.uploadLogo(id, this.logoFile).subscribe({ next: finish, error: finish });
     else finish();
   }
 
   eventIcon(j: JournalEntry): string {
     if (j.isAutomatic && j.event) return ClientDetail.EVENT_ICONS[j.event] || 'ℹ️';
-    return ({ note: '🗒️', decision: '✅', risk: '⚠️', action: '⚡',
-              incident: '🔥', info: 'ℹ️', event: '•' } as Record<string, string>)[j.category] || '🗒️';
+    return (
+      (
+        {
+          note: '🗒️',
+          decision: '✅',
+          risk: '⚠️',
+          action: '⚡',
+          incident: '🔥',
+          info: 'ℹ️',
+          event: '•',
+        } as Record<string, string>
+      )[j.category] || '🗒️'
+    );
   }
   catColor(j: JournalEntry): string {
     const byEvent: Record<string, string> = {
-      document_created: '#2E5E8E', version_created: '#2E6B55', form_added: '#6B3F6E',
-      form_response: '#2D6E7E', meeting_added: '#806A2E', meeting_cancelled: '#A32638',
-      contact_added: '#2F6B45', contact_removed: '#A32638', project_added: '#5B4F8A',
-      team_updated: '#A34E2A', contact_changed: '#806A2E',
+      document_created: '#2E5E8E',
+      version_created: '#2E6B55',
+      form_added: '#6B3F6E',
+      form_response: '#2D6E7E',
+      meeting_added: '#806A2E',
+      meeting_cancelled: '#A32638',
+      contact_added: '#2F6B45',
+      contact_removed: '#A32638',
+      project_added: '#5B4F8A',
+      team_updated: '#A34E2A',
+      contact_changed: '#806A2E',
     };
     if (j.isAutomatic && j.event && byEvent[j.event]) return byEvent[j.event];
-    return ({ note: '#5B5A55', decision: '#2F6B45', risk: '#B04A12', action: '#2E5E8E',
-              incident: '#A1202A', info: '#2D6E7E', event: '#5B4F8A' } as Record<string, string>)[j.category] || '#5B5A55';
+    return (
+      (
+        {
+          note: '#5B5A55',
+          decision: '#2F6B45',
+          risk: '#B04A12',
+          action: '#2E5E8E',
+          incident: '#A1202A',
+          info: '#2D6E7E',
+          event: '#5B4F8A',
+        } as Record<string, string>
+      )[j.category] || '#5B5A55'
+    );
   }
-  hasContent(html: string) { return !!html && html.replace(/<[^>]*>/g, '').trim().length > 0; }
+  hasContent(html: string) {
+    return !!html && html.replace(/<[^>]*>/g, '').trim().length > 0;
+  }
   visibleJournal() {
     return this.showAuto ? this.journal() : this.journal().filter((j) => !j.isAutomatic);
   }
   addJournal() {
     if (!this.hasContent(this.njHtml)) return;
-    this.service.addJournal(+this.id!, { category: this.njCat, confidentiality: this.njConf, bodyHtml: this.njHtml })
-      .subscribe(() => { this.njHtml = ''; this.reload(); });
+    this.service
+      .addJournal(+this.id!, {
+        category: this.njCat,
+        confidentiality: this.njConf,
+        bodyHtml: this.njHtml,
+      })
+      .subscribe(() => {
+        this.njHtml = '';
+        this.reload();
+      });
   }
 
   filteredMeetings() {
-    const b = this.data(); if (!b) return [];
+    const b = this.data();
+    if (!b) return [];
     return b.meetings.filter((m: any) => {
       if (this.fProject && m.project !== this.fProject) return false;
       if (this.fFrom && m.date && m.date.slice(0, 10) < this.fFrom) return false;
@@ -146,8 +235,16 @@ export class ClientDetail {
       return true;
     });
   }
-  resetFilters() { this.fProject = 0; this.fFrom = ''; this.fTo = ''; }
+  resetFilters() {
+    this.fProject = 0;
+    this.fFrom = '';
+    this.fTo = '';
+  }
   statusLabel(s: string) {
-    return ({ active: 'Actif', on_hold: 'En pause', archived: 'Archivé' } as Record<string, string>)[s] ?? s;
+    return (
+      ({ active: 'Actif', on_hold: 'En pause', archived: 'Archivé' } as Record<string, string>)[
+        s
+      ] ?? s
+    );
   }
 }

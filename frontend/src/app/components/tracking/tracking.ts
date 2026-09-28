@@ -31,20 +31,21 @@ export class Tracking {
     this.formSvc.list().subscribe((r) => this.forms.set(r.results));
   }
 
-  totalSubmissions = computed(() =>
-    this.forms().reduce((s, f) => s + (f.submissionCount || 0), 0));
+  totalSubmissions = computed(() => this.forms().reduce((s, f) => s + (f.submissionCount || 0), 0));
 
   filteredDocs() {
     const q = this.docSearch.toLowerCase().trim();
     if (!q) return this.documents();
     return this.documents().filter((d) =>
-      (d.title + ' ' + (d.projectName || '')).toLowerCase().includes(q));
+      (d.title + ' ' + (d.projectName || '')).toLowerCase().includes(q),
+    );
   }
   filteredForms() {
     const q = this.formSearch.toLowerCase().trim();
     if (!q) return this.forms();
     return this.forms().filter((f) =>
-      (f.title + ' ' + (f.templateName || '')).toLowerCase().includes(q));
+      (f.title + ' ' + (f.templateName || '')).toLowerCase().includes(q),
+    );
   }
   projectName(f: OnlineForm): string {
     return f.projectName || '—';

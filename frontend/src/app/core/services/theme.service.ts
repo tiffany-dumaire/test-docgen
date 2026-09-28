@@ -4,7 +4,11 @@ export type Proposition = 'vnv' | 'spring' | 'summer' | 'autumn' | 'winter';
 export type ThemeMode = 'light' | 'dark' | 'auto';
 
 export interface PropositionDef {
-  id: Proposition; name: string; sub: string; primary: string; font: string;
+  id: Proposition;
+  name: string;
+  sub: string;
+  primary: string;
+  font: string;
 }
 
 /**
@@ -26,8 +30,8 @@ export const DEFAULT_PROPOSITION: Proposition = 'vnv';
 
 /** Valeurs par défaut issues de la charte VNV (Corporate Identity). */
 export const VNV_BRAND = {
-  primary: '#ec6608',   // Orange VNV
-  text: '#1d1e1b',      // Charcoal Black
+  primary: '#ec6608', // Orange VNV
+  text: '#1d1e1b', // Charcoal Black
   fontTitle: '"Montserrat", "Segoe UI", system-ui, sans-serif',
   fontBody: '"Montserrat", "Segoe UI", system-ui, sans-serif',
 };
@@ -55,11 +59,14 @@ export class ThemeService {
 
   /** À appeler au démarrage de l'application. */
   init() {
-    let p: string = DEFAULT_PROPOSITION, m = 'auto';
+    let p: string = DEFAULT_PROPOSITION,
+      m = 'auto';
     try {
       p = localStorage.getItem(P_KEY) || DEFAULT_PROPOSITION;
       m = localStorage.getItem(M_KEY) || 'auto';
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
     if (!PROPOSITION_IDS.includes(p as Proposition)) p = DEFAULT_PROPOSITION;
     if (!['light', 'dark', 'auto'].includes(m)) m = 'auto';
     this.proposition.set(p as Proposition);
@@ -73,58 +80,96 @@ export class ThemeService {
 
   setProposition(p: Proposition) {
     this.proposition.set(p);
-    try { localStorage.setItem(P_KEY, p); } catch { /* noop */ }
+    try {
+      localStorage.setItem(P_KEY, p);
+    } catch {
+      /* noop */
+    }
     this.apply();
   }
   setMode(m: ThemeMode) {
     this.mode.set(m);
-    try { localStorage.setItem(M_KEY, m); } catch { /* noop */ }
+    try {
+      localStorage.setItem(M_KEY, m);
+    } catch {
+      /* noop */
+    }
     this.apply();
   }
-  toggleDark() { this.setMode(this.resolvedDark() ? 'light' : 'dark'); }
+  toggleDark() {
+    this.setMode(this.resolvedDark() ? 'light' : 'dark');
+  }
 
   resolvedDark(): boolean {
     const m = this.mode();
     if (m === 'dark') return true;
     if (m === 'light') return false;
-    return !!(typeof window !== 'undefined' && window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches);
+    return !!(
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
   }
 
   private apply() {
     const root = document.documentElement;
     const p = this.proposition();
     // « vnv » = jeu de jetons de base (:root sans data-p) ; les saisons ont un bloc dédié.
-    if (p === 'vnv') root.removeAttribute('data-p'); else root.setAttribute('data-p', p);
+    if (p === 'vnv') root.removeAttribute('data-p');
+    else root.setAttribute('data-p', p);
     const m = this.mode();
-    if (m === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', m);
+    if (m === 'auto') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', m);
     root.classList.toggle('dark', this.resolvedDark());
   }
 
   // --- Personnalisation fine (couleur + typographie), point 4 ---------------
   private hexToRgb(h: string) {
-    h = h.replace('#', ''); if (h.length === 3) h = h.split('').map((c) => c + c).join('');
-    return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16) };
+    h = h.replace('#', '');
+    if (h.length === 3)
+      h = h
+        .split('')
+        .map((c) => c + c)
+        .join('');
+    return {
+      r: parseInt(h.slice(0, 2), 16),
+      g: parseInt(h.slice(2, 4), 16),
+      b: parseInt(h.slice(4, 6), 16),
+    };
   }
   private shade(hex: string, amt: number) {
     const { r, g, b } = this.hexToRgb(hex);
-    const f = (v: number) => Math.max(0, Math.min(255, Math.round(v + (amt < 0 ? v * amt : (255 - v) * amt))));
+    const f = (v: number) =>
+      Math.max(0, Math.min(255, Math.round(v + (amt < 0 ? v * amt : (255 - v) * amt))));
     return `#${[f(r), f(g), f(b)].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
   }
   private mix(hex: string, other: string, ratio: number) {
-    const a = this.hexToRgb(hex), b = this.hexToRgb(other);
+    const a = this.hexToRgb(hex),
+      b = this.hexToRgb(other);
     const m = (x: number, y: number) => Math.round(x * (1 - ratio) + y * ratio);
     return `#${[m(a.r, b.r), m(a.g, b.g), m(a.b, b.b)].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
   }
   private rgba(hex: string, alpha: number) {
-    const { r, g, b } = this.hexToRgb(hex); return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    const { r, g, b } = this.hexToRgb(hex);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   /** Applique une couleur primaire personnalisée (vide = revient au thème de base). */
   applyAccent(accent: string) {
     const root = document.documentElement;
-    const keys = ['--primary', '--primary-dark', '--primary-light', '--primary-050', '--ring', '--brand'];
-    if (!accent) { keys.forEach((k) => root.style.removeProperty(k)); root.removeAttribute('data-brand'); return; }
+    const keys = [
+      '--primary',
+      '--primary-dark',
+      '--primary-light',
+      '--primary-050',
+      '--ring',
+      '--brand',
+    ];
+    if (!accent) {
+      keys.forEach((k) => root.style.removeProperty(k));
+      root.removeAttribute('data-brand');
+      return;
+    }
     root.setAttribute('data-brand', '');
     root.style.setProperty('--brand', accent);
     root.style.setProperty('--primary', accent);
@@ -137,7 +182,15 @@ export class ThemeService {
   /** Applique les polices de titre / corps (vide = valeurs du thème de base). */
   applyFonts(fontTitle: string, fontBody: string) {
     const root = document.documentElement;
-    if (fontTitle) { root.style.setProperty('--pd-display', fontTitle) } else { root.style.removeProperty('--pd-display');}
-    if (fontBody) { root.style.setProperty('--pd-body', fontBody) } else {root.style.removeProperty('--pd-body');}
+    if (fontTitle) {
+      root.style.setProperty('--pd-display', fontTitle);
+    } else {
+      root.style.removeProperty('--pd-display');
+    }
+    if (fontBody) {
+      root.style.setProperty('--pd-body', fontBody);
+    } else {
+      root.style.removeProperty('--pd-body');
+    }
   }
 }

@@ -1,40 +1,76 @@
 /* ---------- HIVER · aurore boréale
    Vert aurore + violet/magenta, sur un ciel de nuit polaire (indigo profond). ---------- */
 @mixin winter-light {
-  --mat-sys-primary:#12A67B; --mat-sys-on-primary:#FFFFFF;
-  --mat-sys-primary-container:#A6F2D5; --mat-sys-on-primary-container:#00210F;
-  --mat-sys-secondary:#3B7C8C; --mat-sys-on-secondary:#FFFFFF;
-  --mat-sys-secondary-container:#C4E9F0; --mat-sys-on-secondary-container:#071E24;
-  --mat-sys-tertiary:#7A3FB0; --mat-sys-on-tertiary:#FFFFFF;
-  --mat-sys-tertiary-container:#EEDBFF; --mat-sys-on-tertiary-container:#2A0A47;
-  --mat-sys-surface:#F3FBF8; --mat-sys-on-surface:#121B18; --mat-sys-on-surface-variant:#3D4A46;
-  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#E9F6F1;
-  --mat-sys-surface-container:#DFF0EA; --mat-sys-surface-container-high:#D4E9E2;
-  --mat-sys-surface-container-highest:#CAE2DA;
-  --mat-sys-outline:#6C7A75; --mat-sys-outline-variant:#B8C8C2;
-  --mat-sys-inverse-surface:#23342F; --mat-sys-inverse-on-surface:#EBF6F1; --mat-sys-inverse-primary:#55D6AC;
-  --mat-sys-error:#B3261E; --mat-sys-on-error:#FFFFFF;
-  --mat-sys-error-container:#F9DEDC; --mat-sys-on-error-container:#410E0B;
+  --mat-sys-primary: #12a67b;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #a6f2d5;
+  --mat-sys-on-primary-container: #00210f;
+  --mat-sys-secondary: #3b7c8c;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #c4e9f0;
+  --mat-sys-on-secondary-container: #071e24;
+  --mat-sys-tertiary: #7a3fb0;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #eedbff;
+  --mat-sys-on-tertiary-container: #2a0a47;
+  --mat-sys-surface: #f3fbf8;
+  --mat-sys-on-surface: #121b18;
+  --mat-sys-on-surface-variant: #3d4a46;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #e9f6f1;
+  --mat-sys-surface-container: #dff0ea;
+  --mat-sys-surface-container-high: #d4e9e2;
+  --mat-sys-surface-container-highest: #cae2da;
+  --mat-sys-outline: #6c7a75;
+  --mat-sys-outline-variant: #b8c8c2;
+  --mat-sys-inverse-surface: #23342f;
+  --mat-sys-inverse-on-surface: #ebf6f1;
+  --mat-sys-inverse-primary: #55d6ac;
+  --mat-sys-error: #b3261e;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #f9dedc;
+  --mat-sys-on-error-container: #410e0b;
 }
 @mixin winter-dark {
-  --mat-sys-primary:#55E0A8; --mat-sys-on-primary:#00382A;
-  --mat-sys-primary-container:#005138; --mat-sys-on-primary-container:#A6F2D5;
-  --mat-sys-secondary:#85D3E6; --mat-sys-on-secondary:#04333F;
-  --mat-sys-secondary-container:#234C57; --mat-sys-on-secondary-container:#C4E9F0;
-  --mat-sys-tertiary:#D9A6FF; --mat-sys-on-tertiary:#3F1069;
-  --mat-sys-tertiary-container:#5A2A86; --mat-sys-on-tertiary-container:#EEDBFF;
-  --mat-sys-surface:#0B1020; --mat-sys-on-surface:#E2E6F0; --mat-sys-on-surface-variant:#C3C7D5;
-  --mat-sys-surface-container-lowest:#070A16; --mat-sys-surface-container-low:#141A2B;
-  --mat-sys-surface-container:#181E30; --mat-sys-surface-container-high:#232A3D;
-  --mat-sys-surface-container-highest:#2E3548;
-  --mat-sys-outline:#8A8FA0; --mat-sys-outline-variant:#444A5C;
-  --mat-sys-inverse-surface:#E2E6F0; --mat-sys-inverse-on-surface:#23273A; --mat-sys-inverse-primary:#12A67B;
-  --mat-sys-error:#F2B8B5; --mat-sys-on-error:#601410;
-  --mat-sys-error-container:#8C1D18; --mat-sys-on-error-container:#F9DEDC;
+  --mat-sys-primary: #55e0a8;
+  --mat-sys-on-primary: #00382a;
+  --mat-sys-primary-container: #005138;
+  --mat-sys-on-primary-container: #a6f2d5;
+  --mat-sys-secondary: #85d3e6;
+  --mat-sys-on-secondary: #04333f;
+  --mat-sys-secondary-container: #234c57;
+  --mat-sys-on-secondary-container: #c4e9f0;
+  --mat-sys-tertiary: #d9a6ff;
+  --mat-sys-on-tertiary: #3f1069;
+  --mat-sys-tertiary-container: #5a2a86;
+  --mat-sys-on-tertiary-container: #eedbff;
+  --mat-sys-surface: #0b1020;
+  --mat-sys-on-surface: #e2e6f0;
+  --mat-sys-on-surface-variant: #c3c7d5;
+  --mat-sys-surface-container-lowest: #070a16;
+  --mat-sys-surface-container-low: #141a2b;
+  --mat-sys-surface-container: #181e30;
+  --mat-sys-surface-container-high: #232a3d;
+  --mat-sys-surface-container-highest: #2e3548;
+  --mat-sys-outline: #8a8fa0;
+  --mat-sys-outline-variant: #444a5c;
+  --mat-sys-inverse-surface: #e2e6f0;
+  --mat-sys-inverse-on-surface: #23273a;
+  --mat-sys-inverse-primary: #12a67b;
+  --mat-sys-error: #f2b8b5;
+  --mat-sys-on-error: #601410;
+  --mat-sys-error-container: #8c1d18;
+  --mat-sys-on-error-container: #f9dedc;
   color-scheme: dark;
 }
-:root[data-p="winter"]{ @include winter-light; }
-@media (prefers-color-scheme: dark){
-  :root[data-p="winter"]:not([data-theme="light"]){ @include winter-dark; }
+:root[data-p='winter'] {
+  @include winter-light;
 }
-:root[data-p="winter"][data-theme="dark"]{ @include winter-dark; }
+@media (prefers-color-scheme: dark) {
+  :root[data-p='winter']:not([data-theme='light']) {
+    @include winter-dark;
+  }
+}
+:root[data-p='winter'][data-theme='dark'] {
+  @include winter-dark;
+}

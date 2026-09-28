@@ -1,4 +1,10 @@
-import { ApplicationConfig, provideZoneChangeDetection, provideAppInitializer, inject, isDevMode } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideZoneChangeDetection,
+  provideAppInitializer,
+  inject,
+  isDevMode,
+} from '@angular/core';
 import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -12,8 +18,11 @@ import { TranslocoHttpLoader } from '@core/services/transloco-loader';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withComponentInputBinding(),
-      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' })),
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
+    ),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
     provideTransloco({

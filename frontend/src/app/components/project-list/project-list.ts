@@ -19,8 +19,17 @@ import { Project } from '@core/models';
 @Component({
   selector: 'app-project-list',
   imports: [
-    RouterLink, FormsModule, MatTableModule, MatSortModule, MatPaginatorModule,
-    MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatChipsModule, MatTooltipModule,
+    RouterLink,
+    FormsModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatTooltipModule,
     TranslocoModule,
   ],
   templateUrl: './project-list.html',
@@ -41,29 +50,41 @@ export class ProjectList implements AfterViewInit {
   constructor() {
     this.reload();
     effect(() => {
-      const s = this.sort(); const pg = this.paginator();
+      const s = this.sort();
+      const pg = this.paginator();
       if (s) this.ds.sort = s;
       if (pg) this.ds.paginator = pg;
     });
   }
   ngAfterViewInit() {
-    const s = this.sort(); const pg = this.paginator();
+    const s = this.sort();
+    const pg = this.paginator();
     if (s) this.ds.sort = s;
     if (pg) this.ds.paginator = pg;
   }
 
-  canManage() { return this.auth.hasRole('admin') || this.auth.hasRole('manager') || !this.auth.user(); }
+  canManage() {
+    return this.auth.hasRole('admin') || this.auth.hasRole('manager') || !this.auth.user();
+  }
 
   reload() {
     this.service.list({ search: this.search }).subscribe((r) => (this.ds.data = r.results));
   }
   statusLabel(s: string) {
-    const key = ({ active: 'projects.status.active', on_hold: 'projects.status.on_hold',
-      archived: 'projects.status.archived' } as Record<string, string>)[s];
+    const key = (
+      {
+        active: 'projects.status.active',
+        on_hold: 'projects.status.on_hold',
+        archived: 'projects.status.archived',
+      } as Record<string, string>
+    )[s];
     return key ? this.t.translate(key) : s;
   }
   remove(p: Project) {
     if (!confirm(this.t.translate('projects.confirm_delete', { name: p.name }))) return;
-    this.service.remove(p.id!).subscribe(() => { this.toast.success(this.t.translate('projects.deleted')); this.reload(); });
+    this.service.remove(p.id!).subscribe(() => {
+      this.toast.success(this.t.translate('projects.deleted'));
+      this.reload();
+    });
   }
 }

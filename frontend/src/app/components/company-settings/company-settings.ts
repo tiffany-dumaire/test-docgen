@@ -11,7 +11,13 @@ import { CompanyService, TeamService } from '@core/services/company.service';
 import { ProjectService } from '@core/services/project.service';
 import { ToastService } from '@core/services/api.service';
 import {
-  CompanyProfile, CompanyStyles, Project, StyleMap, Team, TeamMember, UsefulLink,
+  CompanyProfile,
+  CompanyStyles,
+  Project,
+  StyleMap,
+  Team,
+  TeamMember,
+  UsefulLink,
 } from '@core/models';
 
 const DOC_TYPES: { key: string; label: string; icon: string }[] = [
@@ -26,7 +32,16 @@ const DOC_TYPES: { key: string; label: string; icon: string }[] = [
 
 @Component({
   selector: 'app-company-settings',
-  imports: [FormsModule, RouterLink, StyleEditor, OrgChart, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [
+    FormsModule,
+    RouterLink,
+    StyleEditor,
+    OrgChart,
+    MatTabsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+  ],
   templateUrl: './company-settings.html',
   styleUrl: './company-settings.scss',
 })
@@ -47,7 +62,9 @@ export class CompanySettings {
   private logoFile: File | null = null;
 
   nc: Partial<TeamMember> = {};
-  ntName = ''; ntColor = '#38BDF8'; ntParent: number | null = null;
+  ntName = '';
+  ntColor = '#38BDF8';
+  ntParent: number | null = null;
   linkCategories = ['Conditions générales', 'Site web', 'Support'];
 
   constructor() {
@@ -57,8 +74,12 @@ export class CompanySettings {
     this.projectSvc.list().subscribe((r) => this.projects.set(r.results));
   }
 
-  reloadTeams() { this.teamSvc.teams().subscribe((r) => this.teams.set(r.results)); }
-  reloadCollaborators() { this.teamSvc.members().subscribe((r) => this.collaborators.set(r.results)); }
+  reloadTeams() {
+    this.teamSvc.teams().subscribe((r) => this.teams.set(r.results));
+  }
+  reloadCollaborators() {
+    this.teamSvc.members().subscribe((r) => this.collaborators.set(r.results));
+  }
 
   // ---- Styles par type ----
   private stylesObj(): CompanyStyles {
@@ -70,7 +91,10 @@ export class CompanySettings {
       s = { global: s as unknown as StyleMap, types: {} };
       m.styles = s;
     }
-    if (!s || typeof s !== 'object') { s = {}; m.styles = s; }
+    if (!s || typeof s !== 'object') {
+      s = {};
+      m.styles = s;
+    }
     if (!s.global) s.global = {};
     if (!s.types) s.types = {};
     return s;
@@ -82,45 +106,84 @@ export class CompanySettings {
     return s.types![type];
   }
 
-  addLink(m: CompanyProfile) { m.usefulLinks.push({ category: 'Site web', label: '', url: '', order: m.usefulLinks.length }); }
-  removeLink(m: CompanyProfile, i: number) { m.usefulLinks.splice(i, 1); }
-  catValue(l: UsefulLink) { return this.linkCategories.includes(l.category || '') ? l.category : '__custom'; }
-  isCustom(l: UsefulLink) { return !this.linkCategories.includes(l.category || ''); }
-  onCat(l: UsefulLink, v: string) { l.category = v === '__custom' ? '' : v; }
+  addLink(m: CompanyProfile) {
+    m.usefulLinks.push({ category: 'Site web', label: '', url: '', order: m.usefulLinks.length });
+  }
+  removeLink(m: CompanyProfile, i: number) {
+    m.usefulLinks.splice(i, 1);
+  }
+  catValue(l: UsefulLink) {
+    return this.linkCategories.includes(l.category || '') ? l.category : '__custom';
+  }
+  isCustom(l: UsefulLink) {
+    return !this.linkCategories.includes(l.category || '');
+  }
+  onCat(l: UsefulLink, v: string) {
+    l.category = v === '__custom' ? '' : v;
+  }
   onLogo(event: Event) {
     const f = (event.target as HTMLInputElement).files?.[0] ?? null;
     this.logoFile = f;
-    if (f) { const m = this.model(); if (m) m.logoUrl = URL.createObjectURL(f); }
+    if (f) {
+      const m = this.model();
+      if (m) m.logoUrl = URL.createObjectURL(f);
+    }
   }
 
   // ---- Collaborateurs ----
   addCollaborator() {
-    if (!this.nc.firstName && !this.nc.lastName) { this.toast.error('Renseignez au moins le nom.'); return; }
+    if (!this.nc.firstName && !this.nc.lastName) {
+      this.toast.error('Renseignez au moins le nom.');
+      return;
+    }
     this.teamSvc.addMember({ ...this.nc }).subscribe({
-      next: () => { this.nc = {}; this.toast.success('Collaborateur ajouté.'); this.reloadCollaborators(); },
+      next: () => {
+        this.nc = {};
+        this.toast.success('Collaborateur ajouté.');
+        this.reloadCollaborators();
+      },
       error: () => this.toast.error('Ajout impossible.'),
     });
   }
   removeCollaborator(c: TeamMember) {
     if (!confirm(`Retirer ${c.fullName} de l'entreprise ?`)) return;
     this.teamSvc.removeMember(c.id!).subscribe({
-      next: () => { this.toast.success('Collaborateur retiré.'); this.reloadCollaborators(); this.reloadTeams(); },
+      next: () => {
+        this.toast.success('Collaborateur retiré.');
+        this.reloadCollaborators();
+        this.reloadTeams();
+      },
       error: () => this.toast.error('Suppression impossible.'),
     });
   }
 
   // ---- Équipes ----
   addTeam() {
-    if (!this.ntName.trim()) { this.toast.error("Nom d'équipe requis."); return; }
-    this.teamSvc.createTeam({ name: this.ntName, color: this.ntColor, parent: this.ntParent }).subscribe({
-      next: () => { this.ntName = ''; this.ntColor = '#38BDF8'; this.ntParent = null; this.toast.success('Équipe créée.'); this.reloadTeams(); },
-      error: () => this.toast.error('Création impossible.'),
-    });
+    if (!this.ntName.trim()) {
+      this.toast.error("Nom d'équipe requis.");
+      return;
+    }
+    this.teamSvc
+      .createTeam({ name: this.ntName, color: this.ntColor, parent: this.ntParent })
+      .subscribe({
+        next: () => {
+          this.ntName = '';
+          this.ntColor = '#38BDF8';
+          this.ntParent = null;
+          this.toast.success('Équipe créée.');
+          this.reloadTeams();
+        },
+        error: () => this.toast.error('Création impossible.'),
+      });
   }
   removeTeam(t: Team) {
     if (!confirm(`Supprimer l'équipe « ${t.name} » ?`)) return;
     this.teamSvc.removeTeam(t.id!).subscribe({
-      next: () => { this.toast.success('Équipe supprimée.'); this.reloadTeams(); this.reloadCollaborators(); },
+      next: () => {
+        this.toast.success('Équipe supprimée.');
+        this.reloadTeams();
+        this.reloadCollaborators();
+      },
       error: () => this.toast.error('Suppression impossible.'),
     });
   }
@@ -147,7 +210,9 @@ export class CompanySettings {
         next: (c) => {
           m.logoUrl = c.logoUrl;
           this.logoFile = null;
-          this.service.update(m).subscribe({ next: (c2) => this.done(c2), error: () => this.fail() });
+          this.service
+            .update(m)
+            .subscribe({ next: (c2) => this.done(c2), error: () => this.fail() });
         },
         error: () => this.fail(),
       });
@@ -156,8 +221,13 @@ export class CompanySettings {
     }
   }
   private done(c: CompanyProfile) {
-    this.model.set(c); this.logoFile = null; this.saving.set(false);
+    this.model.set(c);
+    this.logoFile = null;
+    this.saving.set(false);
     this.toast.success('Profil entreprise enregistré.');
   }
-  private fail() { this.saving.set(false); this.toast.error("Erreur lors de l'enregistrement."); }
+  private fail() {
+    this.saving.set(false);
+    this.toast.error("Erreur lors de l'enregistrement.");
+  }
 }

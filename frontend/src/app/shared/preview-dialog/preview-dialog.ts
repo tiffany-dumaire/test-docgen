@@ -21,7 +21,7 @@ export interface PreviewData {
 export class PreviewDialog {
   public data = inject<PreviewData>(MAT_DIALOG_DATA);
   public ref = inject(MatDialogRef<PreviewDialog>);
-  san = inject(DomSanitizer)
+  san = inject(DomSanitizer);
   blobSafe: SafeResourceUrl;
   constructor() {
     this.blobSafe = this.san.bypassSecurityTrustResourceUrl(this.data.blobUrl);

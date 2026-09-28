@@ -40,53 +40,119 @@ export class FormSchemaEditor {
 
   questionTypes = QUESTION_TYPES;
 
-  emit() { this.changed.emit(); }
-  asQ(el: any): FormField { return el as FormField; }
-  asC(el: any): FormContent { return el as FormContent; }
+  emit() {
+    this.changed.emit();
+  }
+  asQ(el: any): FormField {
+    return el as FormField;
+  }
+  asC(el: any): FormContent {
+    return el as FormContent;
+  }
 
-  blankSection(): FormSection { return { kind: 'section', id: newId('s'), title: '', description: '', elements: [] }; }
-  addSection() { this.sections.push(this.blankSection()); this.emit(); }
-  removeSection(i: number) { this.sections.splice(i, 1); this.emit(); }
+  blankSection(): FormSection {
+    return { kind: 'section', id: newId('s'), title: '', description: '', elements: [] };
+  }
+  addSection() {
+    this.sections.push(this.blankSection());
+    this.emit();
+  }
+  removeSection(i: number) {
+    this.sections.splice(i, 1);
+    this.emit();
+  }
   moveSection(i: number, d: number) {
-    const j = i + d; if (j < 0 || j >= this.sections.length) return;
-    [this.sections[i], this.sections[j]] = [this.sections[j], this.sections[i]]; this.emit();
+    const j = i + d;
+    if (j < 0 || j >= this.sections.length) return;
+    [this.sections[i], this.sections[j]] = [this.sections[j], this.sections[i]];
+    this.emit();
   }
   addQuestion(sec: FormSection) {
-    sec.elements.push({ kind: 'question', key: '', label: '', type: 'text', required: false } as FormField); this.emit();
+    sec.elements.push({
+      kind: 'question',
+      key: '',
+      label: '',
+      type: 'text',
+      required: false,
+    } as FormField);
+    this.emit();
   }
   addContent(sec: FormSection) {
-    sec.elements.push({ kind: 'content', id: newId('c'), content_type: 'text', title: '', text: '' } as FormContent); this.emit();
+    sec.elements.push({
+      kind: 'content',
+      id: newId('c'),
+      content_type: 'text',
+      title: '',
+      text: '',
+    } as FormContent);
+    this.emit();
   }
-  removeEl(sec: FormSection, i: number) { sec.elements.splice(i, 1); this.emit(); }
+  removeEl(sec: FormSection, i: number) {
+    sec.elements.splice(i, 1);
+    this.emit();
+  }
   moveEl(sec: FormSection, i: number, d: number) {
-    const j = i + d; if (j < 0 || j >= sec.elements.length) return;
-    [sec.elements[i], sec.elements[j]] = [sec.elements[j], sec.elements[i]]; this.emit();
+    const j = i + d;
+    if (j < 0 || j >= sec.elements.length) return;
+    [sec.elements[i], sec.elements[j]] = [sec.elements[j], sec.elements[i]];
+    this.emit();
   }
 
-  hasOptions(t: QuestionType) { return t === 'select' || t === 'radio' || t === 'checkboxes'; }
-  contentLabel(t: string) { return ({ text: 'Texte', image: 'Image', file: 'Fichier' } as any)[t] || t; }
-  syncKey(f: FormField) {
-    f.key = (f.label || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'champ';
+  hasOptions(t: QuestionType) {
+    return t === 'select' || t === 'radio' || t === 'checkboxes';
   }
-  setOptions(f: FormField, raw: string) { f.options = raw.split(',').map((s) => s.trim()).filter(Boolean); this.emit(); }
-  setSlots(f: FormField, raw: string) { f.slots = raw.split(',').map((s) => s.trim()).filter(Boolean); this.emit(); }
+  contentLabel(t: string) {
+    return ({ text: 'Texte', image: 'Image', file: 'Fichier' } as any)[t] || t;
+  }
+  syncKey(f: FormField) {
+    f.key =
+      (f.label || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'champ';
+  }
+  setOptions(f: FormField, raw: string) {
+    f.options = raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    this.emit();
+  }
+  setSlots(f: FormField, raw: string) {
+    f.slots = raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    this.emit();
+  }
 
   private pick(ev: Event): File | null {
     const input = ev.target as HTMLInputElement;
     return input.files && input.files.length ? input.files[0] : null;
   }
   uploadQ(f: FormField, key: 'image' | 'template_file', ev: Event) {
-    const file = this.pick(ev); if (!file) return;
+    const file = this.pick(ev);
+    if (!file) return;
     this.service.uploadAsset(file).subscribe({
-      next: (r) => { (f as any)[key] = r.url; if (key === 'template_file') f.template_file_name = r.name; this.emit(); },
+      next: (r) => {
+        (f as any)[key] = r.url;
+        if (key === 'template_file') f.template_file_name = r.name;
+        this.emit();
+      },
       error: () => this.toast.error('Téléversement impossible.'),
     });
   }
   uploadContent(c: FormContent, ev: Event) {
-    const file = this.pick(ev); if (!file) return;
+    const file = this.pick(ev);
+    if (!file) return;
     this.service.uploadAsset(file).subscribe({
-      next: (r) => { c.url = r.url; c.name = r.name; this.emit(); },
+      next: (r) => {
+        c.url = r.url;
+        c.name = r.name;
+        this.emit();
+      },
       error: () => this.toast.error('Téléversement impossible.'),
     });
   }
@@ -96,12 +162,15 @@ export class FormSchemaEditor {
     raw = raw || [];
     if (raw.some((it) => it && it.kind === 'section')) return raw as FormSection[];
     const elements = raw.map((q) => ({ kind: 'question', ...q }));
-    return [{ kind: 'section', id: newId('s'), title: '', description: '', elements } as FormSection];
+    return [
+      { kind: 'section', id: newId('s'), title: '', description: '', elements } as FormSection,
+    ];
   }
   /** Aplati toutes les questions d'un schéma par sections. */
   static questions(sections: FormSection[]): FormField[] {
     const out: FormField[] = [];
-    for (const s of sections) for (const el of s.elements) if ((el as any).kind !== 'content') out.push(el as FormField);
+    for (const s of sections)
+      for (const el of s.elements) if ((el as any).kind !== 'content') out.push(el as FormField);
     return out;
   }
 }

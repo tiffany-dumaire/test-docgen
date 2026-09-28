@@ -14,7 +14,10 @@ export class AuthCallback implements OnInit {
   async ngOnInit() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-    if (!code) { this.status.set('Code d\'autorisation manquant.'); return; }
+    if (!code) {
+      this.status.set("Code d'autorisation manquant.");
+      return;
+    }
     try {
       await this.auth.handleCallback(code);
       this.router.navigateByUrl('/dashboard');

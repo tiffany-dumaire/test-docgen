@@ -39,20 +39,56 @@ interface PaletteItem {
 
 /** Métadonnées d'affichage par type de modèle (onglets séparés par type). */
 const TYPE_META: Record<string, { label: string; icon: string; hint: string }> = {
-  docx: { label: 'Word', icon: '📝', hint: 'Document Word par blocs : titres, textes, tableaux, images, diagrammes.' },
-  pdf: { label: 'PDF', icon: '📄', hint: 'Le PDF est un document Word exporté à l’identique (mêmes blocs et mise en page).' },
-  xlsx: { label: 'Excel', icon: '📊', hint: 'Classeur Excel : onglets, colonnes typées, tableaux croisés, règles.' },
-  a3: { label: 'Template A3 (PNG / PDF)', icon: '🖼️', hint: 'Affiche / planche A3 ou A4 à positionnement libre, exportée en PNG ou PDF.' },
+  docx: {
+    label: 'Word',
+    icon: '📝',
+    hint: 'Document Word par blocs : titres, textes, tableaux, images, diagrammes.',
+  },
+  pdf: {
+    label: 'PDF',
+    icon: '📄',
+    hint: 'Le PDF est un document Word exporté à l’identique (mêmes blocs et mise en page).',
+  },
+  xlsx: {
+    label: 'Excel',
+    icon: '📊',
+    hint: 'Classeur Excel : onglets, colonnes typées, tableaux croisés, règles.',
+  },
+  a3: {
+    label: 'Template A3 (PNG / PDF)',
+    icon: '🖼️',
+    hint: 'Affiche / planche A3 ou A4 à positionnement libre, exportée en PNG ou PDF.',
+  },
   md: { label: 'Markdown', icon: 'M↓', hint: 'Document Markdown par blocs, exporté en .md.' },
-  pptx: { label: 'PowerPoint', icon: '📽️', hint: 'Présentation PowerPoint : chaque titre démarre une diapositive.' },
-  brochure: { label: 'Brochure', icon: '📕', hint: 'Brochure par blocs, exportée en Word (.docx).' },
+  pptx: {
+    label: 'PowerPoint',
+    icon: '📽️',
+    hint: 'Présentation PowerPoint : chaque titre démarre une diapositive.',
+  },
+  brochure: {
+    label: 'Brochure',
+    icon: '📕',
+    hint: 'Brochure par blocs, exportée en Word (.docx).',
+  },
   lettre: { label: 'Lettre', icon: '✉️', hint: 'Lettre par blocs, exportée en Word (.docx).' },
   mail: { label: 'Mail', icon: '📧', hint: 'E-mail par blocs, exporté en Markdown (.md).' },
 };
 
 @Component({
   selector: 'app-template-builder',
-  imports: [BackDirective, FormsModule, RichTextEditor, NgTemplateOutlet, ExcelBuilder, LayoutEditor, StyleEditor, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [
+    BackDirective,
+    FormsModule,
+    RichTextEditor,
+    NgTemplateOutlet,
+    ExcelBuilder,
+    LayoutEditor,
+    StyleEditor,
+    MatTabsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+  ],
   templateUrl: './template-builder.html',
   styleUrl: './template-builder.scss',
 })
@@ -116,13 +152,22 @@ export class TemplateBuilder implements OnDestroy {
   isPdf = computed(() => this.model()?.doc_type === 'pdf');
   isWord = computed(() => this.model()?.doc_type === 'docx');
   /** Types rendus à partir de blocs (contenu). */
-  isBlocks = computed(() => ['docx', 'pdf', 'md', 'pptx', 'brochure', 'lettre', 'mail', 'offre'].includes(this.model()?.doc_type ?? ''));
+  isBlocks = computed(() =>
+    ['docx', 'pdf', 'md', 'pptx', 'brochure', 'lettre', 'mail', 'offre'].includes(
+      this.model()?.doc_type ?? '',
+    ),
+  );
   /** Onglet Structure & styles (mise en page libre + styles). */
   hasStructure = computed(() => this.isWord() || this.isPdf());
   hasTableColor = computed(() => this.isWord() || this.isPdf() || this.isExcel());
   /** En-tête / pied de page configurables : Word, PDF et Lettre. */
-  hasHeaderFooter = computed(() => this.isWord() || this.isPdf()
-    || this.model()?.doc_type === 'lettre' || this.model()?.doc_type === 'offre');
+  hasHeaderFooter = computed(
+    () =>
+      this.isWord() ||
+      this.isPdf() ||
+      this.model()?.doc_type === 'lettre' ||
+      this.model()?.doc_type === 'offre',
+  );
   /** Onglet « Éléments dynamiques » : calques libres PDF / PPTX. */
   hasOverlays = computed(() => this.isPdf() || this.isPptx());
   overlayNoun = computed(() => (this.isPptx() ? 'diapositives' : 'pages'));
@@ -158,16 +203,23 @@ export class TemplateBuilder implements OnDestroy {
     if (st && !st.styles) st.styles = {};
     return (st?.styles ?? {}) as StyleMap;
   };
-  isProjSel(m: DocumentTemplate, id: number) { return (m.projects ?? []).includes(id); }
+  isProjSel(m: DocumentTemplate, id: number) {
+    return (m.projects ?? []).includes(id);
+  }
   toggleProj(m: DocumentTemplate, id: number) {
     m.projects = m.projects ?? [];
     const i = m.projects.indexOf(id);
-    if (i >= 0) m.projects.splice(i, 1); else m.projects.push(id);
+    if (i >= 0) m.projects.splice(i, 1);
+    else m.projects.push(id);
   }
 
   // --- Multilingue (point 5) : langues disponibles + nom par langue ---
-  flagOf(code: string) { return this.languages.find((l) => l.value === code)?.flag ?? ''; }
-  labelOf(code: string) { return this.languages.find((l) => l.value === code)?.label ?? code; }
+  flagOf(code: string) {
+    return this.languages.find((l) => l.value === code)?.flag ?? '';
+  }
+  labelOf(code: string) {
+    return this.languages.find((l) => l.value === code)?.label ?? code;
+  }
   /** Langues du modèle (principale incluse, ordre des langues connues). */
   availableLangs(m: DocumentTemplate): TemplateLanguage[] {
     const set = new Set<TemplateLanguage>(m.languages ?? []);
@@ -175,12 +227,14 @@ export class TemplateBuilder implements OnDestroy {
     if (set.size === 0) set.add((m.language ?? 'fr') as TemplateLanguage);
     return this.languages.map((l) => l.value).filter((v) => set.has(v));
   }
-  hasLang(m: DocumentTemplate, code: TemplateLanguage) { return (m.languages ?? []).includes(code); }
+  hasLang(m: DocumentTemplate, code: TemplateLanguage) {
+    return (m.languages ?? []).includes(code);
+  }
   toggleLang(m: DocumentTemplate, code: TemplateLanguage) {
     const list = [...(m.languages ?? [])];
     const i = list.indexOf(code);
     if (i >= 0) {
-      if (code === m.language) return;          // la langue principale reste active
+      if (code === m.language) return; // la langue principale reste active
       list.splice(i, 1);
       if (m.names) delete m.names[code];
     } else {
@@ -193,31 +247,47 @@ export class TemplateBuilder implements OnDestroy {
     return !!(this.settings() as TemplateSettings)[kind];
   }
   toggleHf(kind: 'header' | 'footer', on: boolean) {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     if (!m.settings) m.settings = {};
     if (on) {
-      m.settings[kind] = { enabled: true, text: '', align: kind === 'footer' ? 'center' : 'left',
-        show_logo: kind === 'header' };
+      m.settings[kind] = {
+        enabled: true,
+        text: '',
+        align: kind === 'footer' ? 'center' : 'left',
+        show_logo: kind === 'header',
+      };
     } else {
       delete m.settings[kind];
     }
   }
   hfVal(kind: 'header' | 'footer', key: 'enabled' | 'text' | 'html' | 'align' | 'show_logo') {
     const o = (this.settings() as TemplateSettings)[kind] as Record<string, unknown> | undefined;
-    if (!o) return key === 'enabled' ? true : (key === 'align' ? (kind === 'footer' ? 'center' : 'left') : '');
+    if (!o)
+      return key === 'enabled'
+        ? true
+        : key === 'align'
+          ? kind === 'footer'
+            ? 'center'
+            : 'left'
+          : '';
     return key === 'enabled' ? o['enabled'] !== false : (o[key] ?? '');
   }
   setHf(kind: 'header' | 'footer', key: string, val: unknown) {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     if (!m.settings) m.settings = {};
     if (!m.settings[kind]) m.settings[kind] = { enabled: true };
     (m.settings[kind] as Record<string, unknown>)[key] = val;
   }
 
-  nameFor(m: DocumentTemplate, code: string) { return (m.names ?? {})[code] ?? ''; }
+  nameFor(m: DocumentTemplate, code: string) {
+    return (m.names ?? {})[code] ?? '';
+  }
   setName(m: DocumentTemplate, code: string, value: string) {
     m.names = { ...(m.names ?? {}) };
-    if (value) m.names[code] = value; else delete m.names[code];
+    if (value) m.names[code] = value;
+    else delete m.names[code];
   }
 
   // --- Contenu par langue (blocs) : édition d'un contenu spécifique par langue ---
@@ -228,13 +298,17 @@ export class TemplateBuilder implements OnDestroy {
     return s.content_i18n;
   }
   switchContentLang(to: string) {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     const primary = m.language || 'fr';
     const from = this.loadedLang;
     if (to === from) return;
     // Range le contenu en cours dans sa langue.
-    if (from === primary) { this.baseSchema = m.schema; }
-    else { this.i18nBucket(m)[from] = { schema: m.schema }; }
+    if (from === primary) {
+      this.baseSchema = m.schema;
+    } else {
+      this.i18nBucket(m)[from] = { schema: m.schema };
+    }
     // Charge le contenu de la langue cible (copie du contenu de base si absent).
     if (to === primary) {
       m.schema = (this.baseSchema as Block[]) ?? m.schema;
@@ -249,7 +323,8 @@ export class TemplateBuilder implements OnDestroy {
   }
   /** Avant sauvegarde : renvoie le contenu de base dans schema, les langues dans content_i18n. */
   private syncContentForSave() {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     const primary = m.language || 'fr';
     if (this.loadedLang !== primary) {
       this.i18nBucket(m)[this.loadedLang] = { schema: m.schema };
@@ -264,13 +339,18 @@ export class TemplateBuilder implements OnDestroy {
   /** Génère et télécharge la planche A3 dans la langue demandée. */
   exportA3Lang(fmt: 'pdf' | 'png' | 'svg', lang: string) {
     const m = this.model();
-    if (!m?.id) { this.toast.error('Enregistrez le modèle avant de générer un rendu.'); return; }
+    if (!m?.id) {
+      this.toast.error('Enregistrez le modèle avant de générer un rendu.');
+      return;
+    }
     this.service.exportA3(m.id, fmt, lang).subscribe({
       next: (blob) => {
         const u = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = u; a.download = `${m.slug || 'template'}-${lang}.${fmt}`;
-        a.click(); URL.revokeObjectURL(u);
+        a.href = u;
+        a.download = `${m.slug || 'template'}-${lang}.${fmt}`;
+        a.click();
+        URL.revokeObjectURL(u);
       },
       error: () => this.toast.error('Export impossible.'),
     });
@@ -300,11 +380,13 @@ export class TemplateBuilder implements OnDestroy {
   }
   setPagePreset(ov: Overlay, v: string) {
     ov.target = ov.target ?? { pages: 'all' };
-    ov.target.pages = v === 'custom' ? (this.pagePresets.has(ov.target.pages) ? '' : ov.target.pages) : v;
+    ov.target.pages =
+      v === 'custom' ? (this.pagePresets.has(ov.target.pages) ? '' : ov.target.pages) : v;
   }
 
   addOverlay() {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     m.settings = m.settings ?? {};
     m.settings.overlays = m.settings.overlays ?? [];
     const isPptx = m.doc_type === 'pptx';
@@ -326,7 +408,8 @@ export class TemplateBuilder implements OnDestroy {
     this.model.set({ ...m });
   }
   removeOverlay(id: string) {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     const list = m.settings?.overlays ?? [];
     m.settings!.overlays = list.filter((o) => o.id !== id);
     if (this.activeOverlay() === id) {
@@ -336,9 +419,18 @@ export class TemplateBuilder implements OnDestroy {
   }
 
   allVariables = computed(() => {
-    const builtins = ['project_name', 'client_name', 'project_reference',
-      'company_name', 'document_title', 'today', 'version'];
-    const keys = this.blocks().filter((b) => b.type === 'field' && b.key).map((b) => b.key!);
+    const builtins = [
+      'project_name',
+      'client_name',
+      'project_reference',
+      'company_name',
+      'document_title',
+      'today',
+      'version',
+    ];
+    const keys = this.blocks()
+      .filter((b) => b.type === 'field' && b.key)
+      .map((b) => b.key!);
     return [...builtins, ...keys];
   });
 
@@ -350,7 +442,8 @@ export class TemplateBuilder implements OnDestroy {
         this.service.template(+this.id).subscribe((t) => {
           if (!t.settings) t.settings = this.defaultSettings();
           this.model.set(t);
-          this.baseSchema = t.schema; this.loadedLang = t.language || 'fr';
+          this.baseSchema = t.schema;
+          this.loadedLang = t.language || 'fr';
           this.contentLang.set(this.loadedLang);
           if (t.doc_type === 'a3') this.ensureA3(t);
           if (t.settings?.overlays?.length) this.activeOverlay.set(t.settings.overlays[0].id);
@@ -358,12 +451,22 @@ export class TemplateBuilder implements OnDestroy {
         });
       } else {
         this.model.set({
-          name: '', slug: '', description: '', doc_type: 'docx', language: 'fr',
-          builder_key: 'custom', is_block_based: true, schema: [],
-          settings: this.defaultSettings(), is_active: true,
-          scope: 'global', projects: [],
+          name: '',
+          slug: '',
+          description: '',
+          doc_type: 'docx',
+          language: 'fr',
+          builder_key: 'custom',
+          is_block_based: true,
+          schema: [],
+          settings: this.defaultSettings(),
+          is_active: true,
+          scope: 'global',
+          projects: [],
         });
-        this.baseSchema = []; this.loadedLang = 'fr'; this.contentLang.set('fr');
+        this.baseSchema = [];
+        this.loadedLang = 'fr';
+        this.contentLang.set('fr');
         this.startHistory();
       }
     });
@@ -375,7 +478,10 @@ export class TemplateBuilder implements OnDestroy {
   private histTimer: ReturnType<typeof setInterval> | null = null;
   private applyingHistory = false;
 
-  private serialize(): string { const m = this.model(); return m ? JSON.stringify(m) : ''; }
+  private serialize(): string {
+    const m = this.model();
+    return m ? JSON.stringify(m) : '';
+  }
   private startHistory() {
     this.initialSnapshot = this.serialize();
     this.history = this.initialSnapshot ? [this.initialSnapshot] : [];
@@ -388,15 +494,19 @@ export class TemplateBuilder implements OnDestroy {
     if (!cur) return;
     if (this.history.length === 0 || this.history[this.history.length - 1] !== cur) {
       this.history.push(cur);
-      if (this.history.length > 11) this.history.shift();  // 1 initial + 10 changements
+      if (this.history.length > 11) this.history.shift(); // 1 initial + 10 changements
     }
   }
-  canUndo() { return this.history.length > 1; }
-  canReset() { return !!this.initialSnapshot && this.serialize() !== this.initialSnapshot; }
+  canUndo() {
+    return this.history.length > 1;
+  }
+  canReset() {
+    return !!this.initialSnapshot && this.serialize() !== this.initialSnapshot;
+  }
   undo() {
     this.snapshot();
     if (this.history.length <= 1) return;
-    this.history.pop();                                   // retire l'état courant
+    this.history.pop(); // retire l'état courant
     this.applyState(this.history[this.history.length - 1]);
   }
   reset() {
@@ -411,7 +521,9 @@ export class TemplateBuilder implements OnDestroy {
       this.model.set(obj);
       this.baseSchema = obj.schema;
       setTimeout(() => (this.applyingHistory = false), 0);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
   ngOnDestroy() {
     if (this.histTimer) clearInterval(this.histTimer);
@@ -420,9 +532,13 @@ export class TemplateBuilder implements OnDestroy {
 
   /** Aperçu du modèle affiché en ligne dans l'onglet « Aperçu ». */
   refreshPreview() {
-    if (!this.isEdit()) { this.toast.error("Enregistrez d'abord le modèle."); return; }
+    if (!this.isEdit()) {
+      this.toast.error("Enregistrez d'abord le modèle.");
+      return;
+    }
     this.syncContentForSave();
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     this.previewing.set(true);
     this.service.updateTemplate(+this.id!, m).subscribe({
       next: () => {
@@ -435,13 +551,24 @@ export class TemplateBuilder implements OnDestroy {
             if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
             this.previewUrl = url;
             this.previewKind.set(r.kind);
-            if (r.kind === 'image') { this.previewImg.set(url); this.previewFrame.set(null); }
-            else { this.previewFrame.set(this.san.bypassSecurityTrustResourceUrl(url)); this.previewImg.set(null); }
+            if (r.kind === 'image') {
+              this.previewImg.set(url);
+              this.previewFrame.set(null);
+            } else {
+              this.previewFrame.set(this.san.bypassSecurityTrustResourceUrl(url));
+              this.previewImg.set(null);
+            }
           },
-          error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+          error: () => {
+            this.previewing.set(false);
+            this.toast.error('Aperçu impossible.');
+          },
         });
       },
-      error: () => { this.previewing.set(false); this.toast.error('Aperçu impossible.'); },
+      error: () => {
+        this.previewing.set(false);
+        this.toast.error('Aperçu impossible.');
+      },
     });
   }
 
@@ -449,12 +576,16 @@ export class TemplateBuilder implements OnDestroy {
     return {
       cover_title: '{{document_title}}',
       cover_subtitle: '{{client_name}} — {{project_name}}',
-      include_cover: true, include_suivi: true, include_toc: true,
+      include_cover: true,
+      include_suivi: true,
+      include_toc: true,
       pdf_from_docx: true,
     };
   }
 
-  isEdit() { return !!this.id; }
+  isEdit() {
+    return !!this.id;
+  }
 
   onFormatChange(m: DocumentTemplate) {
     // « Formulaire » = modèle de formulaire (autre éditeur).
@@ -465,15 +596,21 @@ export class TemplateBuilder implements OnDestroy {
     m.settings = m.settings ?? {};
     if (m.doc_type === 'xlsx' && !m.settings.excel) {
       m.settings.excel = {
-        sheets: [{
-          id: `sh${Date.now()}`, name: 'Onglet 1', type: 'table',
-          groups: [], show_totals: false, allow_add_rows: true,
-          allow_add_columns: false,
-          columns: [
-            { key: 'col1', label: 'Colonne 1', type: 'text' },
-            { key: 'col2', label: 'Colonne 2', type: 'text' },
-          ],
-        }],
+        sheets: [
+          {
+            id: `sh${Date.now()}`,
+            name: 'Onglet 1',
+            type: 'table',
+            groups: [],
+            show_totals: false,
+            allow_add_rows: true,
+            allow_add_columns: false,
+            columns: [
+              { key: 'col1', label: 'Colonne 1', type: 'text' },
+              { key: 'col2', label: 'Colonne 2', type: 'text' },
+            ],
+          },
+        ],
       };
     }
     if (m.doc_type === 'a3') {
@@ -500,7 +637,8 @@ export class TemplateBuilder implements OnDestroy {
   }
 
   addA3Page() {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     m.settings = m.settings ?? {};
     m.settings.a3_pages = m.settings.a3_pages ?? [];
     const pg = this.newA3Page(m.settings.a3_pages.length + 1);
@@ -509,9 +647,13 @@ export class TemplateBuilder implements OnDestroy {
     this.model.set({ ...m });
   }
   removeA3Page(id: string) {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     const pages = m.settings?.a3_pages ?? [];
-    if (pages.length <= 1) { this.toast.error('Au moins une page est nécessaire.'); return; }
+    if (pages.length <= 1) {
+      this.toast.error('Au moins une page est nécessaire.');
+      return;
+    }
     m.settings!.a3_pages = pages.filter((p) => p.id !== id);
     if (this.activeA3() === id) this.activeA3.set(m.settings!.a3_pages[0].id);
     this.model.set({ ...m });
@@ -526,14 +668,22 @@ export class TemplateBuilder implements OnDestroy {
   }
 
   // --- Drag & drop ---
-  onPaletteDrag(type: BlockType) { this.dragType = type; this.dragIndex = null; }
-  onBlockDrag(i: number) { this.dragIndex = i; this.dragType = null; }
+  onPaletteDrag(type: BlockType) {
+    this.dragType = type;
+    this.dragIndex = null;
+  }
+  onBlockDrag(i: number) {
+    this.dragIndex = i;
+    this.dragType = null;
+  }
   onCanvasDrop() {
     if (this.dragType) this.add(this.dragType);
-    this.dragType = null; this.dragIndex = null;
+    this.dragType = null;
+    this.dragIndex = null;
   }
   onDropAt(index: number) {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     const arr = m.schema as Block[];
     if (this.dragType) {
       arr.splice(index, 0, this.newBlock(this.dragType));
@@ -541,59 +691,115 @@ export class TemplateBuilder implements OnDestroy {
       const [moved] = arr.splice(this.dragIndex, 1);
       arr.splice(index, 0, moved);
     }
-    this.dragType = null; this.dragIndex = null;
+    this.dragType = null;
+    this.dragIndex = null;
     this.model.set({ ...m });
   }
 
   private newBlock(type: BlockType): Block {
     const id = `b${Date.now()}_${this.counter++}`;
     const b: Block = { id, type };
-    if (type === 'heading') { b.level = 2; b.text = ''; }
-    else if (type === 'text' || type === 'code') b.text = '';
+    if (type === 'heading') {
+      b.level = 2;
+      b.text = '';
+    } else if (type === 'text' || type === 'code') b.text = '';
     else if (type === 'richtext') b.text = '';
     else if (type === 'bullet_list' || type === 'numbered_list') b.items = ['', ''];
-    else if (type === 'image') { b.width_pct = 40; b.align = 'left'; b.asset_url = ''; }
-    else if (type === 'logo') { b.width_pct = 30; b.align = 'left'; }
-    else if (type === 'table') { b.label = ''; b.columns = [{ label: 'Colonne 1' }, { label: 'Colonne 2' }]; b.allow_edit_columns = false; }
-    else if (type === 'field') { b.label = ''; b.key = ''; b.field_type = 'text'; b.required = false; b.show_label = true; }
-    else if (type === 'link') { b.label = ''; b.url = ''; }
-    else if (type === 'contacts') { b.label = 'Contacts'; b.scope = 'both'; }
-    else if (type === 'diagram') {
-      b.variant = 'process'; b.width_pct = 100; b.align = 'center';
-      b.diagram_items = [{ title: 'Étape 1', text: '' }, { title: 'Étape 2', text: '' }, { title: 'Étape 3', text: '' }];
+    else if (type === 'image') {
+      b.width_pct = 40;
+      b.align = 'left';
+      b.asset_url = '';
+    } else if (type === 'logo') {
+      b.width_pct = 30;
+      b.align = 'left';
+    } else if (type === 'table') {
+      b.label = '';
+      b.columns = [{ label: 'Colonne 1' }, { label: 'Colonne 2' }];
+      b.allow_edit_columns = false;
+    } else if (type === 'field') {
+      b.label = '';
+      b.key = '';
+      b.field_type = 'text';
+      b.required = false;
+      b.show_label = true;
+    } else if (type === 'link') {
+      b.label = '';
+      b.url = '';
+    } else if (type === 'contacts') {
+      b.label = 'Contacts';
+      b.scope = 'both';
+    } else if (type === 'diagram') {
+      b.variant = 'process';
+      b.width_pct = 100;
+      b.align = 'center';
+      b.diagram_items = [
+        { title: 'Étape 1', text: '' },
+        { title: 'Étape 2', text: '' },
+        { title: 'Étape 3', text: '' },
+      ];
+    } else if (type === 'form_diagram') {
+      b.diagram_key = 'd1';
+      b.width_pct = 90;
+      b.align = 'center';
     }
-    else if (type === 'form_diagram') { b.diagram_key = 'd1'; b.width_pct = 90; b.align = 'center'; }
     return b;
   }
 
   add(type: BlockType) {
-    const m = this.model(); if (!m) return;
+    const m = this.model();
+    if (!m) return;
     (m.schema as Block[]).push(this.newBlock(type));
     this.model.set({ ...m });
   }
   removeBlock(i: number) {
-    const m = this.model(); if (!m) return;
-    (m.schema as Block[]).splice(i, 1); this.model.set({ ...m });
+    const m = this.model();
+    if (!m) return;
+    (m.schema as Block[]).splice(i, 1);
+    this.model.set({ ...m });
   }
   move(i: number, dir: number) {
-    const m = this.model(); if (!m) return;
-    const arr = m.schema as Block[]; const j = i + dir;
+    const m = this.model();
+    if (!m) return;
+    const arr = m.schema as Block[];
+    const j = i + dir;
     if (j < 0 || j >= arr.length) return;
-    [arr[i], arr[j]] = [arr[j], arr[i]]; this.model.set({ ...m });
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    this.model.set({ ...m });
   }
 
-  addItem(b: Block) { b.items = b.items ?? []; b.items.push(''); }
-  addDiagramItem(b: Block) { b.diagram_items = b.diagram_items ?? []; b.diagram_items.push({ title: '', text: '' }); }
-  addCol(b: Block) { b.columns = b.columns ?? []; b.columns.push({ label: `Colonne ${b.columns.length + 1}` }); }
-  removeCol(b: Block, i: number) { b.columns?.splice(i, 1); }
-  syncKey(b: Block) { b.key = this.slugify(b.label || '') || 'champ'; }
-  setOptions(b: Block, raw: string) { b.options = raw.split(',').map((s) => s.trim()).filter(Boolean); }
+  addItem(b: Block) {
+    b.items = b.items ?? [];
+    b.items.push('');
+  }
+  addDiagramItem(b: Block) {
+    b.diagram_items = b.diagram_items ?? [];
+    b.diagram_items.push({ title: '', text: '' });
+  }
+  addCol(b: Block) {
+    b.columns = b.columns ?? [];
+    b.columns.push({ label: `Colonne ${b.columns.length + 1}` });
+  }
+  removeCol(b: Block, i: number) {
+    b.columns?.splice(i, 1);
+  }
+  syncKey(b: Block) {
+    b.key = this.slugify(b.label || '') || 'champ';
+  }
+  setOptions(b: Block, raw: string) {
+    b.options = raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
 
   uploadImage(event: Event, block: Block) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     this.service.uploadAsset(file).subscribe({
-      next: (r) => { block.asset_url = r.url; this.toast.success('Image ajoutée.'); },
+      next: (r) => {
+        block.asset_url = r.url;
+        this.toast.success('Image ajoutée.');
+      },
       error: () => this.toast.error("Échec de l'upload."),
     });
   }
@@ -604,24 +810,36 @@ export class TemplateBuilder implements OnDestroy {
   }
 
   private slugify(s: string): string {
-    return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 
   save() {
     this.syncContentForSave();
-    const m = this.model(); if (!m) return;
-    if (!m.name) { this.toast.error('Le nom est obligatoire.'); return; }
+    const m = this.model();
+    if (!m) return;
+    if (!m.name) {
+      this.toast.error('Le nom est obligatoire.');
+      return;
+    }
 
     if (this.isExcel()) {
       m.is_block_based = false;
       m.builder_key = 'excel_workbook';
       m.schema = [];
       if (!m.settings?.excel?.sheets?.length) {
-        this.toast.error('Ajoutez au moins un onglet au classeur.'); return;
+        this.toast.error('Ajoutez au moins un onglet au classeur.');
+        return;
       }
       m.settings.excel.sheets.forEach((sh) =>
-        (sh.columns ?? []).forEach((c, i) => { if (!c.key) c.key = `col${i + 1}`; }));
+        (sh.columns ?? []).forEach((c, i) => {
+          if (!c.key) c.key = `col${i + 1}`;
+        }),
+      );
       this.persist(m);
       return;
     }
@@ -631,27 +849,40 @@ export class TemplateBuilder implements OnDestroy {
       m.builder_key = 'a3';
       m.schema = [];
       if (!m.settings?.a3_pages?.length) {
-        this.toast.error('Ajoutez au moins une page.'); return;
+        this.toast.error('Ajoutez au moins une page.');
+        return;
       }
       this.persist(m);
       return;
     }
 
     // Types par blocs (Word / PDF / Markdown / PowerPoint)
-    (m.schema as Block[]).forEach((b) => { if (b.type === 'field' && !b.key) this.syncKey(b); });
+    (m.schema as Block[]).forEach((b) => {
+      if (b.type === 'field' && !b.key) this.syncKey(b);
+    });
     (m.schema as Block[]).forEach((b) => {
       if (b.items) b.items = b.items.filter((x) => x.trim() !== '');
     });
-    m.is_block_based = true; m.builder_key = 'custom';
+    m.is_block_based = true;
+    m.builder_key = 'custom';
     this.persist(m);
   }
 
   private persist(m: DocumentTemplate) {
     this.saving.set(true);
-    const req = this.isEdit() ? this.service.updateTemplate(+this.id!, m) : this.service.createTemplate(m);
+    const req = this.isEdit()
+      ? this.service.updateTemplate(+this.id!, m)
+      : this.service.createTemplate(m);
     req.subscribe({
-      next: () => { this.saving.set(false); this.toast.success('Modèle enregistré.'); this.router.navigate(['/templates']); },
-      error: () => { this.saving.set(false); this.toast.error('Erreur (identifiant déjà utilisé ?).'); },
+      next: () => {
+        this.saving.set(false);
+        this.toast.success('Modèle enregistré.');
+        this.router.navigate(['/templates']);
+      },
+      error: () => {
+        this.saving.set(false);
+        this.toast.error('Erreur (identifiant déjà utilisé ?).');
+      },
     });
   }
 }

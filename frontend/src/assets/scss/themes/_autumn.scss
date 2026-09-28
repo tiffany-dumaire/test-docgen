@@ -1,39 +1,75 @@
 /* ---------- AUTOMNE · feuilles mortes (orange brûlé + rouille) ---------- */
 @mixin autumn-light {
-  --mat-sys-primary:#B4571B; --mat-sys-on-primary:#FFFFFF;
-  --mat-sys-primary-container:#FFDBC7; --mat-sys-on-primary-container:#341100;
-  --mat-sys-secondary:#74594A; --mat-sys-on-secondary:#FFFFFF;
-  --mat-sys-secondary-container:#FFDBC7; --mat-sys-on-secondary-container:#2A160A;
-  --mat-sys-tertiary:#9B2D24; --mat-sys-on-tertiary:#FFFFFF;
-  --mat-sys-tertiary-container:#FFDAD4; --mat-sys-on-tertiary-container:#410001;
-  --mat-sys-surface:#FBF7F3; --mat-sys-on-surface:#201A16; --mat-sys-on-surface-variant:#52443B;
-  --mat-sys-surface-container-lowest:#FFFFFF; --mat-sys-surface-container-low:#F6EFE8;
-  --mat-sys-surface-container:#F0E9E1; --mat-sys-surface-container-high:#EAE2DA;
-  --mat-sys-surface-container-highest:#E4DDD4;
-  --mat-sys-outline:#857468; --mat-sys-outline-variant:#D7C3B5;
-  --mat-sys-inverse-surface:#362F2A; --mat-sys-inverse-on-surface:#FBEEE5; --mat-sys-inverse-primary:#FFB68A;
-  --mat-sys-error:#B3261E; --mat-sys-on-error:#FFFFFF;
-  --mat-sys-error-container:#F9DEDC; --mat-sys-on-error-container:#410E0B;
+  --mat-sys-primary: #b4571b;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #ffdbc7;
+  --mat-sys-on-primary-container: #341100;
+  --mat-sys-secondary: #74594a;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #ffdbc7;
+  --mat-sys-on-secondary-container: #2a160a;
+  --mat-sys-tertiary: #9b2d24;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #ffdad4;
+  --mat-sys-on-tertiary-container: #410001;
+  --mat-sys-surface: #fbf7f3;
+  --mat-sys-on-surface: #201a16;
+  --mat-sys-on-surface-variant: #52443b;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #f6efe8;
+  --mat-sys-surface-container: #f0e9e1;
+  --mat-sys-surface-container-high: #eae2da;
+  --mat-sys-surface-container-highest: #e4ddd4;
+  --mat-sys-outline: #857468;
+  --mat-sys-outline-variant: #d7c3b5;
+  --mat-sys-inverse-surface: #362f2a;
+  --mat-sys-inverse-on-surface: #fbeee5;
+  --mat-sys-inverse-primary: #ffb68a;
+  --mat-sys-error: #b3261e;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #f9dedc;
+  --mat-sys-on-error-container: #410e0b;
 }
 @mixin autumn-dark {
-  --mat-sys-primary:#FFB68A; --mat-sys-on-primary:#542100;
-  --mat-sys-primary-container:#713300; --mat-sys-on-primary-container:#FFDBC7;
-  --mat-sys-secondary:#E4BFA9; --mat-sys-on-secondary:#422A1C;
-  --mat-sys-secondary-container:#5B4131; --mat-sys-on-secondary-container:#FFDBC7;
-  --mat-sys-tertiary:#FFB4A8; --mat-sys-on-tertiary:#5F1410;
-  --mat-sys-tertiary-container:#7E2A22; --mat-sys-on-tertiary-container:#FFDAD4;
-  --mat-sys-surface:#17120E; --mat-sys-on-surface:#ECE0D8; --mat-sys-on-surface-variant:#D7C3B5;
-  --mat-sys-surface-container-lowest:#110D0A; --mat-sys-surface-container-low:#201A16;
-  --mat-sys-surface-container:#241E19; --mat-sys-surface-container-high:#2F2823;
-  --mat-sys-surface-container-highest:#3A332D;
-  --mat-sys-outline:#A08D80; --mat-sys-outline-variant:#52443B;
-  --mat-sys-inverse-surface:#ECE0D8; --mat-sys-inverse-on-surface:#362F2A; --mat-sys-inverse-primary:#B4571B;
-  --mat-sys-error:#F2B8B5; --mat-sys-on-error:#601410;
-  --mat-sys-error-container:#8C1D18; --mat-sys-on-error-container:#F9DEDC;
+  --mat-sys-primary: #ffb68a;
+  --mat-sys-on-primary: #542100;
+  --mat-sys-primary-container: #713300;
+  --mat-sys-on-primary-container: #ffdbc7;
+  --mat-sys-secondary: #e4bfa9;
+  --mat-sys-on-secondary: #422a1c;
+  --mat-sys-secondary-container: #5b4131;
+  --mat-sys-on-secondary-container: #ffdbc7;
+  --mat-sys-tertiary: #ffb4a8;
+  --mat-sys-on-tertiary: #5f1410;
+  --mat-sys-tertiary-container: #7e2a22;
+  --mat-sys-on-tertiary-container: #ffdad4;
+  --mat-sys-surface: #17120e;
+  --mat-sys-on-surface: #ece0d8;
+  --mat-sys-on-surface-variant: #d7c3b5;
+  --mat-sys-surface-container-lowest: #110d0a;
+  --mat-sys-surface-container-low: #201a16;
+  --mat-sys-surface-container: #241e19;
+  --mat-sys-surface-container-high: #2f2823;
+  --mat-sys-surface-container-highest: #3a332d;
+  --mat-sys-outline: #a08d80;
+  --mat-sys-outline-variant: #52443b;
+  --mat-sys-inverse-surface: #ece0d8;
+  --mat-sys-inverse-on-surface: #362f2a;
+  --mat-sys-inverse-primary: #b4571b;
+  --mat-sys-error: #f2b8b5;
+  --mat-sys-on-error: #601410;
+  --mat-sys-error-container: #8c1d18;
+  --mat-sys-on-error-container: #f9dedc;
   color-scheme: dark;
 }
-:root[data-p="autumn"]{ @include autumn-light; }
-@media (prefers-color-scheme: dark){
-  :root[data-p="autumn"]:not([data-theme="light"]){ @include autumn-dark; }
+:root[data-p='autumn'] {
+  @include autumn-light;
 }
-:root[data-p="autumn"][data-theme="dark"]{ @include autumn-dark; }
+@media (prefers-color-scheme: dark) {
+  :root[data-p='autumn']:not([data-theme='light']) {
+    @include autumn-dark;
+  }
+}
+:root[data-p='autumn'][data-theme='dark'] {
+  @include autumn-dark;
+}

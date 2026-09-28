@@ -24,7 +24,10 @@ export class FormAppearanceEditor {
   @Output() showProgressChange = new EventEmitter<boolean>();
   @Output() changed = new EventEmitter<void>();
 
-  set(key: keyof FormTheme, val: any) { (this.theme as any)[key] = val; this.changed.emit(); }
+  set(key: keyof FormTheme, val: any) {
+    (this.theme as any)[key] = val;
+    this.changed.emit();
+  }
 
   uploadCover(ev: Event) {
     const input = ev.target as HTMLInputElement;

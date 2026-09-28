@@ -16,8 +16,7 @@ export class OrgChart {
   @Input({ required: true }) teams: Team[] = [];
 
   roots(): Team[] {
-    return this.teams.filter((t) => !t.parent ||
-      !this.teams.some((x) => x.id === t.parent));
+    return this.teams.filter((t) => !t.parent || !this.teams.some((x) => x.id === t.parent));
   }
   children(team: Team): Team[] {
     return this.teams.filter((t) => t.parent === team.id);
@@ -25,6 +24,9 @@ export class OrgChart {
   relatedNames(team: Team): string {
     const ids = team.relatedTeams ?? [];
     if (!ids.length) return '';
-    return this.teams.filter((t) => ids.includes(t.id!)).map((t) => t.name).join(', ');
+    return this.teams
+      .filter((t) => ids.includes(t.id!))
+      .map((t) => t.name)
+      .join(', ');
   }
 }

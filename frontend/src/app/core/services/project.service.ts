@@ -14,28 +14,41 @@ export class ProjectService {
   private url = `${this.cfg.base}/projects/`;
 
   list(filters: Record<string, unknown> = {}): Observable<Paginated<Project>> {
-    return this.http.get<Paginated<ProjectInterface>>(this.url, {
-      params: toHttpParams(filters),
-    }).pipe(map((p) => serializePaginated(p, ProjectSerializer.fromApi)));
+    return this.http
+      .get<Paginated<ProjectInterface>>(this.url, {
+        params: toHttpParams(filters),
+      })
+      .pipe(map((p) => serializePaginated(p, ProjectSerializer.fromApi)));
   }
 
   get(id: number): Observable<Project> {
-    return this.http.get<ProjectInterface>(`${this.url}${id}/`).pipe(map(ProjectSerializer.fromApi));
+    return this.http
+      .get<ProjectInterface>(`${this.url}${id}/`)
+      .pipe(map(ProjectSerializer.fromApi));
   }
 
   create(data: Partial<Project>): Observable<Project> {
-    return this.http.post<ProjectInterface>(this.url, ProjectSerializer.toApi(data)).pipe(map(ProjectSerializer.fromApi));
+    return this.http
+      .post<ProjectInterface>(this.url, ProjectSerializer.toApi(data))
+      .pipe(map(ProjectSerializer.fromApi));
   }
 
   update(id: number, data: Partial<Project>): Observable<Project> {
-    return this.http.put<ProjectInterface>(`${this.url}${id}/`, ProjectSerializer.toApi(data)).pipe(map(ProjectSerializer.fromApi));
+    return this.http
+      .put<ProjectInterface>(`${this.url}${id}/`, ProjectSerializer.toApi(data))
+      .pipe(map(ProjectSerializer.fromApi));
   }
   patch(id: number, data: Partial<Project>): Observable<Project> {
-    return this.http.patch<ProjectInterface>(`${this.url}${id}/`, ProjectSerializer.toApi(data)).pipe(map(ProjectSerializer.fromApi));
+    return this.http
+      .patch<ProjectInterface>(`${this.url}${id}/`, ProjectSerializer.toApi(data))
+      .pipe(map(ProjectSerializer.fromApi));
   }
   uploadLogo(id: number, file: File): Observable<Project> {
-    const fd = new FormData(); fd.append('logo', file);
-    return this.http.patch<ProjectInterface>(`${this.url}${id}/`, fd).pipe(map(ProjectSerializer.fromApi));
+    const fd = new FormData();
+    fd.append('logo', file);
+    return this.http
+      .patch<ProjectInterface>(`${this.url}${id}/`, fd)
+      .pipe(map(ProjectSerializer.fromApi));
   }
   trackingDiagramUrl(id: number, type: string, primary?: string): string {
     let u = `${this.url}${id}/tracking_diagram/?type=${encodeURIComponent(type)}`;

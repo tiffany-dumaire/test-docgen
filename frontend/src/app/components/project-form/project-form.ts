@@ -12,11 +12,29 @@ import { ClientService } from '@core/services/client.service';
 import { TeamService } from '@core/services/company.service';
 import { StyleEditor } from '@shared/content/style-editor/style-editor';
 import { ToastService } from '@core/services/api.service';
-import { Client, Contact, ContactKind, Project, ProjectRepo, ProjectStatus, Team, TeamMember } from '@core/models';
+import {
+  Client,
+  Contact,
+  ContactKind,
+  Project,
+  ProjectRepo,
+  ProjectStatus,
+  Team,
+  TeamMember,
+} from '@core/models';
 
 @Component({
   selector: 'app-project-form',
-  imports: [FormsModule, NgTemplateOutlet, StyleEditor, MatTabsModule, MatFormFieldModule, MatInputModule, MatSelectModule, BackDirective],
+  imports: [
+    FormsModule,
+    NgTemplateOutlet,
+    StyleEditor,
+    MatTabsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    BackDirective,
+  ],
   templateUrl: './project-form.html',
   styleUrl: './project-form.scss',
 })
@@ -40,9 +58,12 @@ export class ProjectForm {
     this.clientService.list().subscribe((r) => this.clients.set(r.results));
     this.service.list().subscribe((r) => this.allProjects.set(r.results));
     this.teamService.members().subscribe((r) => {
-      this.allMembers.set(r.results.map((mem) => ({
-        ...mem, teamName: (mem.teamNames || []).join(', '),
-      })));
+      this.allMembers.set(
+        r.results.map((mem) => ({
+          ...mem,
+          teamName: (mem.teamNames || []).join(', '),
+        })),
+      );
     });
     setTimeout(() => {
       if (this.id) {
@@ -75,7 +96,10 @@ export class ProjectForm {
     return !!this.id;
   }
 
-  projStyles(m: Project) { if (!m.styles) m.styles = {}; return m.styles; }
+  projStyles(m: Project) {
+    if (!m.styles) m.styles = {};
+    return m.styles;
+  }
 
   onClientChange(clientId: number | null, m: Project) {
     m.client = clientId;
@@ -85,11 +109,14 @@ export class ProjectForm {
     }
   }
 
-  isClientSel(m: Project, id: number) { return (m.clients ?? []).includes(id); }
+  isClientSel(m: Project, id: number) {
+    return (m.clients ?? []).includes(id);
+  }
   toggleClient(m: Project, id: number) {
     m.clients = m.clients ?? [];
     const i = m.clients.indexOf(id);
-    if (i >= 0) m.clients.splice(i, 1); else m.clients.push(id);
+    if (i >= 0) m.clients.splice(i, 1);
+    else m.clients.push(id);
   }
   addFieldDef(m: Project) {
     m.customFieldDefs = m.customFieldDefs ?? [];
@@ -97,16 +124,28 @@ export class ProjectForm {
   }
   syncFieldKey(def: { key: string; label: string }) {
     if (!def.key) {
-      def.key = (def.label || '').toLowerCase().normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'champ';
+      def.key =
+        (def.label || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '_')
+          .replace(/^_+|_+$/g, '') || 'champ';
     }
   }
-  cfVal(m: Project, key: string) { return (m.customFields ?? {})[key]; }
+  cfVal(m: Project, key: string) {
+    return (m.customFields ?? {})[key];
+  }
   setCf(m: Project, key: string, v: unknown) {
     m.customFields = m.customFields ?? {};
     (m.customFields as Record<string, unknown>)[key] = v;
   }
-  splitList(raw: string): string[] { return raw.split(',').map((s) => s.trim()).filter(Boolean); }
+  splitList(raw: string): string[] {
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
 
   addAssignment() {
     const m = this.model();
@@ -150,18 +189,46 @@ export class ProjectForm {
     const f = (ev.target as HTMLInputElement).files?.[0] ?? null;
     this.logoFile = f;
     const m = this.model();
-    if (f && m) { m.logoUrl = URL.createObjectURL(f); this.model.set({ ...m }); }
+    if (f && m) {
+      m.logoUrl = URL.createObjectURL(f);
+      this.model.set({ ...m });
+    }
   }
-  clearLogo(m: Project) { this.logoFile = null; m.logoUrl = null; m.logo = null; this.model.set({ ...m }); }
+  clearLogo(m: Project) {
+    this.logoFile = null;
+    m.logoUrl = null;
+    m.logo = null;
+    this.model.set({ ...m });
+  }
 
-  addInstance(m: Project) { m.instances = m.instances ?? []; m.instances.push({ name: '', ip: '', domain: '', url: '' }); this.model.set({ ...m }); }
-  removeInstance(m: Project, i: number) { m.instances?.splice(i, 1); this.model.set({ ...m }); }
+  addInstance(m: Project) {
+    m.instances = m.instances ?? [];
+    m.instances.push({ name: '', ip: '', domain: '', url: '' });
+    this.model.set({ ...m });
+  }
+  removeInstance(m: Project, i: number) {
+    m.instances?.splice(i, 1);
+    this.model.set({ ...m });
+  }
 
-  private repoId() { return 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1000); }
-  addRepo(m: Project) { m.repos = m.repos ?? []; m.repos.push({ id: this.repoId(), parent: null, name: '', url: '', component: '', instance: '' }); this.model.set({ ...m }); }
+  private repoId() {
+    return 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1000);
+  }
+  addRepo(m: Project) {
+    m.repos = m.repos ?? [];
+    m.repos.push({
+      id: this.repoId(),
+      parent: null,
+      name: '',
+      url: '',
+      component: '',
+      instance: '',
+    });
+    this.model.set({ ...m });
+  }
   removeRepo(m: Project, rp: ProjectRepo) {
     m.repos = (m.repos ?? []).filter((x) => x.id !== rp.id);
-    for (const r of m.repos) if (r.parent === rp.id) r.parent = rp.parent ?? null;  // ré-attache les enfants
+    for (const r of m.repos) if (r.parent === rp.id) r.parent = rp.parent ?? null; // ré-attache les enfants
     this.model.set({ ...m });
   }
   /** Parents possibles : tous les dépôts sauf lui-même et ses descendants (anti-cycle). */
@@ -171,7 +238,11 @@ export class ProjectForm {
     let changed = true;
     while (changed) {
       changed = false;
-      for (const r of repos) if (r.parent && banned.has(r.parent) && !banned.has(r.id)) { banned.add(r.id); changed = true; }
+      for (const r of repos)
+        if (r.parent && banned.has(r.parent) && !banned.has(r.id)) {
+          banned.add(r.id);
+          changed = true;
+        }
     }
     return repos.filter((r) => !banned.has(r.id));
   }
@@ -184,14 +255,19 @@ export class ProjectForm {
       return;
     }
     this.saving.set(true);
-    const payload = { ...m }; delete (payload as Partial<Project>).logoUrl;
+    const payload = { ...m };
+    delete (payload as Partial<Project>).logoUrl;
     const req = this.isEdit()
       ? this.service.update(+this.id!, payload)
       : this.service.create(payload);
     req.subscribe({
       next: (p) => {
-        const done = () => { this.toast.success('Projet enregistré.'); this.router.navigate(['/projects', p.id]); };
-        if (this.logoFile) this.service.uploadLogo(p.id!, this.logoFile).subscribe({ next: done, error: done });
+        const done = () => {
+          this.toast.success('Projet enregistré.');
+          this.router.navigate(['/projects', p.id]);
+        };
+        if (this.logoFile)
+          this.service.uploadLogo(p.id!, this.logoFile).subscribe({ next: done, error: done });
         else done();
       },
       error: () => {
