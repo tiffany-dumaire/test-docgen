@@ -247,7 +247,11 @@ def render(ctx: GenerationContext) -> bytes:
 
     pctx = placeholder_context(ctx)
     excel_cfg = (ctx.document.template.settings or {}).get("excel", {})
-    sheets = excel_cfg.get("sheets", [])
+    sheets = list(excel_cfg.get("sheets", []))
+    # Onglets ajoutés à la volée lors de la génération (data['extra_sheets']).
+    for xs in ((ctx.data or {}).get("extra_sheets") or []):
+        if isinstance(xs, dict) and xs.get("type"):
+            sheets.append(xs)
     data_sheets = (ctx.data or {}).get("sheets", {})
 
     thin = Side(style="thin", color=BORDER_COLOR)

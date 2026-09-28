@@ -31,6 +31,18 @@ import {
   TableData,
 } from '@core/models';
 
+interface ExtraSheetItem {
+  label: string;
+  value: string;
+  type: string;
+}
+interface ExtraSheet {
+  id: string;
+  name: string;
+  type: 'info';
+  items: ExtraSheetItem[];
+}
+
 @Component({
   selector: 'app-document-editor',
   imports: [
@@ -354,6 +366,26 @@ export class DocumentEditor implements OnDestroy {
   }
   removeExtra(d: ProjectDocument, i: number) {
     this.extraBlocks(d).splice(i, 1);
+  }
+
+  // --- Onglets Excel ajoutés à la volée (data['extra_sheets']) ---
+  extraSheets(d: ProjectDocument): ExtraSheet[] {
+    const data = d.data as Record<string, unknown>;
+    return (data['extra_sheets'] ??= []) as ExtraSheet[];
+  }
+  addExtraSheet(d: ProjectDocument) {
+    this.extraSheets(d).push({
+      id: 'xs' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: 'Informations',
+      type: 'info',
+      items: [{ label: '', value: '', type: 'text' }],
+    });
+  }
+  removeExtraSheet(d: ProjectDocument, i: number) {
+    this.extraSheets(d).splice(i, 1);
+  }
+  addExtraSheetItem(xs: ExtraSheet) {
+    xs.items.push({ label: '', value: '', type: 'text' });
   }
 
   tableModel(d: ProjectDocument, block: Block): TableData {

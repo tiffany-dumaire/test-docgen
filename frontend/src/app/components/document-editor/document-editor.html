@@ -166,6 +166,56 @@
                   </div>
                 }
               }
+
+              <!-- Onglets d'informations ajoutés à la volée -->
+              <div class="extra-blocks">
+                <div class="row between">
+                  <span class="field-label" style="margin: 0">➕ Onglets ajoutés</span>
+                  <button class="btn btn-sm btn-ghost" (click)="addExtraSheet(d)">
+                    + Onglet d'informations
+                  </button>
+                </div>
+                @for (xs of extraSheets(d); track xs.id; let si = $index) {
+                  <div class="xsheet">
+                    <div class="row" style="gap: 0.5rem; align-items: center">
+                      <mat-form-field appearance="outline" class="grow-field">
+                        <mat-label>Nom de l'onglet</mat-label>
+                        <input matInput [(ngModel)]="xs.name" />
+                      </mat-form-field>
+                      <button class="btn btn-sm btn-danger" (click)="removeExtraSheet(d, si)">
+                        Supprimer l'onglet
+                      </button>
+                    </div>
+                    @for (it of xs.items; track $index) {
+                      <div class="row" style="gap: 0.5rem; margin-top: 0.3rem">
+                        <mat-form-field appearance="outline" class="grow-field">
+                          <mat-label>Libellé</mat-label>
+                          <input matInput [(ngModel)]="it.label" />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="grow-field">
+                          <mat-label>Valeur</mat-label>
+                          <input matInput [(ngModel)]="it.value" />
+                        </mat-form-field>
+                        <button class="btn btn-sm btn-danger" (click)="xs.items.splice($index, 1)">
+                          ✕
+                        </button>
+                      </div>
+                    }
+                    <button
+                      class="btn btn-sm btn-ghost"
+                      style="margin-top: 0.3rem"
+                      (click)="addExtraSheetItem(xs)"
+                    >
+                      + Information
+                    </button>
+                  </div>
+                } @empty {
+                  <p class="muted" style="margin: 0.2rem 0 0; font-size: 0.82rem">
+                    Ajoutez des onglets d'informations (libellé / valeur) insérés dans le classeur
+                    généré.
+                  </p>
+                }
+              </div>
             </div>
           } @else if (tpl.is_block_based) {
             <div class="card stack">
