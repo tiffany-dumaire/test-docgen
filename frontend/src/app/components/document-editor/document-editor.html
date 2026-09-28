@@ -173,18 +173,51 @@
               @for (block of asBlocks(tpl); track block.id) {
                 @switch (block.type) {
                   @case ('heading') {
-                    <div
-                      class="preview-heading"
-                      [style.fontSize.rem]="block.level === 1 ? 1.3 : 1.05"
-                    >
-                      {{ interpolate(block.text || '') }}
-                    </div>
+                    @if (block.editable) {
+                      <mat-form-field appearance="outline" class="editable-block">
+                        <mat-label>✏️ Titre {{ block.level || 2 }}</mat-label>
+                        <input
+                          matInput
+                          [ngModel]="blockText(d, block)"
+                          (ngModelChange)="setBlockText(d, block, $event)"
+                        />
+                      </mat-form-field>
+                    } @else {
+                      <div
+                        class="preview-heading"
+                        [style.fontSize.rem]="block.level === 1 ? 1.3 : 1.05"
+                      >
+                        {{ interpolate(block.text || '') }}
+                      </div>
+                    }
                   }
                   @case ('text') {
-                    <div class="preview-text">{{ interpolate(block.text || '') }}</div>
+                    @if (block.editable) {
+                      <mat-form-field appearance="outline" class="editable-block">
+                        <mat-label>✏️ Texte</mat-label>
+                        <textarea
+                          matInput
+                          rows="3"
+                          [ngModel]="blockText(d, block)"
+                          (ngModelChange)="setBlockText(d, block, $event)"
+                        ></textarea>
+                      </mat-form-field>
+                    } @else {
+                      <div class="preview-text">{{ interpolate(block.text || '') }}</div>
+                    }
                   }
                   @case ('richtext') {
-                    <div class="preview-rich" [innerHTML]="block.text"></div>
+                    @if (block.editable) {
+                      <div class="editable-block">
+                        <span class="field-label">✏️ Texte enrichi</span>
+                        <app-rich-text-editor
+                          [value]="blockText(d, block)"
+                          (valueChange)="setBlockText(d, block, $event)"
+                        />
+                      </div>
+                    } @else {
+                      <div class="preview-rich" [innerHTML]="block.text"></div>
+                    }
                   }
                   @case ('bullet_list') {
                     <ul class="preview-list">
@@ -280,6 +313,58 @@
                   }
                 }
               }
+
+              <!-- Éléments ajoutés à la volée (insérés après le contenu du modèle) -->
+              <div class="extra-blocks">
+                <div class="row between">
+                  <span class="field-label" style="margin: 0">➕ Éléments ajoutés</span>
+                  <div class="row" style="gap: 0.3rem">
+                    <button class="btn btn-sm btn-ghost" (click)="addExtra(d, 'heading')">
+                      + Titre
+                    </button>
+                    <button class="btn btn-sm btn-ghost" (click)="addExtra(d, 'text')">
+                      + Texte
+                    </button>
+                    <button class="btn btn-sm btn-ghost" (click)="addExtra(d, 'bullet_list')">
+                      + Liste
+                    </button>
+                  </div>
+                </div>
+                @for (xb of extraBlocks(d); track xb.id; let i = $index) {
+                  <div class="xblock">
+                    @if (xb.type === 'heading') {
+                      <mat-form-field appearance="outline" class="w-lvl">
+                        <mat-label>Niveau</mat-label>
+                        <mat-select [(ngModel)]="xb.level">
+                          @for (l of [1, 2, 3, 4, 5]; track l) {
+                            <mat-option [value]="l">Titre {{ l }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="grow-field">
+                        <mat-label>Texte du titre</mat-label>
+                        <input matInput [(ngModel)]="xb.text" />
+                      </mat-form-field>
+                    } @else if (xb.type === 'bullet_list') {
+                      <mat-form-field appearance="outline" class="grow-field">
+                        <mat-label>Liste (une ligne = un élément)</mat-label>
+                        <textarea matInput rows="3" [(ngModel)]="xb.text"></textarea>
+                      </mat-form-field>
+                    } @else {
+                      <mat-form-field appearance="outline" class="grow-field">
+                        <mat-label>Texte</mat-label>
+                        <textarea matInput rows="2" [(ngModel)]="xb.text"></textarea>
+                      </mat-form-field>
+                    }
+                    <button class="btn btn-sm btn-danger" (click)="removeExtra(d, i)">✕</button>
+                  </div>
+                } @empty {
+                  <p class="muted" style="margin: 0.2rem 0 0; font-size: 0.82rem">
+                    Ajoutez des titres, textes ou listes qui seront insérés à la fin du document
+                    généré.
+                  </p>
+                }
+              </div>
             </div>
           } @else {
             <!-- Modèle avancé (non visuel) : saisie JSON de repli -->

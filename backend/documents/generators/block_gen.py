@@ -179,6 +179,32 @@ def _fmt_counter(n, fmt):
     return f"{n}."
 
 
+def effective_blocks(ctx):
+    """Blocs effectifs : schéma du modèle (avec surcharges des blocs modifiables
+    saisies à la génération) + éléments ajoutés à la volée (data['extra_blocks']).
+    """
+    data = ctx.data or {}
+    overrides = data.get("blocks") or {}
+    out = []
+    for b in (ctx.document.template.schema or []):
+        if not isinstance(b, dict):
+            continue
+        b2 = dict(b)
+        if b2.get("editable") and b2.get("id") in overrides:
+            ov = overrides.get(b2["id"])
+            if ov is not None:
+                b2["text"] = ov
+        out.append(b2)
+    for xb in (data.get("extra_blocks") or []):
+        if not isinstance(xb, dict) or not xb.get("type"):
+            continue
+        b2 = dict(xb)
+        if b2.get("type") == "bullet_list" and b2.get("text") and not b2.get("items"):
+            b2["items"] = [l for l in str(b2["text"]).split("\n") if l.strip()]
+        out.append(b2)
+    return out
+
+
 # ===========================================================================
 def render_docx(ctx: GenerationContext) -> bytes:
     from docx import Document as Docx
@@ -443,7 +469,7 @@ def render_docx(ctx: GenerationContext) -> bytes:
 
     _hcounters = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
     _numbered_levels = set()
-    for block in ctx.document.template.schema:
+    for block in effective_blocks(ctx):
         bt = block.get("type")
         if bt == "heading":
             lvl = max(1, min(5, int(block.get("level", 2))))
@@ -1058,7 +1084,7 @@ def render_pdf(ctx: GenerationContext) -> bytes:
         return ListFlowable(flow, bulletType="1" if ordered else "bullet",
                             start="1" if ordered else "•", leftIndent=16)
 
-    for block in ctx.document.template.schema:
+    for block in effective_blocks(ctx):
         bt = block.get("type")
         if bt == "heading":
             lvl = int(block.get("level", 2))
@@ -1185,7 +1211,7 @@ def render_xlsx(ctx: GenerationContext) -> bytes:
             if letter:
                 sheet.column_dimensions[letter].width = min(length + 4, 70)
 
-    for block in ctx.document.template.schema:
+    for block in effective_blocks(ctx):
         bt = block.get("type")
         if bt in ("heading", "text", "richtext", "link", "code"):
             txt = interpolate(block.get("text", "") or block.get("label", ""), pctx)

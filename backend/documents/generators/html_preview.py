@@ -212,10 +212,10 @@ def _blocks_html(ctx, resolved):
             except Exception:
                 pass
 
-    from .block_gen import _fmt_counter, _BULLET_CHARS
+    from .block_gen import _fmt_counter, _BULLET_CHARS, effective_blocks
     hcounters = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
     numbered_levels = set()
-    for b in (tpl.schema or []):
+    for b in effective_blocks(ctx):
         t = b.get("type")
         if t == "heading":
             lvl = min(max(int(b.get("level", 2)), 1), 5)

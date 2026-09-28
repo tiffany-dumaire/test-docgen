@@ -232,6 +232,10 @@
                       </select>
                       <input [(ngModel)]="block.text" placeholder="Texte du titre" />
                     </div>
+                    <label class="chk" style="margin-top: 0.35rem">
+                      <input type="checkbox" [(ngModel)]="block.editable" /> ✏️ Modifiable à la
+                      génération
+                    </label>
                   }
                   @case ('text') {
                     <textarea
@@ -239,12 +243,20 @@
                       rows="3"
                       placeholder="Texte. Variables {{ '{{' }}…{{ '}}' }} autorisées."
                     ></textarea>
+                    <label class="chk" style="margin-top: 0.35rem">
+                      <input type="checkbox" [(ngModel)]="block.editable" /> ✏️ Modifiable à la
+                      génération
+                    </label>
                   }
                   @case ('richtext') {
                     <app-rich-text-editor
                       [value]="block.text || ''"
                       (valueChange)="block.text = $event"
                     />
+                    <label class="chk" style="margin-top: 0.35rem">
+                      <input type="checkbox" [(ngModel)]="block.editable" /> ✏️ Modifiable à la
+                      génération
+                    </label>
                   }
                   @case ('bullet_list') {
                     <ng-container *ngTemplateOutlet="listEditor; context: { $implicit: block }" />

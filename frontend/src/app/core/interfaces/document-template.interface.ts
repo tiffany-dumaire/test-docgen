@@ -41,6 +41,8 @@ export interface Block {
   // heading / text / richtext / code
   text?: string;
   level?: number;
+  /** Bloc (titre/texte/texte enrichi) modifiable par l'utilisateur à la génération. */
+  editable?: boolean;
   // field
   key?: string;
   label?: string;

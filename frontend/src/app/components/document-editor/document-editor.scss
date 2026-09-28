@@ -184,3 +184,27 @@ table.gridfill {
     }
   }
 }
+
+/* Blocs modifiables à la génération + éléments ajoutés à la volée. */
+.editable-block {
+  width: 100%;
+  display: block;
+  margin: 0.2rem 0;
+}
+.extra-blocks {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--mat-sys-outline-variant);
+  .xblock {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    .w-lvl {
+      width: 130px;
+    }
+    .grow-field {
+      flex: 1;
+    }
+  }
+}

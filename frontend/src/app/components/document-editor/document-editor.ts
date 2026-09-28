@@ -16,6 +16,7 @@ import { CompanyService } from '@core/services/company.service';
 import { ToastService } from '@core/services/api.service';
 import { PreviewService } from '@core/services/preview.service';
 import { DataGrid } from '@shared/data-grid/data-grid';
+import { RichTextEditor } from '@shared/rich-text-editor/rich-text-editor';
 import {
   Block,
   CellType,
@@ -37,6 +38,7 @@ import {
     FormsModule,
     ChDatePipe,
     DataGrid,
+    RichTextEditor,
     MatTabsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -320,6 +322,38 @@ export class DocumentEditor implements OnDestroy {
     const cell = this.gridCellAt(sh, r, c);
     if (!cell || cell.value == null) return '';
     return this.interpolate(String(cell.value));
+  }
+
+  // --- Blocs modifiables à la génération (titre / texte / texte enrichi) ---
+  private blockStore(d: ProjectDocument): Record<string, string> {
+    const data = d.data as Record<string, unknown>;
+    return (data['blocks'] ??= {}) as Record<string, string>;
+  }
+  /** Texte courant d'un bloc modifiable : surcharge saisie, sinon valeur du modèle. */
+  blockText(d: ProjectDocument, block: Block): string {
+    const ov = this.blockStore(d)[block.id];
+    return ov != null ? ov : (block.text ?? '');
+  }
+  setBlockText(d: ProjectDocument, block: Block, v: string) {
+    this.blockStore(d)[block.id] = v;
+  }
+
+  // --- Éléments ajoutés à la volée (insérés après le contenu du modèle) ---
+  extraBlocks(d: ProjectDocument): Block[] {
+    const data = d.data as Record<string, unknown>;
+    return (data['extra_blocks'] ??= []) as Block[];
+  }
+  addExtra(d: ProjectDocument, type: 'heading' | 'text' | 'bullet_list') {
+    const b = {
+      id: 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      type,
+      text: '',
+      ...(type === 'heading' ? { level: 2 } : {}),
+    } as Block;
+    this.extraBlocks(d).push(b);
+  }
+  removeExtra(d: ProjectDocument, i: number) {
+    this.extraBlocks(d).splice(i, 1);
   }
 
   tableModel(d: ProjectDocument, block: Block): TableData {
