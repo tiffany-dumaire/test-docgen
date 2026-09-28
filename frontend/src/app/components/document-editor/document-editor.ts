@@ -384,6 +384,36 @@ export class DocumentEditor implements OnDestroy {
   removeExtraSheet(d: ProjectDocument, i: number) {
     this.extraSheets(d).splice(i, 1);
   }
+
+  // --- Export Word/PowerPoint → PDF ---
+  pdfBusy = signal<number | null>(null);
+  /** Formats convertibles en PDF (Word et PowerPoint) côté serveur. */
+  canExportPdf(): boolean {
+    const t = this.activeTemplate()?.doc_type;
+    return ['docx', 'lettre', 'offre', 'brochure', 'pptx'].includes(t ?? '');
+  }
+  nativeLabel(): string {
+    return this.activeTemplate()?.doc_type === 'pptx' ? 'PPT' : 'Word';
+  }
+  downloadPdf(v: DocumentVersion) {
+    if (!v.id) return;
+    this.pdfBusy.set(v.id);
+    this.service.versionPdf(v.id).subscribe({
+      next: (blob) => {
+        this.pdfBusy.set(null);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.doc()?.title ?? 'document'}-v${v.versionNumber}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.pdfBusy.set(null);
+        this.toast.error('Conversion PDF indisponible (LibreOffice requis côté serveur).');
+      },
+    });
+  }
   addExtraSheetItem(xs: ExtraSheet) {
     xs.items.push({ label: '', value: '', type: 'text' });
   }

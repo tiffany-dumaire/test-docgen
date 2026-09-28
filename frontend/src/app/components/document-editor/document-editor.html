@@ -548,7 +548,23 @@
                     <td class="cmt">{{ v.comment || '—' }}</td>
                     <td>
                       @if (v.fileUrl) {
-                        <a class="btn btn-sm btn-ghost" [href]="v.fileUrl" target="_blank">⬇</a>
+                        <a
+                          class="btn btn-sm btn-ghost"
+                          [href]="v.fileUrl"
+                          target="_blank"
+                          [title]="canExportPdf() ? 'Télécharger (format natif)' : 'Télécharger'"
+                          >⬇ {{ canExportPdf() ? nativeLabel() : '' }}</a
+                        >
+                        @if (canExportPdf()) {
+                          <button
+                            class="btn btn-sm btn-ghost"
+                            (click)="downloadPdf(v)"
+                            [disabled]="pdfBusy() === v.id"
+                            title="Télécharger en PDF"
+                          >
+                            {{ pdfBusy() === v.id ? '…' : '⬇ PDF' }}
+                          </button>
+                        }
                       }
                       <button
                         class="btn btn-sm btn-ghost"

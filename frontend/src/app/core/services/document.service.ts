@@ -70,6 +70,12 @@ export class DocumentService {
   preview(id: number): Observable<PreviewResult> {
     return this.http.get<PreviewResult>(`${this.base}/${id}/preview/`);
   }
+  /** Télécharge une version convertie en PDF (Word / PowerPoint → PDF). */
+  versionPdf(versionId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/versions/${versionId}/download/?format=pdf`, {
+      responseType: 'blob',
+    });
+  }
   previewTemplate(id: number): Observable<PreviewResult> {
     return this.http.get<PreviewResult>(`${this.base}/templates/${id}/preview/`);
   }

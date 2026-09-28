@@ -237,13 +237,31 @@ class DocumentVersionViewSet(viewsets.ReadOnlyModelViewSet):
         version = self.get_object()
         if not version.file:
             raise Http404("Fichier introuvable")
-        # Type MIME déduit de l'extension réelle du fichier (gère A3 PNG/PDF).
         import mimetypes
+        import os
+        from django.http import HttpResponse
+        name = version.file.name.split("/")[-1]
+        ext = os.path.splitext(name)[1].lower()
+
+        # Export PDF à la volée pour les documents Word / PowerPoint.
+        if request.query_params.get("format") == "pdf" and ext in (".docx", ".pptx"):
+            from .services import to_pdf_for_preview
+            content = version.file.open("rb").read()
+            pdf = to_pdf_for_preview(content, ext)
+            if pdf is None:
+                return Response(
+                    {"detail": "Conversion PDF indisponible (LibreOffice requis sur le serveur)."},
+                    status=503)
+            resp = HttpResponse(pdf, content_type="application/pdf")
+            resp["Content-Disposition"] = (
+                f'attachment; filename="{os.path.splitext(name)[0]}.pdf"')
+            return resp
+
+        # Type MIME déduit de l'extension réelle du fichier (gère A3 PNG/PDF).
         mime = (mimetypes.guess_type(version.file.name)[0]
                 or file_meta(version.document.doc_type)[1])
         response = FileResponse(version.file.open("rb"), content_type=mime)
-        response["Content-Disposition"] = (
-            f'attachment; filename="{version.file.name.split("/")[-1]}"')
+        response["Content-Disposition"] = f'attachment; filename="{name}"'
         return response
 
 
