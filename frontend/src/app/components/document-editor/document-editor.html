@@ -111,7 +111,7 @@
                       <ol class="preview-list">@for (it of block.items ?? []; track $index) { <li>{{ interpolate(it) }}</li> }</ol>
                     }
                     @case ('image') {
-                      @if (block.asset_url) { <img [src]="block.asset_url" class="preview-thumb" [style.width.%]="block.width_pct" /> }
+                      @if (block.asset_url) { <img [src]="block.asset_url" class="preview-thumb" [style.width.%]="block.width_pct" alt="asset" /> }
                     }
                     @case ('logo') {
                       <div class="info-block">🏢 Logo de l'entreprise (position : {{ block.align }}).</div>

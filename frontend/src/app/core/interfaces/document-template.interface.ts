@@ -132,7 +132,7 @@ export interface TemplateSettings {
   include_toc?: boolean;
   table_color?: string;
   excel?: ExcelWorkbook;
-  layouts?: { [page: string]: PageLayout };
+  layouts?: Record<string, PageLayout>;
   styles?: StyleMap;
   pdf_from_docx?: boolean;
   pptx?: PptxSettings;

@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, computed } from '@angular/core';
+import { Component, inject, signal, Input, computed, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -30,7 +30,7 @@ import {
   templateUrl: './document-editor.html',
   styleUrl: './document-editor.scss',
 })
-export class DocumentEditor {
+export class DocumentEditor implements OnDestroy {
   private service = inject(DocumentService);
   private projectSvc = inject(ProjectService);
   private companySvc = inject(CompanyService);

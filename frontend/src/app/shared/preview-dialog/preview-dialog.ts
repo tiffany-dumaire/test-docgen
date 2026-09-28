@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject, Inject } from '@angular/core';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,9 +19,11 @@ export interface PreviewData {
   styleUrl: './preview-dialog.scss',
 })
 export class PreviewDialog {
+  public data = inject<PreviewData>(MAT_DIALOG_DATA);
+  public ref = inject(MatDialogRef<PreviewDialog>);
+  san = inject(DomSanitizer)
   blobSafe: SafeResourceUrl;
-  constructor(@Inject(MAT_DIALOG_DATA) public data: PreviewData,
-              public ref: MatDialogRef<PreviewDialog>, san: DomSanitizer) {
-    this.blobSafe = san.bypassSecurityTrustResourceUrl(data.blobUrl);
+  constructor() {
+    this.blobSafe = this.san.bypassSecurityTrustResourceUrl(this.data.blobUrl);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input } from '@angular/core';
+import { Component, inject, signal, Input, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -28,7 +28,7 @@ const TYPES: { key: string; label: string }[] = [
   templateUrl: './project-tracking.html',
   styleUrl: './project-tracking.scss',
 })
-export class ProjectTracking {
+export class ProjectTracking implements OnInit {
   private http = inject(HttpClient);
   private san = inject(DomSanitizer);
   private svc = inject(ProjectService);

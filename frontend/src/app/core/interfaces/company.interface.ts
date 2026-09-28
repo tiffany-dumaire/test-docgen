@@ -10,7 +10,7 @@ export interface UsefulLink {
 
 export interface CompanyStyles {
   global?: StyleMap;
-  types?: { [docType: string]: StyleMap };
+  types?: Record<string, StyleMap>;
 }
 
 /** Forme brute (API) du profil d'entreprise. */

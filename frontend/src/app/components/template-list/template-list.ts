@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnDestroy } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -39,7 +39,7 @@ const TYPE_TABS: TypeTab[] = [
   templateUrl: './template-list.html',
   styleUrl: './template-list.scss',
 })
-export class TemplateList {
+export class TemplateList implements OnDestroy {
   private service = inject(DocumentService);
   private formSvc = inject(FormService);
   private toast = inject(ToastService);

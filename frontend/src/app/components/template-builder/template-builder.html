@@ -174,7 +174,7 @@
                       @case ('numbered_list') { <ng-container *ngTemplateOutlet="listEditor; context:{ $implicit: block }" /> }
                       @case ('image') {
                         <div class="stack">
-                          @if (block.asset_url) { <img [src]="block.asset_url" class="preview-img" [style.width.%]="block.width_pct" /> }
+                          @if (block.asset_url) { <img [src]="block.asset_url" class="preview-img" [style.width.%]="block.width_pct" alt="asset" /> }
                           <input type="file" accept="image/*" (change)="uploadImage($event, block)" />
                           <ng-container *ngTemplateOutlet="sizePos; context:{ $implicit: block }" />
                         </div>

@@ -58,11 +58,11 @@
                     @case ('ellipse') { <div class="fillbox" [style.background]="el.fill || 'transparent'" [style.border]="'2px solid ' + (el.stroke || '#1F497D')" style="border-radius:50%"></div> }
                     @case ('line') { <div class="linebox" [style.background]="el.color || '#1F497D'"></div> }
                     @case ('image') {
-                      @if (el.asset_url) { <img class="fillimg" [src]="el.asset_url" /> }
+                      @if (el.asset_url) { <img class="fillimg" [src]="el.asset_url" alt="asset"/> }
                       @else { <div class="ph">🖼️ image</div> }
                     }
                     @case ('logo') {
-                      @if (previewData() && companyLogo()) { <img class="fillimg" [src]="companyLogo()" /> }
+                      @if (previewData() && companyLogo()) { <img class="fillimg" [src]="companyLogo()" alt="logo" /> }
                       @else { <div class="ph">🏢 logo</div> }
                     }
                     @default {

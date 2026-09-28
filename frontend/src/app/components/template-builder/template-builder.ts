@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, computed } from '@angular/core';
+import { Component, inject, signal, Input, computed, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -53,7 +53,7 @@ const TYPE_META: Record<string, { label: string; icon: string; hint: string }> =
   templateUrl: './template-builder.html',
   styleUrl: './template-builder.scss',
 })
-export class TemplateBuilder {
+export class TemplateBuilder implements OnDestroy {
   private service = inject(DocumentService);
   private projectService = inject(ProjectService);
   private toast = inject(ToastService);

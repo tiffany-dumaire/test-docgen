@@ -3,4 +3,4 @@ export interface ElementStyle {
   color?: string; align?: 'left' | 'center' | 'right' | 'justify';
   space_after?: number;
 }
-export type StyleMap = { [element: string]: ElementStyle };
+export type StyleMap = Record<string, ElementStyle>;

@@ -191,7 +191,7 @@ export class ExcelBuilder {
   delRow(s: ExcelSheet, r: number) {
     s.cells = (s.cells ?? []).filter((x) => x.row !== r);
     for (const cl of s.cells) if (cl.row > r) cl.row -= 1;
-    s.col_widths = s.col_widths; // inchangé
+    // s.col_widths = s.col_widths;
     s.row_heights = this.shiftDims(s.row_heights, r);
     if ((s as any).grid_rows) (s as any).grid_rows = Math.max(1, (s as any).grid_rows - 1);
     this.gsel.set(null); this.touch();
