@@ -1,0 +1,76 @@
+/* ---------- ÉTÉ · coucher de soleil sur la mer (tons chauds, AUCUN bleu)
+   Soleil doré, orange, corail et rose du couchant, mer embrasée. ---------- */
+@mixin summer-light {
+  --mat-sys-primary: #e85d1f;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #ffd9c2;
+  --mat-sys-on-primary-container: #3a1200;
+  --mat-sys-secondary: #b5566b;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #ffd9e0;
+  --mat-sys-on-secondary-container: #3e0a1c;
+  --mat-sys-tertiary: #e9a400;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #ffe1a6;
+  --mat-sys-on-tertiary-container: #3a2600;
+  --mat-sys-surface: #fff7f1;
+  --mat-sys-on-surface: #241813;
+  --mat-sys-on-surface-variant: #574238;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #fff0e7;
+  --mat-sys-surface-container: #fce8dc;
+  --mat-sys-surface-container-high: #f7e0d2;
+  --mat-sys-surface-container-highest: #f2d8c8;
+  --mat-sys-outline: #8b7266;
+  --mat-sys-outline-variant: #dec6b8;
+  --mat-sys-inverse-surface: #3a2a22;
+  --mat-sys-inverse-on-surface: #ffede3;
+  --mat-sys-inverse-primary: #ffb68f;
+  --mat-sys-error: #b3261e;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #f9dedc;
+  --mat-sys-on-error-container: #410e0b;
+}
+@mixin summer-dark {
+  --mat-sys-primary: #ffb68f;
+  --mat-sys-on-primary: #5a2000;
+  --mat-sys-primary-container: #7e3510;
+  --mat-sys-on-primary-container: #ffd9c2;
+  --mat-sys-secondary: #f1b0be;
+  --mat-sys-on-secondary: #571d2b;
+  --mat-sys-secondary-container: #703043;
+  --mat-sys-on-secondary-container: #ffd9e0;
+  --mat-sys-tertiary: #f1c04e;
+  --mat-sys-on-tertiary: #3d2e00;
+  --mat-sys-tertiary-container: #6d5200;
+  --mat-sys-on-tertiary-container: #ffe1a6;
+  --mat-sys-surface: #1a1113;
+  --mat-sys-on-surface: #f2dfd6;
+  --mat-sys-on-surface-variant: #dec6b8;
+  --mat-sys-surface-container-lowest: #140c0e;
+  --mat-sys-surface-container-low: #241619;
+  --mat-sys-surface-container: #29191b;
+  --mat-sys-surface-container-high: #352325;
+  --mat-sys-surface-container-highest: #402d2e;
+  --mat-sys-outline: #a48d82;
+  --mat-sys-outline-variant: #574238;
+  --mat-sys-inverse-surface: #f2dfd6;
+  --mat-sys-inverse-on-surface: #3a2a22;
+  --mat-sys-inverse-primary: #e85d1f;
+  --mat-sys-error: #f2b8b5;
+  --mat-sys-on-error: #601410;
+  --mat-sys-error-container: #8c1d18;
+  --mat-sys-on-error-container: #f9dedc;
+  color-scheme: dark;
+}
+:root[data-p='summer'] {
+  @include summer-light;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-p='summer']:not([data-theme='light']) {
+    @include summer-dark;
+  }
+}
+:root[data-p='summer'][data-theme='dark'] {
+  @include summer-dark;
+}

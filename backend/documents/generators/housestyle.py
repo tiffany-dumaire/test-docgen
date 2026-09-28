@@ -11,18 +11,19 @@ ASSETS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
 FONTS_DIR = os.path.join(ASSETS_DIR, "fonts")
 BASE_DOCX = os.path.join(ASSETS_DIR, "Modele.docx")
 
-# --- Couleurs (thème du modèle) ---
+# --- Couleurs (charte VNV / Corporate Identity par défaut) ---
+# Orange VNV #ec6608, charcoal #1d1e1b, gris 45% #a8a8a8.
 COLORS = {
-    "primary": "#1F497D",       # dk2 du thème
-    "accent": "#4F81BD",        # accent1
-    "heading": "#000000",       # titres 1-4
-    "heading_deep": "#243F60",  # titres 5+
-    "toc_heading": "#365F91",
-    "muted": "#595959",
-    "border": "#BFBFBF",
-    "light": "#F2F2F2",
-    "code_bg": "#F4F4F4",
-    "link": "#0000FF",
+    "primary": "#EC6608",       # Orange VNV
+    "accent": "#F5A15A",        # Orange VNV éclairci
+    "heading": "#1D1E1B",       # Charcoal Black (titres 1-4)
+    "heading_deep": "#3A3A36",  # titres 5+
+    "toc_heading": "#EC6608",
+    "muted": "#6D6D6A",
+    "border": "#CBC7BC",
+    "light": "#F5F3EF",
+    "code_bg": "#F4F4F2",
+    "link": "#EC6608",
 }
 
 # --- Polices (fichiers TTF embarqués) ---

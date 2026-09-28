@@ -1,4 +1,17 @@
-.PHONY: venv deps env migrate data user backend frontend start
+.PHONY: venv deps env migrate data user backend frontend start up down logs
+
+COMPOSE = docker compose -f .devcontainer/docker-compose.yml
+
+# Dev container : lance toute la stack (Django + Angular + PostgreSQL)
+up:
+	$(COMPOSE) up --build
+
+# Dev container : arrête la stack (ajoutez -v pour supprimer la base)
+down:
+	$(COMPOSE) down
+
+logs:
+	$(COMPOSE) logs -f
 
 venv:
 	python3 -m venv backend/.venv

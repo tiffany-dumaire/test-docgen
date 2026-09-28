@@ -1,0 +1,127 @@
+/* =========================================================
+   THÈME DE BASE (VNV) — jetons partagés par TOUS les thèmes.
+   - Couleurs par défaut : charte VNV (orange #ec6608).
+   - Typographie VNV (Montserrat / Oswald) : commune à tous les thèmes,
+     définie ici uniquement (les saisons ne surchargent que les couleurs).
+   - Jetons de formes, de types de document (--doc-*) et de statut (--st-*).
+   data-theme : "light" | "dark" | (absent → système)
+   ========================================================= */
+
+:root {
+  /* Couleurs (VNV — clair) */
+  --mat-sys-primary: #ec6608;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #ffdcc2;
+  --mat-sys-on-primary-container: #331200;
+  --mat-sys-secondary: #5b5a55;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #e6e4df;
+  --mat-sys-on-secondary-container: #1d1e1b;
+  --mat-sys-tertiary: #6d6d6a;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #e9e9e7;
+  --mat-sys-on-tertiary-container: #1d1e1b;
+  --mat-sys-surface: #fbfaf8;
+  --mat-sys-on-surface: #1d1e1b;
+  --mat-sys-on-surface-variant: #48473f;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #f5f3ef;
+  --mat-sys-surface-container: #efede8;
+  --mat-sys-surface-container-high: #e9e7e1;
+  --mat-sys-surface-container-highest: #e3e1da;
+  --mat-sys-outline: #79766d;
+  --mat-sys-outline-variant: #cbc7bc;
+  --mat-sys-inverse-surface: #31302c;
+  --mat-sys-inverse-on-surface: #f3f1ec;
+  --mat-sys-inverse-primary: #ffb68a;
+  --mat-sys-error: #b3261e;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #f9dedc;
+  --mat-sys-on-error-container: #410e0b;
+  /* Typographie VNV — commune à tous les thèmes */
+  --pd-display: 'Montserrat', 'Segoe UI', system-ui, sans-serif;
+  --pd-body: 'Montserrat', 'Segoe UI', system-ui, sans-serif;
+  --pd-mono: 'Oswald', 'Segoe UI', system-ui, sans-serif;
+  --pd-display-wght: 600;
+  --pd-display-track: -0.01em;
+  /* Formes */
+  --pd-r-xs: 6px;
+  --pd-r-s: 10px;
+  --pd-r-m: 16px;
+  --pd-r-l: 28px;
+  --pd-r-btn: 999px;
+  --pd-row: 48px;
+  /* Types de document (--doc-*) et statuts (--st-*) — clair */
+  --doc-word: #2e5e8e;
+  --doc-pdf: #a32638;
+  --doc-md: #4a5360;
+  --doc-ppt: #a34e2a;
+  --doc-xls: #2e6b55;
+  --doc-a3: #5b4f8a;
+  --doc-stats: #6b3f6e;
+  --doc-letter: #806a2e;
+  --doc-mail: #2d6e7e;
+  --st-calm: #2f6b45;
+  --st-breeze: #7f6400;
+  --st-gale: #b04a12;
+  --st-storm: #a1202a;
+  color-scheme: light;
+}
+
+/* ---------- Variantes sombres (VNV + doc/st) ---------- */
+
+@mixin base-dark {
+  --mat-sys-primary: #ffb68a;
+  --mat-sys-on-primary: #4a1c00;
+  --mat-sys-primary-container: #6a2e00;
+  --mat-sys-on-primary-container: #ffdcc2;
+  --mat-sys-secondary: #cbc7bc;
+  --mat-sys-on-secondary: #2f2e29;
+  --mat-sys-secondary-container: #45443e;
+  --mat-sys-on-secondary-container: #e6e4df;
+  --mat-sys-tertiary: #c6c5c0;
+  --mat-sys-on-tertiary: #2f2f2c;
+  --mat-sys-tertiary-container: #454542;
+  --mat-sys-on-tertiary-container: #e9e9e7;
+  --mat-sys-surface: #16150f;
+  --mat-sys-on-surface: #e9e7e0;
+  --mat-sys-on-surface-variant: #cbc7bc;
+  --mat-sys-surface-container-lowest: #100f0a;
+  --mat-sys-surface-container-low: #1e1d16;
+  --mat-sys-surface-container: #22211a;
+  --mat-sys-surface-container-high: #2c2b24;
+  --mat-sys-surface-container-highest: #37362e;
+  --mat-sys-outline: #928e82;
+  --mat-sys-outline-variant: #48473f;
+  --mat-sys-inverse-surface: #e9e7e0;
+  --mat-sys-inverse-on-surface: #31302c;
+  --mat-sys-inverse-primary: #ec6608;
+  --mat-sys-error: #f2b8b5;
+  --mat-sys-on-error: #601410;
+  --mat-sys-error-container: #8c1d18;
+  --mat-sys-on-error-container: #f9dedc;
+  --doc-word: #a6c8f0;
+  --doc-pdf: #f5a3ae;
+  --doc-md: #bfc7d2;
+  --doc-ppt: #f2a98a;
+  --doc-xls: #93d3b8;
+  --doc-a3: #c4b8f2;
+  --doc-stats: #ddb0dd;
+  --doc-letter: #dcc68a;
+  --doc-mail: #8fd0df;
+  --st-calm: #8fd3a6;
+  --st-breeze: #e3c04e;
+  --st-gale: #f59e6b;
+  --st-storm: #f28b8b;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include base-dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  @include base-dark;
+}

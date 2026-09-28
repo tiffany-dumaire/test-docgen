@@ -14,8 +14,11 @@ défaut. Un modèle peut ainsi :
   - définir des styles totalement personnalisés (surcharge complète).
 
 Éléments stylables : title, subtitle, section, h1..h5, paragraph.
-Propriétés : font (nom de police), size (pt), bold, italic, color (#hex),
-align (left|center|right|justify), space_after (pt).
+Propriétés : font (nom de police), size (pt), bold, italic, underline,
+color (#hex), align (left|center|right|justify), space_after (pt),
+page_break (saut de page avant, pour les titres). Les propriétés de
+numérotation (numbered/number_format/number_indent) et de listes
+(list_format/list_indent) sont transportées telles quelles.
 """
 from . import housestyle as HS
 
@@ -92,6 +95,9 @@ def apply(paragraph, element_key, resolved):
             paragraph.paragraph_format.space_after = Pt(float(props["space_after"]))
         except (TypeError, ValueError):
             pass
+    # Titre « commence sur une nouvelle page » : saut de page avant le paragraphe.
+    if props.get("page_break"):
+        paragraph.paragraph_format.page_break_before = True
 
     color = None
     if props.get("color"):
@@ -115,5 +121,7 @@ def apply(paragraph, element_key, resolved):
             run.font.bold = bool(props["bold"])
         if "italic" in props:
             run.font.italic = bool(props["italic"])
+        if "underline" in props:
+            run.font.underline = bool(props["underline"])
         if color is not None:
             run.font.color.rgb = color

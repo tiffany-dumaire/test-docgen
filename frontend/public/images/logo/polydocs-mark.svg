@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="PolyDocs">
+  <defs>
+    <linearGradient id="m_face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4C670"/><stop offset="1" stop-color="#C97A22"/></linearGradient>
+    <linearGradient id="m_back" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A23C16"/><stop offset="1" stop-color="#5E2410"/></linearGradient>
+  </defs>
+  <g transform="rotate(-10 32 32)">
+    <!-- feuille pliée : face claire + dos rouille séparés par un pli central -->
+    <polygon points="15,8 49,13 45,56 11,51" fill="url(#m_face)"/>
+    <polygon points="33,10 45,56 11,51" fill="url(#m_back)"/>
+    <!-- coin corné -->
+    <polygon points="49,13 37,14 47,26" fill="url(#m_back)"/>
+    <!-- arête du pli -->
+    <path d="M33 10L28 54" stroke="#FBEAC8" stroke-width="1" opacity=".5" fill="none"/>
+  </g>
+</svg>

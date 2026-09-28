@@ -11,7 +11,52 @@ from reportlab.platypus import (
     Spacer, Table, TableStyle,
 )
 
-from .base import GenerationContext, resolve_value
+from .base import GenerationContext, placeholder_context, interpolate, resolve_value
+from .htmlparse import inline_runs, parse_html
+
+
+def _inline_rl(html: str) -> str:
+    """Convertit l'HTML en ligne en balisage mini-HTML de reportlab (Paragraph)."""
+    out = []
+    for seg in inline_runs(html):
+        t = (seg["text"].replace("&", "&amp;").replace("<", "&lt;")
+             .replace(">", "&gt;").replace("\n", "<br/>"))
+        if seg.get("color"):
+            t = f'<font color="{seg["color"]}">{t}</font>'
+        if seg.get("bold"):
+            t = f"<b>{t}</b>"
+        if seg.get("italic"):
+            t = f"<i>{t}</i>"
+        if seg.get("underline"):
+            t = f"<u>{t}</u>"
+        if seg.get("href"):
+            t = f'<a href="{seg["href"]}">{t}</a>'
+        out.append(t)
+    return "".join(out)
+
+
+def _rl_markup_from_html(html: str) -> str:
+    """HTML enrichi -> balisage Paragraph (titres/paragraphes/listes)."""
+    parts = []
+    for node in parse_html(html or ""):
+        if node["kind"] in ("heading", "paragraph"):
+            parts.append(_inline_rl(node["html"]))
+        elif node["kind"] == "list":
+            for it in node["items"]:
+                parts.append("• " + _inline_rl(it))
+    return "<br/>".join(p for p in parts if p)
+
+
+def _draw_rich(canvas, markup, x, y_bottom, width, align, size, color):
+    from reportlab.lib.styles import ParagraphStyle
+    amap = {"left": 0, "center": 1, "right": 2}
+    style = ParagraphStyle("hf", fontName="Helvetica", fontSize=size,
+                           leading=size + 2, alignment=amap.get(align, 1),
+                           textColor=color)
+    para = Paragraph(markup or "", style)
+    _pw, ph = para.wrap(width, 6 * cm)
+    para.drawOn(canvas, x, y_bottom)
+    return ph
 
 PRIMARY = colors.HexColor("#2563EB")
 DARK = colors.HexColor("#1E293B")
@@ -63,24 +108,40 @@ class _DocTemplate(BaseDocTemplate):
     def _decorate(self, canvas, doc):
         ctx = self.ctx
         w, h = A4
+        cfg = (ctx.document.template.settings or {})
+        header_cfg = cfg.get("header")
+        footer_cfg = cfg.get("footer")
+        pctx = placeholder_context(ctx)
         canvas.saveState()
 
         # --- En-tête ---
-        canvas.setFillColor(PRIMARY)
-        canvas.rect(0, h - 1.4 * cm, w, 1.4 * cm, fill=1, stroke=0)
-        canvas.setFillColor(colors.white)
-        canvas.setFont("Helvetica-Bold", 12)
-        canvas.drawString(2 * cm, h - 0.95 * cm, ctx.company.name or "Entreprise")
+        header_on = header_cfg is None or header_cfg.get("enabled", True)
+        header_html = (header_cfg or {}).get("html") if header_cfg else None
+        if header_on and header_html and header_html.strip():
+            # En-tête personnalisé en texte enrichi (couleurs propres, pas de bandeau).
+            markup = _rl_markup_from_html(interpolate(header_html, pctx))
+            _draw_rich(canvas, markup, 2 * cm, h - 1.7 * cm, w - 4 * cm,
+                       (header_cfg or {}).get("align", "left"), 10, DARK)
+        elif header_on:
+            canvas.setFillColor(PRIMARY)
+            canvas.rect(0, h - 1.4 * cm, w, 1.4 * cm, fill=1, stroke=0)
+            canvas.setFillColor(colors.white)
+            canvas.setFont("Helvetica-Bold", 12)
+            htext = (interpolate(header_cfg.get("text", "") or "", pctx)
+                     if header_cfg else "") or (ctx.company.name or "Entreprise")
+            canvas.drawString(2 * cm, h - 0.95 * cm, htext.split("\n")[0])
 
+        # Badge de confidentialité (indépendant de l'en-tête)
         conf_color = CONF_COLORS.get(ctx.confidentiality, MUTED)
         label = ctx.confidentiality_label.upper()
-        canvas.setFillColor(conf_color)
-        badge_w = 3.8 * cm
-        canvas.roundRect(w - 2 * cm - badge_w, h - 1.15 * cm, badge_w,
-                         0.65 * cm, 3, fill=1, stroke=0)
-        canvas.setFillColor(colors.white)
-        canvas.setFont("Helvetica-Bold", 7)
-        canvas.drawCentredString(w - 2 * cm - badge_w / 2, h - 0.72 * cm, label)
+        if header_on and not (header_html and header_html.strip()):
+            canvas.setFillColor(conf_color)
+            badge_w = 3.8 * cm
+            canvas.roundRect(w - 2 * cm - badge_w, h - 1.15 * cm, badge_w,
+                             0.65 * cm, 3, fill=1, stroke=0)
+            canvas.setFillColor(colors.white)
+            canvas.setFont("Helvetica-Bold", 7)
+            canvas.drawCentredString(w - 2 * cm - badge_w / 2, h - 0.72 * cm, label)
 
         # --- Filigrane pour les niveaux élevés ---
         if ctx.confidentiality in ("confidential", "restricted"):
@@ -93,21 +154,45 @@ class _DocTemplate(BaseDocTemplate):
             canvas.restoreState()
 
         # --- Pied de page ---
-        canvas.setStrokeColor(LIGHT)
-        canvas.line(2 * cm, 1.6 * cm, w - 2 * cm, 1.6 * cm)
-        canvas.setFont("Helvetica", 7)
-        canvas.setFillColor(MUTED)
-        footer = []
-        if ctx.company.website_url:
-            footer.append(ctx.company.website_url)
-        if ctx.company.email:
-            footer.append(ctx.company.email)
-        if ctx.company.phone:
-            footer.append(ctx.company.phone)
-        canvas.drawString(2 * cm, 1.1 * cm, "  |  ".join(footer))
-        canvas.drawRightString(
-            w - 2 * cm, 1.1 * cm,
-            f"v{ctx.version_number}  ·  Page {doc.page}")
+        if footer_cfg is None:
+            canvas.setStrokeColor(LIGHT)
+            canvas.line(2 * cm, 1.6 * cm, w - 2 * cm, 1.6 * cm)
+            canvas.setFont("Helvetica", 7)
+            canvas.setFillColor(MUTED)
+            footer = []
+            if ctx.company.website_url:
+                footer.append(ctx.company.website_url)
+            if ctx.company.email:
+                footer.append(ctx.company.email)
+            if ctx.company.phone:
+                footer.append(ctx.company.phone)
+            canvas.drawString(2 * cm, 1.1 * cm, "  |  ".join(footer))
+            canvas.drawRightString(
+                w - 2 * cm, 1.1 * cm,
+                f"v{ctx.version_number}  ·  Page {doc.page}")
+        elif footer_cfg.get("enabled", True):
+            canvas.setStrokeColor(LIGHT)
+            canvas.line(2 * cm, 1.6 * cm, w - 2 * cm, 1.6 * cm)
+            align = footer_cfg.get("align", "center")
+            footer_html = footer_cfg.get("html")
+            if footer_html and footer_html.strip():
+                markup = _rl_markup_from_html(interpolate(footer_html, pctx))
+                _draw_rich(canvas, markup, 2 * cm, 0.7 * cm, w - 4 * cm,
+                           align, 7, MUTED)
+            else:
+                canvas.setFont("Helvetica", 7)
+                canvas.setFillColor(MUTED)
+                text = interpolate(footer_cfg.get("text", "") or "", pctx)
+                lines = [l for l in text.split("\n") if l.strip()]
+                y = 1.1 * cm
+                for line in reversed(lines):
+                    if align == "left":
+                        canvas.drawString(2 * cm, y, line)
+                    elif align == "right":
+                        canvas.drawRightString(w - 2 * cm, y, line)
+                    else:
+                        canvas.drawCentredString(w / 2, y, line)
+                    y += 0.34 * cm
         canvas.restoreState()
 
 

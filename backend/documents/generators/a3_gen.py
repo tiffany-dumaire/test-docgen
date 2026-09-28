@@ -19,8 +19,24 @@ import io
 from . import layout_render as LR
 
 
+def _requested_lang(ctx):
+    """Langue demandée : data['_lang'] du document, sinon langue principale."""
+    tpl = ctx.document.template
+    data = getattr(ctx.document, "data", None) or {}
+    lang = data.get("_lang") or getattr(tpl, "language", None) or "fr"
+    return lang
+
+
 def _pages(ctx):
     settings = (ctx.document.template.settings or {})
+    # Contenu multilingue : settings["a3_pages_i18n"] = {lang: [pages...]}
+    i18n = settings.get("a3_pages_i18n") or {}
+    if isinstance(i18n, dict) and i18n:
+        lang = _requested_lang(ctx)
+        pages = i18n.get(lang) or i18n.get(getattr(ctx.document.template, "language", "fr")) \
+            or next(iter(i18n.values()), None)
+        if pages:
+            return [p for p in pages if isinstance(p, dict) and p.get("layout")]
     pages = settings.get("a3_pages")
     if pages:
         return [p for p in pages if isinstance(p, dict) and p.get("layout")]

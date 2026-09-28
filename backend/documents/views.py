@@ -75,13 +75,19 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Modèle non A3."},
                             status=status.HTTP_400_BAD_REQUEST)
         fmt = (request.query_params.get("fmt") or "pdf").lower()
+        # Langue demandée : rend la planche dans la langue choisie (a3_pages_i18n).
+        avail = template.available_languages()
+        lang = (request.query_params.get("lang") or "").strip()
+        if lang not in avail:
+            lang = template.language or (avail[0] if avail else "fr")
+        data = {"_lang": lang}
         project = Project.objects.first()
         tmp = Document.objects.create(
-            project=project, template=template, title=template.name,
-            confidentiality=ConfidentialityLevel.INTERNAL, data={})
+            project=project, template=template, title=template.name_for(lang),
+            confidentiality=ConfidentialityLevel.INTERNAL, data=data)
         try:
             ctx = GenerationContext.build(
-                tmp, version_number=1, data={}, author_initials="—")
+                tmp, version_number=1, data=data, author_initials="—")
             if fmt == "png":
                 content, mime, ext = a3_gen.render_png(ctx), "image/png", "png"
             elif fmt == "svg":
@@ -90,7 +96,7 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
                 content, mime, ext = a3_gen.render(ctx), "application/pdf", "pdf"
             resp = HttpResponse(content, content_type=mime)
             disp = "attachment" if request.query_params.get("download") else "inline"
-            name = (template.slug or "template") + "." + ext
+            name = f"{template.slug or 'template'}-{lang}.{ext}"
             resp["Content-Disposition"] = f'{disp}; filename="{name}"'
             return resp
         finally:
@@ -113,6 +119,59 @@ class DocumentTemplateViewSet(viewsets.ModelViewSet):
         return Response(DocumentTemplateSerializer(clone).data,
                         status=status.HTTP_201_CREATED)
 
+    @action(detail=True, methods=["get"])
+    def versions(self, request, pk=None):
+        """Liste les versions nommées du modèle."""
+        from .models import DocumentTemplateVersion
+        from .serializers import DocumentTemplateVersionSerializer
+        qs = DocumentTemplateVersion.objects.filter(template=self.get_object())
+        return Response(DocumentTemplateVersionSerializer(qs, many=True).data)
+
+    @action(detail=True, methods=["post"])
+    def save_version(self, request, pk=None):
+        """Enregistre la configuration courante du modèle comme nouvelle version.
+
+        payload : {name?, make_default?}
+        """
+        from django.db.models import Max
+        from .models import DocumentTemplateVersion
+        from .serializers import DocumentTemplateVersionSerializer
+        tpl = self.get_object()
+        next_num = (tpl.versions.aggregate(m=Max("version_number"))["m"] or 0) + 1
+        make_default = bool(request.data.get("make_default")) or not tpl.versions.exists()
+        if make_default:
+            tpl.versions.update(is_default=False)
+        version = DocumentTemplateVersion.objects.create(
+            template=tpl,
+            name=(request.data.get("name") or f"Version {next_num}").strip(),
+            version_number=next_num,
+            is_default=make_default,
+            schema=tpl.schema,
+            settings=tpl.settings)
+        return Response(DocumentTemplateVersionSerializer(version).data,
+                        status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"])
+    def set_default_version(self, request, pk=None):
+        """Définit la version par défaut (utilisée pour générer) et recharge sa
+        configuration dans le modèle."""
+        from .models import DocumentTemplateVersion
+        from .serializers import DocumentTemplateSerializer
+        tpl = self.get_object()
+        vid = request.data.get("version")
+        try:
+            version = tpl.versions.get(pk=vid)
+        except DocumentTemplateVersion.DoesNotExist:
+            return Response({"detail": "Version introuvable."}, status=404)
+        tpl.versions.update(is_default=False)
+        version.is_default = True
+        version.save(update_fields=["is_default"])
+        # Recharge la config de la version par défaut dans le modèle vivant.
+        tpl.schema = version.schema
+        tpl.settings = version.settings
+        tpl.save(update_fields=["schema", "settings"])
+        return Response(DocumentTemplateSerializer(tpl).data)
+
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = (Document.objects.select_related("project", "template")
@@ -126,6 +185,18 @@ class DocumentViewSet(viewsets.ModelViewSet):
         ctx = super().get_serializer_context()
         ctx["request"] = self.request
         return ctx
+
+    def perform_create(self, serializer):
+        document = serializer.save()
+        try:
+            from projects.journal import log_project
+            if document.project_id:
+                log_project(
+                    document.project, "document_created",
+                    f"Nouveau document « {document.title} » créé.",
+                    confidentiality=document.confidentiality)
+        except Exception:
+            pass
 
     @action(detail=True, methods=["post"])
     def generate(self, request, pk=None):
@@ -219,13 +290,37 @@ class DocumentVersionViewSet(viewsets.ReadOnlyModelViewSet):
         version = self.get_object()
         if not version.file:
             raise Http404("Fichier introuvable")
-        # Type MIME déduit de l'extension réelle du fichier (gère A3 PNG/PDF).
         import mimetypes
+        import os
+        from django.http import HttpResponse
+        name = version.file.name.split("/")[-1]
+        ext = os.path.splitext(name)[1].lower()
+
+        # Export PDF à la volée pour les documents Word / PowerPoint.
+        if request.query_params.get("format") == "pdf" and ext in (".docx", ".pptx"):
+            from .services import to_pdf_for_preview, native_pdf_from_version
+            content = version.file.open("rb").read()
+            # 1) Fidélité maximale via Word/LibreOffice si disponible.
+            pdf = to_pdf_for_preview(content, ext)
+            # 2) Repli natif (reportlab) pour les documents Word par blocs,
+            #    sans dépendance bureautique côté serveur.
+            if pdf is None and ext == ".docx":
+                pdf = native_pdf_from_version(version)
+            if pdf is None:
+                return Response(
+                    {"detail": "Conversion PDF indisponible pour ce document "
+                     "(installez LibreOffice pour l'export PowerPoint → PDF)."},
+                    status=503)
+            resp = HttpResponse(pdf, content_type="application/pdf")
+            resp["Content-Disposition"] = (
+                f'attachment; filename="{os.path.splitext(name)[0]}.pdf"')
+            return resp
+
+        # Type MIME déduit de l'extension réelle du fichier (gère A3 PNG/PDF).
         mime = (mimetypes.guess_type(version.file.name)[0]
                 or file_meta(version.document.doc_type)[1])
         response = FileResponse(version.file.open("rb"), content_type=mime)
-        response["Content-Disposition"] = (
-            f'attachment; filename="{version.file.name.split("/")[-1]}"')
+        response["Content-Disposition"] = f'attachment; filename="{name}"'
         return response
 
 

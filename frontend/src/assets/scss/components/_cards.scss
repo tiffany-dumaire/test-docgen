@@ -1,0 +1,30 @@
+/* Cartes */
+
+.card {
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--border);
+  border-radius: var(--pd-r-m);
+  box-shadow: var(--shadow);
+  padding: 1.25rem 1.35rem;
+  transition:
+    box-shadow 0.18s ease,
+    border-color 0.15s ease,
+    transform 0.14s ease,
+    background 0.3s;
+  + .card {
+    margin-top: 1rem;
+  }
+  h3:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    &::before {
+      content: '';
+      width: 5px;
+      height: 17px;
+      border-radius: 3px;
+      background: var(--mat-sys-primary);
+      display: inline-block;
+    }
+  }
+}

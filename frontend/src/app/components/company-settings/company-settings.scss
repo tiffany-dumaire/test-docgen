@@ -1,0 +1,148 @@
+.company-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.4rem 0 0.2rem;
+}
+
+.logo-slot {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  flex: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  &.empty {
+    background: linear-gradient(135deg, var(--frost), #fff);
+    color: var(--primary);
+  }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .material-icons {
+    font-size: 26px;
+  }
+  .logo-edit {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background: var(--primary);
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-top-left-radius: 8px;
+    .material-icons {
+      font-size: 13px;
+    }
+  }
+}
+
+.company-title {
+  max-width: 520px;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0.2rem 0.4rem;
+  border-radius: 8px;
+  color: var(--dark);
+  &:hover {
+    border-color: var(--border);
+  }
+  &:focus {
+    background: var(--surface);
+  }
+}
+
+.link-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.detail-tabs {
+  margin-top: 1rem;
+}
+
+.tabpad {
+  padding-top: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ava {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--primary-050);
+  color: var(--primary-dark);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  margin: 0.1rem 0.15rem 0 0;
+}
+
+.team-card .tdot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--team);
+  margin-right: 0.4rem;
+}
+
+.team-card {
+  border-top: 3px solid var(--team);
+}
+
+.type-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.type-pill {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  &.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+}

@@ -1,0 +1,8 @@
+/* Couleur d'entreprise (accent perso) — surcharge le primaire, quel que soit le thème */
+html[data-brand] {
+  --mat-sys-primary: var(--brand);
+  --mat-sys-on-primary: #fff;
+  --mat-sys-primary-container: color-mix(in srgb, var(--brand) 22%, var(--mat-sys-surface));
+  --mat-sys-on-primary-container: var(--brand);
+  --mat-sys-inverse-primary: color-mix(in srgb, var(--brand) 60%, #fff);
+}

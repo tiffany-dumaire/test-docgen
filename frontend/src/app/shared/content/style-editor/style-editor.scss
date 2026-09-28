@@ -1,0 +1,51 @@
+.hint {
+  margin: 0 0 0.6rem;
+}
+
+.style-acc {
+  display: block;
+
+  .fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.6rem 1rem;
+    padding-top: 0.4rem;
+
+    mat-form-field {
+      width: 200px;
+
+      &.w-sm {
+        width: 120px;
+      }
+      &.w-md {
+        width: 220px;
+      }
+    }
+
+    .colorfield {
+      margin: 0;
+
+      label {
+        display: block;
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-bottom: 0.2rem;
+      }
+      input[type='color'] {
+        width: 52px;
+        height: 40px;
+        padding: 2px;
+      }
+    }
+
+    .toggles,
+    .subrow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem 1rem;
+      width: 100%;
+    }
+  }
+}

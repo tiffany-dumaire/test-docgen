@@ -1,11 +1,17 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth.guard';
+import { authGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
   // Publiques (sans authentification)
-  { path: 'login', loadComponent: () => import('./features/auth/login').then((m) => m.Login) },
-  { path: 'auth/callback', loadComponent: () => import('./features/auth/callback').then((m) => m.AuthCallback) },
-  { path: 'f/:code', loadComponent: () => import('./features/forms/public-form').then((m) => m.PublicForm) },
+  { path: 'login', loadComponent: () => import('@components/login/login').then((m) => m.Login) },
+  {
+    path: 'auth/callback',
+    loadComponent: () => import('@components/callback/callback').then((m) => m.AuthCallback),
+  },
+  {
+    path: 'f/:code',
+    loadComponent: () => import('@components/public-form/public-form').then((m) => m.PublicForm),
+  },
 
   // Protégées (authentification requise)
   {
@@ -13,29 +19,123 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-      { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard) },
-      { path: 'company', loadComponent: () => import('./features/company/company-settings').then((m) => m.CompanySettings) },
-      { path: 'projects', loadComponent: () => import('./features/projects/project-list').then((m) => m.ProjectList) },
-      { path: 'projects/new', loadComponent: () => import('./features/projects/project-form').then((m) => m.ProjectForm) },
-      { path: 'projects/:id', loadComponent: () => import('./features/projects/project-detail').then((m) => m.ProjectDetail) },
-      { path: 'projects/:id/edit', loadComponent: () => import('./features/projects/project-form').then((m) => m.ProjectForm) },
-      { path: 'documents', loadComponent: () => import('./features/documents/document-list').then((m) => m.DocumentList) },
-      { path: 'documents/new', loadComponent: () => import('./features/documents/document-editor').then((m) => m.DocumentEditor) },
-      { path: 'documents/:id', loadComponent: () => import('./features/documents/document-editor').then((m) => m.DocumentEditor) },
-      { path: 'templates', loadComponent: () => import('./features/documents/template-list').then((m) => m.TemplateList) },
-      { path: 'templates/new', loadComponent: () => import('./features/documents/template-builder').then((m) => m.TemplateBuilder) },
-      { path: 'templates/:id', loadComponent: () => import('./features/documents/template-builder').then((m) => m.TemplateBuilder) },
-      { path: 'forms', loadComponent: () => import('./features/forms/form-list').then((m) => m.FormList) },
-      { path: 'forms/new', loadComponent: () => import('./features/forms/form-builder').then((m) => m.FormBuilder) },
-      { path: 'forms/:id', loadComponent: () => import('./features/forms/form-builder').then((m) => m.FormBuilder) },
-      { path: 'form-templates/new', loadComponent: () => import('./features/forms/form-template-builder').then((m) => m.FormTemplateBuilder) },
-      { path: 'form-templates/:id', loadComponent: () => import('./features/forms/form-template-builder').then((m) => m.FormTemplateBuilder) },
-      { path: 'suivi', loadComponent: () => import('./features/tracking/tracking').then((m) => m.Tracking) },
-      { path: 'clients', loadComponent: () => import('./features/clients/client-list').then((m) => m.ClientList) },
-      { path: 'clients/:id', loadComponent: () => import('./features/clients/client-detail').then((m) => m.ClientDetail) },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('@components/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      {
+        path: 'company',
+        loadComponent: () =>
+          import('@components/company-settings/company-settings').then((m) => m.CompanySettings),
+      },
+      {
+        path: 'projects',
+        loadComponent: () =>
+          import('@components/project-list/project-list').then((m) => m.ProjectList),
+      },
+      {
+        path: 'projects/new',
+        loadComponent: () =>
+          import('@components/project-form/project-form').then((m) => m.ProjectForm),
+      },
+      {
+        path: 'projects/:id',
+        loadComponent: () =>
+          import('@components/project-detail/project-detail').then((m) => m.ProjectDetail),
+      },
+      {
+        path: 'projects/:id/edit',
+        loadComponent: () =>
+          import('@components/project-form/project-form').then((m) => m.ProjectForm),
+      },
+      {
+        path: 'documents',
+        loadComponent: () =>
+          import('@components/document-list/document-list').then((m) => m.DocumentList),
+      },
+      {
+        path: 'documents/new',
+        loadComponent: () =>
+          import('@components/document-editor/document-editor').then((m) => m.DocumentEditor),
+      },
+      {
+        path: 'documents/:id',
+        loadComponent: () =>
+          import('@components/document-editor/document-editor').then((m) => m.DocumentEditor),
+      },
+      {
+        path: 'templates',
+        loadComponent: () =>
+          import('@components/template-list/template-list').then((m) => m.TemplateList),
+      },
+      {
+        path: 'templates/new',
+        loadComponent: () =>
+          import('@components/template-builder/template-builder').then((m) => m.TemplateBuilder),
+      },
+      {
+        path: 'templates/:id',
+        loadComponent: () =>
+          import('@components/template-builder/template-builder').then((m) => m.TemplateBuilder),
+      },
+      {
+        path: 'forms',
+        loadComponent: () => import('@components/form-list/form-list').then((m) => m.FormList),
+      },
+      {
+        path: 'forms/new',
+        loadComponent: () =>
+          import('@components/form-builder/form-builder').then((m) => m.FormBuilder),
+      },
+      {
+        path: 'forms/:id',
+        loadComponent: () =>
+          import('@components/form-builder/form-builder').then((m) => m.FormBuilder),
+      },
+      {
+        path: 'form-templates/new',
+        loadComponent: () =>
+          import('@components/form-template-builder/form-template-builder').then(
+            (m) => m.FormTemplateBuilder,
+          ),
+      },
+      {
+        path: 'form-templates/:id',
+        loadComponent: () =>
+          import('@components/form-template-builder/form-template-builder').then(
+            (m) => m.FormTemplateBuilder,
+          ),
+      },
+      {
+        path: 'suivi',
+        loadComponent: () => import('@components/tracking/tracking').then((m) => m.Tracking),
+      },
+      {
+        path: 'clients',
+        loadComponent: () =>
+          import('@components/client-list/client-list').then((m) => m.ClientList),
+      },
+      {
+        path: 'clients/new',
+        loadComponent: () =>
+          import('@components/client-detail/client-detail').then((m) => m.ClientDetail),
+      },
+      {
+        path: 'clients/:id',
+        loadComponent: () =>
+          import('@components/client-detail/client-detail').then((m) => m.ClientDetail),
+      },
       { path: 'teams', pathMatch: 'full', redirectTo: 'company' },
-      { path: 'teams/:id', loadComponent: () => import('./features/teams/team-detail').then((m) => m.TeamDetail) },
-      { path: 'preferences', loadComponent: () => import('./features/preferences/preferences').then((m) => m.Preferences) },
+      {
+        path: 'teams/:id',
+        loadComponent: () =>
+          import('@components/team-detail/team-detail').then((m) => m.TeamDetail),
+      },
+      {
+        path: 'preferences',
+        loadComponent: () =>
+          import('@components/preferences/preferences').then((m) => m.Preferences),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

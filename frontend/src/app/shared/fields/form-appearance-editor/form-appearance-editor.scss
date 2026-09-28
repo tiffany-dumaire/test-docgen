@@ -1,0 +1,25 @@
+.chk {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  input {
+    width: auto;
+  }
+}
+
+.upload-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  input[type='file'] {
+    width: auto;
+  }
+}
+
+.thumb {
+  height: 40px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}

@@ -1,0 +1,475 @@
+{
+ "sheets": [
+  {
+   "id": "seance",
+   "name": "Séance",
+   "title": "",
+   "type": "grid",
+   "cells": [
+    {
+     "row": 1,
+     "col": 2,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 1,
+     "col": 4,
+     "value": "PROCÈS-VERBAL DE SÉANCE",
+     "bold": true,
+     "size": 16.0,
+     "align": "center",
+     "number_format": "dd/mm/yy;@",
+     "border": false,
+     "col_span": 4
+    },
+    {
+     "row": 2,
+     "col": 2,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 2,
+     "col": 5,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 2,
+     "col": 6,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 2,
+     "col": 7,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 3,
+     "col": 1,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 3,
+     "col": 2,
+     "value": "Séance :",
+     "bold": true,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 3,
+     "col": 3,
+     "bold": true,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "valign": "center",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 3,
+     "col": 4,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 3,
+     "col": 5,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 3,
+     "col": 6,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 3,
+     "col": 7,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 4,
+     "col": 1,
+     "size": 10.0,
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 4,
+     "col": 2,
+     "value": "Lieu et date :",
+     "bold": true,
+     "size": 10.0,
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": true
+    },
+    {
+     "row": 4,
+     "col": 3,
+     "value": "VNV, XYZ",
+     "size": 10.0,
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true,
+     "col_span": 5
+    },
+    {
+     "row": 5,
+     "col": 2,
+     "value": "Participants :",
+     "bold": true,
+     "size": 10.0,
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": true
+    },
+    {
+     "row": 5,
+     "col": 3,
+     "size": 10.0,
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true,
+     "col_span": 5
+    },
+    {
+     "row": 6,
+     "col": 1,
+     "size": 10.0,
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 6,
+     "col": 2,
+     "value": "Distribution :",
+     "bold": true,
+     "size": 10.0,
+     "align": "right",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": true
+    },
+    {
+     "row": 6,
+     "col": 3,
+     "value": "Participants",
+     "size": 10.0,
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true,
+     "col_span": 5
+    },
+    {
+     "row": 7,
+     "col": 1,
+     "value": "Point",
+     "size": 10.0,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 7,
+     "col": 2,
+     "value": "Date d'ajout",
+     "size": 10.0,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 7,
+     "col": 3,
+     "value": "Action / Remarque",
+     "size": 10.0,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 7,
+     "col": 4,
+     "value": "Resp.",
+     "size": 10.0,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 7,
+     "col": 5,
+     "value": "Délai",
+     "size": 10.0,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 7,
+     "col": 6,
+     "value": "Nouveau délai",
+     "size": 10.0,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 7,
+     "col": 7,
+     "value": "Date conclusion",
+     "size": 10.0,
+     "bg": "#DDE3EA",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 8,
+     "col": 1,
+     "value": 1,
+     "bold": true,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 8,
+     "col": 2,
+     "bold": true,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 8,
+     "col": 3,
+     "bold": true,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "valign": "center",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 8,
+     "col": 4,
+     "bold": true,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "border": false
+    },
+    {
+     "row": 8,
+     "col": 5,
+     "bold": true,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 8,
+     "col": 6,
+     "bold": true,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 8,
+     "col": 7,
+     "bold": true,
+     "size": 10.0,
+     "bg": "#E88F52",
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": false
+    },
+    {
+     "row": 9,
+     "col": 1,
+     "value": 1.1,
+     "size": 10.0,
+     "align": "left",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 9,
+     "col": 2,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": true
+    },
+    {
+     "row": 9,
+     "col": 4,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "border": true
+    },
+    {
+     "row": 9,
+     "col": 5,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": true
+    },
+    {
+     "row": 9,
+     "col": 6,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": true
+    },
+    {
+     "row": 9,
+     "col": 7,
+     "size": 10.0,
+     "align": "center",
+     "valign": "center",
+     "wrap": true,
+     "number_format": "dd/mm/yy;@",
+     "border": true
+    }
+   ],
+   "col_widths": {
+    "1": 7.1,
+    "2": 16.0,
+    "3": 77.7,
+    "4": 13.0,
+    "5": 13.0,
+    "8": 9.1
+   },
+   "row_heights": {
+    "1": 50.2,
+    "2": 3.8,
+    "3": 16.5,
+    "4": 16.5,
+    "5": 16.5,
+    "6": 16.5,
+    "7": 33.0,
+    "8": 16.5,
+    "9": 16.5
+   }
+  }
+ ]
+}

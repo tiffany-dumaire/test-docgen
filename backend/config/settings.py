@@ -1,5 +1,5 @@
 """
-Configuration Django pour le projet DocuGen.
+Configuration Django pour le projet PolyDocs.
 Génération de documents génériques et personnalisés à partir de projets.
 """
 import os
@@ -77,12 +77,33 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# ---------------------------------------------------------------------------
+# Base de données
+# ---------------------------------------------------------------------------
+# PostgreSQL par défaut (voir backend/.env.example et le dev container).
+# Il reste possible de repasser sur SQLite en positionnant
+# DB_ENGINE=django.db.backends.sqlite3 (utile pour un test rapide hors Docker).
+DB_ENGINE = os.getenv("DB_ENGINE", "django.db.backends.postgresql")
+
+if DB_ENGINE.endswith("sqlite3"):
+    DATABASES = {
+        "default": {
+            "ENGINE": DB_ENGINE,
+            "NAME": os.getenv("DB_NAME", str(BASE_DIR / "db.sqlite3")),
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": DB_ENGINE,
+            "NAME": os.getenv("DB_NAME", "docugen"),
+            "USER": os.getenv("DB_USER", "docugen"),
+            "PASSWORD": os.getenv("DB_PASSWORD", "docugen"),
+            "HOST": os.getenv("DB_HOST", "localhost"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+            "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -151,6 +172,8 @@ OIDC_ISSUER = os.environ.get("OIDC_ISSUER", "")
 OIDC_JWKS_URL = os.environ.get("OIDC_JWKS_URL", "")
 OIDC_AUDIENCE = os.environ.get("OIDC_AUDIENCE", "")
 OIDC_CLIENT_ID = os.environ.get("OIDC_CLIENT_ID", "")
+# Secret client (clients « confidentiels ») — facultatif avec PKCE (clients publics).
+OIDC_CLIENT_SECRET = os.environ.get("OIDC_CLIENT_SECRET", "")
 OIDC_AUTHORIZE_URL = os.environ.get("OIDC_AUTHORIZE_URL", "")
 OIDC_TOKEN_URL = os.environ.get("OIDC_TOKEN_URL", "")
 OIDC_END_SESSION_URL = os.environ.get("OIDC_END_SESSION_URL", "")

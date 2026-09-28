@@ -33,6 +33,9 @@ def _tpl_settings(ctx):
         "include_suivi": s.get("include_suivi", True),
         "include_toc": s.get("include_toc", True),
         "table_color": (s.get("table_color") or "").lstrip("#") or None,
+        # En-tête / pied de page configurables (None = conserver le modèle de base).
+        "header": s.get("header"),
+        "footer": s.get("footer"),
     }
 
 
@@ -142,6 +145,64 @@ def _render_free_page_docx(ctx, layout) -> bytes:
     buffer = io.BytesIO()
     doc.save(buffer)
     return buffer.getvalue()
+
+
+# --- Numérotation / puces des styles (titres numérotés, formats de listes) ---
+_BULLET_CHARS = {"disc": "●", "circle": "○", "square": "▪",
+                 "dash": "–"}
+
+
+def _roman(n):
+    vals = [(1000, "M"), (900, "CM"), (500, "D"), (400, "CD"), (100, "C"),
+            (90, "XC"), (50, "L"), (40, "XL"), (10, "X"), (9, "IX"), (5, "V"),
+            (4, "IV"), (1, "I")]
+    out = ""
+    for v, s in vals:
+        while n >= v:
+            out += s
+            n -= v
+    return out or "I"
+
+
+def _fmt_counter(n, fmt):
+    """Formate un compteur (1-indexé) selon un format de numérotation."""
+    if n < 1:
+        n = 1
+    if fmt == "upper-alpha":
+        return chr(64 + ((n - 1) % 26) + 1) + "."
+    if fmt == "lower-alpha":
+        return chr(96 + ((n - 1) % 26) + 1) + ")"
+    if fmt == "upper-roman":
+        return _roman(n) + "."
+    if fmt == "decimal-paren":
+        return f"{n})"
+    return f"{n}."
+
+
+def effective_blocks(ctx):
+    """Blocs effectifs : schéma du modèle (avec surcharges des blocs modifiables
+    saisies à la génération) + éléments ajoutés à la volée (data['extra_blocks']).
+    """
+    data = ctx.data or {}
+    overrides = data.get("blocks") or {}
+    out = []
+    for b in (ctx.document.template.schema or []):
+        if not isinstance(b, dict):
+            continue
+        b2 = dict(b)
+        if b2.get("editable") and b2.get("id") in overrides:
+            ov = overrides.get(b2["id"])
+            if ov is not None:
+                b2["text"] = ov
+        out.append(b2)
+    for xb in (data.get("extra_blocks") or []):
+        if not isinstance(xb, dict) or not xb.get("type"):
+            continue
+        b2 = dict(xb)
+        if b2.get("type") == "bullet_list" and b2.get("text") and not b2.get("items"):
+            b2["items"] = [l for l in str(b2["text"]).split("\n") if l.strip()]
+        out.append(b2)
+    return out
 
 
 # ===========================================================================
@@ -406,12 +467,34 @@ def render_docx(ctx: GenerationContext) -> bytes:
             elif node["kind"] == "code":
                 shaded_code(node["text"])
 
-    for block in ctx.document.template.schema:
+    _hcounters = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    _numbered_levels = set()
+    for block in effective_blocks(ctx):
         bt = block.get("type")
         if bt == "heading":
-            lvl = int(block.get("level", 2))
-            p = para(interpolate(block.get("text", ""), pctx),
-                     HS.DOCX_STYLE_IDS.get(f"h{lvl}", "Titre2"))
+            lvl = max(1, min(5, int(block.get("level", 2))))
+            el = f"h{lvl}"
+            rprops = (_resolved_styles or {}).get(el, {})
+            text = interpolate(block.get("text", ""), pctx)
+            if rprops.get("numbered"):
+                fmt = rprops.get("number_format") or "decimal"
+                _hcounters[lvl] += 1
+                for d in range(lvl + 1, 6):
+                    _hcounters[d] = 0
+                _numbered_levels.add(lvl)
+                if fmt == "decimal":
+                    label = ".".join(str(_hcounters[i]) for i in range(1, lvl + 1)
+                                     if i in _numbered_levels)
+                else:
+                    label = _fmt_counter(_hcounters[lvl], fmt)
+                if label:
+                    text = f"{label} {text}"
+            p = para(text, HS.DOCX_STYLE_IDS.get(f"h{lvl}", "Titre2"))
+            if rprops.get("numbered") and rprops.get("number_indent"):
+                try:
+                    p.paragraph_format.left_indent = Pt(float(rprops["number_indent"]))
+                except (TypeError, ValueError):
+                    pass
         elif bt == "text":
             para(interpolate(block.get("text", ""), pctx),
                  HS.DOCX_STYLE_IDS["normal"])
@@ -419,17 +502,35 @@ def render_docx(ctx: GenerationContext) -> bytes:
             render_richtext(interpolate(block.get("text", ""), pctx))
         elif bt in ("bullet_list", "numbered_list"):
             ordered = bt == "numbered_list"
+            el = "numbered_list" if ordered else "bullet_list"
+            rprops = (_resolved_styles or {}).get(el, {})
+            lf = rprops.get("list_format")
+            indent = rprops.get("list_indent")
             items = block.get("items")
             if not items:
                 items = [l for l in interpolate(block.get("text", ""), pctx).split("\n") if l.strip()]
             for n, it in enumerate(items, 1):
-                sid = _list_style(styles, ordered)
-                p = doc.add_paragraph()
-                if sid:
-                    p.style = styles[sid]
-                    p.add_run(interpolate(str(it), pctx))
+                text = interpolate(str(it), pctx)
+                if lf:
+                    # Format explicite : marqueur manuel (puce ou numéro formaté).
+                    marker = _fmt_counter(n, lf) if ordered else _BULLET_CHARS.get(lf, "•")
+                    p = doc.add_paragraph()
+                    p.add_run(f"{marker} {text}")
                 else:
-                    p.add_run((f"{n}. " if ordered else "• ") + interpolate(str(it), pctx))
+                    sid = _list_style(styles, ordered)
+                    p = doc.add_paragraph()
+                    if sid:
+                        p.style = styles[sid]
+                        p.add_run(text)
+                    else:
+                        p.add_run((f"{n}. " if ordered else "• ") + text)
+                if indent:
+                    try:
+                        p.paragraph_format.left_indent = Pt(float(indent))
+                    except (TypeError, ValueError):
+                        pass
+                # Applique police/gras/italique/souligné/taille/couleur du style de liste.
+                STYLES.apply(p, el, _resolved_styles)
         elif bt == "diagram":
             from . import diagram_render as DR
             png, wpx, hpx = DR.render_png(block, ctx, color=table_hex)
@@ -507,22 +608,105 @@ def render_docx(ctx: GenerationContext) -> bytes:
         elif bt == "spacer":
             doc.add_paragraph()
 
-    # -- Pied : profil entreprise --
-    foot = doc.add_paragraph()
-    align(foot, "center")
-    bits = [b for b in [ctx.company.website_url, ctx.company.email,
-                        ctx.company.phone] if b]
-    if bits:
-        fr = foot.add_run("  ·  ".join(bits))
-        fr.font.size = Pt(8)
-        fr.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+    # -- Pied de page « profil entreprise » dans le corps --
+    # Conservé uniquement si le modèle ne définit PAS d'en-tête/pied configurables
+    # (settings.footer). Sinon, c'est le vrai pied de page de section qui gère.
+    if cfg.get("footer") is None:
+        foot = doc.add_paragraph()
+        align(foot, "center")
+        bits = [b for b in [ctx.company.website_url, ctx.company.email,
+                            ctx.company.phone] if b]
+        if bits:
+            fr = foot.add_run("  ·  ".join(bits))
+            fr.font.size = Pt(8)
+            fr.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
 
     if sectPr is not None:
         body.append(sectPr)
 
+    # En-tête / pied de page configurables (Word, PDF-via-Word, Lettre).
+    _apply_docx_header_footer(doc, cfg, ctx, pctx)
+
     buffer = io.BytesIO()
     doc.save(buffer)
     return buffer.getvalue()
+
+
+def _apply_docx_header_footer(doc, cfg, ctx, pctx):
+    """Applique l'en-tête et le pied de page définis dans les réglages du modèle.
+
+    settings.header / settings.footer = {
+        "enabled": bool, "text": "…\\n…" (variables {{…}} interpolées),
+        "align": "left|center|right", "show_logo": bool (en-tête).
+    }
+    Clé absente → on ne touche pas (comportement du modèle de base conservé).
+    """
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Inches, Pt, RGBColor
+
+    from docx.oxml.ns import qn as _qn
+
+    header_cfg = cfg.get("header")
+    footer_cfg = cfg.get("footer")
+    if header_cfg is None and footer_cfg is None:
+        return
+    try:
+        sec = doc.sections[0]
+    except (IndexError, AttributeError):
+        return
+    # Le modèle de base (Modele.docx) définit un en-tête/pied de PREMIÈRE PAGE
+    # (titlePg) ; sur une lettre d'une page, c'est lui qui s'affiche. On retire
+    # titlePg pour que l'en-tête/pied principal (celui qu'on configure) s'applique
+    # à toutes les pages.
+    try:
+        tp = sec._sectPr.find(_qn("w:titlePg"))
+        if tp is not None:
+            sec._sectPr.remove(tp)
+    except Exception:
+        pass
+    amap = {"left": WD_ALIGN_PARAGRAPH.LEFT, "center": WD_ALIGN_PARAGRAPH.CENTER,
+            "right": WD_ALIGN_PARAGRAPH.RIGHT}
+
+    def fill(part, conf, is_footer):
+        part.is_linked_to_previous = False
+        for p in list(part.paragraphs):
+            p._element.getparent().remove(p._element)
+        for t in list(part.tables):
+            t._element.getparent().remove(t._element)
+        if not conf.get("enabled", True):
+            part.add_paragraph("")  # pied/en-tête volontairement vide
+            return
+        alignment = amap.get(conf.get("align", "center" if is_footer else "left"),
+                             WD_ALIGN_PARAGRAPH.LEFT)
+        if not is_footer and conf.get("show_logo"):
+            logo = _logo_path(ctx)
+            if logo:
+                p = part.add_paragraph(); p.alignment = alignment
+                try:
+                    p.add_run().add_picture(logo, height=Inches(0.7))
+                except Exception:
+                    pass
+        html = conf.get("html")
+        if html and html.strip():
+            # Texte enrichi (couleur, gras, listes…) interpolé puis rendu.
+            _render_rich_into(part, interpolate(html, pctx), alignment,
+                              8 if is_footer else 10, is_footer)
+        else:
+            text = interpolate(conf.get("text", "") or "", pctx)
+            lines = text.split("\n") if text.strip() else []
+            for line in lines:
+                p = part.add_paragraph(); p.alignment = alignment
+                run = p.add_run(line)
+                run.font.size = Pt(8 if is_footer else 10)
+                if is_footer:
+                    run.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+        if not part.paragraphs:
+            part.add_paragraph("")
+
+    if header_cfg is not None:
+        fill(sec.header, header_cfg, False)
+    if footer_cfg is not None:
+        fill(sec.footer, footer_cfg, True)
 
 
 def _list_style(styles, ordered):
@@ -548,6 +732,53 @@ def _add_inline(paragraph, html, doc, add_hyperlink):
         run.bold = seg.get("bold", False)
         run.italic = seg.get("italic", False)
         run.underline = seg.get("underline", False)
+        color = seg.get("color")
+        if color:
+            try:
+                run.font.color.rgb = RGBColor.from_string(color.lstrip("#").upper())
+            except Exception:
+                pass
+
+
+def _add_hyperlink_part(paragraph, url, text):
+    """Ajoute un lien hypertexte dans un paragraphe (corps, en-tête ou pied)."""
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+    part = paragraph.part
+    r_id = part.relate_to(
+        url, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+        is_external=True)
+    hyper = OxmlElement("w:hyperlink"); hyper.set(qn("r:id"), r_id)
+    run = OxmlElement("w:r"); rpr = OxmlElement("w:rPr")
+    c = OxmlElement("w:color"); c.set(qn("w:val"), "0000FF"); rpr.append(c)
+    u = OxmlElement("w:u"); u.set(qn("w:val"), "single"); rpr.append(u)
+    run.append(rpr)
+    t = OxmlElement("w:t"); t.text = text; run.append(t)
+    hyper.append(run); paragraph._p.append(hyper)
+
+
+def _render_rich_into(part, html, alignment, base_size, is_footer):
+    """Rend un fragment HTML enrichi (couleur/gras/listes) dans un en-tête/pied."""
+    from docx.shared import Pt, RGBColor
+    added = False
+    for node in parse_html(html):
+        if node["kind"] in ("heading", "paragraph"):
+            p = part.add_paragraph(); p.alignment = alignment
+            _add_inline(p, node["html"], None, _add_hyperlink_part)
+            for run in p.runs:
+                run.font.size = Pt(base_size + (1 if node["kind"] == "heading" else 0))
+                if node["kind"] == "heading":
+                    run.bold = True
+            added = True
+        elif node["kind"] == "list":
+            for item in node["items"]:
+                p = part.add_paragraph(); p.alignment = alignment
+                p.add_run("• ").font.size = Pt(base_size)
+                _add_inline(p, item, None, _add_hyperlink_part)
+                for run in p.runs:
+                    run.font.size = Pt(base_size)
+                added = True
+    return added
 
 
 def _contacts_docx(doc, block, ctx, styles):
@@ -853,7 +1084,7 @@ def render_pdf(ctx: GenerationContext) -> bytes:
         return ListFlowable(flow, bulletType="1" if ordered else "bullet",
                             start="1" if ordered else "•", leftIndent=16)
 
-    for block in ctx.document.template.schema:
+    for block in effective_blocks(ctx):
         bt = block.get("type")
         if bt == "heading":
             lvl = int(block.get("level", 2))
@@ -980,7 +1211,7 @@ def render_xlsx(ctx: GenerationContext) -> bytes:
             if letter:
                 sheet.column_dimensions[letter].width = min(length + 4, 70)
 
-    for block in ctx.document.template.schema:
+    for block in effective_blocks(ctx):
         bt = block.get("type")
         if bt in ("heading", "text", "richtext", "link", "code"):
             txt = interpolate(block.get("text", "") or block.get("label", ""), pctx)
@@ -1094,3 +1325,4 @@ BLOCK_RENDERERS["md"] = _render_md
 BLOCK_RENDERERS["brochure"] = render_docx   # Brochure -> Word
 BLOCK_RENDERERS["lettre"] = render_docx     # Lettre  -> Word
 BLOCK_RENDERERS["mail"] = _render_md        # Mail    -> Markdown
+BLOCK_RENDERERS["offre"] = render_docx      # Offre   -> Word

@@ -1,0 +1,162 @@
+<p class="muted hint">
+  Laissez un style <b>non personnalisé</b> pour <b>hériter</b> du niveau supérieur (entreprise →
+  projet → modèle). Activez « Personnaliser » pour surcharger ses propriétés.
+</p>
+
+<mat-accordion class="style-acc" multi>
+  @for (el of elements; track el.key) {
+    <mat-expansion-panel [expanded]="has(el.key)">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ el.label }}</mat-panel-title>
+        <mat-panel-description>
+          <mat-slide-toggle
+            [ngModel]="has(el.key)"
+            (ngModelChange)="toggle(el.key, $event)"
+            (click)="$event.stopPropagation()"
+          >
+            Personnaliser
+          </mat-slide-toggle>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      @if (has(el.key)) {
+        <div class="fields">
+          <!-- Propriétés communes -->
+          <mat-form-field appearance="outline">
+            <mat-label>Police</mat-label>
+            <input
+              matInput
+              [ngModel]="get(el.key).font"
+              (ngModelChange)="set(el.key, 'font', $event)"
+              placeholder="ex : Montserrat"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-sm">
+            <mat-label>Taille (pt)</mat-label>
+            <input
+              matInput
+              type="number"
+              min="6"
+              max="72"
+              [ngModel]="get(el.key).size"
+              (ngModelChange)="set(el.key, 'size', +$event)"
+            />
+          </mat-form-field>
+          <div class="field colorfield">
+            <label [attr.for]="'se-color-' + el.key">Couleur</label>
+            <input
+              [id]="'se-color-' + el.key"
+              type="color"
+              [ngModel]="get(el.key).color || '#000000'"
+              (ngModelChange)="set(el.key, 'color', $event)"
+            />
+          </div>
+
+          <div class="toggles">
+            <mat-checkbox
+              [ngModel]="get(el.key).bold"
+              (ngModelChange)="set(el.key, 'bold', $event)"
+            >
+              Gras
+            </mat-checkbox>
+            <mat-checkbox
+              [ngModel]="get(el.key).italic"
+              (ngModelChange)="set(el.key, 'italic', $event)"
+            >
+              Italique
+            </mat-checkbox>
+            <mat-checkbox
+              [ngModel]="get(el.key).underline"
+              (ngModelChange)="set(el.key, 'underline', $event)"
+            >
+              Souligné
+            </mat-checkbox>
+          </div>
+
+          @if (showAlign(el.key)) {
+            <mat-form-field appearance="outline" class="w-md">
+              <mat-label>Alignement</mat-label>
+              <mat-select
+                [ngModel]="get(el.key).align"
+                (ngModelChange)="set(el.key, 'align', $event)"
+              >
+                <mat-option [value]="undefined">— hérité —</mat-option>
+                <mat-option value="left">Gauche</mat-option>
+                <mat-option value="center">Centre</mat-option>
+                <mat-option value="right">Droite</mat-option>
+                <mat-option value="justify">Justifié</mat-option>
+              </mat-select>
+            </mat-form-field>
+          }
+
+          <!-- Titres : numérotation + saut de page -->
+          @if (isTitle(el.key)) {
+            <div class="subrow">
+              <mat-checkbox
+                [ngModel]="get(el.key).page_break"
+                (ngModelChange)="set(el.key, 'page_break', $event)"
+              >
+                Commence sur une nouvelle page
+              </mat-checkbox>
+              <mat-checkbox
+                [ngModel]="get(el.key).numbered"
+                (ngModelChange)="set(el.key, 'numbered', $event)"
+              >
+                Numéroté
+              </mat-checkbox>
+            </div>
+            @if (get(el.key).numbered) {
+              <mat-form-field appearance="outline" class="w-md">
+                <mat-label>Format de numérotation</mat-label>
+                <mat-select
+                  [ngModel]="get(el.key).number_format || 'decimal'"
+                  (ngModelChange)="set(el.key, 'number_format', $event)"
+                >
+                  @for (f of numberFormats; track f.value) {
+                    <mat-option [value]="f.value">{{ f.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="w-sm">
+                <mat-label>Décalage (pt)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="0"
+                  [ngModel]="get(el.key).number_indent"
+                  (ngModelChange)="set(el.key, 'number_indent', +$event)"
+                />
+              </mat-form-field>
+            }
+          }
+
+          <!-- Listes : format des puces / numéros + décalage -->
+          @if (isList(el.key)) {
+            <mat-form-field appearance="outline" class="w-md">
+              <mat-label>Format</mat-label>
+              <mat-select
+                [ngModel]="get(el.key).list_format"
+                (ngModelChange)="set(el.key, 'list_format', $event)"
+              >
+                <mat-option [value]="undefined">— par défaut —</mat-option>
+                @for (f of listFormats(el.key); track f.value) {
+                  <mat-option [value]="f.value">{{ f.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-sm">
+              <mat-label>Décalage (pt)</mat-label>
+              <input
+                matInput
+                type="number"
+                min="0"
+                [ngModel]="get(el.key).list_indent"
+                (ngModelChange)="set(el.key, 'list_indent', +$event)"
+              />
+            </mat-form-field>
+          }
+        </div>
+      }
+    </mat-expansion-panel>
+  }
+</mat-accordion>

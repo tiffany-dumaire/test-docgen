@@ -20,6 +20,7 @@ class DocumentType(models.TextChoices):
     BROCHURE = "brochure", "Brochure"
     LETTRE = "lettre", "Lettre"
     MAIL = "mail", "Mail"
+    OFFRE = "offre", "Offre"
 
 
 class TemplateLanguage(models.TextChoices):
@@ -59,8 +60,20 @@ class DocumentTemplate(models.Model):
         help_text="Liste de blocs (modèle visuel) ou de variables (JSON).",
     )
     language = models.CharField(
-        "Langue", max_length=5, choices=TemplateLanguage.choices,
-        default=TemplateLanguage.FR)
+        "Langue principale", max_length=5, choices=TemplateLanguage.choices,
+        default=TemplateLanguage.FR,
+        help_text="Langue par défaut du modèle (repli si une langue demandée "
+        "n'est pas disponible).")
+    languages = models.JSONField(
+        "Langues disponibles", default=list, blank=True,
+        help_text="Liste des codes de langue pris en charge par ce modèle "
+        "(ex: ['fr', 'en', 'de']). Un modèle peut en proposer une ou plusieurs.",
+    )
+    names = models.JSONField(
+        "Noms par langue", default=dict, blank=True,
+        help_text="Nom du modèle pour chaque langue, ex: "
+        "{'fr': 'Offre d'emploi', 'en': 'Job offer'}.",
+    )
     is_active = models.BooleanField("Actif", default=True)
     is_system = models.BooleanField(
         "Modèle système", default=False,
@@ -91,6 +104,22 @@ class DocumentTemplate(models.Model):
 
     def __str__(self):
         return f"{self.name} [{self.get_doc_type_display()}]"
+
+    def available_languages(self):
+        """Codes de langue proposés par le modèle (la principale en premier)."""
+        langs = [l for l in (self.languages or []) if l]
+        primary = self.language or TemplateLanguage.FR
+        if primary not in langs:
+            langs = [primary] + langs
+        return langs or [primary]
+
+    def name_for(self, lang=None):
+        """Nom du modèle dans la langue demandée, avec replis successifs."""
+        names = self.names or {}
+        for candidate in (lang, self.language, *self.available_languages()):
+            if candidate and names.get(candidate):
+                return names[candidate]
+        return self.name
 
 
 class Document(models.Model):
@@ -187,3 +216,31 @@ class DocumentAsset(models.Model):
 
     def __str__(self):
         return self.name or f"Image #{self.pk}"
+
+
+class DocumentTemplateVersion(models.Model):
+    """Version nommée d'un modèle de document (tous types).
+
+    Capture un instantané de la configuration qui influe sur la génération
+    (schéma de blocs + réglages de mise en page/styles). La version marquée
+    par défaut est celle utilisée pour générer les documents.
+    """
+
+    template = models.ForeignKey(
+        DocumentTemplate, related_name="versions",
+        on_delete=models.CASCADE)
+    name = models.CharField("Nom de la version", max_length=255, blank=True)
+    version_number = models.PositiveIntegerField("Numéro de version", default=1)
+    is_default = models.BooleanField("Version par défaut", default=False)
+    schema = models.JSONField("Schéma / Blocs", default=list, blank=True)
+    settings = models.JSONField("Réglages", default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-version_number"]
+        unique_together = ("template", "version_number")
+        verbose_name = "Version de modèle"
+        verbose_name_plural = "Versions de modèles"
+
+    def __str__(self):
+        return f"{self.template.name} — {self.name or ('v' + str(self.version_number))}"

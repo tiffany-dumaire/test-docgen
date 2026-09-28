@@ -1,5 +1,15 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
+import { Component, inject, signal, effect, ViewChild, ElementRef } from '@angular/core';
+import {
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+  Router,
+  NavigationStart,
+  NavigationEnd,
+  NavigationCancel,
+  NavigationError,
+} from '@angular/router';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
@@ -7,184 +17,126 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ToastService } from './core/services/api.service';
-import { AuthService } from './core/services/auth.service';
-import { ThemeService } from './core/services/theme.service';
+import { TranslocoModule } from '@jsverse/transloco';
+import { ToastService } from '@core/services/api.service';
+import { AuthService } from '@core/auth/auth.service';
+import { ThemeService } from '@core/services/theme.service';
+import { LanguageService, Lang } from '@core/services/language.service';
+import { NavHistoryService } from '@shared/back.directive';
 
-interface NavItem { path: string; icon: string; label: string; }
+interface NavItem {
+  path: string;
+  icon: string;
+  label: string;
+}
 
 @Component({
   selector: 'app-root',
   imports: [
-    RouterOutlet, RouterLink, RouterLinkActive,
-    MatSidenavModule, MatToolbarModule, MatListModule, MatIconModule,
-    MatButtonModule, MatMenuModule, MatTooltipModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    MatSidenavModule,
+    MatToolbarModule,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatTooltipModule,
+    TranslocoModule,
   ],
-  template: `
-    @if (!showShell()) {
-      <router-outlet />
-    } @else {
-      <mat-sidenav-container class="shell" autosize>
-        <mat-sidenav mode="side" opened [class.rail]="collapsed()" class="nav">
-          <div class="brand" [class.center]="collapsed()">
-            <span class="logo">📄</span>
-            @if (!collapsed()) {
-              <div class="brandtext"><strong>DocuGen</strong><div class="tag">Documents</div></div>
-            }
-          </div>
-          <mat-nav-list>
-            @for (n of nav; track n.path) {
-              <a mat-list-item [routerLink]="n.path" routerLinkActive="active"
-                 [matTooltip]="collapsed() ? n.label : ''" matTooltipPosition="right">
-                <mat-icon matListItemIcon>{{ n.icon }}</mat-icon>
-                @if (!collapsed()) { <span matListItemTitle>{{ n.label }}</span> }
-              </a>
-            }
-            <div class="sep"></div>
-            @for (n of navBottom; track n.path) {
-              <a mat-list-item [routerLink]="n.path" routerLinkActive="active"
-                 [matTooltip]="collapsed() ? n.label : ''" matTooltipPosition="right">
-                <mat-icon matListItemIcon>{{ n.icon }}</mat-icon>
-                @if (!collapsed()) { <span matListItemTitle>{{ n.label }}</span> }
-              </a>
-            }
-          </mat-nav-list>
-        </mat-sidenav>
-
-        <mat-sidenav-content class="main">
-          <mat-toolbar class="topbar">
-            <button mat-icon-button (click)="collapsed.set(!collapsed())" matTooltip="Menu">
-              <mat-icon>{{ collapsed() ? 'menu' : 'menu_open' }}</mat-icon>
-            </button>
-            <span class="grow"></span>
-            <button mat-icon-button [matMenuTriggerFor]="themeMenu" matTooltip="Thème">
-              <mat-icon>palette</mat-icon>
-            </button>
-            <mat-menu #themeMenu="matMenu" class="theme-menu">
-              <div class="tm-head">Ambiance</div>
-              @for (p of theme.propositions; track p.id) {
-                <button mat-menu-item (click)="$event.stopPropagation(); theme.setProposition(p.id)">
-                  <span class="tm-dot" [style.background]="p.primary"></span>
-                  <span class="tm-name" [style.font-family]="p.font">{{ p.name }}</span>
-                  <span class="tm-sub">{{ p.sub }}</span>
-                  @if (theme.proposition() === p.id) { <mat-icon class="tm-check">check</mat-icon> }
-                </button>
-              }
-              <div class="tm-head">Luminosité</div>
-              <div class="tm-modes" (click)="$event.stopPropagation()">
-                <button [class.on]="theme.mode() === 'light'" (click)="theme.setMode('light')"><mat-icon>light_mode</mat-icon> Clair</button>
-                <button [class.on]="theme.mode() === 'dark'" (click)="theme.setMode('dark')"><mat-icon>dark_mode</mat-icon> Sombre</button>
-                <button [class.on]="theme.mode() === 'auto'" (click)="theme.setMode('auto')"><mat-icon>brightness_auto</mat-icon> Auto</button>
-              </div>
-            </mat-menu>
-            <button mat-icon-button (click)="theme.toggleDark()" [matTooltip]="theme.resolvedDark() ? 'Mode clair' : 'Mode sombre'">
-              <mat-icon>{{ theme.resolvedDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-            </button>
-            @if (auth.user(); as u) {
-              <button mat-button [matMenuTriggerFor]="menu" class="userbtn">
-                <span class="avatar">{{ initials(u) }}</span>
-                <span class="uname">{{ u.full_name || u.email }}</span>
-                <mat-icon>arrow_drop_down</mat-icon>
-              </button>
-              <mat-menu #menu="matMenu">
-                <div class="menuhead">
-                  <div class="mn">{{ u.full_name || u.email }}</div>
-                  <div class="mr">{{ u.primary_app_role }}</div>
-                </div>
-                <a mat-menu-item routerLink="/preferences"><mat-icon>palette</mat-icon> Préférences</a>
-                <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> Se déconnecter</button>
-              </mat-menu>
-            }
-          </mat-toolbar>
-
-          <div class="content"><router-outlet /></div>
-        </mat-sidenav-content>
-      </mat-sidenav-container>
-    }
-
-    @if (toast.message(); as t) {
-      <div class="toast" [class.error]="t.kind === 'error'" [class.success]="t.kind === 'success'">
-        {{ t.text }}
-      </div>
-    }
-  `,
-  styles: [`
-    .shell { height: 100vh; background: var(--mat-sys-surface-container-low, #f4f5fb); }
-    .nav { width: 244px; border: none !important;
-      background: var(--mat-sys-surface-container-low) !important;
-      border-right: 1px solid var(--mat-sys-outline-variant) !important;
-      color: var(--mat-sys-on-surface); transition: width .18s ease; overflow-x: hidden; }
-    .nav.rail { width: 72px; }
-    .brand { display: flex; align-items: center; gap: .6rem; padding: 1rem 1.1rem; }
-    .brand.center { justify-content: center; padding: 1rem .5rem; }
-    .brand .logo { font-size: 1.2rem; width: 40px; height: 40px; border-radius: var(--pd-r-s); flex: none;
-      display: grid; place-items: center; background: var(--brand, var(--mat-sys-primary)); color: var(--mat-sys-on-primary); }
-    .brand strong { color: var(--mat-sys-on-surface); font-family: var(--pd-display); letter-spacing: var(--pd-display-track); font-size: 1.1rem; }
-    .brand .tag { color: var(--mat-sys-on-surface-variant); font-size: .7rem; }
-    mat-nav-list { --mat-list-list-item-label-text-color: var(--mat-sys-on-surface-variant); padding: 0 .5rem; }
-    mat-nav-list a { border-radius: var(--pd-r-btn); }
-    mat-nav-list a.active { background: var(--mat-sys-secondary-container);
-      color: var(--mat-sys-on-secondary-container); border-radius: var(--pd-r-btn); }
-    mat-nav-list a.active mat-icon, mat-nav-list a.active span { color: var(--mat-sys-on-secondary-container); }
-    mat-nav-list mat-icon { color: var(--mat-sys-on-surface-variant); }
-    .sep { height: 1px; background: var(--mat-sys-outline-variant); margin: .5rem .8rem; }
-    /* Menu de thème */
-    .tm-head { padding: .4rem 1rem .2rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--mat-sys-on-surface-variant); font-weight: 700; }
-    .tm-dot { width: 14px; height: 14px; border-radius: 50%; margin-right: .6rem; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
-    .tm-name { font-weight: 600; }
-    .tm-sub { margin-left: .5rem; color: var(--mat-sys-on-surface-variant); font-size: .75rem; }
-    .tm-check { margin-left: auto; color: var(--mat-sys-primary); }
-    .tm-modes { display: flex; gap: .3rem; padding: .2rem .8rem .6rem; }
-    .tm-modes button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .2rem; border: 1px solid var(--mat-sys-outline-variant); background: transparent; color: var(--mat-sys-on-surface-variant); border-radius: var(--pd-r-s); padding: .4rem; cursor: pointer; font-size: .72rem; }
-    .tm-modes button mat-icon { font-size: 20px; width: 20px; height: 20px; }
-    .tm-modes button.on { background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); border-color: transparent; }
-    .main { background: var(--mat-sys-surface-container-low, #f4f5fb); }
-    .topbar { position: sticky; top: 0; z-index: 5;
-      background: color-mix(in srgb, var(--mat-sys-surface) 88%, transparent);
-      backdrop-filter: blur(10px); border-bottom: 1px solid var(--mat-sys-outline-variant); }
-    .grow { flex: 1; }
-    .userbtn { display: inline-flex; align-items: center; gap: .5rem; }
-    .avatar { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center;
-      color: #fff; font-weight: 700; font-size: .75rem; text-transform: uppercase;
-      background: linear-gradient(135deg, var(--brand,#3b82f6), #22d3ee); }
-    .uname { font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    @media (max-width: 640px) { .uname { display: none; } }
-    .menuhead { padding: .6rem 1rem; border-bottom: 1px solid var(--mat-sys-outline-variant); }
-    .menuhead .mn { font-weight: 700; } .menuhead .mr { font-size: .75rem; color: var(--mat-sys-outline); text-transform: capitalize; }
-    .content { padding: 1.8rem 2.2rem; max-width: 1280px; }
-    @media (max-width: 700px) { .content { padding: 1rem; } }
-    .toast { position: fixed; bottom: 1.4rem; right: 1.4rem; z-index: 1000; background: #0f172a; color: #fff;
-      padding: .8rem 1.15rem; border-radius: 12px; box-shadow: 0 18px 44px rgba(0,0,0,.3); }
-    .toast.error { background: #dc2626; } .toast.success { background: #16a34a; }
-  `],
+  templateUrl: './app.html',
+  styleUrl: './app.scss',
 })
 export class App {
   toast = inject(ToastService);
   auth = inject(AuthService);
   theme = inject(ThemeService);
+  lang = inject(LanguageService);
   private router = inject(Router);
+  private breakpoints = inject(BreakpointObserver);
+  private navHistory = inject(NavHistoryService); // démarre le suivi d'historique tôt
   collapsed = signal(false);
+  isMobile = signal(false);
+  mobileOpen = signal(false);
+  navLoading = signal(false);
 
-  constructor() { this.theme.init(); }
+  @ViewChild('scrollContent') private scrollContent?: ElementRef<HTMLElement>;
 
+  rail() {
+    return this.collapsed() && !this.isMobile();
+  }
+  toggleNav() {
+    if (this.isMobile()) this.mobileOpen.set(!this.mobileOpen());
+    else this.collapsed.set(!this.collapsed());
+  }
+  onNavClick() {
+    if (this.isMobile()) this.mobileOpen.set(false);
+  }
+
+  constructor() {
+    this.theme.init();
+    this.breakpoints.observe('(max-width: 768px)').subscribe((r) => this.isMobile.set(r.matches));
+    // Barre de progression + remontée en haut + fermeture du menu mobile à chaque navigation.
+    this.router.events.subscribe((e) => {
+      if (e instanceof NavigationStart) this.navLoading.set(true);
+      else if (
+        e instanceof NavigationEnd ||
+        e instanceof NavigationCancel ||
+        e instanceof NavigationError
+      ) {
+        this.navLoading.set(false);
+        if (e instanceof NavigationEnd) {
+          if (this.isMobile()) this.mobileOpen.set(false);
+          queueMicrotask(() => {
+            // Le conteneur défilant est .mat-drawer-content ; repli sur la fenêtre.
+            const scroller = document.querySelector('.mat-drawer-content') as HTMLElement | null;
+            (scroller ?? this.scrollContent?.nativeElement)?.scrollTo({ top: 0 });
+            window.scrollTo({ top: 0 });
+          });
+        }
+      }
+    });
+    // Applique la langue enregistrée dans le profil dès qu'il est chargé.
+    effect(() => {
+      const prefLang = this.auth.user()?.ui_prefs?.['lang'] as Lang | undefined;
+      if (prefLang && prefLang !== this.lang.active()) this.lang.set(prefLang, false);
+    });
+  }
+
+  setLang(code: Lang) {
+    this.lang.set(code);
+    if (this.auth.isAuthenticated()) {
+      this.auth.updatePrefs({ lang: code }).catch(() => {
+        /* appliqué localement */
+      });
+    }
+  }
+
+  // Les libellés sont des clés i18n (pipe transloco).
   nav: NavItem[] = [
-    { path: '/dashboard', icon: 'dashboard', label: 'Tableau de bord' },
-    { path: '/projects', icon: 'folder', label: 'Projets' },
-    { path: '/suivi', icon: 'fact_check', label: 'Suivi général' },
-    { path: '/templates', icon: 'grid_view', label: 'Modèles' },
+    { path: '/dashboard', icon: 'dashboard', label: 'nav.dashboard' },
+    { path: '/projects', icon: 'folder', label: 'nav.projects' },
+    { path: '/suivi', icon: 'fact_check', label: 'nav.tracking' },
+    { path: '/templates', icon: 'grid_view', label: 'nav.templates' },
   ];
   navBottom: NavItem[] = [
-    { path: '/clients', icon: 'handshake', label: 'Clients' },
-    { path: '/company', icon: 'business', label: 'Mon entreprise' },
+    { path: '/clients', icon: 'handshake', label: 'nav.clients' },
+    { path: '/company', icon: 'business', label: 'nav.company' },
   ];
 
   isPublic(): boolean {
     const u = this.router.url;
     return u.startsWith('/f/') || u.startsWith('/login') || u.startsWith('/auth/');
   }
-  showShell(): boolean { return !this.isPublic() && this.auth.isAuthenticated(); }
-  initials(u: { first_name?: string; last_name?: string; email?: string }) {
-    return ((u.first_name?.[0] || '') + (u.last_name?.[0] || '')) || (u.email?.[0] || '?');
+  showShell(): boolean {
+    return !this.isPublic() && this.auth.isAuthenticated();
   }
-  logout() { this.auth.logout(); this.router.navigateByUrl('/login'); }
+  initials(u: { first_name?: string; last_name?: string; email?: string }) {
+    return (u.first_name?.[0] || '') + (u.last_name?.[0] || '') || u.email?.[0] || '?';
+  }
+  logout() {
+    this.auth.logout();
+    this.router.navigateByUrl('/login');
+  }
 }

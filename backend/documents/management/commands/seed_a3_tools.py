@@ -413,40 +413,82 @@ _DESC = {
 }
 ALL_LANGS = ["fr", "en", "de", "it"]
 
+# Nom de chaque outil par langue (point 5 : un nom par langue, configurable).
+# Les méthodes au nom international restent identiques dans les quatre langues.
+NAMES = {
+    "bmc-a3": {"fr": "Business Model Canvas", "en": "Business Model Canvas",
+               "de": "Business Model Canvas", "it": "Business Model Canvas"},
+    "vpc-a3": {"fr": "Value Proposition Canvas", "en": "Value Proposition Canvas",
+               "de": "Value Proposition Canvas", "it": "Value Proposition Canvas"},
+    "empathy-a3": {"fr": "Carte d'empathie", "en": "Empathy Map",
+                   "de": "Empathy Map", "it": "Mappa dell'empatia"},
+    "persona-a3": {"fr": "Persona", "en": "Persona", "de": "Persona", "it": "Persona"},
+    "journey-a3": {"fr": "Parcours client", "en": "Customer Journey Map",
+                   "de": "Customer Journey Map", "it": "Mappa del percorso cliente"},
+    "problem-a3": {"fr": "Énoncé du problème", "en": "Problem Statement",
+                   "de": "Problemstellung", "it": "Definizione del problema"},
+    "pestel-a3": {"fr": "PESTEL", "en": "PESTEL", "de": "PESTEL", "it": "PESTEL"},
+    "onion-a3": {"fr": "Diagramme en oignon", "en": "Onion Diagram",
+                 "de": "Zwiebeldiagramm", "it": "Diagramma a cipolla"},
+}
+
 
 class Command(BaseCommand):
-    help = "Génère les 8 outils d'analyse au format Template A3 (fr/en/de/it)."
+    help = ("Génère les 8 outils d'analyse au format Template A3. Chaque outil "
+            "est un seul modèle multilingue (nom + contenu par langue fr/en/de/it).")
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--langs", default=",".join(ALL_LANGS),
-            help="Langues à générer, séparées par des virgules (défaut : fr,en,de,it).")
+            help="Langues à activer, séparées par des virgules (défaut : fr,en,de,it).")
 
     def handle(self, *args, **options):
         from documents.models import DocumentTemplate
         langs = [l.strip() for l in str(options["langs"]).split(",")
                  if l.strip() in ALL_LANGS] or ALL_LANGS
+        primary = "fr" if "fr" in langs else langs[0]
         count = 0
-        for lang in langs:
-            for slug, name, landscape, fn in TOOLS:
-                page = _page(name, landscape, fn, lang)
-                lslug = slug if lang == "fr" else f"{slug}-{lang}"
-                o = _ORIENT[lang][0 if landscape else 1]
-                defaults = {
-                    "name": name, "doc_type": "a3", "builder_key": "a3",
-                    "is_block_based": False, "schema": [],
-                    "language": lang,
-                    "description": _DESC[lang].format(name=name, o=o),
-                    "settings": {"a3_export": "pdf", "a3_pages": [page]},
-                }
-                obj, created = DocumentTemplate.objects.get_or_create(
-                    slug=lslug, defaults=defaults)
-                if not created:
-                    for k, v in defaults.items():
-                        setattr(obj, k, v)
-                    obj.save()
-                count += 1
+        for slug, name, landscape, fn in TOOLS:
+            names = {l: NAMES.get(slug, {}).get(l, name) for l in langs}
+            pages_i18n = {l: [_page(names[l], landscape, fn, l)] for l in langs}
+            o = _ORIENT[primary][0 if landscape else 1]
+            defaults = {
+                "name": names[primary],
+                "names": names,
+                "language": primary,
+                "languages": langs,
+                "doc_type": "a3", "builder_key": "a3",
+                "is_block_based": False, "schema": [],
+                "is_system": True,
+                "description": _DESC[primary].format(name=names[primary], o=o),
+                "settings": {"a3_export": "pdf",
+                             "a3_pages": pages_i18n[primary],
+                             "a3_pages_i18n": pages_i18n},
+            }
+            obj, created = DocumentTemplate.objects.get_or_create(
+                slug=slug, defaults=defaults)
+            if not created:
+                for k, v in defaults.items():
+                    setattr(obj, k, v)
+                obj.save()
+            count += 1
+            self.stdout.write(
+                f"{'Créé' if created else 'Mis à jour'} : {names[primary]} "
+                f"({'/'.join(langs)})")
+
+        # Nettoyage des anciens modèles A3 mono-langue (slug-en/-de/-it),
+        # remplacés par les modèles multilingues ci-dessus.
+        from django.db.models import ProtectedError
+        removed = 0
+        stale = [f"{slug}-{l}" for slug, *_ in TOOLS for l in ("en", "de", "it")]
+        for obj in DocumentTemplate.objects.filter(slug__in=stale):
+            try:
+                obj.delete()
+                removed += 1
+            except ProtectedError:
                 self.stdout.write(
-                    f"[{lang}] {'Créé' if created else 'Mis à jour'} : {name}")
+                    f"Conservé (documents liés) : {obj.slug}")
+        if removed:
+            self.stdout.write(f"Anciens modèles mono-langue supprimés : {removed}")
         self.stdout.write(self.style.SUCCESS(
-            f"Outils A3 générés : {count} modèle(s) sur {len(langs)} langue(s)."))
+            f"Outils A3 générés : {count} modèle(s) multilingue(s)."))

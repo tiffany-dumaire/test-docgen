@@ -1,0 +1,588 @@
+<div class="row between">
+  <h1>{{ isEdit() ? doc()?.title : 'Nouveau document' }}</h1>
+  <button type="button" class="btn btn-ghost" appBack="/documents">Retour</button>
+</div>
+
+@if (doc(); as d) {
+  <mat-tab-group class="detail-tabs" animationDuration="200ms" mat-stretch-tabs="false">
+    <mat-tab label="Informations de base (Paramètres)">
+      <div class="stack tabpad">
+        <div class="card stack">
+          <h3>Paramètres</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>Titre du document *</mat-label>
+            <input matInput [(ngModel)]="d.title" />
+          </mat-form-field>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Projet *</mat-label>
+              <mat-select
+                [(ngModel)]="d.project"
+                [disabled]="isEdit()"
+                (ngModelChange)="onProjectChange($event)"
+                placeholder="— choisir —"
+              >
+                @for (p of projects(); track p.id) {
+                  <mat-option [value]="p.id">{{ p.name }} ({{ p.clientName }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Modèle *</mat-label>
+              <mat-select
+                [(ngModel)]="d.template"
+                [disabled]="isEdit()"
+                (ngModelChange)="onTemplateChange()"
+                placeholder="— choisir —"
+              >
+                @for (t of templates(); track t.id) {
+                  <mat-option [value]="t.id">{{ t.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Niveau de confidentialité</mat-label>
+            <mat-select [(ngModel)]="d.confidentiality">
+              @for (c of confidentialityLevels(); track c.value) {
+                <mat-option [value]="c.value">{{ c.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Date du document</mat-label>
+            <input
+              matInput
+              [matDatepicker]="dpDocDate"
+              [value]="toDate(d.docDate)"
+              (dateChange)="d.docDate = toIso($event.value)"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="dpDocDate"></mat-datepicker-toggle>
+            <mat-datepicker #dpDocDate></mat-datepicker>
+            <mat-hint>Utilisable dans les textes via {{ '{{' }}doc_date{{ '}}' }}.</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="row">
+          <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+            {{ isEdit() ? 'Enregistrer' : 'Créer le document' }}
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Contenu">
+      <div class="stack tabpad">
+        <!-- Saisie assistée depuis les blocs -->
+        @if (activeTemplate(); as tpl) {
+          @if (isExcelWorkbook(tpl)) {
+            <div class="card stack">
+              <h3>Données du classeur</h3>
+              <div class="sheet-tabs">
+                @for (sh of wbSheets(tpl); track sh.id; let i = $index) {
+                  <button
+                    class="stab"
+                    [class.active]="activeSheet() === i"
+                    (click)="activeSheet.set(i)"
+                  >
+                    {{ sheetIcon(sh.type) }} {{ sh.name }}
+                  </button>
+                }
+              </div>
+              @if (wbSheets(tpl)[activeSheet()]; as sh) {
+                @if (sh.type === 'table') {
+                  <p class="muted" style="margin: 0.2rem 0">
+                    Saisissez les lignes. Colonnes typées : les formats (monnaie, date…) sont
+                    appliqués à la génération.
+                  </p>
+                  <div class="col-hints">
+                    @for (c of sh.columns ?? []; track c.key) {
+                      <span class="chip"
+                        >{{ c.label }} <em>· {{ typeShort(c.type) }}</em></span
+                      >
+                    }
+                  </div>
+                  <app-data-grid
+                    [model]="sheetGrid(d, sh)"
+                    [allowColumns]="!!sh.allow_add_columns"
+                  />
+                } @else if (sh.type === 'pivot') {
+                  <div class="info-block">
+                    ⊞ Tableau croisé généré automatiquement à partir de l'onglet «
+                    {{ sourceName(tpl, sh) }} » (agrégation : {{ sh.pivot?.agg }}).
+                  </div>
+                } @else if (sh.type === 'grid') {
+                  @if (hasEditableGrid(sh)) {
+                    <p class="muted" style="margin: 0.2rem 0">
+                      Complétez directement les cellules encadrées (modifiables). Les autres
+                      cellules sont fixes (définies dans le modèle) et verrouillées dans le fichier
+                      Excel généré.
+                    </p>
+                  } @else {
+                    <div class="info-block">
+                      ▧ Grille fixe : aucune cellule n'a été marquée « modifiable » dans le modèle.
+                      Ouvrez le modèle et cochez « 🔓 Modifiable » sur les cellules à remplir ici.
+                    </div>
+                  }
+                  <div class="gridfill-wrap">
+                    <table class="gridfill">
+                      <tbody>
+                        @for (r of gridRowRange(sh); track r) {
+                          <tr>
+                            @for (c of gridColRange(sh); track c) {
+                              @if (!gridCovered(sh, r, c)) {
+                                @if (gridCellAt(sh, r, c); as cell) {
+                                  <td
+                                    [attr.colspan]="gridSpanC(sh, r, c)"
+                                    [attr.rowspan]="gridSpanR(sh, r, c)"
+                                    [class.editable]="cell.editable"
+                                    [style.background]="cell.bg || null"
+                                  >
+                                    @if (cell.editable) {
+                                      <input
+                                        class="gf-in"
+                                        [attr.aria-label]="gridColLabel(c) + r"
+                                        [ngModel]="gridVal(d, sh, cell)"
+                                        (ngModelChange)="setGridVal(d, sh, cell, $event)"
+                                      />
+                                    } @else {
+                                      <span class="gf-fixed">{{ gridDisplay(sh, r, c) }}</span>
+                                    }
+                                  </td>
+                                } @else {
+                                  <td class="gf-empty"></td>
+                                }
+                              }
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                } @else {
+                  <div class="info-block">
+                    ℹ️ Informations fixes définies dans le modèle ({{ (sh.items ?? []).length }}
+                    élément(s)). Elles seront insérées telles quelles.
+                  </div>
+                }
+              }
+
+              <!-- Onglets d'informations ajoutés à la volée -->
+              <div class="extra-blocks">
+                <div class="row between">
+                  <span class="field-label" style="margin: 0">➕ Onglets ajoutés</span>
+                  <button class="btn btn-sm btn-ghost" (click)="addExtraSheet(d)">
+                    + Onglet d'informations
+                  </button>
+                </div>
+                @for (xs of extraSheets(d); track xs.id; let si = $index) {
+                  <div class="xsheet">
+                    <div class="row" style="gap: 0.5rem; align-items: center">
+                      <mat-form-field appearance="outline" class="grow-field">
+                        <mat-label>Nom de l'onglet</mat-label>
+                        <input matInput [(ngModel)]="xs.name" />
+                      </mat-form-field>
+                      <button class="btn btn-sm btn-danger" (click)="removeExtraSheet(d, si)">
+                        Supprimer l'onglet
+                      </button>
+                    </div>
+                    @for (it of xs.items; track $index) {
+                      <div class="row" style="gap: 0.5rem; margin-top: 0.3rem">
+                        <mat-form-field appearance="outline" class="grow-field">
+                          <mat-label>Libellé</mat-label>
+                          <input matInput [(ngModel)]="it.label" />
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="grow-field">
+                          <mat-label>Valeur</mat-label>
+                          <input matInput [(ngModel)]="it.value" />
+                        </mat-form-field>
+                        <button class="btn btn-sm btn-danger" (click)="xs.items.splice($index, 1)">
+                          ✕
+                        </button>
+                      </div>
+                    }
+                    <button
+                      class="btn btn-sm btn-ghost"
+                      style="margin-top: 0.3rem"
+                      (click)="addExtraSheetItem(xs)"
+                    >
+                      + Information
+                    </button>
+                  </div>
+                } @empty {
+                  <p class="muted" style="margin: 0.2rem 0 0; font-size: 0.82rem">
+                    Ajoutez des onglets d'informations (libellé / valeur) insérés dans le classeur
+                    généré.
+                  </p>
+                }
+              </div>
+            </div>
+          } @else if (tpl.is_block_based) {
+            <div class="card stack">
+              <h3>Contenu à remplir</h3>
+              @for (block of asBlocks(tpl); track block.id) {
+                @switch (block.type) {
+                  @case ('heading') {
+                    @if (block.editable) {
+                      <mat-form-field appearance="outline" class="editable-block">
+                        <mat-label>✏️ Titre {{ block.level || 2 }}</mat-label>
+                        <input
+                          matInput
+                          [ngModel]="blockText(d, block)"
+                          (ngModelChange)="setBlockText(d, block, $event)"
+                        />
+                      </mat-form-field>
+                    } @else {
+                      <div
+                        class="preview-heading"
+                        [style.fontSize.rem]="block.level === 1 ? 1.3 : 1.05"
+                      >
+                        {{ interpolate(block.text || '') }}
+                      </div>
+                    }
+                  }
+                  @case ('text') {
+                    @if (block.editable) {
+                      <mat-form-field appearance="outline" class="editable-block">
+                        <mat-label>✏️ Texte</mat-label>
+                        <textarea
+                          matInput
+                          rows="3"
+                          [ngModel]="blockText(d, block)"
+                          (ngModelChange)="setBlockText(d, block, $event)"
+                        ></textarea>
+                      </mat-form-field>
+                    } @else {
+                      <div class="preview-text">{{ interpolate(block.text || '') }}</div>
+                    }
+                  }
+                  @case ('richtext') {
+                    @if (block.editable) {
+                      <div class="editable-block">
+                        <span class="field-label">✏️ Texte enrichi</span>
+                        <app-rich-text-editor
+                          [value]="blockText(d, block)"
+                          (valueChange)="setBlockText(d, block, $event)"
+                        />
+                      </div>
+                    } @else {
+                      <div class="preview-rich" [innerHTML]="block.text"></div>
+                    }
+                  }
+                  @case ('bullet_list') {
+                    <ul class="preview-list">
+                      @for (it of block.items ?? []; track $index) {
+                        <li>{{ interpolate(it) }}</li>
+                      }
+                    </ul>
+                  }
+                  @case ('numbered_list') {
+                    <ol class="preview-list">
+                      @for (it of block.items ?? []; track $index) {
+                        <li>{{ interpolate(it) }}</li>
+                      }
+                    </ol>
+                  }
+                  @case ('image') {
+                    @if (block.asset_url) {
+                      <img
+                        [src]="block.asset_url"
+                        class="preview-thumb"
+                        [style.width.%]="block.width_pct"
+                        alt="asset"
+                      />
+                    }
+                  }
+                  @case ('logo') {
+                    <div class="info-block">
+                      🏢 Logo de l'entreprise (position : {{ block.align }}).
+                    </div>
+                  }
+                  @case ('code') {
+                    <pre class="preview-code">{{ interpolate(block.text || '') }}</pre>
+                  }
+                  @case ('link') {
+                    <div class="preview-text">🔗 {{ block.label || block.url }}</div>
+                  }
+                  @case ('field') {
+                    <mat-form-field appearance="outline">
+                      <mat-label
+                        >{{ block.label || 'Champ' }}
+                        @if (block.required) {
+                          <span class="req">*</span>
+                        }
+                      </mat-label>
+                      @switch (block.field_type) {
+                        @case ('textarea') {
+                          <textarea
+                            matInput
+                            [ngModel]="fieldVal(d, block.key!)"
+                            (ngModelChange)="setField(d, block.key!, $event)"
+                            rows="3"
+                          ></textarea>
+                        }
+                        @case ('select') {
+                          <mat-select
+                            [ngModel]="fieldVal(d, block.key!)"
+                            (ngModelChange)="setField(d, block.key!, $event)"
+                          >
+                            <mat-option value="">—</mat-option>
+                            @for (opt of block.options ?? []; track opt) {
+                              <mat-option [value]="opt">{{ opt }}</mat-option>
+                            }
+                          </mat-select>
+                        }
+                        @default {
+                          <input
+                            matInput
+                            [type]="inputType(block.field_type)"
+                            [ngModel]="fieldVal(d, block.key!)"
+                            (ngModelChange)="setField(d, block.key!, $event)"
+                          />
+                        }
+                      }
+                    </mat-form-field>
+                  }
+                  @case ('table') {
+                    <div class="field">
+                      <span class="field-label">{{ block.label || 'Tableau' }}</span>
+                      <app-data-grid
+                        [model]="tableModel(d, block)"
+                        [allowColumns]="!!block.allow_edit_columns"
+                      />
+                    </div>
+                  }
+                  @case ('contacts') {
+                    <div class="info-block">
+                      📇 Les contacts du projet ({{ scopeLabel(block.scope) }}) seront insérés
+                      automatiquement ici.
+                    </div>
+                  }
+                  @case ('spacer') {
+                    <div style="height: 8px"></div>
+                  }
+                }
+              }
+
+              <!-- Éléments ajoutés à la volée (insérés après le contenu du modèle) -->
+              <div class="extra-blocks">
+                <div class="row between">
+                  <span class="field-label" style="margin: 0">➕ Éléments ajoutés</span>
+                  <div class="row" style="gap: 0.3rem">
+                    <button class="btn btn-sm btn-ghost" (click)="addExtra(d, 'heading')">
+                      + Titre
+                    </button>
+                    <button class="btn btn-sm btn-ghost" (click)="addExtra(d, 'text')">
+                      + Texte
+                    </button>
+                    <button class="btn btn-sm btn-ghost" (click)="addExtra(d, 'bullet_list')">
+                      + Liste
+                    </button>
+                  </div>
+                </div>
+                @for (xb of extraBlocks(d); track xb.id; let i = $index) {
+                  <div class="xblock">
+                    @if (xb.type === 'heading') {
+                      <mat-form-field appearance="outline" class="w-lvl">
+                        <mat-label>Niveau</mat-label>
+                        <mat-select [(ngModel)]="xb.level">
+                          @for (l of [1, 2, 3, 4, 5]; track l) {
+                            <mat-option [value]="l">Titre {{ l }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="grow-field">
+                        <mat-label>Texte du titre</mat-label>
+                        <input matInput [(ngModel)]="xb.text" />
+                      </mat-form-field>
+                    } @else if (xb.type === 'bullet_list') {
+                      <mat-form-field appearance="outline" class="grow-field">
+                        <mat-label>Liste (une ligne = un élément)</mat-label>
+                        <textarea matInput rows="3" [(ngModel)]="xb.text"></textarea>
+                      </mat-form-field>
+                    } @else {
+                      <mat-form-field appearance="outline" class="grow-field">
+                        <mat-label>Texte</mat-label>
+                        <textarea matInput rows="2" [(ngModel)]="xb.text"></textarea>
+                      </mat-form-field>
+                    }
+                    <button class="btn btn-sm btn-danger" (click)="removeExtra(d, i)">✕</button>
+                  </div>
+                } @empty {
+                  <p class="muted" style="margin: 0.2rem 0 0; font-size: 0.82rem">
+                    Ajoutez des titres, textes ou listes qui seront insérés à la fin du document
+                    généré.
+                  </p>
+                }
+              </div>
+            </div>
+          } @else {
+            <!-- Modèle avancé (non visuel) : saisie JSON de repli -->
+            <div class="card stack">
+              <h3>Variables (modèle avancé)</h3>
+              <p class="muted">Ce modèle n'utilise pas l'éditeur visuel. Saisie JSON :</p>
+              <textarea
+                class="mono"
+                [ngModel]="jsonData(d)"
+                (ngModelChange)="setJsonData(d, $event)"
+                rows="8"
+              ></textarea>
+              @if (jsonError()) {
+                <small class="req">JSON invalide</small>
+              }
+            </div>
+          }
+        }
+
+        <div class="row">
+          <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+            {{ isEdit() ? 'Enregistrer' : 'Créer le document' }}
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Aperçu">
+      <div class="stack tabpad">
+        <div class="card stack">
+          <div class="row between">
+            <h3>Aperçu du document</h3>
+            <button
+              class="btn btn-sm btn-primary"
+              (click)="refreshPreview()"
+              [disabled]="previewing() || !isEdit()"
+            >
+              {{ previewing() ? 'Génération…' : "↻ Rafraîchir l'aperçu" }}
+            </button>
+          </div>
+          @if (!isEdit()) {
+            <p class="muted" style="margin: 0">
+              Enregistrez d'abord le document pour afficher son aperçu.
+            </p>
+          } @else if (previewKind() === 'image' && previewImg()) {
+            <img [src]="previewImg()" class="pv-inline-img" alt="aperçu" />
+          } @else if (previewFrame()) {
+            <iframe class="pv-inline" [src]="previewFrame()" title="Aperçu"></iframe>
+          } @else {
+            <p class="muted" style="margin: 0">
+              Cliquez sur « Rafraîchir l'aperçu » pour générer un aperçu à jour du document.
+            </p>
+          }
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Générations et versions">
+      <div class="stack tabpad">
+        <div class="card stack">
+          <h3>Générer une version</h3>
+          @if (!isEdit()) {
+            <p class="muted">Enregistrez d'abord le document, puis générez sa première version.</p>
+          } @else {
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Vos initiales *</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="gen.author_initials"
+                  maxlength="10"
+                  placeholder="ex : PM"
+                />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Votre nom</mat-label>
+                <input matInput [(ngModel)]="gen.author_name" placeholder="Paul Martin" />
+              </mat-form-field>
+            </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Commentaire de modification</mat-label>
+              <textarea
+                matInput
+                [(ngModel)]="gen.comment"
+                rows="2"
+                placeholder="Ce qui a changé…"
+              ></textarea>
+            </mat-form-field>
+            <button class="btn btn-primary" (click)="generate()" [disabled]="generating()">
+              🖨️
+              {{
+                (doc()?.currentVersion ?? 0) > 0
+                  ? 'Régénérer (nouvelle version)'
+                  : 'Générer la version 1'
+              }}
+            </button>
+            <button class="btn btn-ghost" (click)="preview()" [disabled]="previewing()">
+              👁 {{ previewing() ? 'Aperçu…' : 'Aperçu' }}
+            </button>
+            <small class="muted"
+              >Pensez à <b>Enregistrer</b> vos modifications avant de générer.</small
+            >
+          }
+        </div>
+
+        <div class="card">
+          <h3>Historique des versions</h3>
+          @if (versions().length) {
+            <table>
+              <thead>
+                <tr>
+                  <th>Ver.</th>
+                  <th>Date</th>
+                  <th>Auteur</th>
+                  <th>Confid.</th>
+                  <th>Commentaire</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (v of versions(); track v.id) {
+                  <tr>
+                    <td>v{{ v.versionNumber }}</td>
+                    <td>{{ v.createdAt | chDate: true }}</td>
+                    <td>{{ v.authorInitials }}</td>
+                    <td>
+                      <span class="badge" [class]="'badge-' + v.confidentiality">{{
+                        v.confidentialityDisplay
+                      }}</span>
+                    </td>
+                    <td class="cmt">{{ v.comment || '—' }}</td>
+                    <td>
+                      @if (v.fileUrl) {
+                        <a
+                          class="btn btn-sm btn-ghost"
+                          [href]="v.fileUrl"
+                          target="_blank"
+                          [title]="canExportPdf() ? 'Télécharger (format natif)' : 'Télécharger'"
+                          >⬇ {{ canExportPdf() ? nativeLabel() : '' }}</a
+                        >
+                        @if (canExportPdf()) {
+                          <button
+                            class="btn btn-sm btn-ghost"
+                            (click)="downloadPdf(v)"
+                            [disabled]="pdfBusy() === v.id"
+                            title="Télécharger en PDF"
+                          >
+                            {{ pdfBusy() === v.id ? '…' : '⬇ PDF' }}
+                          </button>
+                        }
+                      }
+                      <button
+                        class="btn btn-sm btn-ghost"
+                        (click)="restore(v)"
+                        title="Restaurer cette version"
+                      >
+                        ↺
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="muted">Aucune version générée.</div>
+          }
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+}
