@@ -51,6 +51,8 @@ def _style_css(props):
         st.append("font-weight:" + ("700" if props["bold"] else "400"))
     if "italic" in props:
         st.append("font-style:" + ("italic" if props["italic"] else "normal"))
+    if "underline" in props:
+        st.append("text-decoration:" + ("underline" if props["underline"] else "none"))
     if props.get("color"):
         st.append(f"color:{_esc(props['color'])}")
     if props.get("align") in _ALIGN_CSS:
