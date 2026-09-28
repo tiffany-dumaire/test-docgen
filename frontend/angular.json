@@ -53,6 +53,12 @@
           },
           "defaultConfiguration": "development",
           "options": { "port": 4200 }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          }
         }
       }
     }
